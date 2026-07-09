@@ -380,8 +380,8 @@ function Dashboard() {
                     {tr.activity.map((item, i) => (
                       <li key={i} className="group flex items-start gap-3 rounded-lg p-1.5 transition-colors hover:bg-primary/5">
                         <div
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-primary ring-1 ring-primary/25 transition-transform group-hover:scale-105"
-                          style={{ background: "oklch(0.78 0.13 85 / 0.22)" }}
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground shadow-md transition-transform group-hover:scale-105"
+                          style={{ backgroundImage: "var(--gradient-gold)" }}
                           aria-hidden="true"
                         >
                           {item.name.split(" ").map((n) => n[0]).join("")}

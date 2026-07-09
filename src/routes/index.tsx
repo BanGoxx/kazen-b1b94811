@@ -156,12 +156,19 @@ function NavList({
           href="#"
           aria-current={item.active ? "page" : undefined}
           onClick={onNavigate}
-          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${
+          className={`group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 text-sm font-medium outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${
             item.active
-              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_0_0_0_1px_oklch(0.78_0.13_85/0.3)]"
+              : "text-muted-foreground hover:translate-x-0.5 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
           }`}
         >
+          {item.active && (
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-1.5 left-0 w-1 rounded-full"
+              style={{ background: "var(--gradient-gold)" }}
+            />
+          )}
           <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span className="truncate">{tr.nav[item.key]}</span>
         </a>

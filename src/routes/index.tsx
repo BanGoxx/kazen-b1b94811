@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -7,6 +8,8 @@ import {
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
+  Menu,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -14,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,6 +36,13 @@ export const Route = createFileRoute("/")({
   }),
   component: Dashboard,
 });
+
+const nav = [
+  { label: "Overview", icon: LayoutDashboard, active: true },
+  { label: "Customers", icon: Users, active: false },
+  { label: "Revenue", icon: DollarSign, active: false },
+  { label: "Analytics", icon: Activity, active: false },
+];
 
 const stats = [
   {
@@ -72,136 +83,211 @@ const activity = [
   { name: "Sofia Davis", action: "published a report", time: "1d ago" },
 ];
 
-function Dashboard() {
+const chart = [40, 65, 45, 80, 55, 90, 70, 100, 60, 85, 75, 95];
+const months = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function NavList({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto flex min-h-screen max-w-7xl">
-        {/* Sidebar */}
+    <nav aria-label="Primary" className="space-y-1">
+      {nav.map((item) => (
+        <a
+          key={item.label}
+          href="#"
+          aria-current={item.active ? "page" : undefined}
+          onClick={onNavigate}
+          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${
+            item.active
+              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+          }`}
+        >
+          <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="truncate">{item.label}</span>
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function Brand() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-md"
+        style={{ backgroundImage: "var(--gradient-primary)" }}
+      >
+        <LayoutDashboard className="h-4.5 w-4.5" aria-hidden="true" />
+      </div>
+      <span className="truncate text-sm font-semibold text-sidebar-foreground">
+        Acme Inc
+      </span>
+    </div>
+  );
+}
+
+function Dashboard() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <div className="min-h-dvh bg-background">
+      <div className="mx-auto flex min-h-dvh max-w-7xl">
+        {/* Desktop sidebar */}
         <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar px-4 py-6 md:block">
-          <div className="mb-8 flex items-center gap-2 px-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <LayoutDashboard className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-semibold text-sidebar-foreground">
-              Acme Inc
-            </span>
+          <div className="mb-8 px-2">
+            <Brand />
           </div>
-          <nav className="space-y-1">
-            {[
-              { label: "Overview", icon: LayoutDashboard, active: true },
-              { label: "Customers", icon: Users, active: false },
-              { label: "Revenue", icon: DollarSign, active: false },
-              { label: "Analytics", icon: Activity, active: false },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href="#"
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  item.active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          <NavList />
         </aside>
 
+        {/* Mobile drawer */}
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div
+              className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in"
+              onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              className="absolute inset-y-0 left-0 w-64 border-r border-border bg-sidebar px-4 py-6 shadow-lg animate-fade-in"
+            >
+              <div className="mb-8 flex items-center justify-between px-2">
+                <Brand />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="min-h-11 min-w-11"
+                  aria-label="Close navigation menu"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              </div>
+              <NavList onNavigate={() => setMobileOpen(false)} />
+            </div>
+          </div>
+        )}
+
         {/* Main */}
-        <main className="flex-1 px-6 py-8">
-          <header className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Overview
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Welcome back, here's what's happening today.
-            </p>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-border px-4 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="min-h-11 min-w-11 md:hidden"
+              aria-label="Open navigation menu"
+              onClick={() => setMobileOpen(true)}
+            >
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            </Button>
+            <div className="min-w-0 animate-fade-in">
+              <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                Overview
+              </h1>
+              <p className="truncate text-sm text-muted-foreground">
+                Welcome back, here's what's happening today.
+              </p>
+            </div>
           </header>
 
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.label}
-                  </CardTitle>
-                  <stat.icon className="h-4 w-4 text-muted-foreground" />
+          <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+            <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {stats.map((stat, i) => (
+                <Card
+                  key={stat.label}
+                  className="card-elevated animate-rise"
+                  style={{ animationDelay: `${i * 70}ms` }}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.label}
+                    </CardTitle>
+                    <stat.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold tracking-tight text-foreground">
+                      {stat.value}
+                    </div>
+                    <p
+                      className={`mt-1 flex items-center gap-1 text-xs font-medium ${
+                        stat.trend === "up"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {stat.trend === "up" ? (
+                        <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <ArrowDownRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                      <span>
+                        {stat.change}
+                        <span className="text-muted-foreground"> from last month</span>
+                      </span>
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+
+            <section className="mt-6 grid gap-4 lg:grid-cols-3">
+              <Card className="card-elevated animate-rise lg:col-span-2" style={{ animationDelay: "280ms" }}>
+                <CardHeader>
+                  <CardTitle className="text-base">Revenue overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">
-                    {stat.value}
+                  <div className="flex h-56 items-end gap-1.5 sm:gap-2" role="img" aria-label="Bar chart of monthly revenue trending upward across the year">
+                    {chart.map((h, i) => (
+                      <div key={months[i]} className="flex flex-1 flex-col items-center gap-2">
+                        <div className="flex w-full flex-1 items-end">
+                          <div
+                            className="bar-grow w-full rounded-t-md bg-primary/85 transition-colors hover:bg-primary"
+                            style={{ height: `${h}%`, animationDelay: `${i * 45}ms` }}
+                          />
+                        </div>
+                        <span className="hidden text-[10px] text-muted-foreground sm:block">
+                          {months[i]}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <p
-                    className={`mt-1 flex items-center gap-1 text-xs ${
-                      stat.trend === "up"
-                        ? "text-emerald-600"
-                        : "text-destructive"
-                    }`}
-                  >
-                    {stat.trend === "up" ? (
-                      <ArrowUpRight className="h-3 w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-3 w-3" />
-                    )}
-                    {stat.change} from last month
-                  </p>
                 </CardContent>
               </Card>
-            ))}
-          </section>
 
-          <section className="mt-6 grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-base">Revenue overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex h-56 items-end gap-2">
-                  {[40, 65, 45, 80, 55, 90, 70, 100, 60, 85, 75, 95].map(
-                    (h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t bg-primary/80 transition-colors hover:bg-primary"
-                        style={{ height: `${h}%` }}
-                      />
-                    ),
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Recent activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {activity.map((item) => (
-                  <div key={item.name} className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                      {item.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-foreground">
-                        <span className="font-medium">{item.name}</span>{" "}
-                        <span className="text-muted-foreground">
-                          {item.action}
-                        </span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </section>
-        </main>
+              <Card className="card-elevated animate-rise" style={{ animationDelay: "350ms" }}>
+                <CardHeader>
+                  <CardTitle className="text-base">Recent activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-4">
+                    {activity.map((item) => (
+                      <li key={item.name} className="flex items-start gap-3">
+                        <div
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                          aria-hidden="true"
+                        >
+                          {item.name.split(" ").map((n) => n[0]).join("")}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm text-foreground">
+                            <span className="font-medium">{item.name}</span>{" "}
+                            <span className="text-muted-foreground">{item.action}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">{item.time}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </section>
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   ArrowDownRight,
   Menu,
   X,
+  Languages,
 } from "lucide-react";
 import {
   Card,
@@ -22,79 +23,136 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Overview" },
+      { title: "Tableau de bord — Aperçu" },
       {
         name: "description",
-        content: "Monitor your key metrics, revenue, and activity at a glance.",
+        content:
+          "Suivez vos indicateurs clés, vos revenus et votre activité en un coup d'œil.",
       },
-      { property: "og:title", content: "Dashboard — Overview" },
+      { property: "og:title", content: "Tableau de bord — Aperçu" },
       {
         property: "og:description",
-        content: "Monitor your key metrics, revenue, and activity at a glance.",
+        content:
+          "Suivez vos indicateurs clés, vos revenus et votre activité en un coup d'œil.",
       },
     ],
   }),
   component: Dashboard,
 });
 
-const nav = [
-  { label: "Overview", icon: LayoutDashboard, active: true },
-  { label: "Customers", icon: Users, active: false },
-  { label: "Revenue", icon: DollarSign, active: false },
-  { label: "Analytics", icon: Activity, active: false },
+type Lang = "fr" | "en";
+
+const t = {
+  fr: {
+    brand: "Acme Inc",
+    nav: {
+      overview: "Aperçu",
+      customers: "Clients",
+      revenue: "Revenus",
+      analytics: "Analytique",
+    },
+    headerTitle: "Aperçu",
+    headerSubtitle: "Bon retour, voici ce qui se passe aujourd'hui.",
+    keyMetrics: "Indicateurs clés",
+    fromLastMonth: " par rapport au mois dernier",
+    revenueOverview: "Aperçu des revenus",
+    recentActivity: "Activité récente",
+    chartAlt:
+      "Graphique à barres des revenus mensuels en hausse sur l'année",
+    stats: [
+      "Revenu total",
+      "Utilisateurs actifs",
+      "Taux de conversion",
+      "Sessions actives",
+    ],
+    months: [
+      "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",
+      "Juil", "Août", "Sep", "Oct", "Nov", "Déc",
+    ],
+    activity: [
+      { name: "Olivia Martin", action: "a créé un nouveau projet", time: "il y a 2 min" },
+      { name: "Jackson Lee", action: "est passé au forfait Pro", time: "il y a 1 h" },
+      { name: "Isabella Nguyen", action: "a invité 3 membres d'équipe", time: "il y a 3 h" },
+      { name: "William Kim", action: "a clôturé un ticket de support", time: "il y a 5 h" },
+      { name: "Sofia Davis", action: "a publié un rapport", time: "il y a 1 j" },
+    ],
+    toggleLabel: "Passer en anglais",
+    langShort: "EN",
+    primaryNav: "Navigation principale",
+    openMenu: "Ouvrir le menu de navigation",
+    closeMenu: "Fermer le menu de navigation",
+    menuLabel: "Menu de navigation",
+  },
+  en: {
+    brand: "Acme Inc",
+    nav: {
+      overview: "Overview",
+      customers: "Customers",
+      revenue: "Revenue",
+      analytics: "Analytics",
+    },
+    headerTitle: "Overview",
+    headerSubtitle: "Welcome back, here's what's happening today.",
+    keyMetrics: "Key metrics",
+    fromLastMonth: " from last month",
+    revenueOverview: "Revenue overview",
+    recentActivity: "Recent activity",
+    chartAlt: "Bar chart of monthly revenue trending upward across the year",
+    stats: [
+      "Total Revenue",
+      "Active Users",
+      "Conversion Rate",
+      "Active Sessions",
+    ],
+    months: [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ],
+    activity: [
+      { name: "Olivia Martin", action: "created a new project", time: "2m ago" },
+      { name: "Jackson Lee", action: "upgraded to Pro plan", time: "1h ago" },
+      { name: "Isabella Nguyen", action: "invited 3 team members", time: "3h ago" },
+      { name: "William Kim", action: "closed a support ticket", time: "5h ago" },
+      { name: "Sofia Davis", action: "published a report", time: "1d ago" },
+    ],
+    toggleLabel: "Switch to French",
+    langShort: "FR",
+    primaryNav: "Primary navigation",
+    openMenu: "Open navigation menu",
+    closeMenu: "Close navigation menu",
+    menuLabel: "Navigation menu",
+  },
+} as const;
+
+const navItems = [
+  { key: "overview" as const, icon: LayoutDashboard, active: true },
+  { key: "customers" as const, icon: Users, active: false },
+  { key: "revenue" as const, icon: DollarSign, active: false },
+  { key: "analytics" as const, icon: Activity, active: false },
 ];
 
-const stats = [
-  {
-    label: "Total Revenue",
-    value: "$48,290",
-    change: "+12.5%",
-    trend: "up" as const,
-    icon: DollarSign,
-  },
-  {
-    label: "Active Users",
-    value: "2,318",
-    change: "+8.2%",
-    trend: "up" as const,
-    icon: Users,
-  },
-  {
-    label: "Conversion Rate",
-    value: "3.42%",
-    change: "-1.1%",
-    trend: "down" as const,
-    icon: TrendingUp,
-  },
-  {
-    label: "Active Sessions",
-    value: "1,024",
-    change: "+4.6%",
-    trend: "up" as const,
-    icon: Activity,
-  },
-];
-
-const activity = [
-  { name: "Olivia Martin", action: "created a new project", time: "2m ago" },
-  { name: "Jackson Lee", action: "upgraded to Pro plan", time: "1h ago" },
-  { name: "Isabella Nguyen", action: "invited 3 team members", time: "3h ago" },
-  { name: "William Kim", action: "closed a support ticket", time: "5h ago" },
-  { name: "Sofia Davis", action: "published a report", time: "1d ago" },
+const statsMeta = [
+  { value: "48 290 €", change: "+12,5%", trend: "up" as const, icon: DollarSign },
+  { value: "2 318", change: "+8,2%", trend: "up" as const, icon: Users },
+  { value: "3,42%", change: "-1,1%", trend: "down" as const, icon: TrendingUp },
+  { value: "1 024", change: "+4,6%", trend: "up" as const, icon: Activity },
 ];
 
 const chart = [40, 65, 45, 80, 55, 90, 70, 100, 60, 85, 75, 95];
-const months = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({
+  lang,
+  onNavigate,
+}: {
+  lang: Lang;
+  onNavigate?: () => void;
+}) {
+  const tr = t[lang];
   return (
-    <nav aria-label="Primary" className="space-y-1">
-      {nav.map((item) => (
+    <nav aria-label={tr.primaryNav} className="space-y-1">
+      {navItems.map((item) => (
         <a
-          key={item.label}
+          key={item.key}
           href="#"
           aria-current={item.active ? "page" : undefined}
           onClick={onNavigate}
@@ -105,14 +163,14 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
           }`}
         >
           <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span className="truncate">{item.label}</span>
+          <span className="truncate">{tr.nav[item.key]}</span>
         </a>
       ))}
     </nav>
   );
 }
 
-function Brand() {
+function Brand({ lang }: { lang: Lang }) {
   return (
     <div className="flex items-center gap-2.5">
       <div
@@ -122,7 +180,7 @@ function Brand() {
         <LayoutDashboard className="h-4.5 w-4.5" aria-hidden="true" />
       </div>
       <span className="truncate text-sm font-semibold text-sidebar-foreground">
-        Acme Inc
+        {t[lang].brand}
       </span>
     </div>
   );
@@ -130,16 +188,20 @@ function Brand() {
 
 function Dashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [lang, setLang] = useState<Lang>("fr");
+  const tr = t[lang];
+
+  const toggleLang = () => setLang((l) => (l === "fr" ? "en" : "fr"));
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background" lang={lang}>
       <div className="mx-auto flex min-h-dvh max-w-7xl">
         {/* Desktop sidebar */}
         <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar px-4 py-6 md:block">
           <div className="mb-8 px-2">
-            <Brand />
+            <Brand lang={lang} />
           </div>
-          <NavList />
+          <NavList lang={lang} />
         </aside>
 
         {/* Mobile drawer */}
@@ -153,59 +215,69 @@ function Dashboard() {
             <div
               role="dialog"
               aria-modal="true"
-              aria-label="Navigation menu"
+              aria-label={tr.menuLabel}
               className="absolute inset-y-0 left-0 w-64 border-r border-border bg-sidebar px-4 py-6 shadow-lg animate-fade-in"
             >
               <div className="mb-8 flex items-center justify-between px-2">
-                <Brand />
+                <Brand lang={lang} />
                 <Button
                   variant="ghost"
                   size="icon"
                   className="min-h-11 min-w-11"
-                  aria-label="Close navigation menu"
+                  aria-label={tr.closeMenu}
                   onClick={() => setMobileOpen(false)}
                 >
                   <X className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </div>
-              <NavList onNavigate={() => setMobileOpen(false)} />
+              <NavList lang={lang} onNavigate={() => setMobileOpen(false)} />
             </div>
           </div>
         )}
 
         {/* Main */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-border px-4 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)]">
+          <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
             <Button
               variant="ghost"
               size="icon"
               className="min-h-11 min-w-11 md:hidden"
-              aria-label="Open navigation menu"
+              aria-label={tr.openMenu}
               onClick={() => setMobileOpen(true)}
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </Button>
             <div className="min-w-0 animate-fade-in">
               <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                Overview
+                {tr.headerTitle}
               </h1>
               <p className="truncate text-sm text-muted-foreground">
-                Welcome back, here's what's happening today.
+                {tr.headerSubtitle}
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-h-11 gap-2"
+              aria-label={tr.toggleLabel}
+              onClick={toggleLang}
+            >
+              <Languages className="h-4 w-4" aria-hidden="true" />
+              <span className="font-semibold">{tr.langShort}</span>
+            </Button>
           </header>
 
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
-            <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {stats.map((stat, i) => (
+            <section aria-label={tr.keyMetrics} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {statsMeta.map((stat, i) => (
                 <Card
-                  key={stat.label}
+                  key={i}
                   className="card-elevated animate-rise"
                   style={{ animationDelay: `${i * 70}ms` }}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {stat.label}
+                      {tr.stats[i]}
                     </CardTitle>
                     <stat.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                   </CardHeader>
@@ -227,7 +299,7 @@ function Dashboard() {
                       )}
                       <span>
                         {stat.change}
-                        <span className="text-muted-foreground"> from last month</span>
+                        <span className="text-muted-foreground">{tr.fromLastMonth}</span>
                       </span>
                     </p>
                   </CardContent>
@@ -238,26 +310,26 @@ function Dashboard() {
             <section className="mt-6 grid gap-4 lg:grid-cols-3">
               <Card className="card-elevated animate-rise lg:col-span-2" style={{ animationDelay: "280ms" }}>
                 <CardHeader>
-                  <CardTitle className="text-base">Revenue overview</CardTitle>
+                  <CardTitle className="text-base">{tr.revenueOverview}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
                     className="flex items-end gap-1.5 sm:gap-2"
                     style={{ height: "14rem" }}
                     role="img"
-                    aria-label="Bar chart of monthly revenue trending upward across the year"
+                    aria-label={tr.chartAlt}
                   >
                     {chart.map((h, i) => (
                       <div
-                        key={months[i]}
+                        key={i}
                         className="bar-grow flex-1 rounded-t-md bg-primary/85 transition-colors hover:bg-primary"
                         style={{ height: `${h}%`, animationDelay: `${i * 45}ms` }}
                       />
                     ))}
                   </div>
                   <div className="mt-2 hidden gap-1.5 sm:flex sm:gap-2" aria-hidden="true">
-                    {months.map((m) => (
-                      <span key={m} className="flex-1 text-center text-[10px] text-muted-foreground">
+                    {tr.months.map((m, i) => (
+                      <span key={i} className="flex-1 text-center text-[10px] text-muted-foreground">
                         {m}
                       </span>
                     ))}
@@ -267,12 +339,12 @@ function Dashboard() {
 
               <Card className="card-elevated animate-rise" style={{ animationDelay: "350ms" }}>
                 <CardHeader>
-                  <CardTitle className="text-base">Recent activity</CardTitle>
+                  <CardTitle className="text-base">{tr.recentActivity}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-4">
-                    {activity.map((item) => (
-                      <li key={item.name} className="flex items-start gap-3">
+                    {tr.activity.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
                         <div
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
                           aria-hidden="true"

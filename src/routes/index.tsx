@@ -241,19 +241,24 @@ function Dashboard() {
                   <CardTitle className="text-base">Revenue overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex h-56 items-end gap-1.5 sm:gap-2" role="img" aria-label="Bar chart of monthly revenue trending upward across the year">
+                  <div
+                    className="flex h-56 items-end gap-1.5 sm:gap-2"
+                    role="img"
+                    aria-label="Bar chart of monthly revenue trending upward across the year"
+                  >
                     {chart.map((h, i) => (
-                      <div key={months[i]} className="flex flex-1 flex-col items-center gap-2">
-                        <div className="flex w-full flex-1 items-end">
-                          <div
-                            className="bar-grow w-full rounded-t-md bg-primary/85 transition-colors hover:bg-primary"
-                            style={{ height: `${h}%`, animationDelay: `${i * 45}ms` }}
-                          />
-                        </div>
-                        <span className="hidden text-[10px] text-muted-foreground sm:block">
-                          {months[i]}
-                        </span>
-                      </div>
+                      <div
+                        key={months[i]}
+                        className="bar-grow flex-1 rounded-t-md bg-primary/85 transition-colors hover:bg-primary"
+                        style={{ height: `${h}%`, animationDelay: `${i * 45}ms` }}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-2 hidden gap-1.5 sm:flex sm:gap-2" aria-hidden="true">
+                    {months.map((m) => (
+                      <span key={m} className="flex-1 text-center text-[10px] text-muted-foreground">
+                        {m}
+                      </span>
                     ))}
                   </div>
                 </CardContent>

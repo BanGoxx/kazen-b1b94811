@@ -294,23 +294,29 @@ function Dashboard() {
               {statsMeta.map((stat, i) => (
                 <Card
                   key={i}
-                  className="card-elevated animate-rise"
+                  className="card-elevated gold-line glass animate-rise overflow-hidden border-border/60"
                   style={{ animationDelay: `${i * 70}ms` }}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
                       {tr.stats[i]}
                     </CardTitle>
-                    <stat.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-primary/25"
+                      style={{ background: "oklch(0.78 0.13 85 / 0.12)" }}
+                      aria-hidden="true"
+                    >
+                      <stat.icon className="h-4 w-4 text-primary" />
+                    </span>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold tracking-tight text-foreground">
+                    <div className="font-display text-3xl font-bold tracking-tight text-foreground">
                       {stat.value}
                     </div>
                     <p
-                      className={`mt-1 flex items-center gap-1 text-xs font-medium ${
+                      className={`mt-1.5 flex items-center gap-1 text-xs font-semibold ${
                         stat.trend === "up"
-                          ? "text-emerald-600 dark:text-emerald-400"
+                          ? "text-emerald-400"
                           : "text-destructive"
                       }`}
                     >
@@ -321,13 +327,14 @@ function Dashboard() {
                       )}
                       <span>
                         {stat.change}
-                        <span className="text-muted-foreground">{tr.fromLastMonth}</span>
+                        <span className="font-normal text-muted-foreground">{tr.fromLastMonth}</span>
                       </span>
                     </p>
                   </CardContent>
                 </Card>
               ))}
             </section>
+
 
             <section className="mt-6 grid gap-4 lg:grid-cols-3">
               <Card className="card-elevated animate-rise lg:col-span-2" style={{ animationDelay: "280ms" }}>

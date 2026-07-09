@@ -242,7 +242,8 @@ function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div
-                    className="flex h-56 items-end gap-1.5 sm:gap-2"
+                    className="flex items-end gap-1.5 sm:gap-2"
+                    style={{ height: "14rem" }}
                     role="img"
                     aria-label="Bar chart of monthly revenue trending upward across the year"
                   >

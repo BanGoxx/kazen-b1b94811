@@ -337,9 +337,9 @@ function Dashboard() {
 
 
             <section className="mt-6 grid gap-4 lg:grid-cols-3">
-              <Card className="card-elevated animate-rise lg:col-span-2" style={{ animationDelay: "280ms" }}>
+              <Card className="card-elevated glass animate-rise border-border/60 lg:col-span-2" style={{ animationDelay: "280ms" }}>
                 <CardHeader>
-                  <CardTitle className="text-base">{tr.revenueOverview}</CardTitle>
+                  <CardTitle className="font-display text-lg tracking-wide">{tr.revenueOverview}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
@@ -351,14 +351,19 @@ function Dashboard() {
                     {chart.map((h, i) => (
                       <div
                         key={i}
-                        className="bar-grow flex-1 rounded-t-md bg-primary/85 transition-colors hover:bg-primary"
-                        style={{ height: `${h}%`, animationDelay: `${i * 45}ms` }}
+                        className="bar-grow group relative flex-1 rounded-t-lg transition-all duration-300 hover:-translate-y-1"
+                        style={{
+                          height: `${h}%`,
+                          animationDelay: `${i * 45}ms`,
+                          background: "linear-gradient(180deg, oklch(0.88 0.11 92), oklch(0.68 0.12 70))",
+                          boxShadow: "0 0 18px -6px oklch(0.78 0.13 85 / 0.6)",
+                        }}
                       />
                     ))}
                   </div>
                   <div className="mt-2 hidden gap-1.5 sm:flex sm:gap-2" aria-hidden="true">
                     {tr.months.map((m, i) => (
-                      <span key={i} className="flex-1 text-center text-[10px] text-muted-foreground">
+                      <span key={i} className="flex-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
                         {m}
                       </span>
                     ))}
@@ -366,23 +371,24 @@ function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="card-elevated animate-rise" style={{ animationDelay: "350ms" }}>
+              <Card className="card-elevated glass animate-rise border-border/60" style={{ animationDelay: "350ms" }}>
                 <CardHeader>
-                  <CardTitle className="text-base">{tr.recentActivity}</CardTitle>
+                  <CardTitle className="font-display text-lg tracking-wide">{tr.recentActivity}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-4">
                     {tr.activity.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3">
+                      <li key={i} className="group flex items-start gap-3 rounded-lg p-1.5 transition-colors hover:bg-primary/5">
                         <div
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-primary ring-1 ring-primary/25 transition-transform group-hover:scale-105"
+                          style={{ background: "oklch(0.78 0.13 85 / 0.12)" }}
                           aria-hidden="true"
                         >
                           {item.name.split(" ").map((n) => n[0]).join("")}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm text-foreground">
-                            <span className="font-medium">{item.name}</span>{" "}
+                            <span className="font-semibold">{item.name}</span>{" "}
                             <span className="text-muted-foreground">{item.action}</span>
                           </p>
                           <p className="text-xs text-muted-foreground">{item.time}</p>
@@ -393,6 +399,7 @@ function Dashboard() {
                 </CardContent>
               </Card>
             </section>
+
           </main>
         </div>
       </div>

@@ -186,17 +186,58 @@ h1, h2, h3, .font-display {
 }
 
 @utility card-elevated {
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
   &:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg), 0 0 0 1px oklch(0.78 0.13 85 / 0.25), 0 0 40px -8px oklch(0.78 0.13 85 / 0.35);
+    transform: translateY(-4px);
+    border-color: oklch(0.78 0.13 85 / 0.4);
+  }
+}
+
+@utility glass {
+  background: oklch(0.22 0.01 65 / 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid oklch(0.85 0.05 88 / 0.1);
+}
+
+@utility gold-text {
+  background: var(--gradient-gold);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+@utility gold-line {
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: var(--gradient-gold);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    border-radius: inherit;
+  }
+  &:hover::before {
+    opacity: 0.9;
   }
 }
 
 @utility bar-grow {
   transform-origin: bottom;
   animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.6; }
+}
+
+@utility ambient-glow {
+  animation: glow-pulse 6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

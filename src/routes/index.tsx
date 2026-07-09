@@ -179,19 +179,20 @@ function NavList({
 
 function Brand({ lang }: { lang: Lang }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-3">
       <div
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-md"
-        style={{ backgroundImage: "var(--gradient-primary)" }}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-lg ring-1 ring-primary/40"
+        style={{ backgroundImage: "var(--gradient-gold)", boxShadow: "0 8px 24px -6px oklch(0.78 0.13 85 / 0.5)" }}
       >
-        <LayoutDashboard className="h-4.5 w-4.5" aria-hidden="true" />
+        <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
       </div>
-      <span className="truncate text-sm font-semibold text-sidebar-foreground">
+      <span className="truncate font-display text-lg font-semibold tracking-wide text-sidebar-foreground">
         {t[lang].brand}
       </span>
     </div>
   );
 }
+
 
 function Dashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);

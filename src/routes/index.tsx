@@ -194,15 +194,28 @@ function Dashboard() {
   const toggleLang = () => setLang((l) => (l === "fr" ? "en" : "fr"));
 
   return (
-    <div className="min-h-dvh bg-background" lang={lang}>
-      <div className="mx-auto flex min-h-dvh max-w-7xl">
+    <div className="relative min-h-dvh overflow-hidden bg-background" lang={lang}>
+      {/* Ambient background glow */}
+      <div
+        aria-hidden="true"
+        className="ambient-glow pointer-events-none absolute -top-40 -right-32 h-[36rem] w-[36rem] rounded-full blur-3xl"
+        style={{ background: "radial-gradient(closest-side, oklch(0.78 0.13 85 / 0.22), transparent)" }}
+      />
+      <div
+        aria-hidden="true"
+        className="ambient-glow pointer-events-none absolute -bottom-48 -left-40 h-[34rem] w-[34rem] rounded-full blur-3xl"
+        style={{ background: "radial-gradient(closest-side, oklch(0.68 0.12 70 / 0.16), transparent)", animationDelay: "2s" }}
+      />
+
+      <div className="relative mx-auto flex min-h-dvh max-w-7xl">
         {/* Desktop sidebar */}
-        <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar px-4 py-6 md:block">
+        <aside className="glass hidden w-60 shrink-0 border-r border-border/60 px-4 py-6 md:block">
           <div className="mb-8 px-2">
             <Brand lang={lang} />
           </div>
           <NavList lang={lang} />
         </aside>
+
 
         {/* Mobile drawer */}
         {mobileOpen && (

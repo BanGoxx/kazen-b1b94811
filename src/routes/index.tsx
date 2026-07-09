@@ -258,7 +258,7 @@ function Dashboard() {
 
         {/* Main */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
+          <header className="glass sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 px-4 py-4 sm:px-6">
             <Button
               variant="ghost"
               size="icon"
@@ -269,7 +269,7 @@ function Dashboard() {
               <Menu className="h-5 w-5" aria-hidden="true" />
             </Button>
             <div className="min-w-0 animate-fade-in">
-              <h1 className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              <h1 className="gold-text truncate font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 {tr.headerTitle}
               </h1>
               <p className="truncate text-sm text-muted-foreground">
@@ -279,14 +279,15 @@ function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="min-h-11 w-fit justify-self-end gap-2"
+              className="min-h-11 w-fit justify-self-end gap-2 border-primary/40 text-foreground transition-all hover:border-primary hover:bg-primary/10 hover:shadow-[0_0_20px_-6px_oklch(0.78_0.13_85/0.6)]"
               aria-label={tr.toggleLabel}
               onClick={toggleLang}
             >
-              <Languages className="h-4 w-4" aria-hidden="true" />
-              <span className="font-semibold">{tr.langShort}</span>
+              <Languages className="h-4 w-4 text-primary" aria-hidden="true" />
+              <span className="font-semibold tracking-wide">{tr.langShort}</span>
             </Button>
           </header>
+
 
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
             <section aria-label={tr.keyMetrics} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

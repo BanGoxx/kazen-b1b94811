@@ -258,7 +258,7 @@ function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="min-h-11 gap-2"
+              className="min-h-11 w-fit justify-self-end gap-2"
               aria-label={tr.toggleLabel}
               onClick={toggleLang}
             >

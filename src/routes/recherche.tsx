@@ -95,15 +95,20 @@ function SearchPage() {
   const updateSearch = (patch: Partial<SearchParams>) => {
     navigate({
       to: "/recherche",
-      search: (prev) => ({ ...prev, ...patch }),
+      search: (prev: SearchParams) => ({ ...prev, ...patch }),
       replace: true,
     });
   };
 
   const onChangeQuery = (value: string) => {
     setQ(value);
-    navigate({ to: "/recherche", search: (prev) => ({ ...prev, q: value.trim() || undefined }), replace: true });
+    navigate({
+      to: "/recherche",
+      search: (prev: SearchParams) => ({ ...prev, q: value.trim() || undefined }),
+      replace: true,
+    });
   };
+
 
   const toggleGenre = (g: string) => {
     const next = filters.genres.includes(g)

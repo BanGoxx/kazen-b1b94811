@@ -12,6 +12,15 @@ import type {
 
 const BASE = "https://api.themoviedb.org/3";
 const IMG = "https://image.tmdb.org/t/p/w92";
+const CACHE_TTL_MS = 1000 * 60 * 20;
+const STALE_TTL_MS = 1000 * 60 * 60 * 6;
+
+type TmdbCacheEntry = { value: unknown; expiresAt: number; staleUntil: number; pending?: Promise<unknown> };
+const tmdbCache = new Map<string, TmdbCacheEntry>();
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function hasTmdbKey(): boolean {
   return Boolean(process.env.TMDB_API_KEY);
@@ -24,9 +33,53 @@ async function tmdb<T>(path: string, params: Record<string, string> = {}): Promi
   url.searchParams.set("api_key", key);
   url.searchParams.set("language", "fr-FR");
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`TMDB ${res.status}`);
-  return (await res.json()) as T;
+  const cacheId = `${path}?${new URLSearchParams(params).toString()}`;
+  const now = Date.now();
+  const cached = tmdbCache.get(cacheId);
+
+  if (cached && cached.expiresAt > now) return cached.value as T;
+  if (cached?.pending) return cached.pending as Promise<T>;
+
+  const pending = (async () => {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const res = await fetch(url.toString());
+        if ((res.status === 429 || res.status >= 500) && attempt < 2) {
+          const retryAfter = Number(res.headers.get("retry-after"));
+          await wait(Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 2000) : 500 * (attempt + 1));
+          continue;
+        }
+        if (!res.ok) throw new Error(`TMDB ${res.status}`);
+        const value = (await res.json()) as T;
+        tmdbCache.set(cacheId, { value, expiresAt: Date.now() + CACHE_TTL_MS, staleUntil: Date.now() + STALE_TTL_MS });
+        return value;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) await wait(400 * (attempt + 1));
+      }
+    }
+    if (cached && cached.staleUntil > Date.now()) {
+      console.error("TMDB source indisponible, cache récent conservé", lastError);
+      return cached.value as T;
+    }
+    throw lastError instanceof Error ? lastError : new Error("TMDB request failed");
+  })();
+
+  tmdbCache.set(cacheId, {
+    value: cached?.value,
+    expiresAt: cached?.expiresAt ?? 0,
+    staleUntil: cached?.staleUntil ?? 0,
+    pending,
+  });
+  try {
+    return await pending;
+  } finally {
+    const latest = tmdbCache.get(cacheId);
+    if (latest?.pending === pending) {
+      tmdbCache.set(cacheId, { value: latest.value, expiresAt: latest.expiresAt, staleUntil: latest.staleUntil });
+    }
+  }
 }
 
 type TmdbListResponse<T> = { results?: T[] };

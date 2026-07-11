@@ -3,6 +3,7 @@ import { Play, Info } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { RatingBadge } from "./RatingBadge";
+import { SafeImage } from "./SafeImage";
 import { PlatformRow } from "./PlatformBadge";
 import { Button } from "@/components/ui/button";
 

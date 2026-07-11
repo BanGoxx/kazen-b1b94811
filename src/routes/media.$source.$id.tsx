@@ -161,7 +161,7 @@ function MediaDetailPage() {
                 </span>
               ) : null}
             </div>
-            <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+            <h1 className="text-balance font-display text-3xl font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-4xl lg:text-5xl">
               {item.title}
             </h1>
             {item.titleOriginal && item.titleOriginal !== item.title ? (

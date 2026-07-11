@@ -174,7 +174,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      anilist_cache_get: {
+        Args: { p_key: string }
+        Returns: {
+          fetched_at: string
+          payload: Json
+        }[]
+      }
+      anilist_cache_put: {
+        Args: { p_key: string; p_payload: Json }
+        Returns: undefined
+      }
     }
     Enums: {
       priority_level: "basse" | "normale" | "haute"

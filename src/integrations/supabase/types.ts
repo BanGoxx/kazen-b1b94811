@@ -121,7 +121,10 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          favorite_styles: string[]
           id: string
+          preferred_genres: string[]
+          preferred_types: string[]
           updated_at: string
         }
         Insert: {
@@ -129,7 +132,10 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          favorite_styles?: string[]
           id: string
+          preferred_genres?: string[]
+          preferred_types?: string[]
           updated_at?: string
         }
         Update: {
@@ -137,7 +143,10 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          favorite_styles?: string[]
           id?: string
+          preferred_genres?: string[]
+          preferred_types?: string[]
           updated_at?: string
         }
         Relationships: []

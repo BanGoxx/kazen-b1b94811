@@ -60,13 +60,41 @@ function entryAffinity(e: ListEntry): number {
   return w;
 }
 
-export function buildTasteProfile(entries: ListEntry[]): TasteProfile {
+export interface ExplicitPreferences {
+  genres?: string[];
+  types?: string[];
+}
+
+export function buildTasteProfile(
+  entries: ListEntry[],
+  prefs?: ExplicitPreferences,
+): TasteProfile {
   const genreWeights: Record<string, number> = {};
   const typeWeights = { anime: 0, series: 0, movie: 0 } as Record<MediaType, number>;
   const tagWeights: Record<string, number> = {};
   const savedKeys = new Set<string>();
   const likedKeys = new Set<string>();
   let signalCount = 0;
+
+  // Seed the profile with the member's explicitly chosen preferences. Given a
+  // moderate weight so real interactions can still dominate over time, but
+  // enough to personalize a cold-start account right away.
+  const PREF_GENRE_WEIGHT = 2.5;
+  const PREF_TYPE_WEIGHT = 2.5;
+  if (prefs?.genres?.length) {
+    for (const g of prefs.genres) {
+      genreWeights[g] = (genreWeights[g] ?? 0) + PREF_GENRE_WEIGHT;
+    }
+    signalCount += 1;
+  }
+  if (prefs?.types?.length) {
+    for (const t of prefs.types) {
+      if (t === "anime" || t === "series" || t === "movie") {
+        typeWeights[t] += PREF_TYPE_WEIGHT;
+      }
+    }
+    signalCount += 1;
+  }
 
   for (const e of entries) {
     savedKeys.add(e.mediaKey);

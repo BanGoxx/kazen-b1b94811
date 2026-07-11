@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LogOut, Loader2, UserRound, Crown, Sparkles } from "lucide-react";
+import { LogOut, Loader2, UserRound, Crown, Sparkles, Wand2, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
@@ -10,15 +10,38 @@ import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
 import { usePremium } from "@/lib/premium";
 import { SupporterBadge } from "@/components/premium/SupporterBadge";
+import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+
+const GENRE_OPTIONS = [
+  "Action", "Aventure", "Comédie", "Drame", "Fantastique", "Science-Fiction",
+  "Romance", "Thriller", "Mystère", "Horreur", "Surnaturel", "Psychologique",
+  "Sport", "Mecha", "Tranche de vie", "Musique",
+];
+
+const TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "anime", label: "Anime" },
+  { value: "series", label: "Séries" },
+  { value: "movie", label: "Films" },
+];
+
+const STYLE_OPTIONS = [
+  "Shonen", "Seinen", "Shojo", "Isekai", "Slice of life", "Dark",
+  "Feel-good", "Épique", "Émotionnel", "Cérébral",
+];
+
+function toggle(list: string[], value: string): string[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
 
 export const Route = createFileRoute("/_authenticated/profil")({
   head: () => ({
@@ -26,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
   }),
   component: ProfilePage,
 });
+
 
 function ProfilePage() {
   const { user } = useAuth();
@@ -40,12 +64,18 @@ function ProfilePage() {
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const [genres, setGenres] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [styles, setStyles] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (data) {
       setDisplayName(data.display_name ?? "");
       setBio(data.bio ?? "");
+      setGenres((data.preferred_genres as string[] | null) ?? []);
+      setTypes((data.preferred_types as string[] | null) ?? []);
+      setStyles((data.favorite_styles as string[] | null) ?? []);
     }
   }, [data]);
 
@@ -59,7 +89,15 @@ function ProfilePage() {
   const save = async () => {
     setSaving(true);
     try {
-      await updateFn({ data: { display_name: displayName, bio } });
+      await updateFn({
+        data: {
+          display_name: displayName,
+          bio,
+          preferred_genres: genres,
+          preferred_types: types,
+          favorite_styles: styles,
+        },
+      });
       await refetch();
       toast.success("Profil mis à jour.");
     } catch {
@@ -68,6 +106,7 @@ function ProfilePage() {
       setSaving(false);
     }
   };
+
 
   const handleSignOut = async () => {
     await signOut();
@@ -184,13 +223,127 @@ function ProfilePage() {
                   placeholder="Parlez de vos goûts…"
                 />
               </div>
-              <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
-              </Button>
             </>
           )}
         </section>
+
+        {/* Préférences de goût — alimentent les recommandations « Pour vous » */}
+        <section className="space-y-6 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+              <Heart className="h-5 w-5 text-primary" /> Mes préférences
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sélectionne tes goûts pour affiner tes recommandations personnalisées.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Types préférés</Label>
+            <div className="flex flex-wrap gap-2">
+              {TYPE_OPTIONS.map((t) => (
+                <Chip
+                  key={t.value}
+                  active={types.includes(t.value)}
+                  onClick={() => setTypes((prev) => toggle(prev, t.value))}
+                >
+                  {t.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Genres préférés</Label>
+            <div className="flex flex-wrap gap-2">
+              {GENRE_OPTIONS.map((g) => (
+                <Chip
+                  key={g}
+                  active={genres.includes(g)}
+                  onClick={() => setGenres((prev) => toggle(prev, g))}
+                >
+                  {g}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Styles favoris</Label>
+            <div className="flex flex-wrap gap-2">
+              {STYLE_OPTIONS.map((s) => (
+                <Chip
+                  key={s}
+                  active={styles.includes(s)}
+                  onClick={() => setStyles((prev) => toggle(prev, s))}
+                >
+                  {s}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Aperçu recommandations + assistant */}
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/25 bg-primary/5 p-5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+              <Sparkles className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-display text-base font-bold">Pour vous</p>
+              <p className="text-sm text-muted-foreground">
+                Des suggestions adaptées à tes goûts et à ton historique.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <RecommendationAssistant
+              trigger={
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Wand2 className="h-4 w-4" /> Assistant
+                </Button>
+              }
+            />
+            <Button asChild variant="aurora" size="sm">
+              <Link to="/pour-vous">Voir</Link>
+            </Button>
+          </div>
+        </section>
+
+        <div className="flex justify-end">
+          <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
+          </Button>
+        </div>
       </div>
     </AppShell>
   );
 }
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/15 text-primary"
+          : "border-border bg-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+

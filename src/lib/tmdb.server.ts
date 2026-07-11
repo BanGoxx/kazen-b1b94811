@@ -132,6 +132,21 @@ function extractPlatforms(wp: WatchProviders): Platform[] {
   return dedupePlatforms(out);
 }
 
+// French synopsis strategy: primary calls request language=fr-FR. When TMDB
+// has no French overview it returns an empty string, so we fall back to the
+// original/English overview rather than showing nothing.
+async function overviewFallback(
+  kind: "movie" | "tv",
+  id: number,
+  current: string | null,
+): Promise<string | null> {
+  if (current && current.trim()) return current;
+  const en = await tmdb<{ overview?: string | null }>(`/${kind}/${id}`, { language: "en-US" }).catch(
+    () => null,
+  );
+  return en?.overview?.trim() || current;
+}
+
 export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & { belongs_to_collection?: { name?: string } | null }>(
     `/movie/${id}`,
@@ -139,6 +154,7 @@ export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   );
   if (!data) return null;
   const bmedia = fromTmdbMovie(data, extractPlatforms(data));
+  bmedia.synopsis = await overviewFallback("movie", id, bmedia.synopsis);
   return augmentTmdb(bmedia, data, "movie", {
     collectionName: data.belongs_to_collection?.name ?? null,
     format: "Film",
@@ -152,6 +168,7 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
   );
   if (!data) return null;
   const bmedia = fromTmdbTv(data, extractPlatforms(data));
+  bmedia.synopsis = await overviewFallback("tv", id, bmedia.synopsis);
   return augmentTmdb(bmedia, data, "tv", {
     studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
     format: "Série",

@@ -36,13 +36,13 @@ function AnimePage() {
           <TabsTrigger value="upcoming">À venir</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <MediaGrid items={trending.data} />
+          <CatalogGrid items={trending.data} />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <MediaGrid items={popular.data} />
+          <CatalogGrid items={popular.data} />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
-          <MediaGrid items={upcoming.data} />
+          <CatalogGrid items={upcoming.data} />
         </TabsContent>
       </Tabs>
     </AppShell>

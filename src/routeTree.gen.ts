@@ -16,9 +16,11 @@ import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AVenirRouteImport } from './routes/a-venir'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
+import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 
 const SeriesRoute = SeriesRouteImport.update({
@@ -56,6 +58,10 @@ const AVenirRoute = AVenirRouteImport.update({
   path: '/a-venir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -70,6 +76,11 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   id: '/saison',
   path: '/saison',
   getParentRoute: () => AnimeRoute,
+} as any)
+const AuthenticatedMesListesRoute = AuthenticatedMesListesRouteImport.update({
+  id: '/mes-listes',
+  path: '/mes-listes',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const MediaSourceIdRoute = MediaSourceIdRouteImport.update({
   id: '/media/$source/$id',
@@ -86,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/mes-listes': typeof AuthenticatedMesListesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -98,6 +110,7 @@ export interface FileRoutesByTo {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/mes-listes': typeof AuthenticatedMesListesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -105,6 +118,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
   '/auth': typeof AuthRoute
@@ -112,6 +126,7 @@ export interface FileRoutesById {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -127,6 +142,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/mes-listes'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -139,12 +155,14 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/mes-listes'
     | '/anime/saison'
     | '/anime'
     | '/media/$source/$id'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/a-venir'
     | '/anime'
     | '/auth'
@@ -152,6 +170,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/_authenticated/mes-listes'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -159,6 +178,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AVenirRoute: typeof AVenirRoute
   AnimeRoute: typeof AnimeRouteWithChildren
   AuthRoute: typeof AuthRoute
@@ -220,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AVenirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -241,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeSaisonRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/_authenticated/mes-listes': {
+      id: '/_authenticated/mes-listes'
+      path: '/mes-listes'
+      fullPath: '/mes-listes'
+      preLoaderRoute: typeof AuthenticatedMesListesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/media/$source/$id': {
       id: '/media/$source/$id'
       path: '/media/$source/$id'
@@ -250,6 +284,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AnimeRouteChildren {
   AnimeSaisonRoute: typeof AnimeSaisonRoute
@@ -265,6 +310,7 @@ const AnimeRouteWithChildren = AnimeRoute._addFileChildren(AnimeRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AVenirRoute: AVenirRoute,
   AnimeRoute: AnimeRouteWithChildren,
   AuthRoute: AuthRoute,

@@ -62,7 +62,7 @@ export function fromAniList(m: AniListMedia): MediaItem {
   const platforms: Platform[] = [];
   for (const link of m.externalLinks ?? []) {
     if (!link?.site) continue;
-    const p = resolvePlatform(link.site, null, "stream");
+    const p = resolvePlatform(link.site, null, "stream", link.url ?? null);
     if (p) platforms.push(p);
   }
   return {

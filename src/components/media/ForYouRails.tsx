@@ -8,7 +8,6 @@ import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
 import { useMyList } from "@/lib/use-list";
 import { useAuth } from "@/lib/auth";
 import {
-  rankForYou,
   rankForYouAnimeFirst,
   rankByGenre,
   rankFreshForYou,

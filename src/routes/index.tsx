@@ -57,6 +57,7 @@ export const Route = createFileRoute("/")({
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(trendingAnimeQO);
+    await context.queryClient.ensureQueryData(popularAnimeQO);
     await context.queryClient.ensureQueryData(upcomingAnimeQO);
     await context.queryClient.ensureQueryData(seasonalAnimeQO());
     void context.queryClient.prefetchQuery(trendingSeriesQO);
@@ -69,6 +70,7 @@ export const Route = createFileRoute("/")({
 
 function DiscoverPage() {
   const { data: anime } = useSuspenseQuery(trendingAnimeQO);
+  const popAnime = useSuspenseQuery(popularAnimeQO);
   const series = useSuspenseQuery(trendingSeriesQO);
   const movies = useSuspenseQuery(trendingMoviesQO);
   const upAnime = useSuspenseQuery(upcomingAnimeQO);

@@ -70,6 +70,8 @@ function CalendarPage() {
   const { data: upcoming } = useSuspenseQuery(upcomingAllQO);
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
   const userList = useUserList();
+  const { user } = useAuth();
+
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [type, setType] = useState<StatusFilter>("all");

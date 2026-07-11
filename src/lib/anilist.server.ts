@@ -309,6 +309,11 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
       popularity
       season
       seasonYear
+      source
+      countryOfOrigin
+      isAdult
+      synonyms
+      endDate { year month day }
       trailer { id site }
       studios(isMain: true) { nodes { name } }
       characters(sort: [ROLE, RELEVANCE], perPage: 14) {

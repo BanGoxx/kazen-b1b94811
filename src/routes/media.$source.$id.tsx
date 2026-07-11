@@ -5,8 +5,12 @@ import {
   CalendarDays,
   Clapperboard,
   Clock,
+  Film,
   Flame,
+  Globe,
+  Info,
   Layers,
+  ShieldCheck,
   Sparkles,
   Tv,
 } from "lucide-react";
@@ -18,6 +22,9 @@ import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedScroller } from "@/components/media/RelatedScroller";
 import { UserListPanel } from "@/components/media/UserListPanel";
+import { FicheSection } from "@/components/media/FicheSection";
+import { ExpandableText } from "@/components/media/ExpandableText";
+import { VideoGallery } from "@/components/media/VideoGallery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -147,6 +154,13 @@ function MediaDetailPage() {
   if (item.runtime) facts.push({ icon: Clock, label: "Durée", value: `${item.runtime} min` });
   if (item.popularity) facts.push({ icon: Flame, label: "Popularité", value: item.popularity.toLocaleString("fr-FR") });
 
+  const endReleased = fmtDate(item.endDate);
+  const infos: { icon: typeof CalendarDays; label: string; value: string }[] = [];
+  if (item.originSource) infos.push({ icon: Film, label: "Source", value: item.originSource });
+  if (item.ageRating) infos.push({ icon: ShieldCheck, label: "Classification", value: item.ageRating });
+  if (item.countryOfOrigin) infos.push({ icon: Globe, label: "Origine", value: item.countryOfOrigin });
+  if (endReleased) infos.push({ icon: CalendarDays, label: "Fin de diffusion", value: endReleased });
+
   return (
     <AppShell>
       {/* Cinematic backdrop */}
@@ -249,10 +263,43 @@ function MediaDetailPage() {
           ) : null}
 
           {item.synopsis ? (
-            <div>
-              <h2 className="mb-2 font-display text-xl font-bold">Synopsis</h2>
-              <p className="max-w-3xl leading-relaxed text-muted-foreground">{item.synopsis}</p>
-            </div>
+            <FicheSection title="Synopsis" icon={<Sparkles className="h-5 w-5" />}>
+              <ExpandableText text={item.synopsis} />
+            </FicheSection>
+          ) : null}
+
+          {item.titleAlternatives.length ? (
+            <FicheSection title="Titres alternatifs" icon={<Info className="h-5 w-5" />}>
+              <div className="flex flex-wrap gap-2">
+                {item.titleAlternatives.map((t) => (
+                  <Badge key={t} variant="outline" className="font-normal">{t}</Badge>
+                ))}
+              </div>
+            </FicheSection>
+          ) : null}
+
+          {infos.length ? (
+            <FicheSection title="Informations" icon={<Info className="h-5 w-5" />}>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {infos.map((f) => {
+                  const Icon = f.icon;
+                  return (
+                    <div key={f.label} className="hover-lift rounded-xl border border-border bg-card/60 p-3 backdrop-blur transition-colors hover:border-primary/40">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Icon className="h-3.5 w-3.5 text-primary" /> {f.label}
+                      </div>
+                      <p className="mt-1 font-semibold">{f.value}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </FicheSection>
+          ) : null}
+
+          {item.videos.length ? (
+            <FicheSection title="Bandes-annonces & vidéos" icon={<Clapperboard className="h-5 w-5" />}>
+              <VideoGallery videos={item.videos} title={item.title} />
+            </FicheSection>
           ) : null}
 
           {item.collectionName ? (

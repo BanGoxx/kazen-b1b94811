@@ -309,6 +309,11 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
       popularity
       season
       seasonYear
+      source
+      countryOfOrigin
+      isAdult
+      synonyms
+      endDate { year month day }
       trailer { id site }
       studios(isMain: true) { nodes { name } }
       characters(sort: [ROLE, RELEVANCE], perPage: 14) {
@@ -340,6 +345,11 @@ interface AniListDetailRaw {
   popularity?: number | null;
   season?: string | null;
   seasonYear?: number | null;
+  source?: string | null;
+  countryOfOrigin?: string | null;
+  isAdult?: boolean | null;
+  synonyms?: (string | null)[] | null;
+  endDate?: { year?: number | null; month?: number | null; day?: number | null } | null;
   trailer?: { id?: string | null; site?: string | null } | null;
   studios?: { nodes?: { name?: string | null }[] | null } | null;
   characters?: {
@@ -400,6 +410,41 @@ const ANILIST_RELATION: Record<string, string> = {
   OTHER: "Autre",
 };
 
+const ANILIST_SOURCE: Record<string, string> = {
+  ORIGINAL: "Œuvre originale",
+  MANGA: "Manga",
+  LIGHT_NOVEL: "Light novel",
+  VISUAL_NOVEL: "Visual novel",
+  VIDEO_GAME: "Jeu vidéo",
+  NOVEL: "Roman",
+  DOUJINSHI: "Dōjinshi",
+  ANIME: "Anime",
+  WEB_NOVEL: "Web novel",
+  LIVE_ACTION: "Live action",
+  GAME: "Jeu",
+  COMIC: "Comic",
+  MULTIMEDIA_PROJECT: "Projet multimédia",
+  PICTURE_BOOK: "Livre illustré",
+  OTHER: "Autre",
+};
+
+const COUNTRY_LABELS: Record<string, string> = {
+  JP: "Japon",
+  CN: "Chine",
+  KR: "Corée du Sud",
+  TW: "Taïwan",
+  US: "États-Unis",
+  FR: "France",
+  GB: "Royaume-Uni",
+};
+
+function anilistDate(d?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
+  if (!d?.year) return null;
+  const mm = String(d.month ?? 1).padStart(2, "0");
+  const dd = String(d.day ?? 1).padStart(2, "0");
+  return `${d.year}-${mm}-${dd}`;
+}
+
 function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[0]): MediaDetail {
   const bmedia = fromAniList(m);
   const trailerUrl =
@@ -429,6 +474,13 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
       relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
       mediaType: "anime" as const,
     }));
+  const alt = Array.from(
+    new Set(
+      [m.title?.native, ...(m.synonyms ?? [])]
+        .map((s) => (s ?? "").trim())
+        .filter((s) => s && s !== bmedia.title && s !== bmedia.titleOriginal),
+    ),
+  ).slice(0, 6);
   return {
     ...bmedia,
     trailerUrl,
@@ -443,6 +495,16 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
     crew,
     related,
     collectionName: null,
+    titleAlternatives: alt,
+    originSource: m.source ? ANILIST_SOURCE[m.source] ?? null : null,
+    ageRating: m.isAdult ? "18+" : null,
+    countryOfOrigin: m.countryOfOrigin
+      ? COUNTRY_LABELS[m.countryOfOrigin] ?? m.countryOfOrigin
+      : null,
+    endDate: anilistDate(m.endDate),
+    videos: trailerUrl
+      ? [{ key: m.trailer!.id!, label: "Bande-annonce", url: trailerUrl }]
+      : [],
   };
 }
 

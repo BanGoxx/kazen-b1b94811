@@ -5,6 +5,7 @@ import { resolvePlatform, dedupePlatforms } from "./platforms";
 import type {
   CreditPerson,
   MediaDetail,
+  MediaVideo,
   MediaItem,
   Platform,
   RelatedMedia,
@@ -208,9 +209,15 @@ async function overviewFallback(
 }
 
 export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & { belongs_to_collection?: { name?: string } | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & {
+    belongs_to_collection?: { name?: string } | null;
+    origin_country?: string[] | null;
+    production_countries?: { iso_3166_1?: string; name?: string }[] | null;
+    original_title?: string | null;
+    release_dates?: { results?: { iso_3166_1?: string; release_dates?: { certification?: string }[] }[] } | null;
+  }>(
     `/movie/${id}`,
-    { append_to_response: "watch/providers,credits,videos,recommendations" },
+    { append_to_response: "watch/providers,credits,videos,recommendations,release_dates" },
   );
   if (!data) return null;
   const bmedia = fromTmdbMovie(data, extractPlatforms(data));
@@ -218,13 +225,24 @@ export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   return augmentTmdb(bmedia, data, "movie", {
     collectionName: data.belongs_to_collection?.name ?? null,
     format: "Film",
+    countryOfOrigin: tmdbCountry(data.origin_country, data.production_countries),
+    ageRating: tmdbMovieCert(data.release_dates),
+    titleAlternatives: [data.original_title].filter((t): t is string => !!t && t !== bmedia.title),
+    endDate: null,
   });
 }
 
 export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & WatchProviders & { networks?: { name?: string }[] | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & WatchProviders & {
+    networks?: { name?: string }[] | null;
+    origin_country?: string[] | null;
+    production_countries?: { iso_3166_1?: string; name?: string }[] | null;
+    original_name?: string | null;
+    last_air_date?: string | null;
+    content_ratings?: { results?: { iso_3166_1?: string; rating?: string }[] } | null;
+  }>(
     `/tv/${id}`,
-    { append_to_response: "watch/providers,credits,videos,recommendations" },
+    { append_to_response: "watch/providers,credits,videos,recommendations,content_ratings" },
   );
   if (!data) return null;
   const bmedia = fromTmdbTv(data, extractPlatforms(data));
@@ -232,6 +250,10 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
   return augmentTmdb(bmedia, data, "tv", {
     studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
     format: "Série",
+    countryOfOrigin: tmdbCountry(data.origin_country, data.production_countries),
+    ageRating: tmdbTvCert(data.content_ratings),
+    titleAlternatives: [data.original_name].filter((t): t is string => !!t && t !== bmedia.title),
+    endDate: data.last_air_date ?? null,
   });
 }
 
@@ -247,11 +269,67 @@ interface TmdbExtra {
 const TMDB_PROFILE = "https://image.tmdb.org/t/p/w185";
 const IMPORTANT_JOBS = ["Director", "Screenplay", "Writer", "Creator", "Producer", "Original Music Composer"];
 
+const TMDB_COUNTRY_LABELS: Record<string, string> = {
+  JP: "Japon",
+  CN: "Chine",
+  KR: "Corée du Sud",
+  US: "États-Unis",
+  FR: "France",
+  GB: "Royaume-Uni",
+  DE: "Allemagne",
+  ES: "Espagne",
+  IT: "Italie",
+};
+
+function tmdbCountry(
+  origin?: string[] | null,
+  production?: { iso_3166_1?: string; name?: string }[] | null,
+): string | null {
+  const code = origin?.[0] ?? production?.[0]?.iso_3166_1;
+  if (!code) return production?.[0]?.name ?? null;
+  return TMDB_COUNTRY_LABELS[code] ?? production?.[0]?.name ?? code;
+}
+
+function tmdbMovieCert(
+  rd?: { results?: { iso_3166_1?: string; release_dates?: { certification?: string }[] }[] } | null,
+): string | null {
+  const results = rd?.results ?? [];
+  const pick = (code: string) => results.find((r) => r.iso_3166_1 === code);
+  const entry = pick("FR") ?? pick("US") ?? results[0];
+  const cert = entry?.release_dates?.map((d) => d.certification).find((c) => c && c.trim());
+  return cert ? cert.trim() : null;
+}
+
+function tmdbTvCert(
+  cr?: { results?: { iso_3166_1?: string; rating?: string }[] } | null,
+): string | null {
+  const results = cr?.results ?? [];
+  const pick = (code: string) => results.find((r) => r.iso_3166_1 === code);
+  const entry = pick("FR") ?? pick("US") ?? results.find((r) => r.rating && r.rating.trim());
+  return entry?.rating?.trim() || null;
+}
+
+const TMDB_VIDEO_LABELS: Record<string, string> = {
+  Trailer: "Bande-annonce",
+  Teaser: "Teaser",
+  Clip: "Extrait",
+  Featurette: "Featurette",
+  "Behind the Scenes": "Coulisses",
+};
+
 function augmentTmdb(
   bmedia: MediaItem,
   data: TmdbExtra,
   kind: "movie" | "tv",
-  extra: { collectionName?: string | null; studios?: string[]; format: string },
+  extra: {
+    collectionName?: string | null;
+    studios?: string[];
+    format: string;
+    countryOfOrigin?: string | null;
+    ageRating?: string | null;
+    titleAlternatives?: string[];
+    endDate?: string | null;
+  },
 ): MediaDetail {
   const cast: CreditPerson[] = (data.credits?.cast ?? []).slice(0, 14).map((c) => ({
     id: `c${c.id}`,
@@ -283,6 +361,14 @@ function augmentTmdb(
       relation: "Recommandé",
       mediaType: m.mediaType,
     }));
+  const videos: MediaVideo[] = (data.videos?.results ?? [])
+    .filter((v) => v.site === "YouTube")
+    .slice(0, 8)
+    .map((v) => ({
+      key: v.key,
+      label: TMDB_VIDEO_LABELS[v.type] ?? v.type,
+      url: `https://www.youtube.com/embed/${v.key}`,
+    }));
   return {
     ...bmedia,
     trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : null,
@@ -296,6 +382,12 @@ function augmentTmdb(
     crew,
     related,
     collectionName: extra.collectionName ?? null,
+    titleAlternatives: extra.titleAlternatives ?? [],
+    originSource: null,
+    ageRating: extra.ageRating ?? null,
+    countryOfOrigin: extra.countryOfOrigin ?? null,
+    endDate: extra.endDate ?? null,
+    videos,
   };
 }
 

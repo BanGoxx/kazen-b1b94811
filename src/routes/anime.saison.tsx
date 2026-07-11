@@ -12,8 +12,8 @@ export const Route = createFileRoute("/anime/saison")({
       { name: "description", content: "Tous les anime de la saison en cours, classés par popularité." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(seasonalAnimeQO());
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(seasonalAnimeQO());
   },
   component: SeasonPage,
 });

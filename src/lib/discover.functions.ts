@@ -279,24 +279,22 @@ export const getAnimePage = createServerFn({ method: "GET" })
   .inputValidator((d: { kind: string; page: number }) => d)
   .handler(async ({ data }): Promise<PagedMedia> => {
     const cfg = ANIME_SORTS[data.kind] ?? ANIME_SORTS.trending;
-    try {
-      const { anilistPaged } = await import("./anilist.server");
-      const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
-      if (data.kind === "upcoming") {
-        // Keep every upcoming anime (status guarantees future); do NOT drop
-        // partial/undated titles. Sort soonest concrete date first, undated last.
-        const today = new Date().toISOString().slice(0, 10);
-        res.items = res.items.sort((a, b) => {
-          const ka = upcomingSortKey(a, today);
-          const kb = upcomingSortKey(b, today);
-          return ka < kb ? -1 : ka > kb ? 1 : 0;
-        });
-      }
-      return res;
-    } catch (e) {
-      console.error("getAnimePage", e);
-      return { items: [], page: data.page, hasMore: false };
+    // No []-swallowing catch: a transient AniList failure must NOT be cached as
+    // an empty page. anilist.server retries + keeps a stale cache; if it still
+    // throws, React Query retries instead of locking an empty anime catalog.
+    const { anilistPaged } = await import("./anilist.server");
+    const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
+    if (data.kind === "upcoming") {
+      // Keep every upcoming anime (status guarantees future); do NOT drop
+      // partial/undated titles. Sort soonest concrete date first, undated last.
+      const today = new Date().toISOString().slice(0, 10);
+      res.items = res.items.sort((a, b) => {
+        const ka = upcomingSortKey(a, today);
+        const kb = upcomingSortKey(b, today);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
     }
+    return res;
   });
 
 

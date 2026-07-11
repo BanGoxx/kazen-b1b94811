@@ -14,7 +14,6 @@ import {
   UserRound,
   Menu,
   X,
-  Hexagon,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { KazenLogo } from "@/components/brand/KazenLogo";
 import { signOut, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 

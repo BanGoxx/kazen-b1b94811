@@ -84,7 +84,7 @@ function UpcomingPage() {
 
   const flat = useMemo(
     () =>
-      [...visible].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0)),
+      [...visible].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)),
     [visible],
   );
 

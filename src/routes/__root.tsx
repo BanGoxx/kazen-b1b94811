@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "KAZEN — Découvrez anime, séries et films" },
       { name: "description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
-      { name: "author", content: "NEXUS MEDIA" },
+      { name: "author", content: "KAZEN" },
       { property: "og:title", content: "KAZEN — Découvrez anime, séries et films" },
       { property: "og:description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
       { property: "og:type", content: "website" },

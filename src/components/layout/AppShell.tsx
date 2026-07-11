@@ -106,7 +106,7 @@ function AuthMenu() {
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="NEXUS MEDIA — accueil">
+    <Link to="/" className="flex items-center gap-2.5" aria-label="KAZEN — accueil">
       <span className="flex h-9 w-9 items-center justify-center rounded-xl aurora-bg shadow-[var(--shadow-glow)]">
         <Hexagon className="h-5 w-5 text-white" strokeWidth={2.5} />
       </span>
@@ -239,7 +239,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
             <p>
-              <span className="font-display font-bold aurora-text">NEXUS MEDIA</span> — Découvrez, suivez, organisez.
+              <span className="font-display font-bold aurora-text">KAZEN</span> — Découvrez, suivez, organisez.
             </p>
             <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
           </footer>

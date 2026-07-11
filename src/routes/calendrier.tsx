@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/calendrier")({
   head: () => ({
     meta: [
-      { title: "Calendrier des sorties — NEXUS MEDIA" },
+      { title: "Calendrier des sorties — KAZEN" },
       { name: "description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
     ],
   }),

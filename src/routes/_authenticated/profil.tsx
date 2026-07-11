@@ -20,7 +20,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/profil")({
   head: () => ({
-    meta: [{ title: "Mon profil — NEXUS MEDIA" }],
+    meta: [{ title: "Mon profil — KAZEN" }],
   }),
   component: ProfilePage,
 });

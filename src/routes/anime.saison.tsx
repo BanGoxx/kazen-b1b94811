@@ -8,7 +8,7 @@ import { seasonalAnimeQO } from "@/lib/queries";
 export const Route = createFileRoute("/anime/saison")({
   head: () => ({
     meta: [
-      { title: "Anime de la saison — NEXUS MEDIA" },
+      { title: "Anime de la saison — KAZEN" },
       { name: "description", content: "Tous les anime de la saison en cours, classés par popularité." },
     ],
   }),

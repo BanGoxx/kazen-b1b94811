@@ -18,11 +18,11 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Connexion — NEXUS MEDIA" },
+      { title: "Connexion — KAZEN" },
       {
         name: "description",
         content:
-          "Connectez-vous à NEXUS MEDIA pour suivre vos anime, séries et films et gérer vos listes personnelles.",
+          "Connectez-vous à KAZEN pour suivre vos anime, séries et films et gérer vos listes personnelles.",
       },
     ],
   }),

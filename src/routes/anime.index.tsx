@@ -9,7 +9,7 @@ import { trendingAnimeQO, popularAnimeQO, upcomingAnimeQO } from "@/lib/queries"
 export const Route = createFileRoute("/anime/")({
   head: () => ({
     meta: [
-      { title: "Anime — NEXUS MEDIA" },
+      { title: "Anime — KAZEN" },
       { name: "description", content: "Découvrez les anime tendance, populaires et à venir, avec leurs plateformes de diffusion." },
     ],
   }),

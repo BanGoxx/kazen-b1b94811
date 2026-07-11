@@ -22,8 +22,8 @@ export const Route = createFileRoute("/recherche")({
   }),
   head: () => ({
     meta: [
-      { title: "Recherche — NEXUS MEDIA" },
-      { name: "description", content: "Recherchez parmi les anime, séries et films de NEXUS MEDIA." },
+      { title: "Recherche — KAZEN" },
+      { name: "description", content: "Recherchez parmi les anime, séries et films de KAZEN." },
     ],
   }),
   component: SearchPage,

@@ -9,7 +9,7 @@ import { trendingSeriesQO, popularSeriesQO, onAirSeriesQO } from "@/lib/queries"
 export const Route = createFileRoute("/series")({
   head: () => ({
     meta: [
-      { title: "Séries — NEXUS MEDIA" },
+      { title: "Séries — KAZEN" },
       { name: "description", content: "Séries tendance, populaires et en cours de diffusion, avec plateformes de streaming." },
     ],
   }),

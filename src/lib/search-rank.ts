@@ -68,6 +68,18 @@ export interface RankedItem {
   score: number;
 }
 
+/** Public relevance score of an item against a query (title + original title).
+ *  Used by the results page to sort by "pertinence". Returns 0 for no match. */
+export function relevanceScore(query: string, item: MediaItem): number {
+  const q = normalize(query);
+  if (!q) return 0;
+  return Math.max(
+    titleScore(q, item.title),
+    item.titleOriginal ? titleScore(q, item.titleOriginal) * 0.9 : 0,
+  );
+}
+
+
 /**
  * Rank grouped media results for the predictive dropdown.
  * Each source (AniList SEARCH_MATCH, TMDB search) already returns its list in

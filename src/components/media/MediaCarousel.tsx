@@ -31,7 +31,9 @@ export function MediaCarousel({
         </div>
       ) : items.length ? (
         <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2">
-          {items.map((item) => (
+          {items
+            .filter((item, i, arr) => arr.findIndex((x) => x.key === item.key) === i)
+            .map((item) => (
             <MediaCard
               key={item.key}
               item={item}

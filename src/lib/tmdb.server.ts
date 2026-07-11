@@ -97,9 +97,12 @@ export async function tmdbMovieList(
 export async function tmdbTvList(
   path: string,
   params: Record<string, string> = {},
+  filterAnime = false,
 ): Promise<MediaItem[]> {
   const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, params);
-  return (data?.results ?? []).map((m) => fromTmdbTv(m));
+  let results = data?.results ?? [];
+  if (filterAnime) results = results.filter((m) => !isAsianAnimationTv(m));
+  return results.map((m) => fromTmdbTv(m));
 }
 
 export async function tmdbMoviePaged(

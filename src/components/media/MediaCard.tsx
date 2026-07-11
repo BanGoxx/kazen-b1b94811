@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ImageOff } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
+import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
@@ -33,21 +33,17 @@ export function MediaCard({
       )}
     >
       <div className="relative aspect-[2/3] overflow-hidden bg-muted">
-        {item.posterUrl ? (
-          <img
-            src={item.posterUrl}
-            alt={item.title}
-            loading="lazy"
-            decoding="async"
-            width={300}
-            height={450}
-            className="h-full w-full object-cover transition-[transform,filter] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07] group-hover:brightness-[1.05]"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <ImageOff className="h-8 w-8" />
-          </div>
-        )}
+        <SafeImage
+          src={item.posterUrl}
+          alt={item.title}
+          variant="poster"
+          fallbackLabel={item.title}
+          loading="lazy"
+          decoding="async"
+          width={300}
+          height={450}
+          className="h-full w-full object-cover transition-[transform,filter] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07] group-hover:brightness-[1.05]"
+        />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
           <span className={cn("rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide shadow-sm backdrop-blur-sm", TYPE_COLORS[item.mediaType])}>
             {MEDIA_TYPE_LABELS[item.mediaType]}

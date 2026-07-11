@@ -4,6 +4,7 @@ import { Info, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { RatingBadge } from "./RatingBadge";
+import { SafeImage } from "./SafeImage";
 import { PlatformRow } from "./PlatformBadge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -68,9 +69,11 @@ export function RotatingHero({ items }: { items: MediaItem[] }) {
             aria-hidden={i !== index}
           >
             {item.backdropUrl || item.posterUrl ? (
-              <img
-                src={item.backdropUrl || item.posterUrl || ""}
+              <SafeImage
+                src={item.backdropUrl || item.posterUrl}
                 alt=""
+                variant="backdrop"
+                fallbackLabel={item.title}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "low"}
                 decoding="async"

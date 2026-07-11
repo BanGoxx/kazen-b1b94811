@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ImageOff } from "lucide-react";
 import type { RelatedMedia } from "@/lib/media-types";
+import { SafeImage } from "./SafeImage";
 
 export function RelatedScroller({
   title,
@@ -22,18 +22,14 @@ export function RelatedScroller({
               className="group block focus-visible:outline-none"
             >
               <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border bg-muted">
-                {it.posterUrl ? (
-                  <img
-                    src={it.posterUrl}
-                    alt={it.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    <ImageOff className="h-6 w-6" />
-                  </div>
-                )}
+                <SafeImage
+                  src={it.posterUrl}
+                  alt={it.title}
+                  variant="poster"
+                  fallbackLabel={it.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
                 <span className="absolute left-1.5 top-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.65rem] font-semibold backdrop-blur">
                   {it.relation}
                 </span>

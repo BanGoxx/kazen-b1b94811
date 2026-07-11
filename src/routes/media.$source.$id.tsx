@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { RatingBadge } from "@/components/media/RatingBadge";
+import { SafeImage } from "@/components/media/SafeImage";
 import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
@@ -151,7 +152,7 @@ function MediaDetailPage() {
       {/* Cinematic backdrop */}
       <div className="grain relative -mx-4 -mt-8 mb-0 h-64 overflow-hidden sm:-mx-6 sm:h-80 lg:-mx-10 lg:h-[26rem]">
         {item.backdropUrl ? (
-          <img src={item.backdropUrl} alt="" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-105 object-cover" />
+          <SafeImage src={item.backdropUrl} alt="" variant="backdrop" fallbackLabel={item.title} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-105 object-cover" />
         ) : (
           <div className="h-full w-full aurora-bg opacity-40" />
         )}
@@ -174,7 +175,7 @@ function MediaDetailPage() {
           <div className="mx-auto w-44 sm:w-52 lg:mx-0 lg:w-full">
             <div className="poster-glow overflow-hidden rounded-2xl border border-border bg-card">
               {item.posterUrl ? (
-                <img src={item.posterUrl} alt={item.title} loading="eager" decoding="async" width={300} height={450} className="aspect-[2/3] w-full object-cover" />
+                <SafeImage src={item.posterUrl} alt={item.title} variant="poster" fallbackLabel={item.title} loading="eager" decoding="async" width={300} height={450} className="aspect-[2/3] w-full object-cover" />
               ) : (
                 <div className="aspect-[2/3] w-full aurora-bg opacity-40" />
               )}

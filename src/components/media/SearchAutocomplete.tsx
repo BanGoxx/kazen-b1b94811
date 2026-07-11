@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SafeImage } from "./SafeImage";
 import { searchMediaQO, trendingAnimeQO, trendingMoviesQO, trendingSeriesQO } from "@/lib/queries";
 import { rankSuggestions } from "@/lib/search-rank";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";
@@ -234,14 +235,14 @@ export function SearchAutocomplete({
                     )}
                   >
                     <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
-                      {item.posterUrl ? (
-                        <img
-                          src={item.posterUrl}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : null}
+                      <SafeImage
+                        src={item.posterUrl}
+                        alt=""
+                        variant="poster"
+                        fallbackLabel={item.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>

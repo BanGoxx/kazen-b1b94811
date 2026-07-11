@@ -19,37 +19,30 @@ const SEASON_LABELS: Record<string, string> = {
 };
 
 // ---------- Anime (AniList) ----------
+//
+// IMPORTANT: these anime handlers deliberately RETHROW on failure instead of
+// returning []. anilist.server already retries (3x) and keeps a stale cache, so
+// a thrown error is genuinely rare. If we swallowed the error into an empty
+// array, React Query would treat it as a successful result and cache the empty
+// list for a full hour — leaving the Anime page and the Découverte anime rows
+// permanently blank after a single transient failure. Throwing lets React
+// Query retry and never caches an empty catalog.
 
 export const getTrendingAnime = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
-    try {
-      return await anilistList({ sort: "TRENDING_DESC", perPage: 24 });
-    } catch (e) {
-      console.error("getTrendingAnime", e);
-      return [];
-    }
+    return await anilistList({ sort: "TRENDING_DESC", perPage: 24 });
   },
 );
 
 export const getPopularAnime = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
-    try {
-      return await anilistList({ sort: "POPULARITY_DESC", perPage: 24 });
-    } catch (e) {
-      console.error("getPopularAnime", e);
-      return [];
-    }
+    return await anilistList({ sort: "POPULARITY_DESC", perPage: 24 });
   },
 );
 
 export const getUpcomingAnime = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
-    try {
-      return await anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 24 });
-    } catch (e) {
-      console.error("getUpcomingAnime", e);
-      return [];
-    }
+    return await anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 24 });
   },
 );
 
@@ -59,13 +52,8 @@ export const getSeasonalAnime = createServerFn({ method: "GET" })
     const fallback = currentAnimeSeason();
     const season = data.season ?? fallback.season;
     const year = data.year ?? fallback.year;
-    try {
-      const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 50 });
-      return { items, season, year, label: SEASON_LABELS[season] ?? season };
-    } catch (e) {
-      console.error("getSeasonalAnime", e);
-      return { items: [], season, year, label: SEASON_LABELS[season] ?? season };
-    }
+    const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 50 });
+    return { items, season, year, label: SEASON_LABELS[season] ?? season };
   });
 
 // ---------- Movies / Series (TMDB) ----------
@@ -291,24 +279,22 @@ export const getAnimePage = createServerFn({ method: "GET" })
   .inputValidator((d: { kind: string; page: number }) => d)
   .handler(async ({ data }): Promise<PagedMedia> => {
     const cfg = ANIME_SORTS[data.kind] ?? ANIME_SORTS.trending;
-    try {
-      const { anilistPaged } = await import("./anilist.server");
-      const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
-      if (data.kind === "upcoming") {
-        // Keep every upcoming anime (status guarantees future); do NOT drop
-        // partial/undated titles. Sort soonest concrete date first, undated last.
-        const today = new Date().toISOString().slice(0, 10);
-        res.items = res.items.sort((a, b) => {
-          const ka = upcomingSortKey(a, today);
-          const kb = upcomingSortKey(b, today);
-          return ka < kb ? -1 : ka > kb ? 1 : 0;
-        });
-      }
-      return res;
-    } catch (e) {
-      console.error("getAnimePage", e);
-      return { items: [], page: data.page, hasMore: false };
+    // No []-swallowing catch: a transient AniList failure must NOT be cached as
+    // an empty page. anilist.server retries + keeps a stale cache; if it still
+    // throws, React Query retries instead of locking an empty anime catalog.
+    const { anilistPaged } = await import("./anilist.server");
+    const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
+    if (data.kind === "upcoming") {
+      // Keep every upcoming anime (status guarantees future); do NOT drop
+      // partial/undated titles. Sort soonest concrete date first, undated last.
+      const today = new Date().toISOString().slice(0, 10);
+      res.items = res.items.sort((a, b) => {
+        const ka = upcomingSortKey(a, today);
+        const kb = upcomingSortKey(b, today);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
     }
+    return res;
   });
 
 

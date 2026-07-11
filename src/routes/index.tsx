@@ -10,6 +10,7 @@ import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import {
   trendingAnimeQO,
+  popularAnimeQO,
   trendingSeriesQO,
   trendingMoviesQO,
   upcomingAnimeQO,
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/")({
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(trendingAnimeQO);
+    await context.queryClient.ensureQueryData(popularAnimeQO);
     await context.queryClient.ensureQueryData(upcomingAnimeQO);
     await context.queryClient.ensureQueryData(seasonalAnimeQO());
     void context.queryClient.prefetchQuery(trendingSeriesQO);
@@ -68,6 +70,7 @@ export const Route = createFileRoute("/")({
 
 function DiscoverPage() {
   const { data: anime } = useSuspenseQuery(trendingAnimeQO);
+  const popAnime = useSuspenseQuery(popularAnimeQO);
   const series = useSuspenseQuery(trendingSeriesQO);
   const movies = useSuspenseQuery(trendingMoviesQO);
   const upAnime = useSuspenseQuery(upcomingAnimeQO);
@@ -107,31 +110,26 @@ function DiscoverPage() {
 
       <div className="space-y-14">
         <ForYouHomeBlock />
+
+        {/* ----- Anime d'abord ----- */}
         <MediaCarousel
-          title="Tendances du moment"
-          subtitle="Ce que la communauté regarde en ce moment"
+          title="Tendances anime"
+          subtitle="Les anime que la communauté regarde en ce moment"
           action={{ label: "Tout voir", to: "/anime" }}
           items={anime.slice(1)}
+        />
+        <MediaCarousel
+          title="Anime populaires"
+          subtitle="Les valeurs sûres de l'animation"
+          action={{ label: "Tout voir", to: "/anime" }}
+          items={popAnime.data}
+          hideWhenEmpty
         />
         <MediaCarousel
           title="Anime à venir"
           subtitle="Les sorties les plus attendues"
           action={{ label: "À venir", to: "/a-venir" }}
           items={upAnime.data}
-        />
-        <MemberCTA />
-        <MediaCarousel
-          title="Séries en vedette"
-          subtitle="Les incontournables du petit écran"
-          action={{ label: "Tout voir", to: "/series" }}
-          items={popSeries.data.length ? popSeries.data : series.data}
-          hideWhenEmpty
-        />
-        <MediaCarousel
-          title="Films à venir"
-          subtitle="Prochainement en salle et en streaming"
-          action={{ label: "À venir", to: "/a-venir" }}
-          items={upMovies.data}
           hideWhenEmpty
         />
         <MediaCarousel
@@ -139,6 +137,27 @@ function DiscoverPage() {
           subtitle="La sélection de la saison en cours"
           action={{ label: "Voir la saison", to: "/anime/saison" }}
           items={seasonal.data.items}
+          hideWhenEmpty
+        />
+
+        <MemberCTA />
+
+        {/* ----- Puis séries ----- */}
+        <MediaCarousel
+          title="Séries en vedette"
+          subtitle="Les incontournables du petit écran"
+          action={{ label: "Tout voir", to: "/series" }}
+          items={popSeries.data.length ? popSeries.data : series.data}
+          hideWhenEmpty
+        />
+
+        {/* ----- Puis films ----- */}
+        <MediaCarousel
+          title="Films à venir"
+          subtitle="Prochainement en salle et en streaming"
+          action={{ label: "À venir", to: "/a-venir" }}
+          items={upMovies.data}
+          hideWhenEmpty
         />
         <MediaCarousel
           title="Films tendance"

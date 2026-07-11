@@ -23,22 +23,26 @@ export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],
   queryFn: () => getTrendingAnime(),
   staleTime: HOUR,
+  retry: 3,
 });
 export const popularAnimeQO = queryOptions({
   queryKey: ["anime", "popular"],
   queryFn: () => getPopularAnime(),
   staleTime: HOUR,
+  retry: 3,
 });
 export const upcomingAnimeQO = queryOptions({
   queryKey: ["anime", "upcoming"],
   queryFn: () => getUpcomingAnime(),
   staleTime: HOUR,
+  retry: 3,
 });
 export const seasonalAnimeQO = (season?: string, year?: number) =>
   queryOptions({
     queryKey: ["anime", "seasonal", season ?? "current", year ?? "current"],
     queryFn: () => getSeasonalAnime({ data: { season, year } }),
     staleTime: HOUR,
+    retry: 3,
   });
 
 export const trendingMoviesQO = queryOptions({
@@ -120,6 +124,7 @@ export const animePageQO = (kind: string) =>
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
     staleTime: HOUR,
+    retry: 3,
   });
 
 export const moviePageQO = (kind: string) =>

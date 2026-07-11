@@ -6,6 +6,7 @@ import type { PagedMedia } from "@/lib/tmdb.server";
 import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
 import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
+import { SafeSection } from "./SafeSection";
 import { Button } from "@/components/ui/button";
 
 // Titles auto-loaded via scroll before we require an explicit click. This keeps

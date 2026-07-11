@@ -77,6 +77,21 @@ export function SearchAutocomplete({
 
   const { data, isFetching } = useQuery(searchMediaQO(debounced));
 
+  const showPopular = q.trim().length < 2;
+
+  // Trending pools for the "on focus, before typing" preview. Only fetched
+  // once the field is focused and empty; otherwise these reuse the homepage
+  // React-Query cache, so no extra API pressure.
+  const trendingEnabled = open && showPopular;
+  const { data: trAnime } = useQuery({ ...trendingAnimeQO, enabled: trendingEnabled });
+  const { data: trMovies } = useQuery({ ...trendingMoviesQO, enabled: trendingEnabled });
+  const { data: trSeries } = useQuery({ ...trendingSeriesQO, enabled: trendingEnabled });
+
+  const popularItems = useMemo(
+    () => blendTrending(trAnime, trMovies, trSeries, 6),
+    [trAnime, trMovies, trSeries],
+  );
+
   const suggestions = useMemo(() => {
     if (!debounced || debounced.length < 2) return [];
     return rankSuggestions(
@@ -86,9 +101,8 @@ export function SearchAutocomplete({
     );
   }, [debounced, data]);
 
-
-  const showPopular = q.trim().length < 2;
-  const hasContent = showPopular || suggestions.length > 0 || isFetching;
+  const items = showPopular ? popularItems : suggestions;
+  const hasContent = items.length > 0 || isFetching;
   const panelOpen = open && hasContent;
 
   // Reset keyboard highlight whenever the list changes.
@@ -106,7 +120,7 @@ export function SearchAutocomplete({
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!panelOpen) return;
-    const max = showPopular ? POPULAR_TITLES.length : suggestions.length;
+    const max = items.length;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActive((a) => (a + 1) % max);
@@ -114,15 +128,15 @@ export function SearchAutocomplete({
       e.preventDefault();
       setActive((a) => (a - 1 + max) % max);
     } else if (e.key === "Enter") {
-      if (active >= 0) {
+      if (active >= 0 && items[active]) {
         e.preventDefault();
-        if (showPopular) goToQuery(POPULAR_TITLES[active]);
-        else goToItem(suggestions[active]);
+        goToItem(items[active]);
       }
     } else if (e.key === "Escape") {
       setOpen(false);
     }
   };
+
 
   // Close when focus leaves the whole widget.
   useEffect(() => {

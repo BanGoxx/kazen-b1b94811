@@ -125,13 +125,16 @@ export async function tmdbTvPaged(
   path: string,
   page: number,
   params: Record<string, string> = {},
+  filterAnime = false,
 ): Promise<PagedMedia> {
   const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, {
     ...params,
     page: String(page),
   });
+  let results = data?.results ?? [];
+  if (filterAnime) results = results.filter((m) => !isAsianAnimationTv(m));
   return {
-    items: (data?.results ?? []).map((m) => fromTmdbTv(m)),
+    items: results.map((m) => fromTmdbTv(m)),
     page: data?.page ?? page,
     hasMore: (data?.page ?? page) < (data?.total_pages ?? page),
   };

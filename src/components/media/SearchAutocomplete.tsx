@@ -3,25 +3,42 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { searchMediaQO } from "@/lib/queries";
+import { searchMediaQO, trendingAnimeQO, trendingMoviesQO, trendingSeriesQO } from "@/lib/queries";
 import { rankSuggestions } from "@/lib/search-rank";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";
-
-// Curated fallbacks shown before the user types (no API call needed).
-const POPULAR_TITLES = [
-  "Demon Slayer",
-  "One Piece",
-  "Jujutsu Kaisen",
-  "Frieren",
-  "Dune",
-  "The Last of Us",
-];
 
 function itemYear(item: MediaItem): string | null {
   if (!item.releaseDate) return null;
   const y = item.releaseDate.slice(0, 4);
   return /^\d{4}$/.test(y) ? y : null;
 }
+
+// Interleave the top trending anime / series / movies into one short list so
+// the "on focus" preview already shows real popular titles (with posters and
+// scores) before the user types. These pools are the same React-Query-cached
+// queries used on the homepage, so this adds no extra API calls.
+function blendTrending(
+  anime: MediaItem[] | undefined,
+  series: MediaItem[] | undefined,
+  movies: MediaItem[] | undefined,
+  limit = 6,
+): MediaItem[] {
+  const lists = [anime ?? [], movies ?? [], series ?? []];
+  const out: MediaItem[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; out.length < limit && i < 12; i++) {
+    for (const list of lists) {
+      const item = list[i];
+      if (item && !seen.has(item.key)) {
+        seen.add(item.key);
+        out.push(item);
+        if (out.length >= limit) break;
+      }
+    }
+  }
+  return out;
+}
+
 
 /**
  * Premium predictive search field with a live dropdown preview.
@@ -60,6 +77,21 @@ export function SearchAutocomplete({
 
   const { data, isFetching } = useQuery(searchMediaQO(debounced));
 
+  const showPopular = q.trim().length < 2;
+
+  // Trending pools for the "on focus, before typing" preview. Only fetched
+  // once the field is focused and empty; otherwise these reuse the homepage
+  // React-Query cache, so no extra API pressure.
+  const trendingEnabled = open && showPopular;
+  const { data: trAnime } = useQuery({ ...trendingAnimeQO, enabled: trendingEnabled });
+  const { data: trMovies } = useQuery({ ...trendingMoviesQO, enabled: trendingEnabled });
+  const { data: trSeries } = useQuery({ ...trendingSeriesQO, enabled: trendingEnabled });
+
+  const popularItems = useMemo(
+    () => blendTrending(trAnime, trMovies, trSeries, 6),
+    [trAnime, trMovies, trSeries],
+  );
+
   const suggestions = useMemo(() => {
     if (!debounced || debounced.length < 2) return [];
     return rankSuggestions(
@@ -69,9 +101,8 @@ export function SearchAutocomplete({
     );
   }, [debounced, data]);
 
-
-  const showPopular = q.trim().length < 2;
-  const hasContent = showPopular || suggestions.length > 0 || isFetching;
+  const items = showPopular ? popularItems : suggestions;
+  const hasContent = items.length > 0 || isFetching;
   const panelOpen = open && hasContent;
 
   // Reset keyboard highlight whenever the list changes.
@@ -89,7 +120,7 @@ export function SearchAutocomplete({
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!panelOpen) return;
-    const max = showPopular ? POPULAR_TITLES.length : suggestions.length;
+    const max = items.length;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActive((a) => (a + 1) % max);
@@ -97,15 +128,15 @@ export function SearchAutocomplete({
       e.preventDefault();
       setActive((a) => (a - 1 + max) % max);
     } else if (e.key === "Enter") {
-      if (active >= 0) {
+      if (active >= 0 && items[active]) {
         e.preventDefault();
-        if (showPopular) goToQuery(POPULAR_TITLES[active]);
-        else goToItem(suggestions[active]);
+        goToItem(items[active]);
       }
     } else if (e.key === "Escape") {
       setOpen(false);
     }
   };
+
 
   // Close when focus leaves the whole widget.
   useEffect(() => {
@@ -174,81 +205,68 @@ export function SearchAutocomplete({
           role="listbox"
           className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover/95 p-1.5 shadow-float backdrop-blur"
         >
-          <p className="px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
-            {showPopular ? "Populaires en ce moment" : "Suggestions"}
+          <p className="flex items-center gap-1.5 px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
+            {showPopular ? (
+              <>
+                <TrendingUp className="h-3.5 w-3.5 text-primary" /> Populaires en ce moment
+              </>
+            ) : (
+              "Suggestions"
+            )}
           </p>
 
-          {showPopular
-            ? POPULAR_TITLES.map((title, i) => (
-                <button
-                  key={title}
-                  id={`${listId}-opt-${i}`}
-                  role="option"
-                  aria-selected={active === i}
-                  type="button"
-                  onMouseEnter={() => setActive(i)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => goToQuery(title)}
-                  className={cn(
-                    "focus-ring flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors",
-                    active === i ? "bg-muted" : "hover:bg-muted",
-                  )}
-                >
-                  <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
-                  {title}
-                </button>
-              ))
-            : suggestions.length > 0
-              ? suggestions.map((item, i) => {
-                  const year = itemYear(item);
-                  return (
-                    <button
-                      key={item.key}
-                      id={`${listId}-opt-${i}`}
-                      role="option"
-                      aria-selected={active === i}
-                      type="button"
-                      onMouseEnter={() => setActive(i)}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => goToItem(item)}
-                      className={cn(
-                        "focus-ring flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
-                        active === i ? "bg-muted" : "hover:bg-muted",
-                      )}
-                    >
-                      <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
-                        {item.posterUrl ? (
-                          <img
-                            src={item.posterUrl}
-                            alt=""
-                            loading="lazy"
-                            className="h-full w-full object-cover"
-                          />
+          {items.length > 0
+            ? items.map((item, i) => {
+                const year = itemYear(item);
+                return (
+                  <button
+                    key={item.key}
+                    id={`${listId}-opt-${i}`}
+                    role="option"
+                    aria-selected={active === i}
+                    type="button"
+                    onMouseEnter={() => setActive(i)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => goToItem(item)}
+                    className={cn(
+                      "focus-ring flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
+                      active === i ? "bg-muted" : "hover:bg-muted",
+                    )}
+                  >
+                    <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
+                      {item.posterUrl ? (
+                        <img
+                          src={item.posterUrl}
+                          alt=""
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
+                      <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-muted-foreground">
+                        <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-medium text-primary">
+                          {MEDIA_TYPE_LABELS[item.mediaType]}
+                        </span>
+                        {year ? <span>{year}</span> : null}
+                        {item.score != null ? (
+                          <span className="inline-flex items-center gap-0.5">
+                            <Star className="h-3 w-3 fill-current text-amber-400" />
+                            {(item.score / 10).toFixed(1)}
+                          </span>
                         ) : null}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
-                        <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-muted-foreground">
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-medium text-primary">
-                            {MEDIA_TYPE_LABELS[item.mediaType]}
-                          </span>
-                          {year ? <span>{year}</span> : null}
-                          {item.score != null ? (
-                            <span className="inline-flex items-center gap-0.5">
-                              <Star className="h-3 w-3 fill-current text-amber-400" />
-                              {(item.score / 10).toFixed(1)}
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })
-              : (
-                <p className="px-3 py-4 text-center text-sm text-muted-foreground">
-                  {isFetching ? "Recherche…" : "Aucun résultat"}
-                </p>
-              )}
+                    </div>
+                  </button>
+                );
+              })
+            : (
+              <p className="px-3 py-4 text-center text-sm text-muted-foreground">
+                {isFetching ? "Recherche…" : "Aucun résultat"}
+              </p>
+            )}
+
         </div>
       ) : null}
     </div>

@@ -345,6 +345,11 @@ interface AniListDetailRaw {
   popularity?: number | null;
   season?: string | null;
   seasonYear?: number | null;
+  source?: string | null;
+  countryOfOrigin?: string | null;
+  isAdult?: boolean | null;
+  synonyms?: (string | null)[] | null;
+  endDate?: { year?: number | null; month?: number | null; day?: number | null } | null;
   trailer?: { id?: string | null; site?: string | null } | null;
   studios?: { nodes?: { name?: string | null }[] | null } | null;
   characters?: {

@@ -182,10 +182,9 @@ export type Database = {
         }[]
       }
       anilist_cache_put: {
-        Args: { p_key: string; p_payload: Json }
+        Args: { p_key: string; p_payload: Json; p_token: string }
         Returns: undefined
       }
-      role_diag: { Args: never; Returns: string }
     }
     Enums: {
       priority_level: "basse" | "normale" | "haute"

@@ -6,6 +6,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { EmptyState } from "@/components/media/EmptyState";
+import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType, WatchStatus } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";

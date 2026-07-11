@@ -7,6 +7,7 @@ import { MediaCarousel } from "@/components/media/MediaCarousel";
 import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
+import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import {
   trendingAnimeQO,
   trendingSeriesQO,
@@ -83,6 +84,7 @@ function DiscoverPage() {
       )}
 
       <div className="space-y-14">
+        <ForYouHomeBlock />
         <MediaCarousel
           title="Tendances du moment"
           subtitle="Ce que la communauté regarde en ce moment"

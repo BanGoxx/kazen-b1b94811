@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoutienRouteImport } from './routes/soutien'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
+import { Route as PourVousRouteImport } from './routes/pour-vous'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -38,6 +39,11 @@ const SeriesRoute = SeriesRouteImport.update({
 const RechercheRoute = RechercheRouteImport.update({
   id: '/recherche',
   path: '/recherche',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PourVousRoute = PourVousRouteImport.update({
+  id: '/pour-vous',
+  path: '/pour-vous',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FilmsRoute = FilmsRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/soutien': typeof SoutienRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/soutien': typeof SoutienRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/soutien': typeof SoutienRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/pour-vous'
     | '/recherche'
     | '/series'
     | '/soutien'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/pour-vous'
     | '/recherche'
     | '/series'
     | '/soutien'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/pour-vous'
     | '/recherche'
     | '/series'
     | '/soutien'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
   FilmsRoute: typeof FilmsRoute
+  PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
   SoutienRoute: typeof SoutienRoute
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/recherche'
       fullPath: '/recherche'
       preLoaderRoute: typeof RechercheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pour-vous': {
+      id: '/pour-vous'
+      path: '/pour-vous'
+      fullPath: '/pour-vous'
+      preLoaderRoute: typeof PourVousRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/films': {
@@ -357,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
   FilmsRoute: FilmsRoute,
+  PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,
   SoutienRoute: SoutienRoute,
@@ -365,3 +386,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

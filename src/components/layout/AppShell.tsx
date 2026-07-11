@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Compass,
+  Wand2,
   Sparkles,
   Tv,
   Film,
@@ -38,6 +39,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: "/", label: "Découverte", icon: Compass },
+  { to: "/pour-vous", label: "Pour vous", icon: Wand2 },
   { to: "/anime", label: "Anime", icon: Sparkles },
   { to: "/series", label: "Séries", icon: Tv },
   { to: "/films", label: "Films", icon: Film },

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { MediaItem } from "./media-types";
+import type { MediaDetail, MediaItem } from "./media-types";
 import { anilistList, anilistDetail, currentAnimeSeason } from "./anilist.server";
 import {
   tmdbMovieList,

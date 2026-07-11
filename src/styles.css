@@ -206,9 +206,9 @@ h1, h2, h3, .font-display {
 }
 
 @utility glass {
-  background: oklch(0.2 0.025 285 / 0.6);
-  backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid oklch(0.85 0.05 300 / 0.08);
+  background: oklch(0.19 0.024 300 / 0.72);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid oklch(0.85 0.05 340 / 0.09);
 }
 
 @utility ambient-glow {
@@ -216,12 +216,12 @@ h1, h2, h3, .font-display {
 }
 
 @utility card-elevated {
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+  box-shadow: var(--shadow-md), var(--shadow-inset-line);
+  transition: box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   &:hover {
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
-    transform: translateY(-4px);
-    border-color: oklch(0.66 0.25 350 / 0.5);
+    box-shadow: var(--shadow-lg), var(--shadow-glow), var(--shadow-inset-line);
+    transform: translateY(-6px);
+    border-color: oklch(0.66 0.25 350 / 0.55);
   }
 }
 

@@ -126,6 +126,19 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
   if (cached?.pending) return cached.pending;
 
   const pending = (async () => {
+    // L2: reuse a fresh payload another isolate already fetched. This is what
+    // keeps anime rows populated across cold starts without hitting AniList.
+    const shared = await readSharedCache<T>(key);
+    if (shared && Date.now() - shared.fetchedAt < CACHE_TTL_MS) {
+      queryCache.set(key, {
+        value: shared.value,
+        expiresAt: shared.fetchedAt + CACHE_TTL_MS,
+        staleUntil: shared.fetchedAt + STALE_TTL_MS,
+        pending: queryCache.get(key)?.pending,
+      });
+      return shared.value;
+    }
+
     let lastError: unknown;
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -156,7 +169,10 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
           value,
           expiresAt: Date.now() + CACHE_TTL_MS,
           staleUntil: Date.now() + STALE_TTL_MS,
+          pending: queryCache.get(key)?.pending,
         });
+        // Fire-and-forget: publish to the shared cache for other isolates.
+        void writeSharedCache(key, value);
         return value;
       } catch (error) {
         lastError = error;
@@ -164,14 +180,24 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
       }
     }
 
-    // Last resort: serve ANY previously cached value rather than surfacing an
-    // error screen. Stale anime data is strictly better than an empty/errored
-    // section, and it lets key anime pages recover as soon as a good fetch
-    // succeeded once. Only a true cold-start (never fetched) throws, which the
-    // client then retries.
+    // Stale-if-error, in-memory first: serve ANY previously cached value rather
+    // than an error screen.
     if (cached?.value) {
-      console.error("AniList source indisponible, cache existant conservé", lastError);
+      console.error("AniList indisponible, cache mémoire conservé", lastError);
       return cached.value;
+    }
+
+    // Stale-if-error, shared cache: even an expired shared payload beats an
+    // empty/errored anime section across a cold isolate.
+    if (shared) {
+      console.error("AniList indisponible, cache partagé (périmé) conservé", lastError);
+      queryCache.set(key, {
+        value: shared.value,
+        expiresAt: 0,
+        staleUntil: shared.fetchedAt + STALE_TTL_MS,
+        pending: queryCache.get(key)?.pending,
+      });
+      return shared.value;
     }
 
     throw lastError instanceof Error ? lastError : new Error("AniList request failed");

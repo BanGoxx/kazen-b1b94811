@@ -30,9 +30,10 @@ export function KazenMark({
       {isGradient ? (
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ff5fa2" />
-            <stop offset="0.5" stopColor="#b95cf5" />
-            <stop offset="1" stopColor="#3fd3de" />
+            <stop offset="0" stopColor="#f0563c" />
+            <stop offset="0.55" stopColor="#c4362b" />
+            <stop offset="1" stopColor="#e7cd93" />
+
           </linearGradient>
         </defs>
       ) : null}

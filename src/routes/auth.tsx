@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { z } from "zod";
-import { Hexagon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { KazenMark } from "@/components/brand/KazenLogo";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";

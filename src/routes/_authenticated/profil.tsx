@@ -64,12 +64,18 @@ function ProfilePage() {
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const [genres, setGenres] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [styles, setStyles] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (data) {
       setDisplayName(data.display_name ?? "");
       setBio(data.bio ?? "");
+      setGenres((data.preferred_genres as string[] | null) ?? []);
+      setTypes((data.preferred_types as string[] | null) ?? []);
+      setStyles((data.favorite_styles as string[] | null) ?? []);
     }
   }, [data]);
 
@@ -83,7 +89,15 @@ function ProfilePage() {
   const save = async () => {
     setSaving(true);
     try {
-      await updateFn({ data: { display_name: displayName, bio } });
+      await updateFn({
+        data: {
+          display_name: displayName,
+          bio,
+          preferred_genres: genres,
+          preferred_types: types,
+          favorite_styles: styles,
+        },
+      });
       await refetch();
       toast.success("Profil mis à jour.");
     } catch {
@@ -92,6 +106,7 @@ function ProfilePage() {
       setSaving(false);
     }
   };
+
 
   const handleSignOut = async () => {
     await signOut();

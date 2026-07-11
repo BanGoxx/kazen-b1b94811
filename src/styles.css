@@ -209,10 +209,11 @@ h1, h2, h3, .font-display {
 }
 
 @utility glass {
-  background: oklch(0.19 0.024 300 / 0.72);
-  backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid oklch(0.85 0.05 340 / 0.09);
+  background: oklch(0.185 0.008 265 / 0.74);
+  backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid oklch(0.85 0.04 80 / 0.08);
 }
+
 
 @utility ambient-glow {
   animation: glow-pulse 7s ease-in-out infinite;

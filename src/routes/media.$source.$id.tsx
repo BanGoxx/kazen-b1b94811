@@ -5,8 +5,12 @@ import {
   CalendarDays,
   Clapperboard,
   Clock,
+  Film,
   Flame,
+  Globe,
+  Info,
   Layers,
+  ShieldCheck,
   Sparkles,
   Tv,
 } from "lucide-react";
@@ -18,6 +22,9 @@ import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedScroller } from "@/components/media/RelatedScroller";
 import { UserListPanel } from "@/components/media/UserListPanel";
+import { FicheSection } from "@/components/media/FicheSection";
+import { ExpandableText } from "@/components/media/ExpandableText";
+import { VideoGallery } from "@/components/media/VideoGallery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

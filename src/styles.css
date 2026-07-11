@@ -6,9 +6,9 @@
 
 /*
  * KAZEN — design system.
- * Dark-first, premium "aurora" identity: obsidian surfaces, electric violet
- * primary, cyan + fuchsia accents. Light mode is a clean editorial variant.
- * All colors in oklch. Map tokens to utilities via @theme inline.
+ * Dark-first, premium "graphite & ember" identity: charcoal/graphite surfaces,
+ * refined ember/crimson primary, champagne accent used sparingly. Light mode is
+ * a clean editorial variant. All colors in oklch. Map tokens via @theme inline.
  */
 
 @theme inline {

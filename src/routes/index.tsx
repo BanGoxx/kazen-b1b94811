@@ -9,6 +9,7 @@ import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import { SafeSection } from "@/components/media/SafeSection";
+import type { MediaItem } from "@/lib/media-types";
 import {
   trendingAnimeQO,
   popularAnimeQO,

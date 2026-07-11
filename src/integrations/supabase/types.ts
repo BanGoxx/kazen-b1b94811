@@ -185,6 +185,7 @@ export type Database = {
         Args: { p_key: string; p_payload: Json }
         Returns: undefined
       }
+      role_diag: { Args: never; Returns: string }
     }
     Enums: {
       priority_level: "basse" | "normale" | "haute"

@@ -259,7 +259,7 @@ export async function tmdbAnimatedMovies(origin?: string): Promise<MediaItem[]> 
   return (data?.results ?? []).map((m) => fromTmdbMovie(m));
 }
 
-
+export async function tmdbSearch(q: string): Promise<MediaItem[]> {
   const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
     "/search/multi",
     { query: q, include_adult: "false" },

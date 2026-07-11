@@ -154,6 +154,13 @@ function MediaDetailPage() {
   if (item.runtime) facts.push({ icon: Clock, label: "Durée", value: `${item.runtime} min` });
   if (item.popularity) facts.push({ icon: Flame, label: "Popularité", value: item.popularity.toLocaleString("fr-FR") });
 
+  const endReleased = fmtDate(item.endDate);
+  const infos: { icon: typeof CalendarDays; label: string; value: string }[] = [];
+  if (item.originSource) infos.push({ icon: Film, label: "Source", value: item.originSource });
+  if (item.ageRating) infos.push({ icon: ShieldCheck, label: "Classification", value: item.ageRating });
+  if (item.countryOfOrigin) infos.push({ icon: Globe, label: "Origine", value: item.countryOfOrigin });
+  if (endReleased) infos.push({ icon: CalendarDays, label: "Fin de diffusion", value: endReleased });
+
   return (
     <AppShell>
       {/* Cinematic backdrop */}

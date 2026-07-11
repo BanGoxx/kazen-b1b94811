@@ -62,9 +62,13 @@ export function SearchAutocomplete({
 
   const suggestions = useMemo(() => {
     if (!debounced || debounced.length < 2) return [];
-    const pool: MediaItem[] = [...(data?.anime ?? []), ...(data?.series ?? []), ...(data?.movies ?? [])];
-    return rankSuggestions(debounced, pool, 7);
+    return rankSuggestions(
+      debounced,
+      { anime: data?.anime, series: data?.series, movies: data?.movies },
+      7,
+    );
   }, [debounced, data]);
+
 
   const showPopular = q.trim().length < 2;
   const hasContent = showPopular || suggestions.length > 0 || isFetching;

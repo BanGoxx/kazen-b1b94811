@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Sparkles, Tv, Film, CalendarClock, Leaf } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { DiscoverHero } from "@/components/media/DiscoverHero";
+import { RotatingHero } from "@/components/media/RotatingHero";
 import { MediaCarousel } from "@/components/media/MediaCarousel";
 import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";

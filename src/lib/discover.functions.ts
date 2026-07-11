@@ -118,7 +118,7 @@ export const getUpcomingMovies = createServerFn({ method: "GET" }).handler(
 export const getTrendingSeries = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     try {
-      return await tmdbTvList("/trending/tv/week", {});
+      return await tmdbTvList("/trending/tv/week", {}, true);
     } catch (e) {
       console.error("getTrendingSeries", e);
       return [];
@@ -129,7 +129,7 @@ export const getTrendingSeries = createServerFn({ method: "GET" }).handler(
 export const getPopularSeries = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     try {
-      return await tmdbTvList("/tv/popular", {});
+      return await tmdbTvList("/tv/popular", {}, true);
     } catch (e) {
       console.error("getPopularSeries", e);
       return [];
@@ -140,7 +140,7 @@ export const getPopularSeries = createServerFn({ method: "GET" }).handler(
 export const getOnAirSeries = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     try {
-      return await tmdbTvList("/tv/on_the_air", {});
+      return await tmdbTvList("/tv/on_the_air", {}, true);
     } catch (e) {
       console.error("getOnAirSeries", e);
       return [];
@@ -275,7 +275,7 @@ export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
       tmdbTvList("/discover/tv", {
         sort_by: "first_air_date.asc",
         "first_air_date.gte": today,
-      }).catch((e) => {
+      }, true).catch((e) => {
         console.error("getUpcomingAll tmdb_series", e);
         return [] as MediaItem[];
       }),
@@ -380,7 +380,7 @@ export const getSeriesPage = createServerFn({ method: "GET" })
     try {
       const { tmdbTvPaged } = await import("./tmdb.server");
       const path = SERIES_PATHS[data.kind] ?? SERIES_PATHS.trending;
-      return await tmdbTvPaged(path, data.page);
+      return await tmdbTvPaged(path, data.page, {}, true);
     } catch (e) {
       console.error("getSeriesPage", e);
       return { items: [], page: data.page, hasMore: false };

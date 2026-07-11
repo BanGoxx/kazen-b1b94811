@@ -62,24 +62,23 @@ export const upsertListItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { media: MediaSnapshot; patch: ListPatch }) => data)
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const m = data.media;
-    const { error: mediaError } = await supabaseAdmin.from("media_records").upsert(
+    const { error: mediaError } = await context.supabase.rpc(
+      "upsert_media_record_snapshot",
       {
-        media_key: m.key,
-        source: m.source,
-        external_id: m.externalId,
-        media_type: m.mediaType,
-        title: m.title,
-        title_original: m.titleOriginal,
-        poster_url: m.posterUrl,
-        backdrop_url: m.backdropUrl,
-        release_date: m.releaseDate,
-        genres: m.genres,
-        platforms: m.platforms as never,
-        score: m.score,
+        p_media_key: m.key,
+        p_source: m.source,
+        p_external_id: m.externalId,
+        p_media_type: m.mediaType,
+        p_title: m.title,
+        p_title_original: m.titleOriginal,
+        p_poster_url: m.posterUrl,
+        p_backdrop_url: m.backdropUrl,
+        p_release_date: m.releaseDate,
+        p_genres: m.genres,
+        p_platforms: m.platforms as never,
+        p_score: m.score,
       },
-      { onConflict: "media_key" },
     );
     if (mediaError) throw new Error(mediaError.message);
 

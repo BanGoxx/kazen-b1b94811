@@ -49,13 +49,18 @@ export function ListControls({ item }: { item: MediaItem }) {
   }
 
   const inList = Boolean(entry);
-  const patch = (p: Parameters<typeof upsert.mutate>[0]["patch"]) =>
+  const patch = (
+    p: Parameters<typeof upsert.mutate>[0]["patch"],
+    confirm?: string,
+  ) => {
     upsert.mutate({ item, patch: p });
+    if (confirm) toast.success(confirm);
+  };
 
   const addTag = () => {
     const v = tagDraft.trim();
     if (!v) return;
-    patch({ tags: Array.from(new Set([...(entry?.tags ?? []), v])) });
+    patch({ tags: Array.from(new Set([...(entry?.tags ?? []), v])) }, "Tag ajouté");
     setTagDraft("");
   };
 

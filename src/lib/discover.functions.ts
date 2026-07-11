@@ -282,8 +282,9 @@ export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
 const ANIME_SORTS: Record<string, { sort: string; status?: string }> = {
   trending: { sort: "TRENDING_DESC" },
   popular: { sort: "POPULARITY_DESC" },
-  // "À venir": order by air date so the soonest release is first (not popularity).
-  upcoming: { sort: "START_DATE", status: "NOT_YET_RELEASED" },
+  // "À venir": popularity surfaces real announced titles (AniList START_DATE
+  // sorting front-loads null-date rows). We re-sort by soonest date client-side.
+  upcoming: { sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED" },
 };
 
 export const getAnimePage = createServerFn({ method: "GET" })
@@ -294,11 +295,14 @@ export const getAnimePage = createServerFn({ method: "GET" })
       const { anilistPaged } = await import("./anilist.server");
       const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
       if (data.kind === "upcoming") {
-        // Drop titles without a valid future air date so no stale entries leak in.
+        // Keep every upcoming anime (status guarantees future); do NOT drop
+        // partial/undated titles. Sort soonest concrete date first, undated last.
         const today = new Date().toISOString().slice(0, 10);
-        res.items = res.items
-          .filter((m) => m.releaseDate && m.releaseDate >= today)
-          .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : a.releaseDate! > b.releaseDate! ? 1 : 0));
+        res.items = res.items.sort((a, b) => {
+          const ka = upcomingSortKey(a, today);
+          const kb = upcomingSortKey(b, today);
+          return ka < kb ? -1 : ka > kb ? 1 : 0;
+        });
       }
       return res;
     } catch (e) {
@@ -306,6 +310,7 @@ export const getAnimePage = createServerFn({ method: "GET" })
       return { items: [], page: data.page, hasMore: false };
     }
   });
+
 
 const MOVIE_PATHS: Record<string, string> = {
   trending: "/trending/movie/week",

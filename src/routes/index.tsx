@@ -82,7 +82,7 @@ function HomeHero() {
   const withArt = (it: MediaItem | undefined) => !!it && !!(it.backdropUrl || it.posterUrl);
   const slides = [
     ...anime.slice(0, 3),
-    ...seasonal.slice(0, 1),
+    ...seasonal.items.slice(0, 1),
     ...series.slice(0, 1),
     ...movies.slice(0, 1),
   ].filter(withArt);

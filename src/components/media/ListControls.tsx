@@ -105,7 +105,7 @@ export function ListControls({ item }: { item: MediaItem }) {
                 key={s}
                 type="button"
                 aria-pressed={active}
-                onClick={() => patch({ status: active ? null : s })}
+                onClick={() => patch({ status: active ? null : s }, active ? undefined : "Statut mis à jour")}
                 className={cn(
                   "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                   active

@@ -45,7 +45,10 @@ export function MediaCarousel({
           ))}
         </div>
       ) : (
-        <EmptyState message="Contenu indisponible pour le moment." />
+        <EmptyState
+          message="Rien à afficher ici pour l'instant."
+          hint="Cette sélection se remplira dès que de nouveaux titres seront disponibles."
+        />
       )}
     </section>
   );

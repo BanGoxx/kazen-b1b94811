@@ -11,6 +11,7 @@ import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
 import { upcomingAllQO, onAirSeriesQO } from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
+import { useAuth } from "@/lib/auth";
 import {
   Select,
   SelectContent,
@@ -18,7 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Sparkles, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendrier")({

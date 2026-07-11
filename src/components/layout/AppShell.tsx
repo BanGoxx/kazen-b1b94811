@@ -44,7 +44,65 @@ const NAV: NavItem[] = [
   { to: "/a-venir", label: "À venir", icon: CalendarClock },
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/recherche", label: "Recherche", icon: Search },
+  { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
 ];
+
+function AuthMenu() {
+  const { user, ready } = useAuth();
+  const navigate = useNavigate();
+
+  if (!ready) return null;
+
+  if (!user) {
+    return (
+      <Button asChild variant="aurora" size="sm">
+        <Link to="/auth" search={{ redirect: undefined }}>
+          Se connecter
+        </Link>
+      </Button>
+    );
+  }
+
+  const initial = (user.email ?? "N").slice(0, 1).toUpperCase();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="focus-ring flex items-center gap-2 rounded-full"
+          aria-label="Menu du compte"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.user_metadata?.avatar_url as string | undefined} alt="" />
+            <AvatarFallback className="aurora-bg text-xs text-white">{initial}</AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link to="/mes-listes" className="gap-2">
+            <ListChecks className="h-4 w-4" /> Mes listes
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/profil" className="gap-2">
+            <UserRound className="h-4 w-4" /> Mon profil
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="gap-2 text-destructive focus:text-destructive"
+          onSelect={async () => {
+            await signOut();
+            navigate({ to: "/", replace: true });
+          }}
+        >
+          <LogOut className="h-4 w-4" /> Déconnexion
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function Brand() {
   return (

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LogOut, Loader2, UserRound } from "lucide-react";
+import { LogOut, Loader2, UserRound, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
 import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
+import { usePremium } from "@/lib/premium";
+import { SupporterBadge } from "@/components/premium/SupporterBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 function ProfilePage() {
   const { user } = useAuth();
+  const { isSupporter } = usePremium();
   const navigate = useNavigate();
   const updateFn = useServerFn(updateMyProfile);
   const { entries } = useMyList();
@@ -83,9 +86,12 @@ function ProfilePage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="font-display text-2xl font-extrabold">
-                {displayName || "Mon profil"}
-              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-display text-2xl font-extrabold">
+                  {displayName || "Mon profil"}
+                </h1>
+                {isSupporter ? <SupporterBadge size="sm" /> : null}
+              </div>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
@@ -93,6 +99,43 @@ function ProfilePage() {
             <LogOut className="h-4 w-4" /> Déconnexion
           </Button>
         </header>
+
+        {/* Couche Soutien / Premium */}
+        {isSupporter ? (
+          <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 backdrop-blur">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+                <Crown className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-display text-base font-bold">Membre Soutien</p>
+                <p className="text-sm text-muted-foreground">
+                  Merci de faire vivre KAZEN 💜
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="premium" size="sm">
+              <Link to="/soutien">Gérer</Link>
+            </Button>
+          </section>
+        ) : (
+          <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-display text-base font-bold">Passe au Soutien</p>
+                <p className="text-sm text-muted-foreground">
+                  Filtres avancés, rappels, stats détaillées et badge exclusif.
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="aurora" size="sm">
+              <Link to="/soutien">Découvrir</Link>
+            </Button>
+          </section>
+        )}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[

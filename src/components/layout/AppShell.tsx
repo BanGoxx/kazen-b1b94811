@@ -12,6 +12,7 @@ import {
   ListChecks,
   LogOut,
   UserRound,
+  Heart,
   Menu,
   X,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const NAV: NavItem[] = [
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/recherche", label: "Recherche", icon: Search },
   { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
+  { to: "/soutien", label: "Soutien", icon: Heart },
 ];
 
 function AuthMenu() {
@@ -87,6 +89,11 @@ function AuthMenu() {
         <DropdownMenuItem asChild>
           <Link to="/profil" className="gap-2">
             <UserRound className="h-4 w-4" /> Mon profil
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/soutien" className="gap-2">
+            <Heart className="h-4 w-4" /> Soutien
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

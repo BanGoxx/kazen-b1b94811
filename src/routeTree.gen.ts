@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SoutienRouteImport } from './routes/soutien'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as FilmsRouteImport } from './routes/films'
@@ -24,6 +25,11 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 
+const SoutienRoute = SoutienRouteImport.update({
+  id: '/soutien',
+  path: '/soutien',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
   path: '/series',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/soutien': typeof SoutienRoute
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/soutien'
     | '/mes-listes'
     | '/profil'
     | '/anime/saison'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/soutien'
     | '/mes-listes'
     | '/profil'
     | '/anime/saison'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/films'
     | '/recherche'
     | '/series'
+    | '/soutien'
     | '/_authenticated/mes-listes'
     | '/_authenticated/profil'
     | '/anime/saison'
@@ -198,11 +210,19 @@ export interface RootRouteChildren {
   FilmsRoute: typeof FilmsRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
+  SoutienRoute: typeof SoutienRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/soutien': {
+      id: '/soutien'
+      path: '/soutien'
+      fullPath: '/soutien'
+      preLoaderRoute: typeof SoutienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/series': {
       id: '/series'
       path: '/series'
@@ -339,6 +359,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilmsRoute: FilmsRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,
+  SoutienRoute: SoutienRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,
 }
 export const routeTree = rootRouteImport

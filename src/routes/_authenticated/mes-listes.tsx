@@ -4,6 +4,7 @@ import { Heart, ListChecks, Loader2, Pencil, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";
+import { PremiumHint } from "@/components/premium/PremiumHint";
 import { useMyList, type ListEntry } from "@/lib/use-list";
 import {
   MEDIA_TYPE_LABELS,
@@ -180,6 +181,10 @@ function MyListsPage() {
               ))}
             </div>
           ) : null}
+          <div className="flex items-center gap-2 border-t border-border/50 pt-3 text-xs text-muted-foreground">
+            <span>Besoin de filtres croisés et de collections&nbsp;?</span>
+            <PremiumHint featureId="filters" label="Filtres avancés" />
+          </div>
         </div>
 
 

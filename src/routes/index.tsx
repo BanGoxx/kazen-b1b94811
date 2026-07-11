@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Sparkles, Tv, Film, CalendarClock, Leaf } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { DiscoverHero } from "@/components/media/DiscoverHero";
 import { MediaCarousel } from "@/components/media/MediaCarousel";
+import { QuickSearch } from "@/components/media/QuickSearch";
+import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import {
   trendingAnimeQO,
   trendingSeriesQO,
@@ -10,7 +13,16 @@ import {
   upcomingAnimeQO,
   upcomingMoviesQO,
   popularSeriesQO,
+  seasonalAnimeQO,
 } from "@/lib/queries";
+
+const QUICK_NAV = [
+  { to: "/anime", label: "Anime", icon: Sparkles },
+  { to: "/series", label: "Séries", icon: Tv },
+  { to: "/films", label: "Films", icon: Film },
+  { to: "/anime/saison", label: "Saison", icon: Leaf },
+  { to: "/a-venir", label: "À venir", icon: CalendarClock },
+] as const;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +38,7 @@ export const Route = createFileRoute("/")({
     context.queryClient.prefetchQuery(upcomingAnimeQO);
     context.queryClient.prefetchQuery(upcomingMoviesQO);
     context.queryClient.prefetchQuery(popularSeriesQO);
+    context.queryClient.prefetchQuery(seasonalAnimeQO());
   },
   component: DiscoverPage,
 });
@@ -37,44 +50,74 @@ function DiscoverPage() {
   const upAnime = useSuspenseQuery(upcomingAnimeQO);
   const upMovies = useSuspenseQuery(upcomingMoviesQO);
   const popSeries = useSuspenseQuery(popularSeriesQO);
+  const seasonal = useSuspenseQuery(seasonalAnimeQO());
 
   const hero = anime[0] ?? series.data[0] ?? movies.data[0];
 
   return (
     <AppShell>
-      {hero ? <DiscoverHero item={hero} /> : null}
-      <div className="space-y-12">
+      {hero ? (
+        <div className="relative">
+          <DiscoverHero item={hero} />
+          <div className="-mt-8 mb-10 flex flex-col items-start gap-5 px-1 sm:-mt-10">
+            <QuickSearch />
+            <nav aria-label="Accès rapides" className="flex flex-wrap gap-2">
+              {QUICK_NAV.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="focus-ring hover-lift inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur hover:border-primary/40"
+                >
+                  <Icon className="h-4 w-4 text-primary" />
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-10">
+          <QuickSearch />
+        </div>
+      )}
+
+      <div className="space-y-14">
         <MediaCarousel
-          title="Anime tendance"
+          title="Tendances du moment"
           subtitle="Ce que la communauté regarde en ce moment"
           action={{ label: "Tout voir", to: "/anime" }}
           items={anime.slice(1)}
         />
         <MediaCarousel
-          title="Séries tendance"
+          title="Anime à venir"
+          subtitle="Les sorties les plus attendues"
+          action={{ label: "À venir", to: "/a-venir" }}
+          items={upAnime.data}
+        />
+        <MediaCarousel
+          title="Séries en vedette"
+          subtitle="Les incontournables du petit écran"
           action={{ label: "Tout voir", to: "/series" }}
-          items={series.data}
+          items={popSeries.data.length ? popSeries.data : series.data}
+        />
+        <MediaCarousel
+          title="Films à venir"
+          subtitle="Prochainement en salle et en streaming"
+          action={{ label: "À venir", to: "/a-venir" }}
+          items={upMovies.data}
+        />
+        <MediaCarousel
+          title={`Saison anime · ${seasonal.data.label} ${seasonal.data.year}`}
+          subtitle="La sélection de la saison en cours"
+          action={{ label: "Voir la saison", to: "/anime/saison" }}
+          items={seasonal.data.items}
         />
         <MediaCarousel
           title="Films tendance"
           action={{ label: "Tout voir", to: "/films" }}
           items={movies.data}
         />
-        <MediaCarousel
-          title="Prochaines sorties anime"
-          action={{ label: "À venir", to: "/a-venir" }}
-          items={upAnime.data}
-        />
-        <MediaCarousel
-          title="Films à venir"
-          action={{ label: "À venir", to: "/a-venir" }}
-          items={upMovies.data}
-        />
-        <MediaCarousel
-          title="Séries populaires"
-          action={{ label: "Tout voir", to: "/series" }}
-          items={popSeries.data}
-        />
+        <PlatformHighlights />
       </div>
     </AppShell>
   );

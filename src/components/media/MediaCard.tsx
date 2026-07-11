@@ -4,6 +4,7 @@ import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
+import { MediaBadges } from "./MediaBadges";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {
@@ -50,7 +51,10 @@ export function MediaCard({
           </span>
           <RatingBadge score={item.score} />
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-card to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card via-card/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-2">
+          <MediaBadges item={item} />
+        </div>
       </div>
       <div className="space-y-1.5 p-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-card-foreground group-hover:text-primary">

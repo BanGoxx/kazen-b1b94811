@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { MediaGrid } from "@/components/media/MediaGrid";
+import { CatalogGrid } from "@/components/media/CatalogGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trendingSeriesQO, popularSeriesQO, onAirSeriesQO } from "@/lib/queries";
 
@@ -36,13 +36,13 @@ function SeriesPage() {
           <TabsTrigger value="onair">En diffusion</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <MediaGrid items={trending.data} />
+          <CatalogGrid items={trending.data} />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <MediaGrid items={popular.data} />
+          <CatalogGrid items={popular.data} />
         </TabsContent>
         <TabsContent value="onair" className="mt-6">
-          <MediaGrid items={onair.data} />
+          <CatalogGrid items={onair.data} />
         </TabsContent>
       </Tabs>
     </AppShell>

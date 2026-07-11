@@ -10,7 +10,7 @@ import {
   tmdbAnimatedMovies,
 } from "./tmdb.server";
 import type { PagedMedia } from "./tmdb.server";
-import { fallbackAnime, fallbackAnimePage, fallbackSeasonalAnime } from "./anime-fallback";
+import { fallbackAnime, fallbackAnimePage, fallbackSeasonalAnime, fallbackAnimeDetail } from "./anime-fallback";
 
 const SEASON_LABELS: Record<string, string> = {
   WINTER: "Hiver",

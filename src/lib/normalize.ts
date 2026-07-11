@@ -134,8 +134,20 @@ const TMDB_GENRES: Record<number, string> = {
   10766: "Feuilleton", 10767: "Talk", 10768: "Guerre & Politique",
 };
 
+// TMDB genre name (EN) -> FR, for when the API returns English genre objects.
+const TMDB_GENRE_NAMES: Record<string, string> = {
+  Action: "Action", Adventure: "Aventure", Animation: "Animation", Comedy: "Comédie",
+  Crime: "Crime", Documentary: "Documentaire", Drama: "Drame", Family: "Familial",
+  Fantasy: "Fantastique", History: "Histoire", Horror: "Horreur", Music: "Musique",
+  Mystery: "Mystère", Romance: "Romance", "Science Fiction": "Science-Fiction",
+  "TV Movie": "Téléfilm", Thriller: "Thriller", War: "Guerre", Western: "Western",
+  "Action & Adventure": "Action & Aventure", Kids: "Enfants", News: "Info",
+  Reality: "Télé-réalité", "Sci-Fi & Fantasy": "SF & Fantastique", Soap: "Feuilleton",
+  Talk: "Talk", "War & Politics": "Guerre & Politique",
+};
+
 function tmdbGenres(b: TmdbBase): string[] {
-  if (b.genres?.length) return b.genres.map((g) => g.name);
+  if (b.genres?.length) return b.genres.map((g) => TMDB_GENRE_NAMES[g.name] ?? g.name);
   return (b.genre_ids ?? []).map((id) => TMDB_GENRES[id]).filter(Boolean);
 }
 

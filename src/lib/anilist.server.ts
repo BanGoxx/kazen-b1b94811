@@ -19,6 +19,8 @@ type CacheEntry<T> = {
 };
 
 const queryCache = new Map<string, CacheEntry<unknown>>();
+let anilistQueue = Promise.resolve();
+let lastAniListRequestAt = 0;
 
 function cacheKey(gql: string, variables: Record<string, unknown>): string {
   return JSON.stringify({ gql, variables });
@@ -26,6 +28,17 @@ function cacheKey(gql: string, variables: Record<string, unknown>): string {
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function queuedAniListFetch(init: RequestInit): Promise<Response> {
+  const run = anilistQueue.then(async () => {
+    const elapsed = Date.now() - lastAniListRequestAt;
+    if (elapsed < 450) await wait(450 - elapsed);
+    lastAniListRequestAt = Date.now();
+    return fetch(ENDPOINT, init);
+  });
+  anilistQueue = run.then(() => undefined, () => undefined);
+  return run;
 }
 
 const MEDIA_FIELDS = `
@@ -57,7 +70,7 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        const res = await fetch(ENDPOINT, {
+        const res = await queuedAniListFetch({
           method: "POST",
           headers: {
             "Content-Type": "application/json",

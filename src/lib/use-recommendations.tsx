@@ -14,8 +14,11 @@ import {
   onAirSeriesQO,
 } from "./queries";
 import { useMyList } from "./use-list";
+import { getMyProfile } from "./list.functions";
+import { useAuth } from "./auth";
 import { buildTasteProfile, normalizePool, type TasteProfile } from "./recommend";
 import type { MediaItem } from "./media-types";
+
 
 /**
  * Aggregates the already-cached discovery pools into a single deduped candidate

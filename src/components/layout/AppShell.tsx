@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Compass,
   Sparkles,
@@ -9,12 +9,24 @@ import {
   CalendarClock,
   Search,
   Leaf,
+  ListChecks,
+  LogOut,
+  UserRound,
   Menu,
   X,
   Hexagon,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { signOut, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 interface NavItem {

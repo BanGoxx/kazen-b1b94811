@@ -138,7 +138,7 @@ export const getOnAirSeries = createServerFn({ method: "GET" }).handler(
 
 export const getMediaDetail = createServerFn({ method: "GET" })
   .inputValidator((d: { source: string; id: string }) => d)
-  .handler(async ({ data }): Promise<MediaItem | null> => {
+  .handler(async ({ data }): Promise<MediaDetail | null> => {
     const id = Number(data.id);
     if (!Number.isFinite(id)) return null;
     try {

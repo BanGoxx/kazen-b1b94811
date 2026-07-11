@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 // Titles auto-loaded via scroll before we require an explicit click. This keeps
 // the first screens fluid (near-infinite) while capping automatic fetches so we
 // never hammer AniList/TMDB. Beyond the cap the user opts in with "Voir plus".
-const AUTO_LOAD_CAP = 90;
+const AUTO_LOAD_CAP = 600;
 
 // Reusable filterable catalogue backed by an infinite query. Pages load one at a
 // time (hybrid: auto on scroll up to a cap, then manual button) — never in

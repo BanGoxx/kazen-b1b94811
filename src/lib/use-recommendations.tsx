@@ -67,5 +67,20 @@ export function useCandidatePool() {
 
 export function useTasteProfile(): TasteProfile {
   const { entries } = useMyList();
-  return useMemo(() => buildTasteProfile(entries), [entries]);
+  const { user } = useAuth();
+  const { data: profile } = useQuery({
+    queryKey: ["profile", "prefs"],
+    queryFn: () => getMyProfile(),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+  return useMemo(
+    () =>
+      buildTasteProfile(entries, {
+        genres: (profile?.preferred_genres as string[] | undefined) ?? undefined,
+        types: (profile?.preferred_types as string[] | undefined) ?? undefined,
+      }),
+    [entries, profile?.preferred_genres, profile?.preferred_types],
+  );
 }
+

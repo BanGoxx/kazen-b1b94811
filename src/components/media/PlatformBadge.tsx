@@ -16,18 +16,23 @@ export function PlatformBadge({ platform, className }: { platform: Platform; cla
   );
 
   if (platform.url) {
+    // Rendered as a button (not <a>) so it stays valid when nested inside a
+    // card link — avoids invalid <a> inside <a> and the hydration warning.
+    const url = platform.url;
     return (
-      <a
-        href={platform.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          window.open(url, "_blank", "noopener,noreferrer");
+        }}
         className={cn(base, "focus-ring transition-transform hover:scale-[1.04]")}
         style={{ backgroundColor: platform.color }}
         title={`Voir sur ${platform.name}`}
       >
         {inner}
-      </a>
+      </button>
     );
   }
 

@@ -205,19 +205,32 @@ export const searchMedia = createServerFn({ method: "GET" })
 // ---------- Upcoming (aggregated) ----------
 //
 // Correctness rules:
-//  - Anime  -> AniList NOT_YET_RELEASED, ordered by START_DATE (soonest first).
+//  - Anime  -> AniList NOT_YET_RELEASED. AniList often ships partial start
+//    dates (year only, or nothing at all) for announced titles, and sorting by
+//    START_DATE puts those null-date rows first. We therefore query by
+//    POPULARITY_DESC (surfaces real, mostly-dated upcoming anime) and NEVER
+//    drop an upcoming anime just because its date is partial/missing — the
+//    NOT_YET_RELEASED status already guarantees it is genuinely upcoming.
 //  - Films  -> TMDB discover with primary_release_date >= today, ascending.
 //  - Séries -> TMDB discover with first_air_date >= today, ascending.
-// We then keep only titles whose date is today or later and sort the whole
-// aggregate ascending, so the very next release is always on top (no stray
-// "mars 1963" old dates). All three sources run in parallel; TMDB keeps its
-// cache/retry guard and AniList keeps its request queue, so no 429 pressure.
+// The final list is sorted so that titles with a concrete future date come
+// first (soonest first); date-imprecise / undated titles trail at the end
+// instead of disappearing. TMDB keeps its cache/retry guard and AniList keeps
+// its request queue, so no 429 pressure.
+
+// Sort key for an upcoming title: a concrete future date sorts by that date;
+// missing or already-past-padded dates (e.g. a year-only title collapsed to
+// Jan 1) sort last so they never crowd out precisely-dated releases — but they
+// are still kept and shown.
+function upcomingSortKey(m: MediaItem, today: string): string {
+  return m.releaseDate && m.releaseDate >= today ? m.releaseDate : "9999-12-31";
+}
 
 export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     const today = new Date().toISOString().slice(0, 10);
     const [anime, movies1, movies2, series] = await Promise.all([
-      anilistList({ sort: "START_DATE", status: "NOT_YET_RELEASED", perPage: 50 }).catch((e) => {
+      anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 50 }).catch((e) => {
         console.error("getUpcomingAll anilist", e);
         return [] as MediaItem[];
       }),
@@ -247,11 +260,19 @@ export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
         return [] as MediaItem[];
       }),
     ]);
-    return [...anime, ...movies1, ...movies2, ...series]
-      .filter((m) => m.releaseDate && m.releaseDate >= today)
-      .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : a.releaseDate! > b.releaseDate! ? 1 : 0));
+    // Keep every upcoming anime (status guarantees future); only films/series
+    // are date-gated at the source. Sort by soonest concrete date, undated last.
+    const films = [...movies1, ...movies2, ...series].filter(
+      (m) => m.releaseDate && m.releaseDate >= today,
+    );
+    return [...anime, ...films].sort((a, b) => {
+      const ka = upcomingSortKey(a, today);
+      const kb = upcomingSortKey(b, today);
+      return ka < kb ? -1 : ka > kb ? 1 : 0;
+    });
   },
 );
+
 
 // ---------- Paginated catalogs ("voir plus") ----------
 // Each returns a fixed page of results plus a hasMore flag. Pagination is

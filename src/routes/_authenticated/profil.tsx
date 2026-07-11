@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LogOut, Loader2, UserRound, Crown, Sparkles } from "lucide-react";
+import { LogOut, Loader2, UserRound, Crown, Sparkles, Wand2, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
@@ -10,15 +10,38 @@ import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
 import { usePremium } from "@/lib/premium";
 import { SupporterBadge } from "@/components/premium/SupporterBadge";
+import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+
+const GENRE_OPTIONS = [
+  "Action", "Aventure", "Comédie", "Drame", "Fantastique", "Science-Fiction",
+  "Romance", "Thriller", "Mystère", "Horreur", "Surnaturel", "Psychologique",
+  "Sport", "Mecha", "Tranche de vie", "Musique",
+];
+
+const TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "anime", label: "Anime" },
+  { value: "series", label: "Séries" },
+  { value: "movie", label: "Films" },
+];
+
+const STYLE_OPTIONS = [
+  "Shonen", "Seinen", "Shojo", "Isekai", "Slice of life", "Dark",
+  "Feel-good", "Épique", "Émotionnel", "Cérébral",
+];
+
+function toggle(list: string[], value: string): string[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
 
 export const Route = createFileRoute("/_authenticated/profil")({
   head: () => ({
@@ -26,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
   }),
   component: ProfilePage,
 });
+
 
 function ProfilePage() {
   const { user } = useAuth();

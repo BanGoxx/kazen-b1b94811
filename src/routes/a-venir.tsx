@@ -46,6 +46,9 @@ function monthKey(iso: string): string {
   return iso.slice(0, 7);
 }
 
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
+
 const SORT_LABELS: Record<SortOrder, string> = {
   soon: "Les plus proches",
   later: "Les plus lointaines",

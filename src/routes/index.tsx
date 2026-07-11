@@ -74,9 +74,19 @@ export const Route = createFileRoute("/")({
 
 function HomeHero() {
   const { data: anime } = useSuspenseQuery(trendingAnimeQO);
-  const hero = anime[0];
-  if (!hero) return null;
-  return <DiscoverHero item={hero} />;
+  const { data: seasonal } = useSuspenseQuery(seasonalAnimeQO());
+  const { data: series } = useSuspenseQuery(trendingSeriesQO);
+  const { data: movies } = useSuspenseQuery(trendingMoviesQO);
+  // Anime-first, with one strong series + film for variety. Max 5 slides.
+  const withArt = (it: MediaItem | undefined) => !!it && !!(it.backdropUrl || it.posterUrl);
+  const slides = [
+    ...anime.slice(0, 3),
+    ...seasonal.slice(0, 1),
+    ...series.slice(0, 1),
+    ...movies.slice(0, 1),
+  ].filter(withArt);
+  if (!slides.length) return null;
+  return <RotatingHero items={slides} />;
 }
 
 function TrendingAnimeRow() {

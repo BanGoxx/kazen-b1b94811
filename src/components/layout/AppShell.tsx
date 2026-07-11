@@ -170,12 +170,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none fixed -top-40 right-0 h-[34rem] w-[34rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.66 0.25 350 / 0.2), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.585 0.2 28 / 0.16), transparent)" }}
       />
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none fixed -bottom-48 -left-40 h-[32rem] w-[32rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.79 0.13 205 / 0.14), transparent)", animationDelay: "2.5s" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.85 0.055 85 / 0.08), transparent)", animationDelay: "2.5s" }}
       />
 
       <div className="relative mx-auto flex min-h-dvh max-w-[1600px]">

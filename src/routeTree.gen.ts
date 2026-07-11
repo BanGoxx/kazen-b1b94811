@@ -20,6 +20,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 
@@ -77,6 +78,11 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   path: '/saison',
   getParentRoute: () => AnimeRoute,
 } as any)
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMesListesRoute = AuthenticatedMesListesRouteImport.update({
   id: '/mes-listes',
   path: '/mes-listes',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/recherche'
     | '/series'
     | '/mes-listes'
+    | '/profil'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/recherche'
     | '/series'
     | '/mes-listes'
+    | '/profil'
     | '/anime/saison'
     | '/anime'
     | '/media/$source/$id'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/recherche'
     | '/series'
     | '/_authenticated/mes-listes'
+    | '/_authenticated/profil'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeSaisonRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mes-listes': {
       id: '/_authenticated/mes-listes'
       path: '/mes-listes'
@@ -287,10 +306,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

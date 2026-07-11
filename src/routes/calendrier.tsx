@@ -94,6 +94,7 @@ function CalendarPage() {
 
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  const [weeks, setWeeks] = useState<1 | 2>(2);
   const [type, setType] = useState<StatusFilter>("all");
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
@@ -108,12 +109,12 @@ function CalendarPage() {
 
   const days = useMemo(
     () =>
-      Array.from({ length: 7 }, (_, i) => {
+      Array.from({ length: weeks * 7 }, (_, i) => {
         const d = new Date(weekStart);
         d.setDate(weekStart.getDate() + i);
         return d;
       }),
-    [weekStart],
+    [weekStart, weeks],
   );
 
   const filtered = useMemo(() => {
@@ -144,7 +145,7 @@ function CalendarPage() {
   }, [filtered]);
 
   const todayIso = isoDay(new Date());
-  const weekEnd = days[6];
+  const weekEnd = days[days.length - 1];
   const rangeLabel = `${rangeFmt.format(weekStart)} – ${rangeFmt.format(weekEnd)} ${weekEnd.getFullYear()}`;
 
   const shiftWeek = (delta: number) => {
@@ -171,9 +172,27 @@ function CalendarPage() {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="premium" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
-          <CalendarDays className="mr-1 h-4 w-4" /> Cette semaine
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-full border border-border bg-background/40 p-0.5">
+            {([1, 2] as const).map((w) => (
+              <button
+                key={w}
+                type="button"
+                aria-pressed={weeks === w}
+                onClick={() => setWeeks(w)}
+                className={cn(
+                  "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  weeks === w ? "aurora-bg text-white" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {w === 1 ? "1 sem." : "2 sem."}
+              </button>
+            ))}
+          </div>
+          <Button variant="premium" size="sm" onClick={() => setWeekStart(startOfWeek(new Date()))}>
+            <CalendarDays className="mr-1 h-4 w-4" /> Cette semaine
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -248,7 +267,7 @@ function CalendarPage() {
               >
                 <div className="mb-2 flex items-baseline justify-between px-1">
                   <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
-                    {DAY_LABELS[i]}
+                    {DAY_LABELS[i % 7]}
                   </span>
                   <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
                 </div>

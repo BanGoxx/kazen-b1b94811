@@ -1,6 +1,6 @@
 // Server-only TMDB REST access. Requires TMDB_API_KEY (v3 key) as a secret.
 // Reads the key inside functions (never at module scope). Language fr-FR, region FR.
-import { fromTmdbMovie, fromTmdbTv } from "./normalize";
+import { fromTmdbMovie, fromTmdbTv, isAsianAnimationTv } from "./normalize";
 import { resolvePlatform, dedupePlatforms } from "./platforms";
 import type {
   CreditPerson,
@@ -97,9 +97,12 @@ export async function tmdbMovieList(
 export async function tmdbTvList(
   path: string,
   params: Record<string, string> = {},
+  filterAnime = false,
 ): Promise<MediaItem[]> {
   const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, params);
-  return (data?.results ?? []).map((m) => fromTmdbTv(m));
+  let results = data?.results ?? [];
+  if (filterAnime) results = results.filter((m) => !isAsianAnimationTv(m));
+  return results.map((m) => fromTmdbTv(m));
 }
 
 export async function tmdbMoviePaged(
@@ -122,13 +125,16 @@ export async function tmdbTvPaged(
   path: string,
   page: number,
   params: Record<string, string> = {},
+  filterAnime = false,
 ): Promise<PagedMedia> {
   const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, {
     ...params,
     page: String(page),
   });
+  let results = data?.results ?? [];
+  if (filterAnime) results = results.filter((m) => !isAsianAnimationTv(m));
   return {
-    items: (data?.results ?? []).map((m) => fromTmdbTv(m)),
+    items: results.map((m) => fromTmdbTv(m)),
     page: data?.page ?? page,
     hasMore: (data?.page ?? page) < (data?.total_pages ?? page),
   };

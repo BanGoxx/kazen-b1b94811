@@ -34,6 +34,29 @@ export const Route = createFileRoute("/media/$source/$id")({
     return { meta: [{ title: "Fiche — KAZEN" }] };
   },
   component: MediaDetailPage,
+  pendingComponent: () => (
+    <AppShell>
+      <div className="-mx-4 -mt-8 h-64 sm:-mx-6 sm:h-80 lg:-mx-10 lg:h-[26rem]">
+        <Skeleton className="h-full w-full rounded-none" />
+      </div>
+      <div className="relative -mt-28 grid gap-8 sm:-mt-32 lg:grid-cols-[300px_1fr] lg:-mt-40">
+        <div className="mx-auto w-44 sm:w-52 lg:mx-0 lg:w-full">
+          <Skeleton className="aspect-[2/3] w-full rounded-2xl" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24 rounded-full" />
+          <Skeleton className="h-12 w-3/4" />
+          <Skeleton className="h-4 w-full max-w-2xl" />
+          <Skeleton className="h-4 w-2/3 max-w-2xl" />
+          <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </AppShell>
+  ),
   notFoundComponent: () => (
     <AppShell>
       <div className="py-24 text-center">

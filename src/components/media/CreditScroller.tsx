@@ -13,9 +13,9 @@ export function CreditScroller({
     <section>
       <h2 className="mb-3 font-display text-xl font-bold">{title}</h2>
       <ul className="flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
-        {people.map((p) => (
+        {people.map((p, i) => (
           <li
-            key={p.id}
+            key={`${p.id}-${p.role ?? ""}-${i}`}
             className="w-28 shrink-0 snap-start rounded-xl border border-border bg-card/60 p-2 text-center"
           >
             <div className="mx-auto mb-2 aspect-square w-full overflow-hidden rounded-lg bg-muted">

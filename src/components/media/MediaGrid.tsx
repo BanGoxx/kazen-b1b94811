@@ -30,9 +30,11 @@ export function MediaGrid({
   className?: string;
 }) {
   if (!items.length) return <EmptyState message={emptyLabel} />;
+  const seen = new Set<string>();
+  const unique = items.filter((item) => (seen.has(item.key) ? false : seen.add(item.key)));
   return (
     <div className={cn(GRID, className)}>
-      {items.map((item, i) => (
+      {unique.map((item, i) => (
         <MediaCard
           key={item.key}
           item={item}

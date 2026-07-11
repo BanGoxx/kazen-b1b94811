@@ -186,7 +186,7 @@ export const searchMedia = createServerFn({ method: "GET" })
     const q = data.q.trim();
     if (q.length < 2) return { anime: [], series: [], movies: [] };
     const [anime, tmdb] = await Promise.all([
-      anilistList({ sort: "SEARCH_MATCH", search: q, perPage: 12 }).catch((e) => {
+      anilistList({ sort: "SEARCH_MATCH", search: q, perPage: 24 }).catch((e) => {
         console.error("searchMedia anilist", e);
         return [] as MediaItem[];
       }),

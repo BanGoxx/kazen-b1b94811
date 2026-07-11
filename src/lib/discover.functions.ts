@@ -7,6 +7,7 @@ import {
   tmdbMovieDetail,
   tmdbTvDetail,
   tmdbSearch,
+  tmdbAnimatedMovies,
 } from "./tmdb.server";
 
 const SEASON_LABELS: Record<string, string> = {
@@ -129,6 +130,30 @@ export const getOnAirSeries = createServerFn({ method: "GET" }).handler(
       return await tmdbTvList("/tv/on_the_air", {});
     } catch (e) {
       console.error("getOnAirSeries", e);
+      return [];
+    }
+  },
+);
+
+// ---------- Animated films (TMDB Discover, genre 16) ----------
+
+export const getAnimatedMovies = createServerFn({ method: "GET" }).handler(
+  async (): Promise<MediaItem[]> => {
+    try {
+      return await tmdbAnimatedMovies();
+    } catch (e) {
+      console.error("getAnimatedMovies", e);
+      return [];
+    }
+  },
+);
+
+export const getAsianAnimationMovies = createServerFn({ method: "GET" }).handler(
+  async (): Promise<MediaItem[]> => {
+    try {
+      return await tmdbAnimatedMovies("JP,CN,KR");
+    } catch (e) {
+      console.error("getAsianAnimationMovies", e);
       return [];
     }
   },

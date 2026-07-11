@@ -20,6 +20,8 @@ export interface Platform {
   logoUrl: string | null;
   color: string;
   type: "stream" | "buy" | "rent";
+  /** Deep link or provider homepage when known, for external redirection. */
+  url: string | null;
 }
 
 export interface MediaItem {

@@ -104,6 +104,7 @@ interface WatchProviders {
   "watch/providers"?: {
     results?: {
       FR?: {
+        link?: string | null;
         flatrate?: { provider_name: string; logo_path?: string | null }[];
         buy?: { provider_name: string; logo_path?: string | null }[];
         rent?: { provider_name: string; logo_path?: string | null }[];
@@ -115,10 +116,13 @@ interface WatchProviders {
 function extractPlatforms(wp: WatchProviders): Platform[] {
   const fr = wp["watch/providers"]?.results?.FR;
   if (!fr) return [];
+  // TMDB exposes an aggregated JustWatch page per title & region — the closest
+  // thing to a deep link. Used as the redirection target for every provider.
+  const link = fr.link ?? null;
   const out: Platform[] = [];
   const push = (arr: { provider_name: string; logo_path?: string | null }[] | undefined, type: Platform["type"]) => {
     for (const item of arr ?? []) {
-      const p = resolvePlatform(item.provider_name, item.logo_path ? `${IMG}${item.logo_path}` : null, type);
+      const p = resolvePlatform(item.provider_name, item.logo_path ? `${IMG}${item.logo_path}` : null, type, link);
       if (p) out.push(p);
     }
   };
@@ -128,6 +132,21 @@ function extractPlatforms(wp: WatchProviders): Platform[] {
   return dedupePlatforms(out);
 }
 
+// French synopsis strategy: primary calls request language=fr-FR. When TMDB
+// has no French overview it returns an empty string, so we fall back to the
+// original/English overview rather than showing nothing.
+async function overviewFallback(
+  kind: "movie" | "tv",
+  id: number,
+  current: string | null,
+): Promise<string | null> {
+  if (current && current.trim()) return current;
+  const en = await tmdb<{ overview?: string | null }>(`/${kind}/${id}`, { language: "en-US" }).catch(
+    () => null,
+  );
+  return en?.overview?.trim() || current;
+}
+
 export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & { belongs_to_collection?: { name?: string } | null }>(
     `/movie/${id}`,
@@ -135,6 +154,7 @@ export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   );
   if (!data) return null;
   const bmedia = fromTmdbMovie(data, extractPlatforms(data));
+  bmedia.synopsis = await overviewFallback("movie", id, bmedia.synopsis);
   return augmentTmdb(bmedia, data, "movie", {
     collectionName: data.belongs_to_collection?.name ?? null,
     format: "Film",
@@ -148,6 +168,7 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
   );
   if (!data) return null;
   const bmedia = fromTmdbTv(data, extractPlatforms(data));
+  bmedia.synopsis = await overviewFallback("tv", id, bmedia.synopsis);
   return augmentTmdb(bmedia, data, "tv", {
     studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
     format: "Série",
@@ -216,6 +237,26 @@ function augmentTmdb(
     related,
     collectionName: extra.collectionName ?? null,
   };
+}
+
+/**
+ * Animated feature films via TMDB Discover (genre 16 = Animation).
+ * `origin` narrows to a country of origin (e.g. "JP,CN" for Asian animation,
+ * "FR" for French animation). Returns [] gracefully when TMDB is absent.
+ */
+export async function tmdbAnimatedMovies(origin?: string): Promise<MediaItem[]> {
+  const params: Record<string, string> = {
+    with_genres: "16",
+    sort_by: "popularity.desc",
+    "vote_count.gte": "40",
+    include_adult: "false",
+  };
+  if (origin) params.with_origin_country = origin;
+  const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbMovie>[0]>>(
+    "/discover/movie",
+    params,
+  );
+  return (data?.results ?? []).map((m) => fromTmdbMovie(m));
 }
 
 export async function tmdbSearch(q: string): Promise<MediaItem[]> {

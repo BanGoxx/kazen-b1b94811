@@ -113,8 +113,11 @@ function AuthMenu() {
 
 function Brand() {
   return (
-    <Link to="/" className="focus-ring rounded-lg" aria-label="KAZEN — accueil">
+    <Link to="/" className="focus-ring flex items-center gap-2 rounded-lg" aria-label="KAZEN — accueil">
       <KazenLogo size="md" />
+      <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-primary">
+        Bêta
+      </span>
     </Link>
   );
 }

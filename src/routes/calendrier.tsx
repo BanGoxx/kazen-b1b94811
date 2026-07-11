@@ -145,7 +145,7 @@ function CalendarPage() {
   }, [filtered]);
 
   const todayIso = isoDay(new Date());
-  const weekEnd = days[6];
+  const weekEnd = days[days.length - 1];
   const rangeLabel = `${rangeFmt.format(weekStart)} – ${rangeFmt.format(weekEnd)} ${weekEnd.getFullYear()}`;
 
   const shiftWeek = (delta: number) => {

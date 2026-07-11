@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoutienRouteImport } from './routes/soutien'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as PourVousRouteImport } from './routes/pour-vous'
@@ -29,6 +30,11 @@ import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 const SoutienRoute = SoutienRouteImport.update({
   id: '/soutien',
   path: '/soutien',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeriesRoute = SeriesRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/pour-vous'
     | '/recherche'
     | '/series'
+    | '/sitemap.xml'
     | '/soutien'
     | '/mes-listes'
     | '/profil'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/pour-vous'
     | '/recherche'
     | '/series'
+    | '/sitemap.xml'
     | '/soutien'
     | '/mes-listes'
     | '/profil'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/pour-vous'
     | '/recherche'
     | '/series'
+    | '/sitemap.xml'
     | '/soutien'
     | '/_authenticated/mes-listes'
     | '/_authenticated/profil'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoutienRoute: typeof SoutienRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
 }
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/soutien'
       fullPath: '/soutien'
       preLoaderRoute: typeof SoutienRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/series': {
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoutienRoute: SoutienRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,
 }

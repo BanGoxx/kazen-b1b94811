@@ -79,6 +79,7 @@ function DiscoverPage() {
 
   return (
     <AppShell>
+      <h1 className="sr-only">KAZEN — Votre hub anime, séries et films en français</h1>
       {hero ? (
         <div className="relative">
           <DiscoverHero item={hero} />

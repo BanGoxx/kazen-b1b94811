@@ -84,7 +84,7 @@ export function ListControls({ item }: { item: MediaItem }) {
           variant="aurora"
           className="w-full gap-2"
           disabled={upsert.isPending}
-          onClick={() => patch({ status: "a_voir" })}
+          onClick={() => patch({ status: "a_voir" }, "Ajouté à votre liste")}
         >
           <Bookmark className="h-4 w-4" /> Ajouter à ma liste
         </Button>

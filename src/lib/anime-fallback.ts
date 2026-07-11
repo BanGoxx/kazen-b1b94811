@@ -1,4 +1,4 @@
-import type { MediaItem } from "./media-types";
+import type { MediaItem, MediaDetail } from "./media-types";
 
 type AnimeFallbackKind = "trending" | "popular" | "upcoming" | "seasonal";
 

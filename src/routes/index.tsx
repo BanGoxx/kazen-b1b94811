@@ -31,14 +31,14 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(trendingAnimeQO);
-    context.queryClient.prefetchQuery(trendingSeriesQO);
-    context.queryClient.prefetchQuery(trendingMoviesQO);
-    context.queryClient.prefetchQuery(upcomingAnimeQO);
-    context.queryClient.prefetchQuery(upcomingMoviesQO);
-    context.queryClient.prefetchQuery(popularSeriesQO);
-    context.queryClient.prefetchQuery(seasonalAnimeQO());
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(trendingAnimeQO);
+    await context.queryClient.ensureQueryData(upcomingAnimeQO);
+    await context.queryClient.ensureQueryData(seasonalAnimeQO());
+    void context.queryClient.prefetchQuery(trendingSeriesQO);
+    void context.queryClient.prefetchQuery(trendingMoviesQO);
+    void context.queryClient.prefetchQuery(upcomingMoviesQO);
+    void context.queryClient.prefetchQuery(popularSeriesQO);
   },
   component: DiscoverPage,
 });

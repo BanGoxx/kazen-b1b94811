@@ -13,10 +13,10 @@ export const Route = createFileRoute("/anime/")({
       { name: "description", content: "Découvrez les anime tendance, populaires et à venir, avec leurs plateformes de diffusion." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(trendingAnimeQO);
-    context.queryClient.prefetchQuery(popularAnimeQO);
-    context.queryClient.prefetchQuery(upcomingAnimeQO);
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(trendingAnimeQO);
+    void context.queryClient.prefetchQuery(popularAnimeQO);
+    void context.queryClient.prefetchQuery(upcomingAnimeQO);
   },
   component: AnimePage,
 });

@@ -4,6 +4,7 @@ import { Heart, ListChecks, Loader2, Pencil, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";
+import { PremiumHint } from "@/components/premium/PremiumHint";
 import { useMyList, type ListEntry } from "@/lib/use-list";
 import {
   MEDIA_TYPE_LABELS,

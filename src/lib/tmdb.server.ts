@@ -5,6 +5,7 @@ import { resolvePlatform, dedupePlatforms } from "./platforms";
 import type {
   CreditPerson,
   MediaDetail,
+  MediaVideo,
   MediaItem,
   Platform,
   RelatedMedia,

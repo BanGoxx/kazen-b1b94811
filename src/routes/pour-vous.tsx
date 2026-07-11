@@ -40,7 +40,7 @@ export const Route = createFileRoute("/pour-vous")({
   }),
   loader: async ({ context }) => {
     // Prime the shared discovery pool the recommendation engine reuses.
-    await context.queryClient.ensureQueryData(trendingAnimeQO);
+    void context.queryClient.ensureQueryData(trendingAnimeQO);
     void context.queryClient.prefetchQuery(popularAnimeQO);
     void context.queryClient.prefetchQuery(upcomingAnimeQO);
     void context.queryClient.prefetchQuery(seasonalAnimeQO());

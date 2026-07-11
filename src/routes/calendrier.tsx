@@ -41,7 +41,7 @@ export const Route = createFileRoute("/calendrier")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/calendrier" }],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(upcomingAllQO);
+    void context.queryClient.ensureQueryData(upcomingAllQO);
     void context.queryClient.prefetchQuery(onAirSeriesQO);
   },
   component: CalendarPage,

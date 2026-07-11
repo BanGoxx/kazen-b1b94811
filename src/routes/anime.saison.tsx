@@ -17,7 +17,7 @@ export const Route = createFileRoute("/anime/saison")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/anime/saison" }],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(seasonalAnimeQO());
+    void context.queryClient.ensureQueryData(seasonalAnimeQO());
   },
   component: SeasonPage,
 });

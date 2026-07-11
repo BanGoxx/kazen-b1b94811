@@ -27,7 +27,7 @@ const QUICK_NAV = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NEXUS MEDIA — Découvrez anime, séries et films" },
+      { title: "KAZEN — Découvrez anime, séries et films" },
       { name: "description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
     ],
   }),

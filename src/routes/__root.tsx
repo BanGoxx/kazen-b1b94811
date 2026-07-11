@@ -79,13 +79,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "NEXUS MEDIA — Découvrez anime, séries et films" },
-      { name: "description", content: "Explorez les sorties à venir, les fiches détaillées, les plateformes de streaming et organisez vos anime, séries et films dans vos listes personnelles." },
+      { title: "KAZEN — Découvrez anime, séries et films" },
+      { name: "description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
       { name: "author", content: "NEXUS MEDIA" },
-      { property: "og:title", content: "NEXUS MEDIA — Découvrez anime, séries et films" },
-      { property: "og:description", content: "La plateforme premium en français pour découvrir et suivre vos anime, séries et films." },
+      { property: "og:title", content: "KAZEN — Découvrez anime, séries et films" },
+      { property: "og:description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "KAZEN — Découvrez anime, séries et films" },
+      { name: "twitter:description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bfa73036-e0c9-440c-94bc-3948e840138d/id-preview-b9f3ab3b--d81bc3c1-5965-4123-b3b6-b9e71c6d05eb.lovable.app-1783738274986.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bfa73036-e0c9-440c-94bc-3948e840138d/id-preview-b9f3ab3b--d81bc3c1-5965-4123-b3b6-b9e71c6d05eb.lovable.app-1783738274986.png" },
     ],
     links: [
       {

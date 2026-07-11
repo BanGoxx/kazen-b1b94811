@@ -1,6 +1,6 @@
 // Server-only TMDB REST access. Requires TMDB_API_KEY (v3 key) as a secret.
 // Reads the key inside functions (never at module scope). Language fr-FR, region FR.
-import { fromTmdbMovie, fromTmdbTv } from "./normalize";
+import { fromTmdbMovie, fromTmdbTv, isAsianAnimationTv } from "./normalize";
 import { resolvePlatform, dedupePlatforms } from "./platforms";
 import type {
   CreditPerson,

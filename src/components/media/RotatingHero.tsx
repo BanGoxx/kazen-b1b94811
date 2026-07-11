@@ -68,9 +68,11 @@ export function RotatingHero({ items }: { items: MediaItem[] }) {
             aria-hidden={i !== index}
           >
             {item.backdropUrl || item.posterUrl ? (
-              <img
-                src={item.backdropUrl || item.posterUrl || ""}
+              <SafeImage
+                src={item.backdropUrl || item.posterUrl}
                 alt=""
+                variant="backdrop"
+                fallbackLabel={item.title}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "low"}
                 decoding="async"

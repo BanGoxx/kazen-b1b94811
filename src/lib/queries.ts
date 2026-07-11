@@ -105,3 +105,37 @@ export const searchMediaQO = (q: string) =>
     staleTime: 1000 * 60 * 5,
     enabled: q.trim().length >= 2,
   });
+
+import { infiniteQueryOptions } from "@tanstack/react-query";
+import { getAnimePage, getMoviePage, getSeriesPage } from "./discover.functions";
+import type { PagedMedia } from "./tmdb.server";
+
+const pagedInitial = { pageParams: [1] as number[], pages: [] as PagedMedia[] };
+void pagedInitial;
+
+export const animePageQO = (kind: string) =>
+  infiniteQueryOptions({
+    queryKey: ["anime", "page", kind],
+    queryFn: ({ pageParam }) => getAnimePage({ data: { kind, page: pageParam } }),
+    initialPageParam: 1,
+    getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
+    staleTime: HOUR,
+  });
+
+export const moviePageQO = (kind: string) =>
+  infiniteQueryOptions({
+    queryKey: ["movies", "page", kind],
+    queryFn: ({ pageParam }) => getMoviePage({ data: { kind, page: pageParam } }),
+    initialPageParam: 1,
+    getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
+    staleTime: HOUR,
+  });
+
+export const seriesPageQO = (kind: string) =>
+  infiniteQueryOptions({
+    queryKey: ["series", "page", kind],
+    queryFn: ({ pageParam }) => getSeriesPage({ data: { kind, page: pageParam } }),
+    initialPageParam: 1,
+    getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
+    staleTime: HOUR,
+  });

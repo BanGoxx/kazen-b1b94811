@@ -1,16 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { CatalogGrid } from "@/components/media/CatalogGrid";
+import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  trendingMoviesQO,
-  popularMoviesQO,
-  upcomingMoviesQO,
-  animatedMoviesQO,
-  asianAnimationMoviesQO,
-} from "@/lib/queries";
+import { moviePageQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/films")({
   head: () => ({
@@ -19,23 +12,13 @@ export const Route = createFileRoute("/films")({
       { name: "description", content: "Films tendance, populaires, à venir et films d'animation, avec leurs plateformes de disponibilité." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(trendingMoviesQO);
-    context.queryClient.prefetchQuery(popularMoviesQO);
-    context.queryClient.prefetchQuery(upcomingMoviesQO);
-    context.queryClient.prefetchQuery(animatedMoviesQO);
-    context.queryClient.prefetchQuery(asianAnimationMoviesQO);
+  loader: async ({ context }) => {
+    await context.queryClient.ensureInfiniteQueryData(moviePageQO("trending"));
   },
   component: MoviesPage,
 });
 
 function MoviesPage() {
-  const trending = useSuspenseQuery(trendingMoviesQO);
-  const popular = useSuspenseQuery(popularMoviesQO);
-  const upcoming = useSuspenseQuery(upcomingMoviesQO);
-  const animated = useSuspenseQuery(animatedMoviesQO);
-  const asianAnimation = useSuspenseQuery(asianAnimationMoviesQO);
-
   return (
     <AppShell>
       <PageHeader title="Films" description="Du blockbuster au film culte, sans oublier l'animation." />
@@ -48,19 +31,25 @@ function MoviesPage() {
           <TabsTrigger value="asian">Animation asiatique</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <CatalogGrid items={trending.data} />
+          <PaginatedCatalog queryOptions={moviePageQO("trending")} />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <CatalogGrid items={popular.data} />
+          <PaginatedCatalog queryOptions={moviePageQO("popular")} />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
-          <CatalogGrid items={upcoming.data} />
+          <PaginatedCatalog queryOptions={moviePageQO("upcoming")} />
         </TabsContent>
         <TabsContent value="animated" className="mt-6">
-          <CatalogGrid items={animated.data} />
+          <PaginatedCatalog
+            queryOptions={moviePageQO("animated")}
+            emptyLabel="Films d'animation indisponibles pour le moment."
+          />
         </TabsContent>
         <TabsContent value="asian" className="mt-6">
-          <CatalogGrid items={asianAnimation.data} />
+          <PaginatedCatalog
+            queryOptions={moviePageQO("asian")}
+            emptyLabel="Animation asiatique indisponible pour le moment."
+          />
         </TabsContent>
       </Tabs>
     </AppShell>

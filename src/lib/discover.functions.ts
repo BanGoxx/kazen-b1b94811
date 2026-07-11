@@ -9,6 +9,7 @@ import {
   tmdbSearch,
   tmdbAnimatedMovies,
 } from "./tmdb.server";
+import type { PagedMedia } from "./tmdb.server";
 
 const SEASON_LABELS: Record<string, string> = {
   WINTER: "Hiver",
@@ -59,7 +60,7 @@ export const getSeasonalAnime = createServerFn({ method: "GET" })
     const season = data.season ?? fallback.season;
     const year = data.year ?? fallback.year;
     try {
-      const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 40 });
+      const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 50 });
       return { items, season, year, label: SEASON_LABELS[season] ?? season };
     } catch (e) {
       console.error("getSeasonalAnime", e);
@@ -185,7 +186,7 @@ export const searchMedia = createServerFn({ method: "GET" })
     const q = data.q.trim();
     if (q.length < 2) return { anime: [], series: [], movies: [] };
     const [anime, tmdb] = await Promise.all([
-      anilistList({ sort: "SEARCH_MATCH", search: q, perPage: 12 }).catch((e) => {
+      anilistList({ sort: "SEARCH_MATCH", search: q, perPage: 24 }).catch((e) => {
         console.error("searchMedia anilist", e);
         return [] as MediaItem[];
       }),
@@ -220,3 +221,67 @@ export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
       .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : 1));
   },
 );
+
+// ---------- Paginated catalogs ("voir plus") ----------
+// Each returns a fixed page of results plus a hasMore flag. Pagination is
+// sequential (one page per user click) so we never trigger parallel fetches,
+// preserving AniList's request queue and TMDB's retry/cache safeguards.
+
+const ANIME_SORTS: Record<string, { sort: string; status?: string }> = {
+  trending: { sort: "TRENDING_DESC" },
+  popular: { sort: "POPULARITY_DESC" },
+  upcoming: { sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED" },
+};
+
+export const getAnimePage = createServerFn({ method: "GET" })
+  .inputValidator((d: { kind: string; page: number }) => d)
+  .handler(async ({ data }): Promise<PagedMedia> => {
+    const cfg = ANIME_SORTS[data.kind] ?? ANIME_SORTS.trending;
+    try {
+      const { anilistPaged } = await import("./anilist.server");
+      return await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
+    } catch (e) {
+      console.error("getAnimePage", e);
+      return { items: [], page: data.page, hasMore: false };
+    }
+  });
+
+const MOVIE_PATHS: Record<string, string> = {
+  trending: "/trending/movie/week",
+  popular: "/movie/popular",
+  upcoming: "/movie/upcoming",
+};
+
+export const getMoviePage = createServerFn({ method: "GET" })
+  .inputValidator((d: { kind: string; page: number }) => d)
+  .handler(async ({ data }): Promise<PagedMedia> => {
+    try {
+      const { tmdbMoviePaged, tmdbAnimatedMoviesPaged } = await import("./tmdb.server");
+      if (data.kind === "animated") return await tmdbAnimatedMoviesPaged(data.page);
+      if (data.kind === "asian") return await tmdbAnimatedMoviesPaged(data.page, "JP,CN,KR");
+      const path = MOVIE_PATHS[data.kind] ?? MOVIE_PATHS.trending;
+      return await tmdbMoviePaged(path, data.page, { region: "FR" });
+    } catch (e) {
+      console.error("getMoviePage", e);
+      return { items: [], page: data.page, hasMore: false };
+    }
+  });
+
+const SERIES_PATHS: Record<string, string> = {
+  trending: "/trending/tv/week",
+  popular: "/tv/popular",
+  onair: "/tv/on_the_air",
+};
+
+export const getSeriesPage = createServerFn({ method: "GET" })
+  .inputValidator((d: { kind: string; page: number }) => d)
+  .handler(async ({ data }): Promise<PagedMedia> => {
+    try {
+      const { tmdbTvPaged } = await import("./tmdb.server");
+      const path = SERIES_PATHS[data.kind] ?? SERIES_PATHS.trending;
+      return await tmdbTvPaged(path, data.page);
+    } catch (e) {
+      console.error("getSeriesPage", e);
+      return { items: [], page: data.page, hasMore: false };
+    }
+  });

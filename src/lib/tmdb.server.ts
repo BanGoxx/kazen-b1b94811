@@ -82,7 +82,9 @@ async function tmdb<T>(path: string, params: Record<string, string> = {}): Promi
   }
 }
 
-type TmdbListResponse<T> = { results?: T[] };
+type TmdbListResponse<T> = { results?: T[]; page?: number; total_pages?: number };
+
+export type PagedMedia = { items: MediaItem[]; page: number; hasMore: boolean };
 
 export async function tmdbMovieList(
   path: string,
@@ -98,6 +100,58 @@ export async function tmdbTvList(
 ): Promise<MediaItem[]> {
   const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, params);
   return (data?.results ?? []).map((m) => fromTmdbTv(m));
+}
+
+export async function tmdbMoviePaged(
+  path: string,
+  page: number,
+  params: Record<string, string> = {},
+): Promise<PagedMedia> {
+  const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbMovie>[0]>>(path, {
+    ...params,
+    page: String(page),
+  });
+  return {
+    items: (data?.results ?? []).map((m) => fromTmdbMovie(m)),
+    page: data?.page ?? page,
+    hasMore: (data?.page ?? page) < (data?.total_pages ?? page),
+  };
+}
+
+export async function tmdbTvPaged(
+  path: string,
+  page: number,
+  params: Record<string, string> = {},
+): Promise<PagedMedia> {
+  const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbTv>[0]>>(path, {
+    ...params,
+    page: String(page),
+  });
+  return {
+    items: (data?.results ?? []).map((m) => fromTmdbTv(m)),
+    page: data?.page ?? page,
+    hasMore: (data?.page ?? page) < (data?.total_pages ?? page),
+  };
+}
+
+export async function tmdbAnimatedMoviesPaged(page: number, origin?: string): Promise<PagedMedia> {
+  const params: Record<string, string> = {
+    with_genres: "16",
+    sort_by: "popularity.desc",
+    "vote_count.gte": "40",
+    include_adult: "false",
+    page: String(page),
+  };
+  if (origin) params.with_origin_country = origin;
+  const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbMovie>[0]>>(
+    "/discover/movie",
+    params,
+  );
+  return {
+    items: (data?.results ?? []).map((m) => fromTmdbMovie(m)),
+    page: data?.page ?? page,
+    hasMore: (data?.page ?? page) < (data?.total_pages ?? page),
+  };
 }
 
 interface WatchProviders {
@@ -260,14 +314,20 @@ export async function tmdbAnimatedMovies(origin?: string): Promise<MediaItem[]> 
 }
 
 export async function tmdbSearch(q: string): Promise<MediaItem[]> {
-  const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
-    "/search/multi",
-    { query: q, include_adult: "false" },
-  );
+  // Fetch the first two result pages sequentially (cached, retry-guarded) for a
+  // richer, deeper result set without triggering parallel API pressure.
   const out: MediaItem[] = [];
-  for (const r of data?.results ?? []) {
-    if (r.media_type === "movie") out.push(fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]));
-    else if (r.media_type === "tv") out.push(fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0]));
+  for (let page = 1; page <= 2; page += 1) {
+    const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
+      "/search/multi",
+      { query: q, include_adult: "false", page: String(page) },
+    );
+    for (const r of data?.results ?? []) {
+      if (r.media_type === "movie") out.push(fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]));
+      else if (r.media_type === "tv") out.push(fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0]));
+    }
+    if ((data?.page ?? page) >= (data?.total_pages ?? page)) break;
   }
   return out;
 }
+

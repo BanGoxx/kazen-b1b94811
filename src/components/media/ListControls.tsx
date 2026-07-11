@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Bookmark, BookmarkCheck, Heart, Plus, Star, Tag, X } from "lucide-react";
 import type { MediaItem, PriorityLevel, WatchStatus } from "@/lib/media-types";
 import { PRIORITY_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
@@ -48,13 +49,18 @@ export function ListControls({ item }: { item: MediaItem }) {
   }
 
   const inList = Boolean(entry);
-  const patch = (p: Parameters<typeof upsert.mutate>[0]["patch"]) =>
+  const patch = (
+    p: Parameters<typeof upsert.mutate>[0]["patch"],
+    confirm?: string,
+  ) => {
     upsert.mutate({ item, patch: p });
+    if (confirm) toast.success(confirm);
+  };
 
   const addTag = () => {
     const v = tagDraft.trim();
     if (!v) return;
-    patch({ tags: Array.from(new Set([...(entry?.tags ?? []), v])) });
+    patch({ tags: Array.from(new Set([...(entry?.tags ?? []), v])) }, "Tag ajouté");
     setTagDraft("");
   };
 
@@ -78,7 +84,7 @@ export function ListControls({ item }: { item: MediaItem }) {
           variant="aurora"
           className="w-full gap-2"
           disabled={upsert.isPending}
-          onClick={() => patch({ status: "a_voir" })}
+          onClick={() => patch({ status: "a_voir" }, "Ajouté à votre liste")}
         >
           <Bookmark className="h-4 w-4" /> Ajouter à ma liste
         </Button>
@@ -99,7 +105,7 @@ export function ListControls({ item }: { item: MediaItem }) {
                 key={s}
                 type="button"
                 aria-pressed={active}
-                onClick={() => patch({ status: active ? null : s })}
+                onClick={() => patch({ status: active ? null : s }, active ? undefined : "Statut mis à jour")}
                 className={cn(
                   "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                   active
@@ -125,7 +131,7 @@ export function ListControls({ item }: { item: MediaItem }) {
                 key={n}
                 type="button"
                 aria-label={`Noter ${n} sur 10`}
-                onClick={() => patch({ rating: entry?.rating === n ? null : n })}
+                onClick={() => patch({ rating: entry?.rating === n ? null : n }, entry?.rating === n ? undefined : "Note enregistrée")}
                 className="focus-ring rounded p-0.5"
               >
                 <Star
@@ -226,7 +232,7 @@ export function ListControls({ item }: { item: MediaItem }) {
           value={noteDraft}
           onChange={(e) => setNoteDraft(e.target.value)}
           onBlur={() => {
-            if (noteDraft !== (entry?.notes ?? "")) patch({ notes: noteDraft });
+            if (noteDraft !== (entry?.notes ?? "")) patch({ notes: noteDraft }, "Note enregistrée");
           }}
           placeholder="Vos impressions, où vous en êtes…"
           rows={3}

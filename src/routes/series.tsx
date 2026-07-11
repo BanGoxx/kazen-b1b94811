@@ -17,7 +17,7 @@ export const Route = createFileRoute("/series")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/series" }],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureInfiniteQueryData(seriesPageQO("trending"));
+    void context.queryClient.ensureInfiniteQueryData(seriesPageQO("trending"));
   },
   component: SeriesPage,
 });

@@ -8,6 +8,7 @@ import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
+import { SafeSection } from "@/components/media/SafeSection";
 import {
   trendingAnimeQO,
   popularAnimeQO,
@@ -56,10 +57,13 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(trendingAnimeQO);
-    await context.queryClient.ensureQueryData(popularAnimeQO);
-    await context.queryClient.ensureQueryData(upcomingAnimeQO);
-    await context.queryClient.ensureQueryData(seasonalAnimeQO());
+    // Warm caches without blocking render: a transient upstream failure must
+    // never turn the whole homepage into a 500 / crash screen. Each section
+    // below is wrapped in its own error boundary and refetches with retry.
+    void context.queryClient.prefetchQuery(trendingAnimeQO);
+    void context.queryClient.prefetchQuery(popularAnimeQO);
+    void context.queryClient.prefetchQuery(upcomingAnimeQO);
+    void context.queryClient.prefetchQuery(seasonalAnimeQO());
     void context.queryClient.prefetchQuery(trendingSeriesQO);
     void context.queryClient.prefetchQuery(trendingMoviesQO);
     void context.queryClient.prefetchQuery(upcomingMoviesQO);
@@ -68,106 +72,169 @@ export const Route = createFileRoute("/")({
   component: DiscoverPage,
 });
 
-function DiscoverPage() {
+function HomeHero() {
   const { data: anime } = useSuspenseQuery(trendingAnimeQO);
-  const popAnime = useSuspenseQuery(popularAnimeQO);
-  const series = useSuspenseQuery(trendingSeriesQO);
-  const movies = useSuspenseQuery(trendingMoviesQO);
-  const upAnime = useSuspenseQuery(upcomingAnimeQO);
-  const upMovies = useSuspenseQuery(upcomingMoviesQO);
+  const hero = anime[0];
+  if (!hero) return null;
+  return <DiscoverHero item={hero} />;
+}
+
+function TrendingAnimeRow() {
+  const { data } = useSuspenseQuery(trendingAnimeQO);
+  return (
+    <MediaCarousel
+      title="Tendances anime"
+      subtitle="Les anime que la communauté regarde en ce moment"
+      action={{ label: "Tout voir", to: "/anime" }}
+      items={data.slice(1)}
+      hideWhenEmpty
+    />
+  );
+}
+
+function PopularAnimeRow() {
+  const { data } = useSuspenseQuery(popularAnimeQO);
+  return (
+    <MediaCarousel
+      title="Anime populaires"
+      subtitle="Les valeurs sûres de l'animation"
+      action={{ label: "Tout voir", to: "/anime" }}
+      items={data}
+      hideWhenEmpty
+    />
+  );
+}
+
+function UpcomingAnimeRow() {
+  const { data } = useSuspenseQuery(upcomingAnimeQO);
+  return (
+    <MediaCarousel
+      title="Anime à venir"
+      subtitle="Les sorties les plus attendues"
+      action={{ label: "À venir", to: "/a-venir" }}
+      items={data}
+      hideWhenEmpty
+    />
+  );
+}
+
+function SeasonalAnimeRow() {
+  const { data } = useSuspenseQuery(seasonalAnimeQO());
+  return (
+    <MediaCarousel
+      title={`Saison anime · ${data.label} ${data.year}`}
+      subtitle="La sélection de la saison en cours"
+      action={{ label: "Voir la saison", to: "/anime/saison" }}
+      items={data.items}
+      hideWhenEmpty
+    />
+  );
+}
+
+function FeaturedSeriesRow() {
   const popSeries = useSuspenseQuery(popularSeriesQO);
-  const seasonal = useSuspenseQuery(seasonalAnimeQO());
+  const series = useSuspenseQuery(trendingSeriesQO);
+  const items = popSeries.data.length ? popSeries.data : series.data;
+  return (
+    <MediaCarousel
+      title="Séries en vedette"
+      subtitle="Les incontournables du petit écran"
+      action={{ label: "Tout voir", to: "/series" }}
+      items={items}
+      hideWhenEmpty
+    />
+  );
+}
 
-  const hero = anime[0] ?? series.data[0] ?? movies.data[0];
+function UpcomingMoviesRow() {
+  const { data } = useSuspenseQuery(upcomingMoviesQO);
+  return (
+    <MediaCarousel
+      title="Films à venir"
+      subtitle="Prochainement en salle et en streaming"
+      action={{ label: "À venir", to: "/a-venir" }}
+      items={data}
+      hideWhenEmpty
+    />
+  );
+}
 
+function TrendingMoviesRow() {
+  const { data } = useSuspenseQuery(trendingMoviesQO);
+  return (
+    <MediaCarousel
+      title="Films tendance"
+      subtitle="Les longs-métrages qui font parler d'eux"
+      action={{ label: "Tout voir", to: "/films" }}
+      items={data}
+      hideWhenEmpty
+    />
+  );
+}
+
+function DiscoverPage() {
   return (
     <AppShell>
       <h1 className="sr-only">KAZEN — Votre hub anime, séries et films en français</h1>
-      {hero ? (
-        <div className="relative">
-          <DiscoverHero item={hero} />
-          <div className="-mt-8 mb-10 flex flex-col items-start gap-5 px-1 sm:-mt-10">
-            <QuickSearch />
-            <nav aria-label="Accès rapides" className="flex flex-wrap gap-2">
-              {QUICK_NAV.map(({ to, label, icon: Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="focus-ring hover-lift inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur hover:border-primary/40"
-                >
-                  <Icon className="h-4 w-4 text-primary" />
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
-      ) : (
-        <div className="mb-10">
+
+      <div className="relative">
+        <SafeSection minHeight="16rem">
+          <HomeHero />
+        </SafeSection>
+        <div className="-mt-8 mb-10 flex flex-col items-start gap-5 px-1 sm:-mt-10">
           <QuickSearch />
+          <nav aria-label="Accès rapides" className="flex flex-wrap gap-2">
+            {QUICK_NAV.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className="focus-ring hover-lift inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur hover:border-primary/40"
+              >
+                <Icon className="h-4 w-4 text-primary" />
+                {label}
+              </Link>
+            ))}
+          </nav>
         </div>
-      )}
+      </div>
 
       <div className="space-y-14">
-        <ForYouHomeBlock />
+        <SafeSection>
+          <ForYouHomeBlock />
+        </SafeSection>
 
         {/* ----- Anime d'abord ----- */}
-        <MediaCarousel
-          title="Tendances anime"
-          subtitle="Les anime que la communauté regarde en ce moment"
-          action={{ label: "Tout voir", to: "/anime" }}
-          items={anime.slice(1)}
-        />
-        <MediaCarousel
-          title="Anime populaires"
-          subtitle="Les valeurs sûres de l'animation"
-          action={{ label: "Tout voir", to: "/anime" }}
-          items={popAnime.data}
-          hideWhenEmpty
-        />
-        <MediaCarousel
-          title="Anime à venir"
-          subtitle="Les sorties les plus attendues"
-          action={{ label: "À venir", to: "/a-venir" }}
-          items={upAnime.data}
-          hideWhenEmpty
-        />
-        <MediaCarousel
-          title={`Saison anime · ${seasonal.data.label} ${seasonal.data.year}`}
-          subtitle="La sélection de la saison en cours"
-          action={{ label: "Voir la saison", to: "/anime/saison" }}
-          items={seasonal.data.items}
-          hideWhenEmpty
-        />
+        <SafeSection>
+          <TrendingAnimeRow />
+        </SafeSection>
+        <SafeSection>
+          <PopularAnimeRow />
+        </SafeSection>
+        <SafeSection>
+          <UpcomingAnimeRow />
+        </SafeSection>
+        <SafeSection>
+          <SeasonalAnimeRow />
+        </SafeSection>
 
         <MemberCTA />
 
         {/* ----- Puis séries ----- */}
-        <MediaCarousel
-          title="Séries en vedette"
-          subtitle="Les incontournables du petit écran"
-          action={{ label: "Tout voir", to: "/series" }}
-          items={popSeries.data.length ? popSeries.data : series.data}
-          hideWhenEmpty
-        />
+        <SafeSection>
+          <FeaturedSeriesRow />
+        </SafeSection>
 
         {/* ----- Puis films ----- */}
-        <MediaCarousel
-          title="Films à venir"
-          subtitle="Prochainement en salle et en streaming"
-          action={{ label: "À venir", to: "/a-venir" }}
-          items={upMovies.data}
-          hideWhenEmpty
-        />
-        <MediaCarousel
-          title="Films tendance"
-          subtitle="Les longs-métrages qui font parler d'eux"
-          action={{ label: "Tout voir", to: "/films" }}
-          items={movies.data}
-          hideWhenEmpty
-        />
+        <SafeSection>
+          <UpcomingMoviesRow />
+        </SafeSection>
+        <SafeSection>
+          <TrendingMoviesRow />
+        </SafeSection>
+
         <PlatformHighlights />
       </div>
     </AppShell>
   );
 }
+

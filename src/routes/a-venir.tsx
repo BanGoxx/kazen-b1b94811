@@ -30,7 +30,7 @@ export const Route = createFileRoute("/a-venir")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/a-venir" }],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(upcomingAllQO);
+    void context.queryClient.ensureQueryData(upcomingAllQO);
   },
   component: UpcomingPage,
   pendingComponent: () => (

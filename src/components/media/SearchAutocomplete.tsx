@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SafeImage } from "./SafeImage";
 import { searchMediaQO, trendingAnimeQO, trendingMoviesQO, trendingSeriesQO } from "@/lib/queries";
 import { rankSuggestions } from "@/lib/search-rank";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";

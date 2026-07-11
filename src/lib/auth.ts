@@ -52,12 +52,10 @@ function subscribe(l: () => void) {
   return () => listeners.delete(l);
 }
 
+const SERVER_SNAPSHOT: AuthState = { user: null, ready: false };
+
 export function useAuth(): AuthState {
-  return useSyncExternalStore(
-    subscribe,
-    () => state,
-    () => ({ user: null, ready: false }),
-  );
+  return useSyncExternalStore(subscribe, () => state, () => SERVER_SNAPSHOT);
 }
 
 export async function signOut() {

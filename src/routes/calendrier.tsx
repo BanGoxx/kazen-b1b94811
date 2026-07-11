@@ -109,12 +109,12 @@ function CalendarPage() {
 
   const days = useMemo(
     () =>
-      Array.from({ length: 7 }, (_, i) => {
+      Array.from({ length: weeks * 7 }, (_, i) => {
         const d = new Date(weekStart);
         d.setDate(weekStart.getDate() + i);
         return d;
       }),
-    [weekStart],
+    [weekStart, weeks],
   );
 
   const filtered = useMemo(() => {

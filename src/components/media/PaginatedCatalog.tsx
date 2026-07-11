@@ -18,7 +18,27 @@ const AUTO_LOAD_CAP = 90;
 // time (hybrid: auto on scroll up to a cap, then manual button) — never in
 // parallel — so the AniList queue and TMDB safeguards stay intact. Client-side
 // genre/status filters and sorting apply over everything already loaded.
-export function PaginatedCatalog({
+export function PaginatedCatalog(props: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
+  emptyLabel?: string;
+}) {
+  return (
+    <SafeSection minHeight="20rem" pending={<CatalogPending />}>
+      <CatalogInner {...props} />
+    </SafeSection>
+  );
+}
+
+function CatalogPending() {
+  return (
+    <div className="flex items-center justify-center py-24 text-muted-foreground">
+      <Loader2 className="h-6 w-6 animate-spin" />
+    </div>
+  );
+}
+
+function CatalogInner({
   queryOptions,
   emptyLabel,
 }: {

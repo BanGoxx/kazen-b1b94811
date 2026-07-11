@@ -12,6 +12,7 @@ import {
   ListChecks,
   LogOut,
   UserRound,
+  Heart,
   Menu,
   X,
 } from "lucide-react";

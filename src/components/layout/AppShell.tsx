@@ -91,6 +91,11 @@ function AuthMenu() {
             <UserRound className="h-4 w-4" /> Mon profil
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/soutien" className="gap-2">
+            <Heart className="h-4 w-4" /> Soutien
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="gap-2 text-destructive focus:text-destructive"

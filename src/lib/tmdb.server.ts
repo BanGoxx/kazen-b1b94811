@@ -239,7 +239,27 @@ function augmentTmdb(
   };
 }
 
-export async function tmdbSearch(q: string): Promise<MediaItem[]> {
+/**
+ * Animated feature films via TMDB Discover (genre 16 = Animation).
+ * `origin` narrows to a country of origin (e.g. "JP,CN" for Asian animation,
+ * "FR" for French animation). Returns [] gracefully when TMDB is absent.
+ */
+export async function tmdbAnimatedMovies(origin?: string): Promise<MediaItem[]> {
+  const params: Record<string, string> = {
+    with_genres: "16",
+    sort_by: "popularity.desc",
+    "vote_count.gte": "40",
+    include_adult: "false",
+  };
+  if (origin) params.with_origin_country = origin;
+  const data = await tmdb<TmdbListResponse<Parameters<typeof fromTmdbMovie>[0]>>(
+    "/discover/movie",
+    params,
+  );
+  return (data?.results ?? []).map((m) => fromTmdbMovie(m));
+}
+
+
   const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
     "/search/multi",
     { query: q, include_adult: "false" },

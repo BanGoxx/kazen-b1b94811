@@ -261,7 +261,8 @@ export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
 const ANIME_SORTS: Record<string, { sort: string; status?: string }> = {
   trending: { sort: "TRENDING_DESC" },
   popular: { sort: "POPULARITY_DESC" },
-  upcoming: { sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED" },
+  // "À venir": order by air date so the soonest release is first (not popularity).
+  upcoming: { sort: "START_DATE", status: "NOT_YET_RELEASED" },
 };
 
 export const getAnimePage = createServerFn({ method: "GET" })
@@ -270,7 +271,15 @@ export const getAnimePage = createServerFn({ method: "GET" })
     const cfg = ANIME_SORTS[data.kind] ?? ANIME_SORTS.trending;
     try {
       const { anilistPaged } = await import("./anilist.server");
-      return await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
+      const res = await anilistPaged({ ...cfg, page: data.page, perPage: 30 });
+      if (data.kind === "upcoming") {
+        // Drop titles without a valid future air date so no stale entries leak in.
+        const today = new Date().toISOString().slice(0, 10);
+        res.items = res.items
+          .filter((m) => m.releaseDate && m.releaseDate >= today)
+          .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : a.releaseDate! > b.releaseDate! ? 1 : 0));
+      }
+      return res;
     } catch (e) {
       console.error("getAnimePage", e);
       return { items: [], page: data.page, hasMore: false };
@@ -290,6 +299,18 @@ export const getMoviePage = createServerFn({ method: "GET" })
       const { tmdbMoviePaged, tmdbAnimatedMoviesPaged } = await import("./tmdb.server");
       if (data.kind === "animated") return await tmdbAnimatedMoviesPaged(data.page);
       if (data.kind === "asian") return await tmdbAnimatedMoviesPaged(data.page, "JP,CN,KR");
+      if (data.kind === "upcoming") {
+        // Films "À venir": discover by ascending release date, future only.
+        const today = new Date().toISOString().slice(0, 10);
+        const res = await tmdbMoviePaged("/discover/movie", data.page, {
+          region: "FR",
+          sort_by: "primary_release_date.asc",
+          "primary_release_date.gte": today,
+          with_release_type: "2|3",
+        });
+        res.items = res.items.filter((m) => m.releaseDate && m.releaseDate >= today);
+        return res;
+      }
       const path = MOVIE_PATHS[data.kind] ?? MOVIE_PATHS.trending;
       return await tmdbMoviePaged(path, data.page, { region: "FR" });
     } catch (e) {
@@ -297,6 +318,7 @@ export const getMoviePage = createServerFn({ method: "GET" })
       return { items: [], page: data.page, hasMore: false };
     }
   });
+
 
 const SERIES_PATHS: Record<string, string> = {
   trending: "/trending/tv/week",

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSuspenseInfiniteQuery, type UseSuspenseInfiniteQueryOptions } from "@tanstack/react-query";
 import { Loader2, Plus } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
@@ -8,10 +8,15 @@ import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
 import { Button } from "@/components/ui/button";
 
-// Reusable filterable catalogue backed by an infinite query. Results load one
-// page at a time on user request ("Voir plus"), never in parallel, so the
-// AniList queue and TMDB safeguards stay intact. Client-side genre/status
-// filters and sorting apply over everything already loaded.
+// Titles auto-loaded via scroll before we require an explicit click. This keeps
+// the first screens fluid (near-infinite) while capping automatic fetches so we
+// never hammer AniList/TMDB. Beyond the cap the user opts in with "Voir plus".
+const AUTO_LOAD_CAP = 90;
+
+// Reusable filterable catalogue backed by an infinite query. Pages load one at a
+// time (hybrid: auto on scroll up to a cap, then manual button) — never in
+// parallel — so the AniList queue and TMDB safeguards stay intact. Client-side
+// genre/status filters and sorting apply over everything already loaded.
 export function PaginatedCatalog({
   queryOptions,
   emptyLabel,
@@ -41,6 +46,25 @@ export function PaginatedCatalog({
 
   const sourceEmpty = items.length === 0;
 
+  // Auto-load on scroll until the cap, one sequential page at a time.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const canAutoLoad = query.hasNextPage && items.length < AUTO_LOAD_CAP;
+  useEffect(() => {
+    if (!canAutoLoad) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !query.isFetchingNextPage) {
+          query.fetchNextPage();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [canAutoLoad, query]);
+
   return (
     <div>
       <FilterBar genres={genres} state={state} onChange={setState} resultCount={visible.length} />
@@ -52,6 +76,10 @@ export function PaginatedCatalog({
             : "Aucun titre ne correspond à ces filtres."
         }
       />
+
+      {/* Invisible sentinel drives near-infinite scrolling up to the cap. */}
+      {canAutoLoad ? <div ref={sentinelRef} aria-hidden className="h-1 w-full" /> : null}
+
       {query.hasNextPage ? (
         <div className="mt-8 flex flex-col items-center gap-2">
           <Button

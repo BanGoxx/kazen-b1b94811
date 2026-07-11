@@ -76,7 +76,7 @@ function extractPlatforms(wp: WatchProviders): Platform[] {
 }
 
 export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & { belongs_to_collection?: { name?: string } | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & { belongs_to_collection?: { name?: string } | null }>(
     `/movie/${id}`,
     { append_to_response: "watch/providers,credits,videos,recommendations" },
   );
@@ -89,7 +89,7 @@ export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
 }
 
 export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & { networks?: { name?: string }[] | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & WatchProviders & { networks?: { name?: string }[] | null }>(
     `/tv/${id}`,
     { append_to_response: "watch/providers,credits,videos,recommendations" },
   );
@@ -139,7 +139,7 @@ function augmentTmdb(
   );
   const related: RelatedMedia[] = (data.recommendations?.results ?? [])
     .slice(0, 12)
-    .map((r) => (kind === "movie" ? fromTmdbMovie(r as Parameters<typeof fromTmdbMovie>[0]) : fromTmdbTv(r as Parameters<typeof fromTmdbTv>[0])))
+    .map((r) => (kind === "movie" ? fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]) : fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0])))
     .map((m) => ({
       key: m.key,
       source: m.source,

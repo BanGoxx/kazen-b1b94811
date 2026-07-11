@@ -208,9 +208,15 @@ async function overviewFallback(
 }
 
 export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & { belongs_to_collection?: { name?: string } | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & WatchProviders & {
+    belongs_to_collection?: { name?: string } | null;
+    origin_country?: string[] | null;
+    production_countries?: { iso_3166_1?: string; name?: string }[] | null;
+    original_title?: string | null;
+    release_dates?: { results?: { iso_3166_1?: string; release_dates?: { certification?: string }[] }[] } | null;
+  }>(
     `/movie/${id}`,
-    { append_to_response: "watch/providers,credits,videos,recommendations" },
+    { append_to_response: "watch/providers,credits,videos,recommendations,release_dates" },
   );
   if (!data) return null;
   const bmedia = fromTmdbMovie(data, extractPlatforms(data));
@@ -218,13 +224,24 @@ export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
   return augmentTmdb(bmedia, data, "movie", {
     collectionName: data.belongs_to_collection?.name ?? null,
     format: "Film",
+    countryOfOrigin: tmdbCountry(data.origin_country, data.production_countries),
+    ageRating: tmdbMovieCert(data.release_dates),
+    titleAlternatives: [data.original_title].filter((t): t is string => !!t && t !== bmedia.title),
+    endDate: null,
   });
 }
 
 export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & WatchProviders & { networks?: { name?: string }[] | null }>(
+  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & WatchProviders & {
+    networks?: { name?: string }[] | null;
+    origin_country?: string[] | null;
+    production_countries?: { iso_3166_1?: string; name?: string }[] | null;
+    original_name?: string | null;
+    last_air_date?: string | null;
+    content_ratings?: { results?: { iso_3166_1?: string; rating?: string }[] } | null;
+  }>(
     `/tv/${id}`,
-    { append_to_response: "watch/providers,credits,videos,recommendations" },
+    { append_to_response: "watch/providers,credits,videos,recommendations,content_ratings" },
   );
   if (!data) return null;
   const bmedia = fromTmdbTv(data, extractPlatforms(data));
@@ -232,6 +249,10 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
   return augmentTmdb(bmedia, data, "tv", {
     studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
     format: "Série",
+    countryOfOrigin: tmdbCountry(data.origin_country, data.production_countries),
+    ageRating: tmdbTvCert(data.content_ratings),
+    titleAlternatives: [data.original_name].filter((t): t is string => !!t && t !== bmedia.title),
+    endDate: data.last_air_date ?? null,
   });
 }
 

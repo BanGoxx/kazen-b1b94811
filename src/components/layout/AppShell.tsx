@@ -111,8 +111,7 @@ function Brand() {
         <Hexagon className="h-5 w-5 text-white" strokeWidth={2.5} />
       </span>
       <span className="font-display text-lg font-extrabold tracking-tight">
-        <span className="aurora-text">NEXUS</span>
-        <span className="text-foreground"> MEDIA</span>
+        <span className="aurora-text">KAZEN</span>
       </span>
     </Link>
   );

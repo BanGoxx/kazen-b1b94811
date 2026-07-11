@@ -177,5 +177,11 @@ export function fallbackAnimeDetail(id: string): MediaDetail | null {
     crew: [],
     related: [],
     collectionName: null,
+    titleAlternatives: [],
+    originSource: null,
+    ageRating: null,
+    countryOfOrigin: "Japon",
+    endDate: null,
+    videos: [],
   };
 }

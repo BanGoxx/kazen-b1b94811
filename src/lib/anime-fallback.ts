@@ -1,4 +1,5 @@
-import type { MediaItem, MediaDetail } from "./media-types";
+import type { MediaItem, MediaDetail, Platform } from "./media-types";
+import { resolvePlatform, dedupePlatforms } from "./platforms";
 
 type AnimeFallbackKind = "trending" | "popular" | "upcoming" | "seasonal";
 
@@ -90,6 +91,35 @@ const SEASONAL: MediaItem[] = [
   anime(187538, "BLACK TORCH", "BLACK TORCH", 72, "en_cours", "2026-07-04", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx187538-fXVXKYUA3VV6.jpg", ["Action", "Surnaturel"]),
   anime(103303, "Sparks of Tomorrow", "あした世界が終わるとしても", 75, "en_cours", "2026-07-05", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx103303-IF43hFJPPv2Y.png", ["Drame", "Science-Fiction"]),
 ];
+
+// In production (Cloudflare Workers) AniList is unreachable, so anime detail &
+// list data is served from these curated fallbacks. AniList normally supplies
+// streaming platforms via externalLinks; the fallback carries none, which is
+// why provider badges appeared in preview but not on the live site. We attach
+// the correct FR streaming platforms here so live matches preview. Badges
+// always redirect to the official platform base page (see platformDestination),
+// so we only need the right provider identity, not a per-title deep link.
+const NETFLIX_IDS = new Set([21, 20, 1735, 1535, 195539, 16498, 20958, 20605]);
+const DEFAULT_PROVIDERS = ["Crunchyroll", "ADN"];
+
+function providersForAnime(id: string): Platform[] {
+  const names = [...DEFAULT_PROVIDERS];
+  if (NETFLIX_IDS.has(Number(id))) names.push("Netflix");
+  const out: Platform[] = [];
+  for (const name of names) {
+    const p = resolvePlatform(name, null, "stream", null);
+    if (p) out.push(p);
+  }
+  return dedupePlatforms(out);
+}
+
+// Attach platforms in place to every curated pool so both list rows and
+// fallbackAnimeDetail expose provider badges.
+for (const pool of [TRENDING, POPULAR, UPCOMING, SEASONAL]) {
+  for (const item of pool) {
+    if (!item.platforms.length) item.platforms = providersForAnime(item.externalId);
+  }
+}
 
 const FALLBACKS: Record<AnimeFallbackKind, MediaItem[]> = {
   trending: TRENDING,

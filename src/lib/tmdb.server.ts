@@ -314,14 +314,20 @@ export async function tmdbAnimatedMovies(origin?: string): Promise<MediaItem[]> 
 }
 
 export async function tmdbSearch(q: string): Promise<MediaItem[]> {
-  const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
-    "/search/multi",
-    { query: q, include_adult: "false" },
-  );
+  // Fetch the first two result pages sequentially (cached, retry-guarded) for a
+  // richer, deeper result set without triggering parallel API pressure.
   const out: MediaItem[] = [];
-  for (const r of data?.results ?? []) {
-    if (r.media_type === "movie") out.push(fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]));
-    else if (r.media_type === "tv") out.push(fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0]));
+  for (let page = 1; page <= 2; page += 1) {
+    const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
+      "/search/multi",
+      { query: q, include_adult: "false", page: String(page) },
+    );
+    for (const r of data?.results ?? []) {
+      if (r.media_type === "movie") out.push(fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]));
+      else if (r.media_type === "tv") out.push(fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0]));
+    }
+    if ((data?.page ?? page) >= (data?.total_pages ?? page)) break;
   }
   return out;
 }
+

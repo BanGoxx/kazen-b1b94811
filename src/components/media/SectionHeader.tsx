@@ -15,20 +15,21 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-4 flex items-end justify-between gap-4", className)}>
-      <div>
-        <h2 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {title}
+    <div className={cn("mb-5 flex items-end justify-between gap-4", className)}>
+      <div className="min-w-0">
+        <h2 className="flex items-center gap-2.5 font-display text-xl font-bold tracking-[-0.02em] text-foreground sm:text-2xl">
+          <span aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full aurora-bg sm:h-6" />
+          <span className="truncate">{title}</span>
         </h2>
-        {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-1.5 pl-[0.9rem] text-sm text-muted-foreground">{subtitle}</p> : null}
       </div>
       {action ? (
         <Link
           to={action.to}
-          className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:underline"
+          className="focus-ring group inline-flex shrink-0 items-center gap-1 rounded-full px-1 text-sm font-semibold text-primary transition-colors hover:text-foreground"
         >
           {action.label}
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       ) : null}
     </div>

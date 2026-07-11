@@ -34,7 +34,11 @@ export const Route = createFileRoute("/calendrier")({
     meta: [
       { title: "Calendrier des sorties — KAZEN" },
       { name: "description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
+      { property: "og:title", content: "Calendrier des sorties — KAZEN" },
+      { property: "og:description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
+      { property: "og:url", content: "https://kazen.lovable.app/calendrier" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/calendrier" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(upcomingAllQO);

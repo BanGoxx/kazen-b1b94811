@@ -205,81 +205,68 @@ export function SearchAutocomplete({
           role="listbox"
           className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover/95 p-1.5 shadow-float backdrop-blur"
         >
-          <p className="px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
-            {showPopular ? "Populaires en ce moment" : "Suggestions"}
+          <p className="flex items-center gap-1.5 px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
+            {showPopular ? (
+              <>
+                <TrendingUp className="h-3.5 w-3.5 text-primary" /> Populaires en ce moment
+              </>
+            ) : (
+              "Suggestions"
+            )}
           </p>
 
-          {showPopular
-            ? POPULAR_TITLES.map((title, i) => (
-                <button
-                  key={title}
-                  id={`${listId}-opt-${i}`}
-                  role="option"
-                  aria-selected={active === i}
-                  type="button"
-                  onMouseEnter={() => setActive(i)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => goToQuery(title)}
-                  className={cn(
-                    "focus-ring flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors",
-                    active === i ? "bg-muted" : "hover:bg-muted",
-                  )}
-                >
-                  <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
-                  {title}
-                </button>
-              ))
-            : suggestions.length > 0
-              ? suggestions.map((item, i) => {
-                  const year = itemYear(item);
-                  return (
-                    <button
-                      key={item.key}
-                      id={`${listId}-opt-${i}`}
-                      role="option"
-                      aria-selected={active === i}
-                      type="button"
-                      onMouseEnter={() => setActive(i)}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => goToItem(item)}
-                      className={cn(
-                        "focus-ring flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
-                        active === i ? "bg-muted" : "hover:bg-muted",
-                      )}
-                    >
-                      <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
-                        {item.posterUrl ? (
-                          <img
-                            src={item.posterUrl}
-                            alt=""
-                            loading="lazy"
-                            className="h-full w-full object-cover"
-                          />
+          {items.length > 0
+            ? items.map((item, i) => {
+                const year = itemYear(item);
+                return (
+                  <button
+                    key={item.key}
+                    id={`${listId}-opt-${i}`}
+                    role="option"
+                    aria-selected={active === i}
+                    type="button"
+                    onMouseEnter={() => setActive(i)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => goToItem(item)}
+                    className={cn(
+                      "focus-ring flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
+                      active === i ? "bg-muted" : "hover:bg-muted",
+                    )}
+                  >
+                    <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
+                      {item.posterUrl ? (
+                        <img
+                          src={item.posterUrl}
+                          alt=""
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
+                      <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-muted-foreground">
+                        <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-medium text-primary">
+                          {MEDIA_TYPE_LABELS[item.mediaType]}
+                        </span>
+                        {year ? <span>{year}</span> : null}
+                        {item.score != null ? (
+                          <span className="inline-flex items-center gap-0.5">
+                            <Star className="h-3 w-3 fill-current text-amber-400" />
+                            {(item.score / 10).toFixed(1)}
+                          </span>
                         ) : null}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
-                        <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-muted-foreground">
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-medium text-primary">
-                            {MEDIA_TYPE_LABELS[item.mediaType]}
-                          </span>
-                          {year ? <span>{year}</span> : null}
-                          {item.score != null ? (
-                            <span className="inline-flex items-center gap-0.5">
-                              <Star className="h-3 w-3 fill-current text-amber-400" />
-                              {(item.score / 10).toFixed(1)}
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })
-              : (
-                <p className="px-3 py-4 text-center text-sm text-muted-foreground">
-                  {isFetching ? "Recherche…" : "Aucun résultat"}
-                </p>
-              )}
+                    </div>
+                  </button>
+                );
+              })
+            : (
+              <p className="px-3 py-4 text-center text-sm text-muted-foreground">
+                {isFetching ? "Recherche…" : "Aucun résultat"}
+              </p>
+            )}
+
         </div>
       ) : null}
     </div>

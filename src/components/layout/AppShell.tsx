@@ -106,13 +106,8 @@ function AuthMenu() {
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="KAZEN — accueil">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl aurora-bg shadow-[var(--shadow-glow)]">
-        <Hexagon className="h-5 w-5 text-white" strokeWidth={2.5} />
-      </span>
-      <span className="font-display text-lg font-extrabold tracking-tight">
-        <span className="aurora-text">KAZEN</span>
-      </span>
+    <Link to="/" className="focus-ring rounded-lg" aria-label="KAZEN — accueil">
+      <KazenLogo size="md" />
     </Link>
   );
 }

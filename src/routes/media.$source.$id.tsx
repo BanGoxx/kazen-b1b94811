@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { RatingBadge } from "@/components/media/RatingBadge";
+import { SafeImage } from "@/components/media/SafeImage";
 import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";

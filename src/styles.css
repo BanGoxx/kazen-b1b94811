@@ -225,7 +225,7 @@ h1, h2, h3, .font-display {
   &:hover {
     box-shadow: var(--shadow-lg), var(--shadow-glow), var(--shadow-inset-line);
     transform: translateY(-6px);
-    border-color: oklch(0.66 0.25 350 / 0.55);
+    border-color: oklch(0.585 0.2 28 / 0.5);
   }
 }
 

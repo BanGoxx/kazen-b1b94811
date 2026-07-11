@@ -185,23 +185,6 @@ export type Database = {
         Args: { p_key: string; p_payload: Json; p_token: string }
         Returns: undefined
       }
-      upsert_media_record_snapshot: {
-        Args: {
-          p_backdrop_url: string
-          p_external_id: string
-          p_genres: string[]
-          p_media_key: string
-          p_media_type: string
-          p_platforms: Json
-          p_poster_url: string
-          p_release_date: string
-          p_score: number
-          p_source: string
-          p_title: string
-          p_title_original: string
-        }
-        Returns: undefined
-      }
     }
     Enums: {
       priority_level: "basse" | "normale" | "haute"

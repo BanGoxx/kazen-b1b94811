@@ -143,12 +143,13 @@
 :root {
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --gradient-aurora: linear-gradient(115deg, oklch(0.71 0.23 355), oklch(0.66 0.25 330) 45%, oklch(0.79 0.13 205));
-  --gradient-surface: linear-gradient(180deg, oklch(0.2 0.026 300), oklch(0.16 0.022 300));
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
-  --shadow-md: 0 8px 24px -8px oklch(0 0 0 / 0.5);
-  --shadow-lg: 0 30px 70px -24px oklch(0 0 0 / 0.7);
-  --shadow-glow: 0 0 40px -8px oklch(0.66 0.25 350 / 0.5);
+  --gradient-aurora: linear-gradient(115deg, oklch(0.62 0.21 32), oklch(0.55 0.2 24) 48%, oklch(0.8 0.07 82));
+  --gradient-surface: linear-gradient(180deg, oklch(0.19 0.008 265), oklch(0.15 0.006 265));
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.45);
+  --shadow-md: 0 8px 24px -8px oklch(0 0 0 / 0.55);
+  --shadow-lg: 0 30px 70px -24px oklch(0 0 0 / 0.75);
+  --shadow-glow: 0 0 34px -10px oklch(0.585 0.2 28 / 0.4);
+
 }
 
 @theme inline {

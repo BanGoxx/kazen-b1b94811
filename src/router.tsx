@@ -6,7 +6,9 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60 * 60,
+        // Client keeps data ~30min; the server layer (20min fresh + 6h SWR)
+        // absorbs re-fetches, so content stays fresh hourly without API abuse.
+        staleTime: 1000 * 60 * 30,
         gcTime: 1000 * 60 * 60 * 2,
         retry: 1,
         refetchOnWindowFocus: false,

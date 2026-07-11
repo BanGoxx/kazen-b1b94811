@@ -181,8 +181,14 @@ export const searchMedia = createServerFn({ method: "GET" })
 export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
     const [anime, movies] = await Promise.all([
-      anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 20 }).catch(() => [] as MediaItem[]),
-      tmdbMovieList("/movie/upcoming", { region: "FR" }).catch(() => [] as MediaItem[]),
+      anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 20 }).catch((e) => {
+        console.error("getUpcomingAll anilist", e);
+        return [] as MediaItem[];
+      }),
+      tmdbMovieList("/movie/upcoming", { region: "FR" }).catch((e) => {
+        console.error("getUpcomingAll tmdb_movies", e);
+        return [] as MediaItem[];
+      }),
     ]);
     return [...anime, ...movies]
       .filter((m) => m.releaseDate)

@@ -134,7 +134,10 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
 }
 
 interface PageResult {
-  Page: { media: Parameters<typeof fromAniList>[0][] };
+  Page: {
+    media: Parameters<typeof fromAniList>[0][];
+    pageInfo?: { currentPage?: number; hasNextPage?: boolean };
+  };
 }
 
 export async function anilistList(params: {
@@ -164,6 +167,41 @@ export async function anilistList(params: {
     search: params.search,
   });
   return (data.Page?.media ?? []).map(fromAniList);
+}
+
+/** Paginated AniList list with hasMore flag for "voir plus" loading. */
+export async function anilistPaged(params: {
+  sort: string;
+  page?: number;
+  perPage?: number;
+  season?: string;
+  seasonYear?: number;
+  status?: string;
+}): Promise<{ items: MediaItem[]; page: number; hasMore: boolean }> {
+  const page = params.page ?? 1;
+  const perPage = params.perPage ?? 30;
+  const gql = `
+    query ($page: Int, $perPage: Int, $sort: [MediaSort], $season: MediaSeason, $seasonYear: Int, $status: MediaStatus) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo { currentPage hasNextPage }
+        media(type: ANIME, sort: $sort, season: $season, seasonYear: $seasonYear, status: $status, isAdult: false) {
+          ${MEDIA_FIELDS}
+        }
+      }
+    }`;
+  const data = await query<PageResult>(gql, {
+    page,
+    perPage,
+    sort: [params.sort],
+    season: params.season,
+    seasonYear: params.seasonYear,
+    status: params.status,
+  });
+  return {
+    items: (data.Page?.media ?? []).map(fromAniList),
+    page,
+    hasMore: Boolean(data.Page?.pageInfo?.hasNextPage),
+  };
 }
 
 export async function anilistDetail(id: number): Promise<MediaDetail | null> {

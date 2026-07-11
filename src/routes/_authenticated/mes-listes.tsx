@@ -50,15 +50,32 @@ function MyListsPage() {
   const { entries, isLoading } = useMyList();
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["value"]>("tous");
   const [type, setType] = useState<MediaType | "tous">("tous");
+  const [platform, setPlatform] = useState<string>("tous");
+  const [tag, setTag] = useState<string>("tous");
+
+  const platforms = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e) => e.item?.platforms.forEach((p) => set.add(p.name)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [entries]);
+
+  const tags = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e) => e.tags.forEach((t) => set.add(t)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [entries]);
 
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       if (tab === "favoris" && !e.favorite) return false;
       if (tab !== "tous" && tab !== "favoris" && e.status !== tab) return false;
       if (type !== "tous" && e.item?.mediaType !== type) return false;
+      if (platform !== "tous" && !e.item?.platforms.some((p) => p.name === platform))
+        return false;
+      if (tag !== "tous" && !e.tags.includes(tag)) return false;
       return true;
     });
-  }, [entries, tab, type]);
+  }, [entries, tab, type, platform, tag]);
 
   return (
     <AppShell>

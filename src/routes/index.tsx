@@ -10,6 +10,7 @@ import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import {
   trendingAnimeQO,
+  popularAnimeQO,
   trendingSeriesQO,
   trendingMoviesQO,
   upcomingAnimeQO,

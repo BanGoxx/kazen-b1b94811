@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ChevronDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendrier")({
@@ -40,6 +41,20 @@ export const Route = createFileRoute("/calendrier")({
     context.queryClient.ensureQueryData(onAirSeriesQO);
   },
   component: CalendarPage,
+  pendingComponent: () => (
+    <AppShell>
+      <PageHeader title="Calendrier" description="Les sorties de la semaine, jour par jour." />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} className="min-h-40 rounded-2xl border border-border bg-card/40 p-2">
+            <Skeleton className="mb-3 h-4 w-10" />
+            <Skeleton className="mb-1.5 h-12 w-full rounded-lg" />
+            <Skeleton className="h-12 w-full rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </AppShell>
+  ),
 });
 
 const TYPE_DOT: Record<MediaType, string> = {

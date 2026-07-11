@@ -223,13 +223,127 @@ function ProfilePage() {
                   placeholder="Parlez de vos goûts…"
                 />
               </div>
-              <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
-              </Button>
             </>
           )}
         </section>
+
+        {/* Préférences de goût — alimentent les recommandations « Pour vous » */}
+        <section className="space-y-6 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+              <Heart className="h-5 w-5 text-primary" /> Mes préférences
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sélectionne tes goûts pour affiner tes recommandations personnalisées.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Types préférés</Label>
+            <div className="flex flex-wrap gap-2">
+              {TYPE_OPTIONS.map((t) => (
+                <Chip
+                  key={t.value}
+                  active={types.includes(t.value)}
+                  onClick={() => setTypes((prev) => toggle(prev, t.value))}
+                >
+                  {t.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Genres préférés</Label>
+            <div className="flex flex-wrap gap-2">
+              {GENRE_OPTIONS.map((g) => (
+                <Chip
+                  key={g}
+                  active={genres.includes(g)}
+                  onClick={() => setGenres((prev) => toggle(prev, g))}
+                >
+                  {g}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Styles favoris</Label>
+            <div className="flex flex-wrap gap-2">
+              {STYLE_OPTIONS.map((s) => (
+                <Chip
+                  key={s}
+                  active={styles.includes(s)}
+                  onClick={() => setStyles((prev) => toggle(prev, s))}
+                >
+                  {s}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Aperçu recommandations + assistant */}
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/25 bg-primary/5 p-5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+              <Sparkles className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-display text-base font-bold">Pour vous</p>
+              <p className="text-sm text-muted-foreground">
+                Des suggestions adaptées à tes goûts et à ton historique.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <RecommendationAssistant
+              trigger={
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Wand2 className="h-4 w-4" /> Assistant
+                </Button>
+              }
+            />
+            <Button asChild variant="aurora" size="sm">
+              <Link to="/pour-vous">Voir</Link>
+            </Button>
+          </div>
+        </section>
+
+        <div className="flex justify-end">
+          <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
+          </Button>
+        </div>
       </div>
     </AppShell>
   );
 }
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/15 text-primary"
+          : "border-border bg-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+

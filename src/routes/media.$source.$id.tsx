@@ -29,11 +29,43 @@ export const Route = createFileRoute("/media/$source/$id")({
       mediaDetailQO(params.source, params.id),
     );
     if (!item) throw notFound();
+    return { item };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Fiche introuvable — KAZEN" }] };
-    return { meta: [{ title: "Fiche — KAZEN" }] };
+    const item = loaderData?.item;
+    if (!item) {
+      return {
+        meta: [
+          { title: "Fiche introuvable — KAZEN" },
+          { name: "description", content: "Ce contenu n'est pas disponible sur KAZEN." },
+        ],
+      };
+    }
+    const kind = MEDIA_TYPE_LABELS[item.mediaType];
+    const title = `${item.title} — ${kind} — KAZEN`;
+    const rawSynopsis = item.synopsis?.trim();
+    const description = rawSynopsis
+      ? rawSynopsis.length > 155
+        ? `${rawSynopsis.slice(0, 152).trimEnd()}…`
+        : rawSynopsis
+      : `Découvrez ${item.title} sur KAZEN : plateformes, casting, bande-annonce et suivi personnel.`;
+    const image = item.backdropUrl || item.posterUrl;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "video.other" },
+        ...(image ? [{ property: "og:image", content: image }] : []),
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
+      ],
+    };
   },
+
   component: MediaDetailPage,
   pendingComponent: () => (
     <AppShell>

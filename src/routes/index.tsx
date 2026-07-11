@@ -28,9 +28,30 @@ const QUICK_NAV = [
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "KAZEN — Découvrez anime, séries et films" },
-      { name: "description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/" }],
+    meta: [{ property: "og:url", content: "https://kazen.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "KAZEN",
+          url: "https://kazen.lovable.app/",
+          description:
+            "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://kazen.lovable.app/recherche?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "KAZEN",
+            url: "https://kazen.lovable.app/",
+          },
+        }),
+      },
     ],
   }),
   loader: async ({ context }) => {

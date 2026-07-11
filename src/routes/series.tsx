@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { CatalogGrid } from "@/components/media/CatalogGrid";
+import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { trendingSeriesQO, popularSeriesQO, onAirSeriesQO } from "@/lib/queries";
+import { seriesPageQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/series")({
   head: () => ({
@@ -13,19 +12,13 @@ export const Route = createFileRoute("/series")({
       { name: "description", content: "Séries tendance, populaires et en cours de diffusion, avec plateformes de streaming." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(trendingSeriesQO);
-    context.queryClient.prefetchQuery(popularSeriesQO);
-    context.queryClient.prefetchQuery(onAirSeriesQO);
+  loader: async ({ context }) => {
+    await context.queryClient.ensureInfiniteQueryData(seriesPageQO("trending"));
   },
   component: SeriesPage,
 });
 
 function SeriesPage() {
-  const trending = useSuspenseQuery(trendingSeriesQO);
-  const popular = useSuspenseQuery(popularSeriesQO);
-  const onair = useSuspenseQuery(onAirSeriesQO);
-
   return (
     <AppShell>
       <PageHeader title="Séries" description="Les séries à ne pas manquer, d'ici et d'ailleurs." />
@@ -36,13 +29,13 @@ function SeriesPage() {
           <TabsTrigger value="onair">En diffusion</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <CatalogGrid items={trending.data} />
+          <PaginatedCatalog queryOptions={seriesPageQO("trending")} />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <CatalogGrid items={popular.data} />
+          <PaginatedCatalog queryOptions={seriesPageQO("popular")} />
         </TabsContent>
         <TabsContent value="onair" className="mt-6">
-          <CatalogGrid items={onair.data} />
+          <PaginatedCatalog queryOptions={seriesPageQO("onair")} />
         </TabsContent>
       </Tabs>
     </AppShell>

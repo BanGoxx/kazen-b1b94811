@@ -50,40 +50,34 @@ async function readSharedCache<T>(
 ): Promise<{ value: T; fetchedAt: number } | null> {
   try {
     const { data, error } = await (supabaseAdmin as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (c: string, v: string) => {
-            maybeSingle: () => Promise<{
-              data: { payload: unknown; fetched_at: string } | null;
-              error: unknown;
-            }>;
-          };
-        };
-      };
-    })
-      .from(SHARED_CACHE_TABLE)
-      .select("payload, fetched_at")
-      .eq("cache_key", key)
-      .maybeSingle();
-    if (error || !data) return null;
-    return { value: data.payload as T, fetchedAt: new Date(data.fetched_at).getTime() };
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{
+        data: Array<{ payload: unknown; fetched_at: string }> | null;
+        error: unknown;
+      }>;
+    }).rpc("anilist_cache_get", { p_key: key });
+    if (error || !data || !data[0]) return null;
+    return {
+      value: data[0].payload as T,
+      fetchedAt: new Date(data[0].fetched_at).getTime(),
+    };
   } catch {
     return null;
   }
 }
 
-// L2 write — fire-and-forget; a failure must never break a request.
+// L2 write — fire-and-forget; a failure must never break a request. Requires
+// the server-only token, read at call time (env is injected per request on
+// Workers), so browser/anon callers can never write to the shared cache.
 async function writeSharedCache(key: string, value: unknown): Promise<void> {
+  const token = process.env.ANILIST_CACHE_TOKEN;
+  if (!token) return;
   try {
     await (supabaseAdmin as unknown as {
-      from: (t: string) => {
-        upsert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
-      };
-    })
-      .from(SHARED_CACHE_TABLE)
-      .upsert({ cache_key: key, payload: value, fetched_at: new Date().toISOString() });
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }>;
+    }).rpc("anilist_cache_put", { p_key: key, p_payload: value, p_token: token });
   } catch {
     /* ignore cache write failures */
+
   }
 }
 

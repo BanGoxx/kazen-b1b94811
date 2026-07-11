@@ -1,6 +1,11 @@
 // Server-only AniList GraphQL access. AniList is a public keyless GraphQL API.
 import { fromAniList } from "./normalize";
-import type { MediaItem } from "./media-types";
+import type {
+  CreditPerson,
+  MediaDetail,
+  MediaItem,
+  RelatedMedia,
+} from "./media-types";
 
 const ENDPOINT = "https://graphql.anilist.co";
 

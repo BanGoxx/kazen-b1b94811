@@ -75,22 +75,94 @@ function extractPlatforms(wp: WatchProviders): Platform[] {
   return dedupePlatforms(out);
 }
 
-export async function tmdbMovieDetail(id: number): Promise<MediaItem | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & WatchProviders>(
+export async function tmdbMovieDetail(id: number): Promise<MediaDetail | null> {
+  const data = await tmdb<Parameters<typeof fromTmdbMovie>[0] & TmdbExtra & { belongs_to_collection?: { name?: string } | null }>(
     `/movie/${id}`,
-    { append_to_response: "watch/providers" },
+    { append_to_response: "watch/providers,credits,videos,recommendations" },
   );
   if (!data) return null;
-  return fromTmdbMovie(data, extractPlatforms(data));
+  const bmedia = fromTmdbMovie(data, extractPlatforms(data));
+  return augmentTmdb(bmedia, data, "movie", {
+    collectionName: data.belongs_to_collection?.name ?? null,
+    format: "Film",
+  });
 }
 
-export async function tmdbTvDetail(id: number): Promise<MediaItem | null> {
-  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & WatchProviders>(
+export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
+  const data = await tmdb<Parameters<typeof fromTmdbTv>[0] & TmdbExtra & { networks?: { name?: string }[] | null }>(
     `/tv/${id}`,
-    { append_to_response: "watch/providers" },
+    { append_to_response: "watch/providers,credits,videos,recommendations" },
   );
   if (!data) return null;
-  return fromTmdbTv(data, extractPlatforms(data));
+  const bmedia = fromTmdbTv(data, extractPlatforms(data));
+  return augmentTmdb(bmedia, data, "tv", {
+    studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
+    format: "Série",
+  });
+}
+
+interface TmdbExtra {
+  credits?: {
+    cast?: { id: number; name: string; character?: string | null; profile_path?: string | null }[];
+    crew?: { id: number; name: string; job?: string | null; profile_path?: string | null }[];
+  } | null;
+  videos?: { results?: { key: string; site: string; type: string; official?: boolean }[] } | null;
+  recommendations?: { results?: Record<string, unknown>[] } | null;
+}
+
+const TMDB_PROFILE = "https://image.tmdb.org/t/p/w185";
+const IMPORTANT_JOBS = ["Director", "Screenplay", "Writer", "Creator", "Producer", "Original Music Composer"];
+
+function augmentTmdb(
+  bmedia: MediaItem,
+  data: TmdbExtra,
+  kind: "movie" | "tv",
+  extra: { collectionName?: string | null; studios?: string[]; format: string },
+): MediaDetail {
+  const cast: CreditPerson[] = (data.credits?.cast ?? []).slice(0, 14).map((c) => ({
+    id: `c${c.id}`,
+    name: c.name,
+    role: c.character ?? null,
+    photoUrl: c.profile_path ? `${TMDB_PROFILE}${c.profile_path}` : null,
+  }));
+  const crew: CreditPerson[] = (data.credits?.crew ?? [])
+    .filter((c) => c.job && IMPORTANT_JOBS.includes(c.job))
+    .slice(0, 10)
+    .map((c) => ({
+      id: `s${c.id}-${c.job}`,
+      name: c.name,
+      role: c.job ?? null,
+      photoUrl: c.profile_path ? `${TMDB_PROFILE}${c.profile_path}` : null,
+    }));
+  const trailer = (data.videos?.results ?? []).find(
+    (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"),
+  );
+  const related: RelatedMedia[] = (data.recommendations?.results ?? [])
+    .slice(0, 12)
+    .map((r) => (kind === "movie" ? fromTmdbMovie(r as Parameters<typeof fromTmdbMovie>[0]) : fromTmdbTv(r as Parameters<typeof fromTmdbTv>[0])))
+    .map((m) => ({
+      key: m.key,
+      source: m.source,
+      externalId: m.externalId,
+      title: m.title,
+      posterUrl: m.posterUrl,
+      relation: "Recommandé",
+      mediaType: m.mediaType,
+    }));
+  return {
+    ...bmedia,
+    trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : null,
+    format: extra.format,
+    seasonLabel: null,
+    studios: extra.studios ?? [],
+    popularity: null,
+    castLabel: "Casting",
+    cast,
+    crewLabel: kind === "movie" ? "Réalisation & scénario" : "Création",
+    crew,
+    related,
+    collectionName: extra.collectionName ?? null,
+  };
 }
 
 export async function tmdbSearch(q: string): Promise<MediaItem[]> {

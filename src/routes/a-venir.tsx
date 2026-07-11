@@ -25,8 +25,8 @@ export const Route = createFileRoute("/a-venir")({
       { name: "description", content: "Toutes les prochaines sorties anime, séries et films, classées par date de sortie." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(upcomingAllQO);
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(upcomingAllQO);
   },
   component: UpcomingPage,
   pendingComponent: () => (

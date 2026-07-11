@@ -131,7 +131,7 @@ export function ListControls({ item }: { item: MediaItem }) {
                 key={n}
                 type="button"
                 aria-label={`Noter ${n} sur 10`}
-                onClick={() => patch({ rating: entry?.rating === n ? null : n })}
+                onClick={() => patch({ rating: entry?.rating === n ? null : n }, entry?.rating === n ? undefined : "Note enregistrée")}
                 className="focus-ring rounded p-0.5"
               >
                 <Star

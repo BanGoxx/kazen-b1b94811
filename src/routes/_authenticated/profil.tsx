@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LogOut, Loader2, UserRound } from "lucide-react";
+import { LogOut, Loader2, UserRound, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
 import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
+import { usePremium } from "@/lib/premium";
+import { SupporterBadge } from "@/components/premium/SupporterBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

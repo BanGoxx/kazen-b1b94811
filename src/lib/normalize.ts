@@ -45,6 +45,19 @@ function aniListStatus(status?: string | null): MediaStatus | null {
   }
 }
 
+// AniList genre (EN enum) -> FR label. Falls back to the raw value if unknown.
+const ANILIST_GENRES: Record<string, string> = {
+  Action: "Action", Adventure: "Aventure", Comedy: "Comédie", Drama: "Drame",
+  Ecchi: "Ecchi", Fantasy: "Fantastique", Horror: "Horreur", "Mahou Shoujo": "Magical Girl",
+  Mecha: "Mecha", Music: "Musique", Mystery: "Mystère", Psychological: "Psychologique",
+  Romance: "Romance", "Sci-Fi": "Science-Fiction", "Slice of Life": "Tranche de vie",
+  Sports: "Sport", Supernatural: "Surnaturel", Thriller: "Thriller",
+};
+
+function aniListGenres(genres?: string[] | null): string[] {
+  return (genres ?? []).map((g) => ANILIST_GENRES[g] ?? g);
+}
+
 export function fromAniList(m: AniListMedia): MediaItem {
   const platforms: Platform[] = [];
   for (const link of m.externalLinks ?? []) {
@@ -62,7 +75,7 @@ export function fromAniList(m: AniListMedia): MediaItem {
     synopsis: stripHtml(m.description),
     posterUrl: m.coverImage?.extraLarge || m.coverImage?.large || null,
     backdropUrl: m.bannerImage || null,
-    genres: m.genres ?? [],
+    genres: aniListGenres(m.genres),
     score: m.averageScore ?? null,
     status: aniListStatus(m.status),
     releaseDate: aniListDate(m.startDate),
@@ -121,8 +134,20 @@ const TMDB_GENRES: Record<number, string> = {
   10766: "Feuilleton", 10767: "Talk", 10768: "Guerre & Politique",
 };
 
+// TMDB genre name (EN) -> FR, for when the API returns English genre objects.
+const TMDB_GENRE_NAMES: Record<string, string> = {
+  Action: "Action", Adventure: "Aventure", Animation: "Animation", Comedy: "Comédie",
+  Crime: "Crime", Documentary: "Documentaire", Drama: "Drame", Family: "Familial",
+  Fantasy: "Fantastique", History: "Histoire", Horror: "Horreur", Music: "Musique",
+  Mystery: "Mystère", Romance: "Romance", "Science Fiction": "Science-Fiction",
+  "TV Movie": "Téléfilm", Thriller: "Thriller", War: "Guerre", Western: "Western",
+  "Action & Adventure": "Action & Aventure", Kids: "Enfants", News: "Info",
+  Reality: "Télé-réalité", "Sci-Fi & Fantasy": "SF & Fantastique", Soap: "Feuilleton",
+  Talk: "Talk", "War & Politics": "Guerre & Politique",
+};
+
 function tmdbGenres(b: TmdbBase): string[] {
-  if (b.genres?.length) return b.genres.map((g) => g.name);
+  if (b.genres?.length) return b.genres.map((g) => TMDB_GENRE_NAMES[g.name] ?? g.name);
   return (b.genre_ids ?? []).map((id) => TMDB_GENRES[id]).filter(Boolean);
 }
 

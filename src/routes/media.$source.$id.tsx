@@ -186,9 +186,9 @@ function MediaDetailPage() {
               {facts.map((f) => {
                 const Icon = f.icon;
                 return (
-                  <div key={f.label} className="rounded-xl border border-border bg-card/60 p-3">
+                  <div key={f.label} className="hover-lift rounded-xl border border-border bg-card/60 p-3 backdrop-blur transition-colors hover:border-primary/40">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Icon className="h-3.5 w-3.5" /> {f.label}
+                      <Icon className="h-3.5 w-3.5 text-primary" /> {f.label}
                     </div>
                     <p className="mt-1 font-semibold">{f.value}</p>
                   </div>

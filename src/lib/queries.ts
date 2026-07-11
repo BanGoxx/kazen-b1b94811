@@ -16,8 +16,6 @@ import {
 } from "./discover.functions";
 
 const HOUR = 1000 * 60 * 60;
-const GC_TIME = 1000 * 60 * 60 * 2;
-void GC_TIME;
 
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],

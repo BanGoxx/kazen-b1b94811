@@ -10,13 +10,16 @@ export function MediaCarousel({
   action,
   items,
   isLoading,
+  hideWhenEmpty,
 }: {
   title: string;
   subtitle?: string;
   action?: { label: string; to: string };
   items: MediaItem[];
   isLoading?: boolean;
+  hideWhenEmpty?: boolean;
 }) {
+  if (hideWhenEmpty && !isLoading && !items.length) return null;
   return (
     <section className="animate-fade-in">
       <SectionHeader title={title} subtitle={subtitle} action={action} />

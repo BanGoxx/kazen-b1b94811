@@ -1,4 +1,5 @@
 // Server-only AniList GraphQL access. AniList is a public keyless GraphQL API.
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { fromAniList } from "./normalize";
 import type {
   CreditPerson,
@@ -10,6 +11,13 @@ import type {
 const ENDPOINT = "https://graphql.anilist.co";
 const CACHE_TTL_MS = 1000 * 60 * 20;
 const STALE_TTL_MS = 1000 * 60 * 60 * 24;
+
+// Shared (cross-isolate) cache. In-memory cache is L1 (fast, per worker
+// isolate); Postgres (via SECURITY DEFINER RPCs) is L2 — survives cold starts
+// and worker restarts so anime payloads fetched by one isolate are reused by
+// all others, which is the main defense against AniList 429s in production.
+// Reads are open (public anime metadata only); writes require a server-only
+// token (read at call time), since the Data API treats our worker as anon.
 
 type CacheEntry<T> = {
   value?: T;
@@ -23,7 +31,54 @@ let anilistQueue = Promise.resolve();
 let lastAniListRequestAt = 0;
 
 function cacheKey(gql: string, variables: Record<string, unknown>): string {
-  return JSON.stringify({ gql, variables });
+  // 64-bit-ish FNV-1a of the full query+vars, kept short so it fits a text PK
+  // index comfortably. Collisions across our small query set are negligible.
+  const raw = JSON.stringify({ gql, variables });
+  let h1 = 0x811c9dc5;
+  let h2 = 0xc2b2ae35;
+  for (let i = 0; i < raw.length; i += 1) {
+    const c = raw.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193);
+    h2 = Math.imul(h2 ^ c, 0x85ebca6b);
+  }
+  return `al_${(h1 >>> 0).toString(16)}${(h2 >>> 0).toString(16)}`;
+}
+
+// L2 read — never throws; a cache miss/failure just falls through to fetch.
+async function readSharedCache<T>(
+  key: string,
+): Promise<{ value: T; fetchedAt: number } | null> {
+  try {
+    const { data, error } = await (supabaseAdmin as unknown as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{
+        data: Array<{ payload: unknown; fetched_at: string }> | null;
+        error: unknown;
+      }>;
+    }).rpc("anilist_cache_get", { p_key: key });
+    if (error || !data || !data[0]) return null;
+    return {
+      value: data[0].payload as T,
+      fetchedAt: new Date(data[0].fetched_at).getTime(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// L2 write — fire-and-forget; a failure must never break a request. Requires
+// the server-only token, read at call time (env is injected per request on
+// Workers), so browser/anon callers can never write to the shared cache.
+async function writeSharedCache(key: string, value: unknown): Promise<void> {
+  const token = process.env.ANILIST_CACHE_TOKEN;
+  if (!token) return;
+  try {
+    await (supabaseAdmin as unknown as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }>;
+    }).rpc("anilist_cache_put", { p_key: key, p_payload: value, p_token: token });
+  } catch {
+    /* ignore cache write failures */
+
+  }
 }
 
 function wait(ms: number) {
@@ -66,6 +121,19 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
   if (cached?.pending) return cached.pending;
 
   const pending = (async () => {
+    // L2: reuse a fresh payload another isolate already fetched. This is what
+    // keeps anime rows populated across cold starts without hitting AniList.
+    const shared = await readSharedCache<T>(key);
+    if (shared && Date.now() - shared.fetchedAt < CACHE_TTL_MS) {
+      queryCache.set(key, {
+        value: shared.value,
+        expiresAt: shared.fetchedAt + CACHE_TTL_MS,
+        staleUntil: shared.fetchedAt + STALE_TTL_MS,
+        pending: queryCache.get(key)?.pending,
+      });
+      return shared.value;
+    }
+
     let lastError: unknown;
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -96,7 +164,10 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
           value,
           expiresAt: Date.now() + CACHE_TTL_MS,
           staleUntil: Date.now() + STALE_TTL_MS,
+          pending: queryCache.get(key)?.pending,
         });
+        // Fire-and-forget: publish to the shared cache for other isolates.
+        void writeSharedCache(key, value);
         return value;
       } catch (error) {
         lastError = error;
@@ -104,14 +175,24 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
       }
     }
 
-    // Last resort: serve ANY previously cached value rather than surfacing an
-    // error screen. Stale anime data is strictly better than an empty/errored
-    // section, and it lets key anime pages recover as soon as a good fetch
-    // succeeded once. Only a true cold-start (never fetched) throws, which the
-    // client then retries.
+    // Stale-if-error, in-memory first: serve ANY previously cached value rather
+    // than an error screen.
     if (cached?.value) {
-      console.error("AniList source indisponible, cache existant conservé", lastError);
+      console.error("AniList indisponible, cache mémoire conservé", lastError);
       return cached.value;
+    }
+
+    // Stale-if-error, shared cache: even an expired shared payload beats an
+    // empty/errored anime section across a cold isolate.
+    if (shared) {
+      console.error("AniList indisponible, cache partagé (périmé) conservé", lastError);
+      queryCache.set(key, {
+        value: shared.value,
+        expiresAt: 0,
+        staleUntil: shared.fetchedAt + STALE_TTL_MS,
+        pending: queryCache.get(key)?.pending,
+      });
+      return shared.value;
     }
 
     throw lastError instanceof Error ? lastError : new Error("AniList request failed");

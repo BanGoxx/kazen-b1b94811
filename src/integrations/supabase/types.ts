@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      anilist_cache: {
+        Row: {
+          cache_key: string
+          fetched_at: string
+          payload: Json
+        }
+        Insert: {
+          cache_key: string
+          fetched_at?: string
+          payload: Json
+        }
+        Update: {
+          cache_key?: string
+          fetched_at?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       list_items: {
         Row: {
           created_at: string
@@ -156,7 +174,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      anilist_cache_get: {
+        Args: { p_key: string }
+        Returns: {
+          fetched_at: string
+          payload: Json
+        }[]
+      }
+      anilist_cache_put: {
+        Args: { p_key: string; p_payload: Json; p_token: string }
+        Returns: undefined
+      }
     }
     Enums: {
       priority_level: "basse" | "normale" | "haute"

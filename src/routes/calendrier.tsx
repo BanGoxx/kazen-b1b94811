@@ -316,7 +316,7 @@ function CalendarEntry({ item }: { item: MediaItem }) {
     >
       <div className="relative h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
         {item.posterUrl ? (
-          <img src={item.posterUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={item.posterUrl} alt={`Affiche de ${item.title}`} loading="lazy" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
             <ImageOff className="h-3 w-3" />

@@ -99,7 +99,7 @@ function MediaDetailPage() {
   return (
     <AppShell>
       {/* Cinematic backdrop */}
-      <div className="relative -mx-4 -mt-8 mb-0 h-64 overflow-hidden sm:-mx-6 sm:h-80 lg:-mx-10 lg:h-[26rem]">
+      <div className="grain relative -mx-4 -mt-8 mb-0 h-64 overflow-hidden sm:-mx-6 sm:h-80 lg:-mx-10 lg:h-[26rem]">
         {item.backdropUrl ? (
           <img src={item.backdropUrl} alt="" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-105 object-cover" />
         ) : (
@@ -107,11 +107,12 @@ function MediaDetailPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />
         <Button
           variant="secondary"
           size="sm"
           onClick={() => router.history.back()}
-          className="absolute left-4 top-4 sm:left-6"
+          className="absolute left-4 top-4 border border-white/10 backdrop-blur transition-transform hover:scale-[1.03] sm:left-6"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Retour
         </Button>
@@ -121,7 +122,7 @@ function MediaDetailPage() {
         {/* Left column: poster + platforms + user panel */}
         <div className="space-y-5">
           <div className="mx-auto w-44 sm:w-52 lg:mx-0 lg:w-full">
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-lg)]">
+            <div className="poster-glow overflow-hidden rounded-2xl border border-border bg-card">
               {item.posterUrl ? (
                 <img src={item.posterUrl} alt={item.title} loading="eager" decoding="async" width={300} height={450} className="aspect-[2/3] w-full object-cover" />
               ) : (

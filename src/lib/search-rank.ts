@@ -68,27 +68,50 @@ export interface RankedItem {
   score: number;
 }
 
-/** Rank a merged pool of media items for the predictive dropdown. */
-export function rankSuggestions(query: string, pool: MediaItem[], limit = 7): MediaItem[] {
+/**
+ * Rank grouped media results for the predictive dropdown.
+ * Each source (AniList SEARCH_MATCH, TMDB search) already returns its list in
+ * relevance+popularity order, so an item's position is a strong popularity
+ * proxy — far more reliable than raw score for obscure titles. We blend:
+ *   relevance (prefix/fuzzy) + popularity (source position) + quality (score).
+ */
+export function rankSuggestions(
+  query: string,
+  groups: { anime?: MediaItem[]; series?: MediaItem[]; movies?: MediaItem[] } | MediaItem[],
+  limit = 7,
+): MediaItem[] {
   const q = normalize(query);
   if (!q) return [];
+
+  // Accept either grouped input or a flat pool (flat = no popularity signal).
+  const sources: MediaItem[][] = Array.isArray(groups)
+    ? [groups]
+    : [groups.anime ?? [], groups.series ?? [], groups.movies ?? []];
 
   const seen = new Set<string>();
   const ranked: RankedItem[] = [];
 
-  for (const item of pool) {
-    if (seen.has(item.key)) continue;
-    const rel = Math.max(titleScore(q, item.title), item.titleOriginal ? titleScore(q, item.titleOriginal) * 0.9 : 0);
-    if (rel <= 0) continue;
-    seen.add(item.key);
+  for (const list of sources) {
+    list.forEach((item, index) => {
+      if (seen.has(item.key)) return;
+      const rel = Math.max(
+        titleScore(q, item.title),
+        item.titleOriginal ? titleScore(q, item.titleOriginal) * 0.9 : 0,
+      );
+      if (rel <= 0) return;
+      seen.add(item.key);
 
-    // Popularity / trend / quality proxy: normalized score (0-100).
-    const quality = item.score != null ? item.score : 45; // neutral default
-    // Blend: relevance dominates, quality breaks ties and lifts strong titles.
-    const finalScore = rel + quality * 0.6;
-    ranked.push({ item, score: finalScore });
+      // Popularity proxy: earlier in the source list = more popular. Strong,
+      // decaying bonus so well-known titles win ties on short queries.
+      const popularity = Math.max(0, 120 - index * 10);
+      // Quality proxy: normalized score (0-100), light tie-breaker only.
+      const quality = item.score != null ? item.score : 45;
+      const finalScore = rel + popularity + quality * 0.25;
+      ranked.push({ item, score: finalScore });
+    });
   }
 
   ranked.sort((a, b) => b.score - a.score);
   return ranked.slice(0, limit).map((r) => r.item);
 }
+

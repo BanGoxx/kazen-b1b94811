@@ -30,8 +30,8 @@ export const Route = createFileRoute("/media/$source/$id")({
     if (!item) throw notFound();
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Fiche introuvable — NEXUS MEDIA" }] };
-    return { meta: [{ title: "Fiche — NEXUS MEDIA" }] };
+    if (!loaderData) return { meta: [{ title: "Fiche introuvable — KAZEN" }] };
+    return { meta: [{ title: "Fiche — KAZEN" }] };
   },
   component: MediaDetailPage,
   notFoundComponent: () => (

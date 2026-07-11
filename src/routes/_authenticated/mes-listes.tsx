@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/mes-listes")({
   head: () => ({
     meta: [
-      { title: "Mes listes — NEXUS MEDIA" },
+      { title: "Mes listes — KAZEN" },
       {
         name: "description",
         content: "Gérez vos anime, séries et films suivis, favoris et notes personnelles.",

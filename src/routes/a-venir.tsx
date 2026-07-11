@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/a-venir")({
   head: () => ({
     meta: [
-      { title: "À venir — NEXUS MEDIA" },
+      { title: "À venir — KAZEN" },
       { name: "description", content: "Toutes les prochaines sorties anime, séries et films, classées par date de sortie." },
     ],
   }),

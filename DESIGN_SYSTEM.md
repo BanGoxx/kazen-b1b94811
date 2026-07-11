@@ -1,4 +1,4 @@
-# NEXUS MEDIA — Système de design
+# KAZEN — Système de design
 
 > Langage visuel « Aurora » : sombre, cinématographique, éditorial et premium.
 > Interface 100 % française. Dark mode d'abord, light mode soigné ensuite.
@@ -239,7 +239,7 @@ Le chargement initial passe par le loader + `useSuspenseQuery`.
 - Variante éditoriale : fond `oklch(0.98…)`, cartes blanches, bordures fines.
 - Primary/accent légèrement assombris pour rester contrastés sur blanc.
 - Halos et verre atténués ; on privilégie l'ombre douce à la lueur.
-- Bascule via `.light` sur `<html>` (`ThemeToggle`, persistée `nexus-theme`).
+- Bascule via `.light` sur `<html>` (`ThemeToggle`, persistée `nexus-theme` (clé interne conservée)).
 
 ---
 

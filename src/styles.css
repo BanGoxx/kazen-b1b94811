@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * NEXUS MEDIA — design system.
+ * KAZEN — design system.
  * Dark-first, premium "aurora" identity: obsidian surfaces, electric violet
  * primary, cyan + fuchsia accents. Light mode is a clean editorial variant.
  * All colors in oklch. Map tokens to utilities via @theme inline.

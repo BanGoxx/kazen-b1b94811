@@ -9,7 +9,7 @@ import { trendingMoviesQO, popularMoviesQO, upcomingMoviesQO } from "@/lib/queri
 export const Route = createFileRoute("/films")({
   head: () => ({
     meta: [
-      { title: "Films — NEXUS MEDIA" },
+      { title: "Films — KAZEN" },
       { name: "description", content: "Films tendance, populaires et à venir, avec leurs plateformes de disponibilité." },
     ],
   }),

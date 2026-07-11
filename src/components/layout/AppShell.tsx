@@ -231,6 +231,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               </Button>
               <ThemeToggle />
+              <AuthMenu />
             </div>
           </header>
 

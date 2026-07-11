@@ -8,7 +8,7 @@ import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
 import { useMyList } from "@/lib/use-list";
 import { useAuth } from "@/lib/auth";
 import {
-  rankForYou,
+  rankForYouAnimeFirst,
   rankByGenre,
   rankFreshForYou,
   rankDiscovery,
@@ -22,7 +22,7 @@ export function ForYouRails() {
   const { user, ready } = useAuth();
 
   const forYou = useMemo<MediaItem[]>(
-    () => rankForYou(pool, profile, { limit: 24 }).map((s) => s.item),
+    () => rankForYouAnimeFirst(pool, profile, { limit: 24 }).map((s) => s.item),
     [pool, profile],
   );
 

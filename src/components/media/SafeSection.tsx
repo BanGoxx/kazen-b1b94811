@@ -56,6 +56,19 @@ function DefaultFallback({ retry, minHeight }: { retry: () => void; minHeight: s
   );
 }
 
+function DefaultPending({ minHeight }: { minHeight: string }) {
+  return (
+    <div
+      aria-busy="true"
+      className="flex items-center gap-3 rounded-2xl border border-border bg-card/35 px-5 py-6 text-sm text-muted-foreground"
+      style={{ minHeight }}
+    >
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+      Chargement de la section…
+    </div>
+  );
+}
+
 /**
  * Isolates a data-driven section: its own error boundary contains fetch/render
  * failures, and its own Suspense boundary shows a local pending state. Failures
@@ -81,7 +94,7 @@ export function SafeSection({
             errorFallback ?? <DefaultFallback retry={retry} minHeight={minHeight} />
           }
         >
-          <Suspense fallback={pending ?? null}>{children}</Suspense>
+          <Suspense fallback={pending ?? <DefaultPending minHeight={minHeight} />}>{children}</Suspense>
         </SectionErrorBoundary>
       )}
     </QueryErrorResetBoundary>

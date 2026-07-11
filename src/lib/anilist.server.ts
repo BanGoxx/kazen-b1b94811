@@ -11,6 +11,7 @@ import type {
 const ENDPOINT = "https://graphql.anilist.co";
 const CACHE_TTL_MS = 1000 * 60 * 20;
 const STALE_TTL_MS = 1000 * 60 * 60 * 24;
+const REQUEST_TIMEOUT_MS = 6500;
 
 // Shared (cross-isolate) cache. In-memory cache is L1 (fast, per worker
 // isolate); Postgres (via SECURITY DEFINER RPCs) is L2 — survives cold starts
@@ -85,12 +86,22 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function fetchWithTimeout(init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(ENDPOINT, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function queuedAniListFetch(init: RequestInit): Promise<Response> {
   const run = anilistQueue.then(async () => {
     const elapsed = Date.now() - lastAniListRequestAt;
     if (elapsed < 450) await wait(450 - elapsed);
     lastAniListRequestAt = Date.now();
-    return fetch(ENDPOINT, init);
+    return fetchWithTimeout(init);
   });
   anilistQueue = run.then(() => undefined, () => undefined);
   return run;

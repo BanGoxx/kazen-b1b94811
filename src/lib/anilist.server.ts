@@ -13,10 +13,12 @@ const CACHE_TTL_MS = 1000 * 60 * 20;
 const STALE_TTL_MS = 1000 * 60 * 60 * 24;
 
 // Shared (cross-isolate) cache. In-memory cache is L1 (fast, per worker
-// isolate); this Postgres table is L2 — survives cold starts and worker
-// restarts so anime payloads fetched by one isolate are reused by all others,
-// which is the main defense against AniList 429s in production.
-const SHARED_CACHE_TABLE = "anilist_cache";
+// isolate); Postgres (via SECURITY DEFINER RPCs) is L2 — survives cold starts
+// and worker restarts so anime payloads fetched by one isolate are reused by
+// all others, which is the main defense against AniList 429s in production.
+// Reads are open (public anime metadata only); writes require this server-only
+// token, since the Data API treats our worker as the anon role.
+const CACHE_WRITE_TOKEN = process.env.ANILIST_CACHE_TOKEN;
 
 type CacheEntry<T> = {
   value?: T;

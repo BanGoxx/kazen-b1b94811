@@ -1,4 +1,5 @@
 // Server-only AniList GraphQL access. AniList is a public keyless GraphQL API.
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { fromAniList } from "./normalize";
 import type {
   CreditPerson,
@@ -10,6 +11,12 @@ import type {
 const ENDPOINT = "https://graphql.anilist.co";
 const CACHE_TTL_MS = 1000 * 60 * 20;
 const STALE_TTL_MS = 1000 * 60 * 60 * 24;
+
+// Shared (cross-isolate) cache. In-memory cache is L1 (fast, per worker
+// isolate); this Postgres table is L2 — survives cold starts and worker
+// restarts so anime payloads fetched by one isolate are reused by all others,
+// which is the main defense against AniList 429s in production.
+const SHARED_CACHE_TABLE = "anilist_cache";
 
 type CacheEntry<T> = {
   value?: T;
@@ -23,7 +30,60 @@ let anilistQueue = Promise.resolve();
 let lastAniListRequestAt = 0;
 
 function cacheKey(gql: string, variables: Record<string, unknown>): string {
-  return JSON.stringify({ gql, variables });
+  // 64-bit-ish FNV-1a of the full query+vars, kept short so it fits a text PK
+  // index comfortably. Collisions across our small query set are negligible.
+  const raw = JSON.stringify({ gql, variables });
+  let h1 = 0x811c9dc5;
+  let h2 = 0xc2b2ae35;
+  for (let i = 0; i < raw.length; i += 1) {
+    const c = raw.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193);
+    h2 = Math.imul(h2 ^ c, 0x85ebca6b);
+  }
+  return `al_${(h1 >>> 0).toString(16)}${(h2 >>> 0).toString(16)}`;
+}
+
+// L2 read — never throws; a cache miss/failure just falls through to fetch.
+async function readSharedCache<T>(
+  key: string,
+): Promise<{ value: T; fetchedAt: number } | null> {
+  try {
+    const { data, error } = await (supabaseAdmin as unknown as {
+      from: (t: string) => {
+        select: (c: string) => {
+          eq: (c: string, v: string) => {
+            maybeSingle: () => Promise<{
+              data: { payload: unknown; fetched_at: string } | null;
+              error: unknown;
+            }>;
+          };
+        };
+      };
+    })
+      .from(SHARED_CACHE_TABLE)
+      .select("payload, fetched_at")
+      .eq("cache_key", key)
+      .maybeSingle();
+    if (error || !data) return null;
+    return { value: data.payload as T, fetchedAt: new Date(data.fetched_at).getTime() };
+  } catch {
+    return null;
+  }
+}
+
+// L2 write — fire-and-forget; a failure must never break a request.
+async function writeSharedCache(key: string, value: unknown): Promise<void> {
+  try {
+    await (supabaseAdmin as unknown as {
+      from: (t: string) => {
+        upsert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
+      };
+    })
+      .from(SHARED_CACHE_TABLE)
+      .upsert({ cache_key: key, payload: value, fetched_at: new Date().toISOString() });
+  } catch {
+    /* ignore cache write failures */
+  }
 }
 
 function wait(ms: number) {

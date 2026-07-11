@@ -28,7 +28,7 @@ export function MediaCard({
       params={{ source: item.source, id: item.externalId }}
       style={style}
       className={cn(
-        "group card-elevated block overflow-hidden rounded-xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group card-elevated gradient-frame relative block overflow-hidden rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >
@@ -41,26 +41,27 @@ export function MediaCard({
             decoding="async"
             width={300}
             height={450}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-[transform,filter] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07] group-hover:brightness-[1.05]"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
             <ImageOff className="h-8 w-8" />
           </div>
         )}
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
-          <span className={cn("rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide", TYPE_COLORS[item.mediaType])}>
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+          <span className={cn("rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide shadow-sm backdrop-blur-sm", TYPE_COLORS[item.mediaType])}>
             {MEDIA_TYPE_LABELS[item.mediaType]}
           </span>
           <RatingBadge score={item.score} />
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card via-card/60 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-2">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card via-card/70 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-2.5">
           <MediaBadges item={item} />
         </div>
       </div>
       <div className="space-y-1.5 p-3">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-card-foreground group-hover:text-primary">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-card-foreground transition-colors group-hover:text-primary">
           {item.title}
         </h3>
         {item.genres.length ? (

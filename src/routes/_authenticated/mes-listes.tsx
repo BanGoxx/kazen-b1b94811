@@ -84,7 +84,7 @@ function MyListsPage() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <ListChecks className="h-4 w-4" /> Espace personnel
           </div>
-          <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
+          <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
             Mes <span className="aurora-text">listes</span>
           </h1>
           <p className="text-muted-foreground">
@@ -93,7 +93,7 @@ function MyListsPage() {
           </p>
         </header>
 
-        <div className="space-y-4">
+        <div className="space-y-4 rounded-2xl border border-border bg-card/40 p-4 backdrop-blur">
           <div className="flex flex-wrap gap-1.5">
             {STATUS_TABS.map((s) => (
               <button
@@ -102,9 +102,9 @@ function MyListsPage() {
                 onClick={() => setTab(s.value)}
                 aria-pressed={tab === s.value}
                 className={cn(
-                  "focus-ring rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors",
+                  "focus-ring rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-all",
                   tab === s.value
-                    ? "border-transparent aurora-bg text-white"
+                    ? "border-transparent aurora-bg text-white shadow-[var(--shadow-glow)]"
                     : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
                 )}
               >

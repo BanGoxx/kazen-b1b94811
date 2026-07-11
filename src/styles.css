@@ -206,9 +206,9 @@ h1, h2, h3, .font-display {
 }
 
 @utility glass {
-  background: oklch(0.2 0.025 285 / 0.6);
-  backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid oklch(0.85 0.05 300 / 0.08);
+  background: oklch(0.19 0.024 300 / 0.72);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid oklch(0.85 0.05 340 / 0.09);
 }
 
 @utility ambient-glow {
@@ -216,12 +216,12 @@ h1, h2, h3, .font-display {
 }
 
 @utility card-elevated {
-  box-shadow: var(--shadow-md);
-  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+  box-shadow: var(--shadow-md), var(--shadow-inset-line);
+  transition: box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   &:hover {
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
-    transform: translateY(-4px);
-    border-color: oklch(0.66 0.25 350 / 0.5);
+    box-shadow: var(--shadow-lg), var(--shadow-glow), var(--shadow-inset-line);
+    transform: translateY(-6px);
+    border-color: oklch(0.66 0.25 350 / 0.55);
   }
 }
 
@@ -294,6 +294,61 @@ h1, h2, h3, .font-display {
     opacity: 0.7;
   }
 }
+
+/* Fine film-grain overlay for cinematic depth over hero / backdrops. */
+@utility grain {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+  }
+}
+
+/* Soft top+bottom vignette to anchor text over imagery. */
+@utility cinematic-scrim {
+  background:
+    linear-gradient(to top, var(--color-background) 6%, oklch(0.15 0.021 300 / 0.55) 42%, transparent 78%),
+    linear-gradient(to right, var(--color-background) 2%, oklch(0.15 0.021 300 / 0.35) 40%, transparent 72%);
+}
+
+/* Radial focus glow used behind posters / hero art. */
+@utility poster-glow {
+  box-shadow:
+    0 24px 60px -24px oklch(0 0 0 / 0.8),
+    0 0 0 1px oklch(1 0 0 / 0.06),
+    0 0 50px -18px oklch(0.66 0.25 350 / 0.35);
+}
+
+/* Animated gradient hairline border on hover for premium cards. */
+@utility gradient-frame {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-aurora);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  &:hover::before { opacity: 0.7; }
+}
+
+/* Balanced multi-line headings — avoids orphans in hero / section titles. */
+@utility text-balance {
+  text-wrap: balance;
+}
+
+
 
 
 @media (prefers-reduced-motion: reduce) {

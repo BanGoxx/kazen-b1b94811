@@ -69,3 +69,59 @@ export function parseMediaKey(key: string): { source: MediaSource; externalId: s
   const [source, externalId] = key.split(":");
   return { source: source as MediaSource, externalId };
 }
+
+// ---------- Rich detail model (detail pages) ----------
+
+export interface CreditPerson {
+  id: string;
+  name: string;
+  role: string | null;
+  photoUrl: string | null;
+}
+
+export interface RelatedMedia {
+  key: string;
+  source: MediaSource;
+  externalId: string;
+  title: string;
+  posterUrl: string | null;
+  relation: string;
+  mediaType: MediaType;
+}
+
+export interface MediaDetail extends MediaItem {
+  trailerUrl: string | null;
+  format: string | null;
+  seasonLabel: string | null;
+  studios: string[];
+  popularity: number | null;
+  castLabel: string;
+  cast: CreditPerson[];
+  crewLabel: string;
+  crew: CreditPerson[];
+  related: RelatedMedia[];
+  collectionName: string | null;
+}
+
+// ---------- Personal tracking (user data) ----------
+
+export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
+  basse: "Basse",
+  normale: "Normale",
+  haute: "Haute",
+};
+
+export interface UserEntry {
+  key: string;
+  source: MediaSource;
+  externalId: string;
+  mediaType: MediaType;
+  title: string;
+  posterUrl: string | null;
+  status: WatchStatus | null;
+  favorite: boolean;
+  priority: PriorityLevel;
+  notes: string;
+  tags: string[];
+  updatedAt: number;
+}

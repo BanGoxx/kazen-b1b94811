@@ -7,6 +7,7 @@ import {
   tmdbMovieDetail,
   tmdbTvDetail,
   tmdbSearch,
+  tmdbAnimatedMovies,
 } from "./tmdb.server";
 
 const SEASON_LABELS: Record<string, string> = {

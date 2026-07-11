@@ -191,19 +191,23 @@ function CalendarPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={watch} onValueChange={(v) => setWatch(v as WatchFilter)}>
-            <SelectTrigger className="h-9 w-40" aria-label="Filtrer par statut">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous statuts</SelectItem>
-              <SelectItem value="tracked">Dans ma liste</SelectItem>
-              <SelectItem value="untracked">Hors liste</SelectItem>
-              {(Object.keys(WATCH_STATUS_LABELS) as WatchStatus[]).map((s) => (
-                <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {user ? (
+            <Select value={watch} onValueChange={(v) => setWatch(v as WatchFilter)}>
+              <SelectTrigger className="h-9 w-40" aria-label="Filtrer par statut">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous statuts</SelectItem>
+                <SelectItem value="tracked">Dans ma liste</SelectItem>
+                <SelectItem value="untracked">Hors liste</SelectItem>
+                {(Object.keys(WATCH_STATUS_LABELS) as WatchStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <SignInFilterPrompt />
+          )}
         </div>
       </div>
 

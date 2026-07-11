@@ -360,6 +360,14 @@ function augmentTmdb(
       relation: "Recommandé",
       mediaType: m.mediaType,
     }));
+  const videos: MediaVideo[] = (data.videos?.results ?? [])
+    .filter((v) => v.site === "YouTube")
+    .slice(0, 8)
+    .map((v) => ({
+      key: v.key,
+      label: TMDB_VIDEO_LABELS[v.type] ?? v.type,
+      url: `https://www.youtube.com/embed/${v.key}`,
+    }));
   return {
     ...bmedia,
     trailerUrl: trailer ? `https://www.youtube.com/embed/${trailer.key}` : null,
@@ -373,6 +381,12 @@ function augmentTmdb(
     crew,
     related,
     collectionName: extra.collectionName ?? null,
+    titleAlternatives: extra.titleAlternatives ?? [],
+    originSource: null,
+    ageRating: extra.ageRating ?? null,
+    countryOfOrigin: extra.countryOfOrigin ?? null,
+    endDate: extra.endDate ?? null,
+    videos,
   };
 }
 

@@ -60,7 +60,7 @@ export const getSeasonalAnime = createServerFn({ method: "GET" })
     const season = data.season ?? fallback.season;
     const year = data.year ?? fallback.year;
     try {
-      const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 40 });
+      const items = await anilistList({ sort: "POPULARITY_DESC", season, seasonYear: year, perPage: 50 });
       return { items, season, year, label: SEASON_LABELS[season] ?? season };
     } catch (e) {
       console.error("getSeasonalAnime", e);

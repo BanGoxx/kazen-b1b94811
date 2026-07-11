@@ -171,7 +171,7 @@ export async function anilistList(params: {
     status: params.status,
     search: params.search,
   });
-  return (data.Page?.media ?? []).map(fromAniList);
+  return (data.Page?.media ?? []).filter((m) => m && m.id != null).map(fromAniList);
 }
 
 /** Paginated AniList list with hasMore flag for "voir plus" loading. */
@@ -203,7 +203,7 @@ export async function anilistPaged(params: {
     status: params.status,
   });
   return {
-    items: (data.Page?.media ?? []).map(fromAniList),
+    items: (data.Page?.media ?? []).filter((m) => m && m.id != null).map(fromAniList),
     page,
     hasMore: Boolean(data.Page?.pageInfo?.hasNextPage),
   };

@@ -9,6 +9,7 @@ import {
   tmdbSearch,
   tmdbAnimatedMovies,
 } from "./tmdb.server";
+import type { PagedMedia } from "./tmdb.server";
 
 const SEASON_LABELS: Record<string, string> = {
   WINTER: "Hiver",

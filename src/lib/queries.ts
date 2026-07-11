@@ -13,6 +13,8 @@ import {
   getMediaDetail,
   searchMedia,
   getUpcomingAll,
+  getAnimatedMovies,
+  getAsianAnimationMovies,
 } from "./discover.functions";
 
 const HOUR = 1000 * 60 * 60;

@@ -267,7 +267,7 @@ function CalendarPage() {
               >
                 <div className="mb-2 flex items-baseline justify-between px-1">
                   <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
-                    {DAY_LABELS[i]}
+                    {DAY_LABELS[i % 7]}
                   </span>
                   <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
                 </div>

@@ -95,6 +95,7 @@ function DiscoverPage() {
           action={{ label: "À venir", to: "/a-venir" }}
           items={upAnime.data}
         />
+        <MemberCTA />
         <MediaCarousel
           title="Séries en vedette"
           subtitle="Les incontournables du petit écran"

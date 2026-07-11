@@ -2,13 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Sparkles, Tv, Film, CalendarClock, Leaf } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { DiscoverHero } from "@/components/media/DiscoverHero";
+import { RotatingHero } from "@/components/media/RotatingHero";
 import { MediaCarousel } from "@/components/media/MediaCarousel";
 import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import { SafeSection } from "@/components/media/SafeSection";
+import type { MediaItem } from "@/lib/media-types";
 import {
   trendingAnimeQO,
   popularAnimeQO,
@@ -74,9 +75,19 @@ export const Route = createFileRoute("/")({
 
 function HomeHero() {
   const { data: anime } = useSuspenseQuery(trendingAnimeQO);
-  const hero = anime[0];
-  if (!hero) return null;
-  return <DiscoverHero item={hero} />;
+  const { data: seasonal } = useSuspenseQuery(seasonalAnimeQO());
+  const { data: series } = useSuspenseQuery(trendingSeriesQO);
+  const { data: movies } = useSuspenseQuery(trendingMoviesQO);
+  // Anime-first, with one strong series + film for variety. Max 5 slides.
+  const withArt = (it: MediaItem | undefined) => !!it && !!(it.backdropUrl || it.posterUrl);
+  const slides = [
+    ...anime.slice(0, 3),
+    ...seasonal.items.slice(0, 1),
+    ...series.slice(0, 1),
+    ...movies.slice(0, 1),
+  ].filter(withArt);
+  if (!slides.length) return null;
+  return <RotatingHero items={slides} />;
 }
 
 function TrendingAnimeRow() {

@@ -104,6 +104,7 @@ interface WatchProviders {
   "watch/providers"?: {
     results?: {
       FR?: {
+        link?: string | null;
         flatrate?: { provider_name: string; logo_path?: string | null }[];
         buy?: { provider_name: string; logo_path?: string | null }[];
         rent?: { provider_name: string; logo_path?: string | null }[];
@@ -115,10 +116,13 @@ interface WatchProviders {
 function extractPlatforms(wp: WatchProviders): Platform[] {
   const fr = wp["watch/providers"]?.results?.FR;
   if (!fr) return [];
+  // TMDB exposes an aggregated JustWatch page per title & region — the closest
+  // thing to a deep link. Used as the redirection target for every provider.
+  const link = fr.link ?? null;
   const out: Platform[] = [];
   const push = (arr: { provider_name: string; logo_path?: string | null }[] | undefined, type: Platform["type"]) => {
     for (const item of arr ?? []) {
-      const p = resolvePlatform(item.provider_name, item.logo_path ? `${IMG}${item.logo_path}` : null, type);
+      const p = resolvePlatform(item.provider_name, item.logo_path ? `${IMG}${item.logo_path}` : null, type, link);
       if (p) out.push(p);
     }
   };

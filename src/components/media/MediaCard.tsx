@@ -38,6 +38,9 @@ export function MediaCard({
             src={item.posterUrl}
             alt={item.title}
             loading="lazy"
+            decoding="async"
+            width={300}
+            height={450}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

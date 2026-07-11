@@ -14,6 +14,9 @@ export function DiscoverHero({ item }: { item: MediaItem }) {
           <img
             src={item.backdropUrl || item.posterUrl || ""}
             alt=""
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (

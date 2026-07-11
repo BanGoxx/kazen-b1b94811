@@ -11,6 +11,7 @@ import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
 import { upcomingAllQO, onAirSeriesQO } from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
+import { useAuth } from "@/lib/auth";
 import {
   Select,
   SelectContent,
@@ -18,7 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Sparkles, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendrier")({
@@ -63,6 +70,8 @@ function CalendarPage() {
   const { data: upcoming } = useSuspenseQuery(upcomingAllQO);
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
   const userList = useUserList();
+  const { user } = useAuth();
+
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [type, setType] = useState<StatusFilter>("all");
@@ -182,19 +191,23 @@ function CalendarPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={watch} onValueChange={(v) => setWatch(v as WatchFilter)}>
-            <SelectTrigger className="h-9 w-40" aria-label="Filtrer par statut">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous statuts</SelectItem>
-              <SelectItem value="tracked">Dans ma liste</SelectItem>
-              <SelectItem value="untracked">Hors liste</SelectItem>
-              {(Object.keys(WATCH_STATUS_LABELS) as WatchStatus[]).map((s) => (
-                <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {user ? (
+            <Select value={watch} onValueChange={(v) => setWatch(v as WatchFilter)}>
+              <SelectTrigger className="h-9 w-40" aria-label="Filtrer par statut">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous statuts</SelectItem>
+                <SelectItem value="tracked">Dans ma liste</SelectItem>
+                <SelectItem value="untracked">Hors liste</SelectItem>
+                {(Object.keys(WATCH_STATUS_LABELS) as WatchStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <SignInFilterPrompt />
+          )}
         </div>
       </div>
 
@@ -236,6 +249,44 @@ function CalendarPage() {
     </AppShell>
   );
 }
+
+function SignInFilterPrompt() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label="Filtrer par mes suivis — connexion requise"
+          className="focus-ring flex h-9 w-40 items-center justify-between gap-2 rounded-md border border-border bg-background/40 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+        >
+          <span className="flex items-center gap-1.5 truncate">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="truncate">Mes suivis</span>
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl aurora-bg text-white">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-display text-sm font-bold">Filtre par tes suivis</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+              Connecte-toi pour filtrer le calendrier selon tes listes : à voir,
+              en cours, terminé et plus encore.
+            </p>
+          </div>
+        </div>
+        <Button asChild variant="aurora" size="sm" className="mt-3 w-full">
+          <Link to="/auth">Se connecter</Link>
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 
 function CalendarEntry({ item }: { item: MediaItem }) {
   return (

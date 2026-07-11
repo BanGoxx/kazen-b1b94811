@@ -2,7 +2,13 @@
 // Reads the key inside functions (never at module scope). Language fr-FR, region FR.
 import { fromTmdbMovie, fromTmdbTv } from "./normalize";
 import { resolvePlatform, dedupePlatforms } from "./platforms";
-import type { MediaItem, Platform } from "./media-types";
+import type {
+  CreditPerson,
+  MediaDetail,
+  MediaItem,
+  Platform,
+  RelatedMedia,
+} from "./media-types";
 
 const BASE = "https://api.themoviedb.org/3";
 const IMG = "https://image.tmdb.org/t/p/w92";

@@ -19,6 +19,7 @@ import { RelatedScroller } from "@/components/media/RelatedScroller";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
 import { mediaDetailQO } from "@/lib/queries";
 

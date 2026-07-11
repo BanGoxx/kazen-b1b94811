@@ -135,6 +135,30 @@ export const getOnAirSeries = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// ---------- Animated films (TMDB Discover, genre 16) ----------
+
+export const getAnimatedMovies = createServerFn({ method: "GET" }).handler(
+  async (): Promise<MediaItem[]> => {
+    try {
+      return await tmdbAnimatedMovies();
+    } catch (e) {
+      console.error("getAnimatedMovies", e);
+      return [];
+    }
+  },
+);
+
+export const getAsianAnimationMovies = createServerFn({ method: "GET" }).handler(
+  async (): Promise<MediaItem[]> => {
+    try {
+      return await tmdbAnimatedMovies("JP,CN,KR");
+    } catch (e) {
+      console.error("getAsianAnimationMovies", e);
+      return [];
+    }
+  },
+);
+
 // ---------- Detail ----------
 
 export const getMediaDetail = createServerFn({ method: "GET" })

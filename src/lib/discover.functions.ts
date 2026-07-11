@@ -203,22 +203,53 @@ export const searchMedia = createServerFn({ method: "GET" })
   });
 
 // ---------- Upcoming (aggregated) ----------
+//
+// Correctness rules:
+//  - Anime  -> AniList NOT_YET_RELEASED, ordered by START_DATE (soonest first).
+//  - Films  -> TMDB discover with primary_release_date >= today, ascending.
+//  - Séries -> TMDB discover with first_air_date >= today, ascending.
+// We then keep only titles whose date is today or later and sort the whole
+// aggregate ascending, so the very next release is always on top (no stray
+// "mars 1963" old dates). All three sources run in parallel; TMDB keeps its
+// cache/retry guard and AniList keeps its request queue, so no 429 pressure.
 
 export const getUpcomingAll = createServerFn({ method: "GET" }).handler(
   async (): Promise<MediaItem[]> => {
-    const [anime, movies] = await Promise.all([
-      anilistList({ sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED", perPage: 20 }).catch((e) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const [anime, movies1, movies2, series] = await Promise.all([
+      anilistList({ sort: "START_DATE", status: "NOT_YET_RELEASED", perPage: 50 }).catch((e) => {
         console.error("getUpcomingAll anilist", e);
         return [] as MediaItem[];
       }),
-      tmdbMovieList("/movie/upcoming", { region: "FR" }).catch((e) => {
-        console.error("getUpcomingAll tmdb_movies", e);
+      tmdbMovieList("/discover/movie", {
+        region: "FR",
+        sort_by: "primary_release_date.asc",
+        "primary_release_date.gte": today,
+        with_release_type: "2|3",
+        "vote_count.gte": "0",
+      }).catch((e) => {
+        console.error("getUpcomingAll tmdb_movies_1", e);
+        return [] as MediaItem[];
+      }),
+      tmdbMovieList("/discover/movie", {
+        region: "FR",
+        page: "2",
+        sort_by: "primary_release_date.asc",
+        "primary_release_date.gte": today,
+        with_release_type: "2|3",
+        "vote_count.gte": "0",
+      }).catch(() => [] as MediaItem[]),
+      tmdbTvList("/discover/tv", {
+        sort_by: "first_air_date.asc",
+        "first_air_date.gte": today,
+      }).catch((e) => {
+        console.error("getUpcomingAll tmdb_series", e);
         return [] as MediaItem[];
       }),
     ]);
-    return [...anime, ...movies]
-      .filter((m) => m.releaseDate)
-      .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : 1));
+    return [...anime, ...movies1, ...movies2, ...series]
+      .filter((m) => m.releaseDate && m.releaseDate >= today)
+      .sort((a, b) => (a.releaseDate! < b.releaseDate! ? -1 : a.releaseDate! > b.releaseDate! ? 1 : 0));
   },
 );
 

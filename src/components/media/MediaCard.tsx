@@ -4,6 +4,7 @@ import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
+import { MediaBadges } from "./MediaBadges";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {

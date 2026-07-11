@@ -250,6 +250,44 @@ function CalendarPage() {
   );
 }
 
+function SignInFilterPrompt() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label="Filtrer par mes suivis — connexion requise"
+          className="focus-ring flex h-9 w-40 items-center justify-between gap-2 rounded-md border border-border bg-background/40 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+        >
+          <span className="flex items-center gap-1.5 truncate">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="truncate">Mes suivis</span>
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl aurora-bg text-white">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-display text-sm font-bold">Filtre par tes suivis</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+              Connecte-toi pour filtrer le calendrier selon tes listes : à voir,
+              en cours, terminé et plus encore.
+            </p>
+          </div>
+        </div>
+        <Button asChild variant="aurora" size="sm" className="mt-3 w-full">
+          <Link to="/auth">Se connecter</Link>
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+
 function CalendarEntry({ item }: { item: MediaItem }) {
   return (
     <Link

@@ -360,6 +360,19 @@ h1, h2, h3, .font-display {
 }
 
 
+/* Smooth, non-distracting light/dark transition on themed surfaces. */
+body,
+.glass,
+[class*="bg-card"],
+[class*="bg-background"],
+[class*="bg-sidebar"],
+[class*="bg-muted"],
+[class*="bg-secondary"] {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
+}
 
 
 @media (prefers-reduced-motion: reduce) {

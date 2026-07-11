@@ -12,9 +12,11 @@ export function DiscoverHero({ item }: { item: MediaItem }) {
     <section className="grain relative mb-12 overflow-hidden rounded-[1.75rem] border border-border shadow-[var(--shadow-float)]">
       <div className="absolute inset-0">
         {item.backdropUrl || item.posterUrl ? (
-          <img
-            src={item.backdropUrl || item.posterUrl || ""}
+          <SafeImage
+            src={item.backdropUrl || item.posterUrl}
             alt=""
+            variant="backdrop"
+            fallbackLabel={item.title}
             loading="eager"
             fetchPriority="high"
             decoding="async"

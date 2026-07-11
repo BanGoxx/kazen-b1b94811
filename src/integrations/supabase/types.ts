@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      list_items: {
+        Row: {
+          created_at: string
+          favorite: boolean
+          id: string
+          media_key: string
+          notes: string
+          priority: Database["public"]["Enums"]["priority_level"]
+          rating: number | null
+          status: Database["public"]["Enums"]["watch_status"] | null
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          media_key: string
+          notes?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          rating?: number | null
+          status?: Database["public"]["Enums"]["watch_status"] | null
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          media_key?: string
+          notes?: string
+          priority?: Database["public"]["Enums"]["priority_level"]
+          rating?: number | null
+          status?: Database["public"]["Enums"]["watch_status"] | null
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_items_media_key_fkey"
+            columns: ["media_key"]
+            isOneToOne: false
+            referencedRelation: "media_records"
+            referencedColumns: ["media_key"]
+          },
+        ]
+      }
+      media_records: {
+        Row: {
+          backdrop_url: string | null
+          created_at: string
+          external_id: string
+          genres: string[]
+          media_key: string
+          media_type: string
+          platforms: Json
+          poster_url: string | null
+          release_date: string | null
+          score: number | null
+          source: string
+          title: string
+          title_original: string | null
+          updated_at: string
+        }
+        Insert: {
+          backdrop_url?: string | null
+          created_at?: string
+          external_id: string
+          genres?: string[]
+          media_key: string
+          media_type: string
+          platforms?: Json
+          poster_url?: string | null
+          release_date?: string | null
+          score?: number | null
+          source: string
+          title: string
+          title_original?: string | null
+          updated_at?: string
+        }
+        Update: {
+          backdrop_url?: string | null
+          created_at?: string
+          external_id?: string
+          genres?: string[]
+          media_key?: string
+          media_type?: string
+          platforms?: Json
+          poster_url?: string | null
+          release_date?: string | null
+          score?: number | null
+          source?: string
+          title?: string
+          title_original?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +150,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      priority_level: "basse" | "normale" | "haute"
+      watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +278,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      priority_level: ["basse", "normale", "haute"],
+      watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],
+    },
   },
 } as const

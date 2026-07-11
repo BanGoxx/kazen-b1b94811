@@ -1,4 +1,4 @@
-import type { MediaItem } from "./media-types";
+import type { MediaItem, MediaDetail } from "./media-types";
 
 type AnimeFallbackKind = "trending" | "popular" | "upcoming" | "seasonal";
 
@@ -110,4 +110,42 @@ export function fallbackAnimePage(kind: string, page: number, perPage = 30) {
   const source = kind === "popular" ? POPULAR : kind === "upcoming" ? UPCOMING : TRENDING;
   if (page > 1) return { items: [], page, hasMore: false };
   return { items: source.slice(0, perPage), page, hasMore: false };
+}
+/** All curated fallback anime, deduplicated by external id. */
+const ALL_FALLBACK: MediaItem[] = (() => {
+  const seen = new Set<string>();
+  const out: MediaItem[] = [];
+  for (const pool of [TRENDING, POPULAR, UPCOMING, SEASONAL]) {
+    for (const item of pool) {
+      if (seen.has(item.externalId)) continue;
+      seen.add(item.externalId);
+      out.push(item);
+    }
+  }
+  return out;
+})();
+
+/**
+ * Build a minimal but valid MediaDetail for a known anime id when the live
+ * AniList detail fetch fails. Prevents a transient upstream error from turning
+ * a visible, valid card into a "Fiche introuvable" dead route.
+ */
+export function fallbackAnimeDetail(id: string): MediaDetail | null {
+  const base = ALL_FALLBACK.find((item) => item.externalId === id);
+  if (!base) return null;
+  return {
+    ...base,
+    platforms: [...base.platforms],
+    trailerUrl: null,
+    format: null,
+    seasonLabel: null,
+    studios: [],
+    popularity: null,
+    castLabel: "Personnages",
+    cast: [],
+    crewLabel: "Équipe",
+    crew: [],
+    related: [],
+    collectionName: null,
+  };
 }

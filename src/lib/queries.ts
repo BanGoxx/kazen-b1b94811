@@ -100,6 +100,7 @@ export const mediaDetailQO = (source: string, id: string) =>
     queryKey: ["media", source, id],
     queryFn: () => getMediaDetail({ data: { source, id } }),
     staleTime: HOUR,
+    retry: 2,
   });
 
 export const searchMediaQO = (q: string) =>

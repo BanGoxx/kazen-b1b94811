@@ -16,9 +16,8 @@ const STALE_TTL_MS = 1000 * 60 * 60 * 24;
 // isolate); Postgres (via SECURITY DEFINER RPCs) is L2 — survives cold starts
 // and worker restarts so anime payloads fetched by one isolate are reused by
 // all others, which is the main defense against AniList 429s in production.
-// Reads are open (public anime metadata only); writes require this server-only
-// token, since the Data API treats our worker as the anon role.
-const CACHE_WRITE_TOKEN = process.env.ANILIST_CACHE_TOKEN;
+// Reads are open (public anime metadata only); writes require a server-only
+// token (read at call time), since the Data API treats our worker as anon.
 
 type CacheEntry<T> = {
   value?: T;

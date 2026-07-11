@@ -62,9 +62,64 @@ export function resolvePlatform(
   type: Platform["type"] = "stream",
   url: string | null = null,
 ): Platform | null {
-  const def = ALIAS_INDEX[name.trim().toLowerCase()];
+  const def = matchPlatform(name);
   if (!def) return null;
   return { id: def.id, name: def.name, logoUrl, color: def.color, type, url };
+}
+
+/** Normalize a provider label so aliases match despite punctuation/casing. */
+function normalizeProvider(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\+/g, " plus ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Reseller / packaging suffixes TMDB appends to the base provider name
+// ("Netflix Standard with Ads", "Crunchyroll Amazon Channel", "Paramount Plus
+// Premium", "Apple TV Store"...). They must NOT hide a valid provider, so we
+// strip them before/while matching against the official platform aliases.
+const PROVIDER_SUFFIXES = [
+  "standard with ads",
+  "basic with ads",
+  "with ads",
+  "amazon channel",
+  "amazon channels",
+  "apple tv channel",
+  "premium",
+  "store",
+];
+
+/**
+ * Resolve a raw provider name to an official platform. Tries an exact alias
+ * match first, then a tolerant prefix match (after stripping reseller suffixes)
+ * so packaging variants still surface the correct base platform. Aliases are
+ * tested longest-first to avoid a short alias shadowing a more specific one.
+ */
+function matchPlatform(name: string): PlatformDef | null {
+  const norm = normalizeProvider(name);
+  if (!norm) return null;
+  const exact = ALIAS_INDEX[name.trim().toLowerCase()] ?? ALIAS_INDEX[norm];
+  if (exact) return exact;
+
+  let stripped = norm;
+  for (const suf of PROVIDER_SUFFIXES) {
+    if (stripped.endsWith(" " + suf)) {
+      stripped = stripped.slice(0, -suf.length - 1).trim();
+    }
+  }
+
+  const candidates: { alias: string; def: PlatformDef }[] = [];
+  for (const p of PLATFORMS) {
+    for (const a of p.aliases) candidates.push({ alias: normalizeProvider(a), def: p });
+  }
+  candidates.sort((x, y) => y.alias.length - x.alias.length);
+  for (const { alias, def } of candidates) {
+    if (stripped === alias || stripped.startsWith(alias + " ")) return def;
+  }
+  return null;
 }
 
 /**

@@ -250,7 +250,9 @@ export function rankForYouAnimeFirst(
   opts: { excludeSaved?: boolean; limit?: number; rankBySourceOrder?: boolean } = {},
 ): ScoredMedia[] {
   const limit = opts.limit ?? 24;
-  const anime = rankForYou(pool.filter((item) => item.mediaType === "anime"), profile, {
+  const animePool = pool.filter((item) => item.mediaType === "anime");
+  if (!animePool.length) return [];
+  const anime = rankForYou(animePool, profile, {
     ...opts,
     limit: Math.ceil(limit * 0.7),
   });

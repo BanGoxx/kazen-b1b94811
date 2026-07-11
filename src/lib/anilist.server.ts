@@ -486,7 +486,9 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
       title: e.node!.title?.english || e.node!.title?.romaji || "Sans titre",
       posterUrl: e.node!.coverImage?.large ?? null,
       relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
+      relationCategory: ANILIST_RELATION_CATEGORY[e.relationType ?? "OTHER"] ?? "other",
       mediaType: "anime" as const,
+      format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
     }));
   const alt = Array.from(
     new Set(

@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { MediaGrid } from "@/components/media/MediaGrid";
+import { SafeSection } from "@/components/media/SafeSection";
 import { seasonalAnimeQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/anime/saison")({
@@ -22,15 +23,25 @@ export const Route = createFileRoute("/anime/saison")({
   component: SeasonPage,
 });
 
-function SeasonPage() {
+function SeasonContent() {
   const { data } = useSuspenseQuery(seasonalAnimeQO());
   return (
-    <AppShell>
+    <>
       <PageHeader
         title={`Saison anime — ${data.label} ${data.year}`}
         description="Les sorties anime de la saison en cours."
       />
       <MediaGrid items={data.items} emptyLabel="Aucun anime pour cette saison." />
+    </>
+  );
+}
+
+function SeasonPage() {
+  return (
+    <AppShell>
+      <SafeSection minHeight="24rem">
+        <SeasonContent />
+      </SafeSection>
     </AppShell>
   );
 }

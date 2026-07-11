@@ -9,7 +9,7 @@ import type {
 
 const ENDPOINT = "https://graphql.anilist.co";
 const CACHE_TTL_MS = 1000 * 60 * 20;
-const STALE_TTL_MS = 1000 * 60 * 60 * 6;
+const STALE_TTL_MS = 1000 * 60 * 60 * 24;
 
 type CacheEntry<T> = {
   value?: T;
@@ -104,8 +104,13 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
       }
     }
 
-    if (cached?.value && cached.staleUntil > Date.now()) {
-      console.error("AniList source indisponible, cache récent conservé", lastError);
+    // Last resort: serve ANY previously cached value rather than surfacing an
+    // error screen. Stale anime data is strictly better than an empty/errored
+    // section, and it lets key anime pages recover as soon as a good fetch
+    // succeeded once. Only a true cold-start (never fetched) throws, which the
+    // client then retries.
+    if (cached?.value) {
+      console.error("AniList source indisponible, cache existant conservé", lastError);
       return cached.value;
     }
 
@@ -166,7 +171,7 @@ export async function anilistList(params: {
     status: params.status,
     search: params.search,
   });
-  return (data.Page?.media ?? []).map(fromAniList);
+  return (data.Page?.media ?? []).filter((m) => m && m.id != null).map(fromAniList);
 }
 
 /** Paginated AniList list with hasMore flag for "voir plus" loading. */
@@ -198,7 +203,7 @@ export async function anilistPaged(params: {
     status: params.status,
   });
   return {
-    items: (data.Page?.media ?? []).map(fromAniList),
+    items: (data.Page?.media ?? []).filter((m) => m && m.id != null).map(fromAniList),
     page,
     hasMore: Boolean(data.Page?.pageInfo?.hasNextPage),
   };

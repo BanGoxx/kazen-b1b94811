@@ -73,13 +73,13 @@ function UpcomingPage() {
     return PLATFORMS.filter((p) => ids.has(p.id));
   }, [data]);
 
+  // Server already curates genuinely-upcoming titles; we no longer drop items
+  // that lack a precise date (many announced anime only have a year/season).
   const visible = useMemo(
     () =>
       data
         .filter((it) => filter === "all" || it.mediaType === filter)
-        .filter((it) => platform === "all" || it.platforms.some((p) => p.id === platform))
-        .filter((it) => it.releaseDate && it.releaseDate >= TODAY_ISO),
-
+        .filter((it) => platform === "all" || it.platforms.some((p) => p.id === platform)),
     [data, filter, platform],
   );
 
@@ -93,7 +93,11 @@ function UpcomingPage() {
   );
 
   const groups = useMemo(() => {
-    const sorted = [...visible].sort((a, b) => {
+    // Titles with a concrete future date are grouped by month; those with a
+    // partial/missing date land in a "date à confirmer" bucket shown last.
+    const scheduled = visible.filter((it) => it.releaseDate && it.releaseDate >= TODAY_ISO);
+    const tbc = visible.filter((it) => !(it.releaseDate && it.releaseDate >= TODAY_ISO));
+    const sorted = [...scheduled].sort((a, b) => {
       const cmp = a.releaseDate! < b.releaseDate! ? -1 : a.releaseDate! > b.releaseDate! ? 1 : 0;
       return sort === "later" ? -cmp : cmp;
     });
@@ -104,8 +108,11 @@ function UpcomingPage() {
       arr.push(it);
       map.set(key, arr);
     }
-    return Array.from(map.entries());
+    const entries = Array.from(map.entries());
+    if (tbc.length) entries.push(["tbc", tbc]);
+    return entries;
   }, [visible, sort]);
+
 
   return (
     <AppShell>

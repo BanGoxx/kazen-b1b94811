@@ -13,6 +13,7 @@ import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,6 +39,11 @@ const FilmsRoute = FilmsRouteImport.update({
 const CalendrierRoute = CalendrierRouteImport.update({
   id: '/calendrier',
   path: '/calendrier',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnimeRoute = AnimeRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-venir': typeof AVenirRoute
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-venir'
     | '/anime'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/a-venir'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/a-venir'
     | '/anime'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AVenirRoute: typeof AVenirRoute
   AnimeRoute: typeof AnimeRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
   FilmsRoute: typeof FilmsRoute
   RechercheRoute: typeof RechercheRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/calendrier'
       fullPath: '/calendrier'
       preLoaderRoute: typeof CalendrierRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/anime': {
@@ -247,6 +267,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AVenirRoute: AVenirRoute,
   AnimeRoute: AnimeRouteWithChildren,
+  AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
   FilmsRoute: FilmsRoute,
   RechercheRoute: RechercheRoute,

@@ -71,13 +71,13 @@ export const upsertListItem = createServerFn({ method: "POST" })
         p_external_id: m.externalId,
         p_media_type: m.mediaType,
         p_title: m.title,
-        p_title_original: m.titleOriginal,
-        p_poster_url: m.posterUrl,
-        p_backdrop_url: m.backdropUrl,
-        p_release_date: m.releaseDate,
+        p_title_original: m.titleOriginal as unknown as string,
+        p_poster_url: m.posterUrl as unknown as string,
+        p_backdrop_url: m.backdropUrl as unknown as string,
+        p_release_date: m.releaseDate as unknown as string,
         p_genres: m.genres,
         p_platforms: m.platforms as never,
-        p_score: m.score,
+        p_score: m.score as unknown as number,
       },
     );
     if (mediaError) throw new Error(mediaError.message);

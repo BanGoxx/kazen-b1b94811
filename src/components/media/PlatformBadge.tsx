@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import type { Platform } from "@/lib/media-types";
 import { openExternal } from "@/lib/external-link";
+import { platformDestination } from "@/lib/platforms";
 import { cn } from "@/lib/utils";
 
 export function PlatformBadge({ platform, className }: { platform: Platform; className?: string }) {
@@ -17,20 +18,25 @@ export function PlatformBadge({ platform, className }: { platform: Platform; cla
     className,
   );
 
-  if (platform.url) {
+  // Resolve the safe destination: a reliable direct provider deep link when it
+  // points at the provider's official domain, otherwise the official platform
+  // base page (FR). Crunchyroll always lands on its official FR base. See
+  // platformDestination() for the full fallback rules.
+  const dest = platformDestination(platform.id, platform.url ?? null);
+
+  if (dest) {
     // Rendered as a button (not <a>) so it stays valid when nested inside a
     // card link — avoids invalid <a> inside <a> and the hydration warning.
     // The click always leaves KAZEN as a real top-level external navigation
     // (see openExternal) so frame-blocking providers like Crunchyroll no
     // longer fail with ERR_BLOCKED_BY_RESPONSE inside the embedded app frame.
-    const url = platform.url;
     return (
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          openExternal(url);
+          openExternal(dest);
         }}
         className={cn(base, "focus-ring transition-transform hover:scale-[1.04]")}
         style={{ backgroundColor: platform.color }}
@@ -49,6 +55,7 @@ export function PlatformBadge({ platform, className }: { platform: Platform; cla
     </span>
   );
 }
+
 
 export function PlatformRow({ platforms, max = 3 }: { platforms: Platform[]; max?: number }) {
   if (!platforms.length) return null;

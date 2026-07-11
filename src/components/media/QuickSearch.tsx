@@ -68,7 +68,7 @@ export function QuickSearch({ className }: { className?: string }) {
       </form>
 
       {showPanel ? (
-        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover/95 p-1.5 shadow-elevated backdrop-blur">
+        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-border bg-popover/95 p-1.5 shadow-float backdrop-blur">
           <p className="px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
             {q.trim() ? "Suggestions" : "Populaires en ce moment"}
           </p>

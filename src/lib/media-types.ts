@@ -91,6 +91,12 @@ export interface RelatedMedia {
   mediaType: MediaType;
 }
 
+export interface MediaVideo {
+  key: string;
+  label: string;
+  url: string;
+}
+
 export interface MediaDetail extends MediaItem {
   trailerUrl: string | null;
   format: string | null;
@@ -103,6 +109,13 @@ export interface MediaDetail extends MediaItem {
   crew: CreditPerson[];
   related: RelatedMedia[];
   collectionName: string | null;
+  // Étape 1 — richesse métadonnées
+  titleAlternatives: string[];
+  originSource: string | null;
+  ageRating: string | null;
+  countryOfOrigin: string | null;
+  endDate: string | null;
+  videos: MediaVideo[];
 }
 
 // ---------- Personal tracking (user data) ----------

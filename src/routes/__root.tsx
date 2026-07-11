@@ -85,6 +85,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "KAZEN — Découvrez anime, séries et films" },
       { property: "og:description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "KAZEN" },
+      { property: "og:url", content: "https://kazen.lovable.app" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "KAZEN — Découvrez anime, séries et films" },
       { name: "twitter:description", content: "Le hub premium en français : tendances anime, séries et films, sorties à venir et plateformes de streaming réunis en un seul endroit." },

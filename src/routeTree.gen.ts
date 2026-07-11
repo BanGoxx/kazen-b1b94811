@@ -18,6 +18,7 @@ import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
+import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
@@ -64,6 +65,11 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   path: '/saison',
   getParentRoute: () => AnimeRoute,
 } as any)
+const MediaSourceIdRoute = MediaSourceIdRouteImport.update({
+  id: '/media/$source/$id',
+  path: '/media/$source/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
+  '/media/$source/$id': typeof MediaSourceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime': typeof AnimeIndexRoute
+  '/media/$source/$id': typeof MediaSourceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
+  '/media/$source/$id': typeof MediaSourceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/series'
     | '/anime/saison'
     | '/anime/'
+    | '/media/$source/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/series'
     | '/anime/saison'
     | '/anime'
+    | '/media/$source/$id'
   id:
     | '__root__'
     | '/'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/series'
     | '/anime/saison'
     | '/anime/'
+    | '/media/$source/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   FilmsRoute: typeof FilmsRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
+  MediaSourceIdRoute: typeof MediaSourceIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeSaisonRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/media/$source/$id': {
+      id: '/media/$source/$id'
+      path: '/media/$source/$id'
+      fullPath: '/media/$source/$id'
+      preLoaderRoute: typeof MediaSourceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -231,6 +251,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilmsRoute: FilmsRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,
+  MediaSourceIdRoute: MediaSourceIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

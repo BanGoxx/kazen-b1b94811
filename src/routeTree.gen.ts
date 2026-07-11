@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SeriesRouteImport } from './routes/series'
+import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as FilmsRouteImport } from './routes/films'
+import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AnimeRouteImport } from './routes/anime'
+import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
@@ -21,14 +24,29 @@ const SeriesRoute = SeriesRouteImport.update({
   path: '/series',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RechercheRoute = RechercheRouteImport.update({
+  id: '/recherche',
+  path: '/recherche',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FilmsRoute = FilmsRouteImport.update({
   id: '/films',
   path: '/films',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalendrierRoute = CalendrierRouteImport.update({
+  id: '/calendrier',
+  path: '/calendrier',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeRoute = AnimeRouteImport.update({
   id: '/anime',
   path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AVenirRoute = AVenirRouteImport.update({
+  id: '/a-venir',
+  path: '/a-venir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,15 +67,21 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a-venir': typeof AVenirRoute
+  '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime': typeof AnimeIndexRoute
@@ -65,22 +89,45 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anime' | '/films' | '/series' | '/anime/saison' | '/anime/'
+  fullPaths:
+    | '/'
+    | '/a-venir'
+    | '/anime'
+    | '/calendrier'
+    | '/films'
+    | '/recherche'
+    | '/series'
+    | '/anime/saison'
+    | '/anime/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/films' | '/series' | '/anime/saison' | '/anime'
+  to:
+    | '/'
+    | '/a-venir'
+    | '/calendrier'
+    | '/films'
+    | '/recherche'
+    | '/series'
+    | '/anime/saison'
+    | '/anime'
   id:
     | '__root__'
     | '/'
+    | '/a-venir'
     | '/anime'
+    | '/calendrier'
     | '/films'
+    | '/recherche'
     | '/series'
     | '/anime/saison'
     | '/anime/'
@@ -88,8 +135,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AVenirRoute: typeof AVenirRoute
   AnimeRoute: typeof AnimeRouteWithChildren
+  CalendrierRoute: typeof CalendrierRoute
   FilmsRoute: typeof FilmsRoute
+  RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
 }
 
@@ -102,6 +152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recherche': {
+      id: '/recherche'
+      path: '/recherche'
+      fullPath: '/recherche'
+      preLoaderRoute: typeof RechercheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/films': {
       id: '/films'
       path: '/films'
@@ -109,11 +166,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FilmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calendrier': {
+      id: '/calendrier'
+      path: '/calendrier'
+      fullPath: '/calendrier'
+      preLoaderRoute: typeof CalendrierRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime': {
       id: '/anime'
       path: '/anime'
       fullPath: '/anime'
       preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/a-venir': {
+      id: '/a-venir'
+      path: '/a-venir'
+      fullPath: '/a-venir'
+      preLoaderRoute: typeof AVenirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -154,8 +225,11 @@ const AnimeRouteWithChildren = AnimeRoute._addFileChildren(AnimeRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AVenirRoute: AVenirRoute,
   AnimeRoute: AnimeRouteWithChildren,
+  CalendrierRoute: CalendrierRoute,
   FilmsRoute: FilmsRoute,
+  RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,
 }
 export const routeTree = rootRouteImport

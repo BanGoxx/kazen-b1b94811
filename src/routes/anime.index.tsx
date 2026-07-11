@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { MediaGrid } from "@/components/media/MediaGrid";
+import { CatalogGrid } from "@/components/media/CatalogGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trendingAnimeQO, popularAnimeQO, upcomingAnimeQO } from "@/lib/queries";
 

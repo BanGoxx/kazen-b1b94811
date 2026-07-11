@@ -268,11 +268,67 @@ interface TmdbExtra {
 const TMDB_PROFILE = "https://image.tmdb.org/t/p/w185";
 const IMPORTANT_JOBS = ["Director", "Screenplay", "Writer", "Creator", "Producer", "Original Music Composer"];
 
+const TMDB_COUNTRY_LABELS: Record<string, string> = {
+  JP: "Japon",
+  CN: "Chine",
+  KR: "Corée du Sud",
+  US: "États-Unis",
+  FR: "France",
+  GB: "Royaume-Uni",
+  DE: "Allemagne",
+  ES: "Espagne",
+  IT: "Italie",
+};
+
+function tmdbCountry(
+  origin?: string[] | null,
+  production?: { iso_3166_1?: string; name?: string }[] | null,
+): string | null {
+  const code = origin?.[0] ?? production?.[0]?.iso_3166_1;
+  if (!code) return production?.[0]?.name ?? null;
+  return TMDB_COUNTRY_LABELS[code] ?? production?.[0]?.name ?? code;
+}
+
+function tmdbMovieCert(
+  rd?: { results?: { iso_3166_1?: string; release_dates?: { certification?: string }[] }[] } | null,
+): string | null {
+  const results = rd?.results ?? [];
+  const pick = (code: string) => results.find((r) => r.iso_3166_1 === code);
+  const entry = pick("FR") ?? pick("US") ?? results[0];
+  const cert = entry?.release_dates?.map((d) => d.certification).find((c) => c && c.trim());
+  return cert ? cert.trim() : null;
+}
+
+function tmdbTvCert(
+  cr?: { results?: { iso_3166_1?: string; rating?: string }[] } | null,
+): string | null {
+  const results = cr?.results ?? [];
+  const pick = (code: string) => results.find((r) => r.iso_3166_1 === code);
+  const entry = pick("FR") ?? pick("US") ?? results.find((r) => r.rating && r.rating.trim());
+  return entry?.rating?.trim() || null;
+}
+
+const TMDB_VIDEO_LABELS: Record<string, string> = {
+  Trailer: "Bande-annonce",
+  Teaser: "Teaser",
+  Clip: "Extrait",
+  Featurette: "Featurette",
+  "Behind the Scenes": "Coulisses",
+};
+
 function augmentTmdb(
   bmedia: MediaItem,
   data: TmdbExtra,
   kind: "movie" | "tv",
-  extra: { collectionName?: string | null; studios?: string[]; format: string },
+  extra: {
+    collectionName?: string | null;
+    studios?: string[];
+    format: string;
+    countryOfOrigin?: string | null;
+    ageRating?: string | null;
+    titleAlternatives?: string[];
+    endDate?: string | null;
+  },
 ): MediaDetail {
   const cast: CreditPerson[] = (data.credits?.cast ?? []).slice(0, 14).map((c) => ({
     id: `c${c.id}`,

@@ -148,7 +148,6 @@ function MediaDetailPage() {
 
         {/* Right column: content */}
         <div className="min-w-0 space-y-8">
-          <h1 className="sr-only">{item.title}</h1>
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full aurora-bg px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">

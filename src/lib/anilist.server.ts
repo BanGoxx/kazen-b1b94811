@@ -8,6 +8,25 @@ import type {
 } from "./media-types";
 
 const ENDPOINT = "https://graphql.anilist.co";
+const CACHE_TTL_MS = 1000 * 60 * 20;
+const STALE_TTL_MS = 1000 * 60 * 60 * 6;
+
+type CacheEntry<T> = {
+  value?: T;
+  expiresAt: number;
+  staleUntil: number;
+  pending?: Promise<T>;
+};
+
+const queryCache = new Map<string, CacheEntry<unknown>>();
+
+function cacheKey(gql: string, variables: Record<string, unknown>): string {
+  return JSON.stringify({ gql, variables });
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const MEDIA_FIELDS = `
   id
@@ -26,15 +45,79 @@ const MEDIA_FIELDS = `
 `;
 
 async function query<T>(gql: string, variables: Record<string, unknown>): Promise<T> {
-  const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query: gql, variables }),
+  const key = cacheKey(gql, variables);
+  const now = Date.now();
+  const cached = queryCache.get(key) as CacheEntry<T> | undefined;
+
+  if (cached?.value && cached.expiresAt > now) return cached.value;
+  if (cached?.pending) return cached.pending;
+
+  const pending = (async () => {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "User-Agent": "KAZEN/1.0 (+https://kazen.lovable.app)",
+          },
+          body: JSON.stringify({ query: gql, variables }),
+        });
+
+        if (res.status === 429 && attempt < 2) {
+          const retryAfter = Number(res.headers.get("retry-after"));
+          await wait(Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 1500) : 650 * (attempt + 1));
+          continue;
+        }
+
+        if (!res.ok) throw new Error(`AniList ${res.status}`);
+
+        const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
+        if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join("; "));
+
+        const value = json.data as T;
+        queryCache.set(key, {
+          value,
+          expiresAt: Date.now() + CACHE_TTL_MS,
+          staleUntil: Date.now() + STALE_TTL_MS,
+        });
+        return value;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) await wait(450 * (attempt + 1));
+      }
+    }
+
+    if (cached?.value && cached.staleUntil > Date.now()) {
+      console.error("AniList source indisponible, cache récent conservé", lastError);
+      return cached.value;
+    }
+
+    throw lastError instanceof Error ? lastError : new Error("AniList request failed");
+  })();
+
+  queryCache.set(key, {
+    value: cached?.value,
+    expiresAt: cached?.expiresAt ?? 0,
+    staleUntil: cached?.staleUntil ?? 0,
+    pending,
   });
-  if (!res.ok) throw new Error(`AniList ${res.status}`);
-  const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
-  if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join("; "));
-  return json.data as T;
+
+  try {
+    return await pending;
+  } finally {
+    const latest = queryCache.get(key) as CacheEntry<T> | undefined;
+    if (latest?.pending === pending) {
+      queryCache.set(key, {
+        value: latest.value,
+        expiresAt: latest.expiresAt,
+        staleUntil: latest.staleUntil,
+      });
+    }
+  }
 }
 
 interface PageResult {

@@ -31,13 +31,15 @@ export const Route = createFileRoute("/media/$source/$id")({
     if (!item) throw notFound();
     return { item };
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
+    const canonical = `https://kazen.lovable.app/media/${params.source}/${params.id}`;
     const item = loaderData?.item;
     if (!item) {
       return {
         meta: [
           { title: "Fiche introuvable — KAZEN" },
           { name: "description", content: "Ce contenu n'est pas disponible sur KAZEN." },
+          { name: "robots", content: "noindex" },
         ],
       };
     }
@@ -50,6 +52,7 @@ export const Route = createFileRoute("/media/$source/$id")({
         : rawSynopsis
       : `Découvrez ${item.title} sur KAZEN : plateformes, casting, bande-annonce et suivi personnel.`;
     const image = item.backdropUrl || item.posterUrl;
+    const schemaType = item.mediaType === "movie" ? "Movie" : "TVSeries";
     return {
       meta: [
         { title },
@@ -57,11 +60,26 @@ export const Route = createFileRoute("/media/$source/$id")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "video.other" },
+        { property: "og:url", content: canonical },
         ...(image ? [{ property: "og:image", content: image }] : []),
         { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
         ...(image ? [{ name: "twitter:image", content: image }] : []),
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": schemaType,
+            name: item.title,
+            description,
+            url: canonical,
+            ...(item.posterUrl ? { image: item.posterUrl } : {}),
+          }),
+        },
       ],
     };
   },

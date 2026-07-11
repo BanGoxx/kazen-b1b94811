@@ -98,7 +98,9 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
       }
     }
   }`;
-  const data = await query<{ Media: AniListDetailRaw | null }>(gql, { id });
+  const data = await query<{
+    Media: (AniListDetailRaw & Parameters<typeof fromAniList>[0]) | null;
+  }>(gql, { id });
   return data.Media ? fromAniListDetail(data.Media) : null;
 }
 

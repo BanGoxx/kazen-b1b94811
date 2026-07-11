@@ -24,7 +24,7 @@ export function MemberCTA() {
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.66 0.24 300 / 0.22), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.585 0.2 28 / 0.18), transparent)" }}
       />
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-xl space-y-3">

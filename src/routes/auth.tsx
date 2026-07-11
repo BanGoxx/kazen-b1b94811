@@ -101,7 +101,7 @@ function AuthPage() {
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none absolute -top-40 right-0 h-[34rem] w-[34rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.66 0.24 300 / 0.2), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.585 0.2 28 / 0.16), transparent)" }}
       />
       <div className="relative w-full max-w-md rounded-3xl border border-border bg-card/70 p-8 shadow-[var(--shadow-card)] backdrop-blur">
         <div className="mb-6 flex flex-col items-center text-center">

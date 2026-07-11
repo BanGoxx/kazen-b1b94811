@@ -123,7 +123,7 @@ function MediaDetailPage() {
           <div className="mx-auto w-44 sm:w-52 lg:mx-0 lg:w-full">
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-lg)]">
               {item.posterUrl ? (
-                <img src={item.posterUrl} alt={item.title} className="aspect-[2/3] w-full object-cover" />
+                <img src={item.posterUrl} alt={item.title} loading="eager" decoding="async" width={300} height={450} className="aspect-[2/3] w-full object-cover" />
               ) : (
                 <div className="aspect-[2/3] w-full aurora-bg opacity-40" />
               )}

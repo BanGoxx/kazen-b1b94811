@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/recherche", label: "Recherche", icon: Search },
   { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
+  { to: "/soutien", label: "Soutien", icon: Heart },
 ];
 
 function AuthMenu() {

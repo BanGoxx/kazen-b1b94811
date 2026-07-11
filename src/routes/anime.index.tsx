@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { CatalogGrid } from "@/components/media/CatalogGrid";
+import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { trendingAnimeQO, popularAnimeQO, upcomingAnimeQO } from "@/lib/queries";
+import { animePageQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/anime/")({
   head: () => ({
@@ -14,18 +13,12 @@ export const Route = createFileRoute("/anime/")({
     ],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(trendingAnimeQO);
-    void context.queryClient.prefetchQuery(popularAnimeQO);
-    void context.queryClient.prefetchQuery(upcomingAnimeQO);
+    await context.queryClient.ensureInfiniteQueryData(animePageQO("trending"));
   },
   component: AnimePage,
 });
 
 function AnimePage() {
-  const trending = useSuspenseQuery(trendingAnimeQO);
-  const popular = useSuspenseQuery(popularAnimeQO);
-  const upcoming = useSuspenseQuery(upcomingAnimeQO);
-
   return (
     <AppShell>
       <PageHeader title="Anime" description="Le meilleur de l'animation, tendance et à venir." />
@@ -36,13 +29,16 @@ function AnimePage() {
           <TabsTrigger value="upcoming">À venir</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <CatalogGrid items={trending.data} />
+          <PaginatedCatalog queryOptions={animePageQO("trending")} />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <CatalogGrid items={popular.data} />
+          <PaginatedCatalog queryOptions={animePageQO("popular")} />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
-          <CatalogGrid items={upcoming.data} />
+          <PaginatedCatalog
+            queryOptions={animePageQO("upcoming")}
+            emptyLabel="Aucun anime à venir listé pour le moment."
+          />
         </TabsContent>
       </Tabs>
     </AppShell>

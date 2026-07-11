@@ -36,9 +36,9 @@ export const Route = createFileRoute("/calendrier")({
       { name: "description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(upcomingAllQO);
-    context.queryClient.ensureQueryData(onAirSeriesQO);
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(upcomingAllQO);
+    void context.queryClient.prefetchQuery(onAirSeriesQO);
   },
   component: CalendarPage,
   pendingComponent: () => (

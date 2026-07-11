@@ -6,6 +6,7 @@ import { DiscoverHero } from "@/components/media/DiscoverHero";
 import { MediaCarousel } from "@/components/media/MediaCarousel";
 import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
+import { MemberCTA } from "@/components/media/MemberCTA";
 import {
   trendingAnimeQO,
   trendingSeriesQO,
@@ -94,17 +95,20 @@ function DiscoverPage() {
           action={{ label: "À venir", to: "/a-venir" }}
           items={upAnime.data}
         />
+        <MemberCTA />
         <MediaCarousel
           title="Séries en vedette"
           subtitle="Les incontournables du petit écran"
           action={{ label: "Tout voir", to: "/series" }}
           items={popSeries.data.length ? popSeries.data : series.data}
+          hideWhenEmpty
         />
         <MediaCarousel
           title="Films à venir"
           subtitle="Prochainement en salle et en streaming"
           action={{ label: "À venir", to: "/a-venir" }}
           items={upMovies.data}
+          hideWhenEmpty
         />
         <MediaCarousel
           title={`Saison anime · ${seasonal.data.label} ${seasonal.data.year}`}
@@ -114,8 +118,10 @@ function DiscoverPage() {
         />
         <MediaCarousel
           title="Films tendance"
+          subtitle="Les longs-métrages qui font parler d'eux"
           action={{ label: "Tout voir", to: "/films" }}
           items={movies.data}
+          hideWhenEmpty
         />
         <PlatformHighlights />
       </div>

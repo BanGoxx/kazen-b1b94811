@@ -188,12 +188,22 @@ function MyListsPage() {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/40 py-20 text-center">
-            <p className="text-muted-foreground">Aucun titre dans cette vue.</p>
-            <Button asChild variant="aurora" className="mt-4">
-              <Link to="/">Découvrir des titres</Link>
-            </Button>
-          </div>
+          entries.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/40 px-6 py-20 text-center">
+              <p className="font-display text-lg font-bold">Votre liste est encore vide</p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Ajoutez un titre depuis n'importe quelle fiche pour le suivre, le noter et
+                l'organiser avec vos tags.
+              </p>
+              <Button asChild variant="aurora" className="mt-5">
+                <Link to="/">Découvrir des titres</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/40 py-20 text-center">
+              <p className="text-muted-foreground">Aucun titre ne correspond à ces filtres.</p>
+            </div>
+          )
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
             {filtered.map((entry) => (

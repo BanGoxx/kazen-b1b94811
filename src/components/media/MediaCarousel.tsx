@@ -10,13 +10,16 @@ export function MediaCarousel({
   action,
   items,
   isLoading,
+  hideWhenEmpty,
 }: {
   title: string;
   subtitle?: string;
   action?: { label: string; to: string };
   items: MediaItem[];
   isLoading?: boolean;
+  hideWhenEmpty?: boolean;
 }) {
+  if (hideWhenEmpty && !isLoading && !items.length) return null;
   return (
     <section className="animate-fade-in">
       <SectionHeader title={title} subtitle={subtitle} action={action} />
@@ -42,7 +45,10 @@ export function MediaCarousel({
           ))}
         </div>
       ) : (
-        <EmptyState message="Contenu indisponible pour le moment." />
+        <EmptyState
+          message="Rien à afficher ici pour l'instant."
+          hint="Cette sélection se remplira dès que de nouveaux titres seront disponibles."
+        />
       )}
     </section>
   );

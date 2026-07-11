@@ -26,6 +26,8 @@ export function CatalogGrid({
     return sortItems(filtered, state.sort);
   }, [items, state]);
 
+  const sourceEmpty = items.length === 0;
+
   return (
     <div>
       <FilterBar
@@ -36,7 +38,11 @@ export function CatalogGrid({
       />
       <MediaGrid
         items={visible}
-        emptyLabel={emptyLabel ?? "Aucun titre ne correspond à ces filtres."}
+        emptyLabel={
+          sourceEmpty
+            ? (emptyLabel ?? "Aucun titre à afficher pour le moment. Revenez bientôt.")
+            : "Aucun titre ne correspond à ces filtres."
+        }
       />
     </div>
   );

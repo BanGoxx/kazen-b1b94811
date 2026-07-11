@@ -180,6 +180,10 @@ function MyListsPage() {
               ))}
             </div>
           ) : null}
+          <div className="flex items-center gap-2 border-t border-border/50 pt-3 text-xs text-muted-foreground">
+            <span>Besoin de filtres croisés et de collections&nbsp;?</span>
+            <PremiumHint featureId="filters" label="Filtres avancés" />
+          </div>
         </div>
 
 

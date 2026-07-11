@@ -32,6 +32,18 @@ export function ListControls({ item }: { item: MediaItem }) {
     setNoteDraft(entry?.notes ?? "");
   }, [entry?.notes]);
 
+  if (!ready) {
+    return (
+      <div className="space-y-4 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-bold">Ma liste</h2>
+          <span className="h-2 w-2 rounded-full bg-primary/70" aria-hidden="true" />
+        </div>
+        <div className="h-10 animate-pulse rounded-xl bg-muted/40" aria-label="Chargement de votre espace membre" />
+      </div>
+    );
+  }
+
   if (ready && !user) {
     return (
       <div className="space-y-4 rounded-2xl border border-border bg-card/60 p-5 text-center backdrop-blur">

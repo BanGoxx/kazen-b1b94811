@@ -180,12 +180,18 @@ export const getMediaDetail = createServerFn({ method: "GET" })
     const id = Number(data.id);
     if (!Number.isFinite(id)) return null;
     try {
-      if (data.source === "anilist") return await anilistDetail(id);
+      if (data.source === "anilist") {
+        const detail = await anilistDetail(id);
+        return detail ?? fallbackAnimeDetail(data.id);
+      }
       if (data.source === "tmdb_movie") return await tmdbMovieDetail(id);
       if (data.source === "tmdb_tv") return await tmdbTvDetail(id);
       return null;
     } catch (e) {
       console.error("getMediaDetail", e);
+      // Serve a curated fallback for known anime so a transient upstream
+      // failure never turns a valid card into "Fiche introuvable".
+      if (data.source === "anilist") return fallbackAnimeDetail(data.id);
       return null;
     }
   });

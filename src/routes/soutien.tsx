@@ -81,12 +81,17 @@ function SoutienPage() {
             <p className="text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
               {SUPPORTER_PITCH.description}
             </p>
+            <p className="mx-auto max-w-md text-balance text-xs leading-relaxed text-primary/90">
+              Pendant la bêta, les outils Soutien sont ouverts gratuitement pour
+              que tu puisses les tester. Aucun paiement n'est requis pour le moment.
+            </p>
             {isSupporter ? (
               <div className="flex items-center justify-center gap-2 pt-2">
                 <SupporterBadge />
                 <span className="text-sm text-muted-foreground">Merci pour ton soutien 💜</span>
               </div>
             ) : null}
+
           </div>
         </header>
 

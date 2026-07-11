@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Bookmark, BookmarkCheck, Heart, Plus, Star, Tag, X } from "lucide-react";
 import type { MediaItem, PriorityLevel, WatchStatus } from "@/lib/media-types";
 import { PRIORITY_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";

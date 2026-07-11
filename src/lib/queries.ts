@@ -56,6 +56,18 @@ export const upcomingMoviesQO = queryOptions({
   queryFn: () => getUpcomingMovies(),
   staleTime: HOUR,
 });
+export const animatedMoviesQO = queryOptions({
+  queryKey: ["movies", "animated"],
+  queryFn: () => getAnimatedMovies(),
+  staleTime: HOUR,
+});
+export const asianAnimationMoviesQO = queryOptions({
+  queryKey: ["movies", "asian-animation"],
+  queryFn: () => getAsianAnimationMovies(),
+  staleTime: HOUR,
+});
+
+
 
 export const trendingSeriesQO = queryOptions({
   queryKey: ["series", "trending"],

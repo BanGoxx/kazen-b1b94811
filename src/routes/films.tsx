@@ -10,7 +10,11 @@ export const Route = createFileRoute("/films")({
     meta: [
       { title: "Films — KAZEN" },
       { name: "description", content: "Films tendance, populaires, à venir et films d'animation, avec leurs plateformes de disponibilité." },
+      { property: "og:title", content: "Films — KAZEN" },
+      { property: "og:description", content: "Films tendance, populaires, à venir et films d'animation, avec leurs plateformes de disponibilité." },
+      { property: "og:url", content: "https://kazen.lovable.app/films" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/films" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureInfiniteQueryData(moviePageQO("trending"));

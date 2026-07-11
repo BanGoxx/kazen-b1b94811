@@ -75,7 +75,7 @@ export function fromAniList(m: AniListMedia): MediaItem {
     synopsis: stripHtml(m.description),
     posterUrl: m.coverImage?.extraLarge || m.coverImage?.large || null,
     backdropUrl: m.bannerImage || null,
-    genres: m.genres ?? [],
+    genres: aniListGenres(m.genres),
     score: m.averageScore ?? null,
     status: aniListStatus(m.status),
     releaseDate: aniListDate(m.startDate),

@@ -14,7 +14,6 @@ import {
   UserRound,
   Menu,
   X,
-  Hexagon,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { KazenLogo } from "@/components/brand/KazenLogo";
 import { signOut, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -106,13 +106,8 @@ function AuthMenu() {
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="KAZEN — accueil">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl aurora-bg shadow-[var(--shadow-glow)]">
-        <Hexagon className="h-5 w-5 text-white" strokeWidth={2.5} />
-      </span>
-      <span className="font-display text-lg font-extrabold tracking-tight">
-        <span className="aurora-text">KAZEN</span>
-      </span>
+    <Link to="/" className="focus-ring rounded-lg" aria-label="KAZEN — accueil">
+      <KazenLogo size="md" />
     </Link>
   );
 }
@@ -165,12 +160,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none fixed -top-40 right-0 h-[34rem] w-[34rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.66 0.24 300 / 0.18), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.66 0.25 350 / 0.2), transparent)" }}
       />
       <div
         aria-hidden="true"
         className="ambient-glow pointer-events-none fixed -bottom-48 -left-40 h-[32rem] w-[32rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(closest-side, oklch(0.78 0.14 200 / 0.14), transparent)", animationDelay: "2.5s" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.79 0.13 205 / 0.14), transparent)", animationDelay: "2.5s" }}
       />
 
       <div className="relative mx-auto flex min-h-dvh max-w-[1600px]">
@@ -238,7 +233,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
             <p>
-              <span className="font-display font-bold aurora-text">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
+              <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
             </p>
             <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
           </footer>

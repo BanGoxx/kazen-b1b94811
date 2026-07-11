@@ -104,14 +104,14 @@ function AuthPage() {
       />
       <div className="relative w-full max-w-md rounded-3xl border border-border bg-card/70 p-8 shadow-[var(--shadow-card)] backdrop-blur">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl aurora-bg shadow-[var(--shadow-glow)]">
-            <Hexagon className="h-6 w-6 text-white" strokeWidth={2.5} />
+          <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl shadow-[var(--shadow-glow)]">
+            <KazenMark className="h-full w-full" />
           </span>
-          <h1 className="font-display text-2xl font-extrabold">
-            <span className="aurora-text">KAZEN</span>
-          </h1>
+          <h1 className="brand-wordmark font-display text-2xl font-extrabold">KAZEN</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "login" ? "Connectez-vous à votre espace" : "Créez votre compte"}
+            {mode === "login"
+              ? "Tes anime, séries et films. Enfin au même endroit."
+              : "Créez votre compte et suivez tout au même endroit."}
           </p>
         </div>
 

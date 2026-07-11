@@ -124,6 +124,7 @@ export const animePageQO = (kind: string) =>
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
     staleTime: HOUR,
+    retry: 3,
   });
 
 export const moviePageQO = (kind: string) =>

@@ -315,13 +315,7 @@ function CalendarEntry({ item }: { item: MediaItem }) {
       className="group flex items-center gap-2 rounded-lg border border-border/60 bg-background/60 p-1.5 transition-colors hover:border-primary/40"
     >
       <div className="relative h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
-        {item.posterUrl ? (
-          <img src={item.posterUrl} alt={`Affiche de ${item.title}`} loading="lazy" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <ImageOff className="h-3 w-3" />
-          </div>
-        )}
+        <SafeImage src={item.posterUrl} alt={`Affiche de ${item.title}`} variant="poster" fallbackLabel={item.title} loading="lazy" className="h-full w-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">

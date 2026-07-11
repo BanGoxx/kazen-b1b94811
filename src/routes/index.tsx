@@ -84,6 +84,7 @@ function DiscoverPage() {
       )}
 
       <div className="space-y-14">
+        <ForYouHomeBlock />
         <MediaCarousel
           title="Tendances du moment"
           subtitle="Ce que la communauté regarde en ce moment"

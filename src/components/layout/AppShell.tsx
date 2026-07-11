@@ -238,7 +238,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
             <p>
-              <span className="font-display font-bold aurora-text">KAZEN</span> — Découvrez, suivez, organisez.
+              <span className="font-display font-bold aurora-text">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
             </p>
             <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
           </footer>

@@ -28,6 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { KazenLogo } from "@/components/brand/KazenLogo";
+import { SearchAutocomplete } from "@/components/media/SearchAutocomplete";
+import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { signOut, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 

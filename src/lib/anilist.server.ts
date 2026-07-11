@@ -410,6 +410,41 @@ const ANILIST_RELATION: Record<string, string> = {
   OTHER: "Autre",
 };
 
+const ANILIST_SOURCE: Record<string, string> = {
+  ORIGINAL: "Œuvre originale",
+  MANGA: "Manga",
+  LIGHT_NOVEL: "Light novel",
+  VISUAL_NOVEL: "Visual novel",
+  VIDEO_GAME: "Jeu vidéo",
+  NOVEL: "Roman",
+  DOUJINSHI: "Dōjinshi",
+  ANIME: "Anime",
+  WEB_NOVEL: "Web novel",
+  LIVE_ACTION: "Live action",
+  GAME: "Jeu",
+  COMIC: "Comic",
+  MULTIMEDIA_PROJECT: "Projet multimédia",
+  PICTURE_BOOK: "Livre illustré",
+  OTHER: "Autre",
+};
+
+const COUNTRY_LABELS: Record<string, string> = {
+  JP: "Japon",
+  CN: "Chine",
+  KR: "Corée du Sud",
+  TW: "Taïwan",
+  US: "États-Unis",
+  FR: "France",
+  GB: "Royaume-Uni",
+};
+
+function anilistDate(d?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
+  if (!d?.year) return null;
+  const mm = String(d.month ?? 1).padStart(2, "0");
+  const dd = String(d.day ?? 1).padStart(2, "0");
+  return `${d.year}-${mm}-${dd}`;
+}
+
 function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[0]): MediaDetail {
   const bmedia = fromAniList(m);
   const trailerUrl =

@@ -6,6 +6,7 @@ import { DiscoverHero } from "@/components/media/DiscoverHero";
 import { MediaCarousel } from "@/components/media/MediaCarousel";
 import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
+import { MemberCTA } from "@/components/media/MemberCTA";
 import {
   trendingAnimeQO,
   trendingSeriesQO,

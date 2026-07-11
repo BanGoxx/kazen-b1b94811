@@ -177,8 +177,11 @@ function UpcomingPage() {
               <section key={key}>
                 <div className="mb-4 flex items-center gap-3">
                   <h2 className="font-display text-xl font-bold capitalize">
-                    {monthFmt.format(new Date(`${key}-01T00:00:00`))}
+                    {key === "tbc"
+                      ? "Date à confirmer"
+                      : monthFmt.format(new Date(`${key}-01T00:00:00`))}
                   </h2>
+
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {items.length}
                   </span>

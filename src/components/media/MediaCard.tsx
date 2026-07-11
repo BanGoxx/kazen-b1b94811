@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ImageOff } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
+import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";

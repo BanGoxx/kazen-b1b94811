@@ -28,7 +28,15 @@ export const Route = createFileRoute("/pour-vous")({
         content:
           "Des recommandations d'anime, séries et films qui s'adaptent à vos goûts, tout en gardant les tendances, nouveautés et titres populaires bien en vue.",
       },
+      { property: "og:title", content: "Pour vous — recommandations personnalisées | KAZEN" },
+      {
+        property: "og:description",
+        content:
+          "Des recommandations d'anime, séries et films qui s'adaptent à vos goûts, tout en gardant les tendances, nouveautés et titres populaires bien en vue.",
+      },
+      { property: "og:url", content: "https://kazen.lovable.app/pour-vous" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/pour-vous" }],
   }),
   loader: async ({ context }) => {
     // Prime the shared discovery pool the recommendation engine reuses.

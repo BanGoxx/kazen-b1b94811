@@ -23,7 +23,11 @@ export const Route = createFileRoute("/a-venir")({
     meta: [
       { title: "À venir — KAZEN" },
       { name: "description", content: "Toutes les prochaines sorties anime, séries et films, classées par date de sortie." },
+      { property: "og:title", content: "À venir — KAZEN" },
+      { property: "og:description", content: "Toutes les prochaines sorties anime, séries et films, classées par date de sortie." },
+      { property: "og:url", content: "https://kazen.lovable.app/a-venir" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/a-venir" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(upcomingAllQO);

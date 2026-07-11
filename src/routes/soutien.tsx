@@ -24,7 +24,15 @@ export const Route = createFileRoute("/soutien")({
         content:
           "Soutenez KAZEN et débloquez des outils avancés : filtres croisés, rappels de sorties, statistiques détaillées et thèmes exclusifs. Le cœur reste gratuit.",
       },
+      { property: "og:title", content: "Soutien KAZEN — Débloquez les outils premium" },
+      {
+        property: "og:description",
+        content:
+          "Soutenez KAZEN et débloquez des outils avancés : filtres croisés, rappels de sorties, statistiques détaillées et thèmes exclusifs. Le cœur reste gratuit.",
+      },
+      { property: "og:url", content: "https://kazen.lovable.app/soutien" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/soutien" }],
   }),
   component: SoutienPage,
 });

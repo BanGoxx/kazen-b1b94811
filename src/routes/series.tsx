@@ -10,7 +10,11 @@ export const Route = createFileRoute("/series")({
     meta: [
       { title: "Séries — KAZEN" },
       { name: "description", content: "Séries tendance, populaires et en cours de diffusion, avec plateformes de streaming." },
+      { property: "og:title", content: "Séries — KAZEN" },
+      { property: "og:description", content: "Séries tendance, populaires et en cours de diffusion, avec plateformes de streaming." },
+      { property: "og:url", content: "https://kazen.lovable.app/series" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/series" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureInfiniteQueryData(seriesPageQO("trending"));

@@ -34,7 +34,11 @@ export const Route = createFileRoute("/calendrier")({
     meta: [
       { title: "Calendrier des sorties — KAZEN" },
       { name: "description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
+      { property: "og:title", content: "Calendrier des sorties — KAZEN" },
+      { property: "og:description", content: "Le calendrier hebdomadaire des sorties anime, séries et films." },
+      { property: "og:url", content: "https://kazen.lovable.app/calendrier" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/calendrier" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(upcomingAllQO);
@@ -312,7 +316,7 @@ function CalendarEntry({ item }: { item: MediaItem }) {
     >
       <div className="relative h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
         {item.posterUrl ? (
-          <img src={item.posterUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={item.posterUrl} alt={`Affiche de ${item.title}`} loading="lazy" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
             <ImageOff className="h-3 w-3" />

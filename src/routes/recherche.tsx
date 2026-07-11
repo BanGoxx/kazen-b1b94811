@@ -43,7 +43,11 @@ export const Route = createFileRoute("/recherche")({
     meta: [
       { title: "Recherche — KAZEN" },
       { name: "description", content: "Recherchez parmi les anime, séries et films de KAZEN." },
+      { property: "og:title", content: "Recherche — KAZEN" },
+      { property: "og:description", content: "Recherchez parmi les anime, séries et films de KAZEN." },
+      { property: "og:url", content: "https://kazen.lovable.app/recherche" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/recherche" }],
   }),
   component: SearchPage,
 });

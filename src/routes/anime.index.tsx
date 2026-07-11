@@ -10,7 +10,11 @@ export const Route = createFileRoute("/anime/")({
     meta: [
       { title: "Anime — KAZEN" },
       { name: "description", content: "Découvrez les anime tendance, populaires et à venir, avec leurs plateformes de diffusion." },
+      { property: "og:title", content: "Anime — KAZEN" },
+      { property: "og:description", content: "Découvrez les anime tendance, populaires et à venir, avec leurs plateformes de diffusion." },
+      { property: "og:url", content: "https://kazen.lovable.app/anime" },
     ],
+    links: [{ rel: "canonical", href: "https://kazen.lovable.app/anime" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureInfiniteQueryData(animePageQO("trending"));

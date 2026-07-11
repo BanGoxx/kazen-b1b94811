@@ -62,9 +62,8 @@ export const upsertListItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { media: MediaSnapshot; patch: ListPatch }) => data)
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const m = data.media;
-    const { error: mediaError } = await supabaseAdmin.from("media_records").upsert(
+    const { error: mediaError } = await context.supabase.from("media_records").upsert(
       {
         media_key: m.key,
         source: m.source,

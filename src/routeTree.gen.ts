@@ -13,11 +13,15 @@ import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AVenirRouteImport } from './routes/a-venir'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 
 const SeriesRoute = SeriesRouteImport.update({
@@ -40,6 +44,11 @@ const CalendrierRoute = CalendrierRouteImport.update({
   path: '/calendrier',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeRoute = AnimeRouteImport.update({
   id: '/anime',
   path: '/anime',
@@ -48,6 +57,10 @@ const AnimeRoute = AnimeRouteImport.update({
 const AVenirRoute = AVenirRouteImport.update({
   id: '/a-venir',
   path: '/a-venir',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +78,16 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   path: '/saison',
   getParentRoute: () => AnimeRoute,
 } as any)
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMesListesRoute = AuthenticatedMesListesRouteImport.update({
+  id: '/mes-listes',
+  path: '/mes-listes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const MediaSourceIdRoute = MediaSourceIdRouteImport.update({
   id: '/media/$source/$id',
   path: '/media/$source/$id',
@@ -75,10 +98,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -86,10 +112,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-venir': typeof AVenirRoute
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -97,12 +126,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/a-venir': typeof AVenirRoute
   '/anime': typeof AnimeRouteWithChildren
+  '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
+  '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/anime/': typeof AnimeIndexRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -113,10 +146,13 @@ export interface FileRouteTypes {
     | '/'
     | '/a-venir'
     | '/anime'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
     | '/series'
+    | '/mes-listes'
+    | '/profil'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -124,22 +160,29 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/a-venir'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
     | '/series'
+    | '/mes-listes'
+    | '/profil'
     | '/anime/saison'
     | '/anime'
     | '/media/$source/$id'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/a-venir'
     | '/anime'
+    | '/auth'
     | '/calendrier'
     | '/films'
     | '/recherche'
     | '/series'
+    | '/_authenticated/mes-listes'
+    | '/_authenticated/profil'
     | '/anime/saison'
     | '/anime/'
     | '/media/$source/$id'
@@ -147,8 +190,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AVenirRoute: typeof AVenirRoute
   AnimeRoute: typeof AnimeRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
   FilmsRoute: typeof FilmsRoute
   RechercheRoute: typeof RechercheRoute
@@ -186,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendrierRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime': {
       id: '/anime'
       path: '/anime'
@@ -198,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/a-venir'
       fullPath: '/a-venir'
       preLoaderRoute: typeof AVenirRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -221,6 +280,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeSaisonRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mes-listes': {
+      id: '/_authenticated/mes-listes'
+      path: '/mes-listes'
+      fullPath: '/mes-listes'
+      preLoaderRoute: typeof AuthenticatedMesListesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/media/$source/$id': {
       id: '/media/$source/$id'
       path: '/media/$source/$id'
@@ -230,6 +303,19 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AnimeRouteChildren {
   AnimeSaisonRoute: typeof AnimeSaisonRoute
@@ -245,8 +331,10 @@ const AnimeRouteWithChildren = AnimeRoute._addFileChildren(AnimeRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AVenirRoute: AVenirRoute,
   AnimeRoute: AnimeRouteWithChildren,
+  AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
   FilmsRoute: FilmsRoute,
   RechercheRoute: RechercheRoute,

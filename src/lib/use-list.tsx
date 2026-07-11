@@ -91,6 +91,60 @@ export function useUserEntry(mediaKey: string): ListEntry | null {
   return entries.find((e) => e.mediaKey === mediaKey) ?? null;
 }
 
+type UpsertVars = { item: MediaItem; patch: ListPatch };
+
+// Build the media_records snapshot the list query embeds, so an optimistic row
+// renders identically to a server row (poster, title, etc.).
+function optimisticMediaRecord(item: MediaItem): NonNullable<ListRow["media_records"]> {
+  const now = new Date().toISOString();
+  return {
+    media_key: item.key,
+    source: item.source,
+    external_id: item.externalId,
+    media_type: item.mediaType,
+    title: item.title,
+    title_original: item.titleOriginal,
+    poster_url: item.posterUrl,
+    backdrop_url: item.backdropUrl,
+    release_date: item.releaseDate,
+    genres: item.genres ?? [],
+    platforms: item.platforms as never,
+    score: item.score,
+    created_at: now,
+    updated_at: now,
+  } as NonNullable<ListRow["media_records"]>;
+}
+
+// Merge a patch onto an existing row (or a fresh row) respecting explicit nulls
+// so "clear rating" / "clear status" work correctly.
+function applyPatch(prev: ListRow | undefined, vars: UpsertVars): ListRow {
+  const { item, patch } = vars;
+  const base: ListRow =
+    prev ??
+    ({
+      media_key: item.key,
+      status: null,
+      favorite: false,
+      priority: "normale",
+      rating: null,
+      notes: "",
+      tags: [],
+      updated_at: new Date().toISOString(),
+      media_records: optimisticMediaRecord(item),
+    } as unknown as ListRow);
+  return {
+    ...base,
+    status: "status" in patch ? patch.status ?? null : base.status,
+    favorite: "favorite" in patch ? patch.favorite ?? false : base.favorite,
+    priority: "priority" in patch ? patch.priority ?? "normale" : base.priority,
+    rating: "rating" in patch ? patch.rating ?? null : base.rating,
+    notes: "notes" in patch ? patch.notes ?? "" : base.notes,
+    tags: "tags" in patch ? patch.tags ?? [] : base.tags,
+    updated_at: new Date().toISOString(),
+    media_records: base.media_records ?? optimisticMediaRecord(item),
+  };
+}
+
 export function useListMutations() {
   const qc = useQueryClient();
   const upsertFn = useServerFn(upsertListItem);
@@ -99,15 +153,50 @@ export function useListMutations() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["my-list"] });
 
   const upsert = useMutation({
-    mutationFn: (vars: { item: MediaItem; patch: ListPatch }) =>
+    mutationFn: (vars: UpsertVars) =>
       upsertFn({ data: { media: snapshotFromItem(vars.item), patch: vars.patch } }),
-    onSuccess: invalidate,
+    // Optimistic: reflect the change instantly, roll back on failure.
+    onMutate: async (vars: UpsertVars) => {
+      await qc.cancelQueries({ queryKey: ["my-list"] });
+      const previous = qc.getQueryData<ListRow[]>(["my-list"]);
+      qc.setQueryData<ListRow[]>(["my-list"], (old) => {
+        const rows = old ?? [];
+        const idx = rows.findIndex((r) => r.media_key === vars.item.key);
+        const updated = applyPatch(idx >= 0 ? rows[idx] : undefined, vars);
+        if (idx >= 0) {
+          const next = rows.slice();
+          next[idx] = updated;
+          return next;
+        }
+        return [updated, ...rows];
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(["my-list"], ctx.previous);
+      toast.error("Impossible d'enregistrer. Réessayez.");
+    },
+    onSettled: invalidate,
   });
 
   const remove = useMutation({
     mutationFn: (mediaKey: string) => removeFn({ data: { mediaKey } }),
-    onSuccess: invalidate,
+    onMutate: async (mediaKey: string) => {
+      await qc.cancelQueries({ queryKey: ["my-list"] });
+      const previous = qc.getQueryData<ListRow[]>(["my-list"]);
+      qc.setQueryData<ListRow[]>(["my-list"], (old) =>
+        (old ?? []).filter((r) => r.media_key !== mediaKey),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(["my-list"], ctx.previous);
+      toast.error("Impossible de retirer ce titre. Réessayez.");
+    },
+    onSuccess: () => toast.success("Retiré de votre liste"),
+    onSettled: invalidate,
   });
 
   return { upsert, remove };
 }
+

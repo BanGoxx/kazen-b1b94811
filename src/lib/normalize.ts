@@ -121,6 +121,27 @@ interface TmdbTv extends TmdbBase {
   number_of_seasons?: number | null;
   number_of_episodes?: number | null;
   episode_run_time?: number[] | null;
+  original_language?: string | null;
+  origin_country?: string[] | null;
+}
+
+// A TMDB series that is really a Japanese/Chinese/Korean animation belongs in
+// the Anime section, not Séries. Detect it so we can keep the two catalogs
+// cleanly separated (animation genre 16 + Asian origin/language).
+export function isAsianAnimationTv(m: {
+  genre_ids?: number[] | null;
+  genres?: { id: number; name: string }[] | null;
+  original_language?: string | null;
+  origin_country?: string[] | null;
+}): boolean {
+  const genreIds = m.genres?.length ? m.genres.map((g) => g.id) : (m.genre_ids ?? []);
+  const isAnimation = genreIds.includes(16);
+  if (!isAnimation) return false;
+  const lang = (m.original_language ?? "").toLowerCase();
+  const origins = (m.origin_country ?? []).map((c) => c.toUpperCase());
+  const asianLang = ["ja", "zh", "ko"].includes(lang);
+  const asianOrigin = origins.some((c) => ["JP", "CN", "KR", "TW", "HK"].includes(c));
+  return asianLang || asianOrigin;
 }
 
 // TMDB genre id -> FR name (subset; full list resolved when genres[] present).

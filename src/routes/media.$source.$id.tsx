@@ -101,7 +101,7 @@ function MediaDetailPage() {
       {/* Cinematic backdrop */}
       <div className="relative -mx-4 -mt-8 mb-0 h-64 overflow-hidden sm:-mx-6 sm:h-80 lg:-mx-10 lg:h-[26rem]">
         {item.backdropUrl ? (
-          <img src={item.backdropUrl} alt="" className="h-full w-full scale-105 object-cover" />
+          <img src={item.backdropUrl} alt="" loading="eager" fetchPriority="high" decoding="async" className="h-full w-full scale-105 object-cover" />
         ) : (
           <div className="h-full w-full aurora-bg opacity-40" />
         )}

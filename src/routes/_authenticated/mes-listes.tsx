@@ -136,7 +136,52 @@ function MyListsPage() {
               </button>
             ))}
           </div>
+          {platforms.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-muted-foreground">
+                Plateforme
+              </span>
+              {["tous", ...platforms].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPlatform(p)}
+                  aria-pressed={platform === p}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    platform === p
+                      ? "border-primary/50 bg-primary/10 text-primary"
+                      : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {p === "tous" ? "Toutes plateformes" : p}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-muted-foreground">Tags</span>
+              {["tous", ...tags].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTag(t)}
+                  aria-pressed={tag === t}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    tag === t
+                      ? "border-accent/50 bg-accent/15 text-accent-foreground"
+                      : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t === "tous" ? "Tous les tags" : t}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
+
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24 text-muted-foreground">

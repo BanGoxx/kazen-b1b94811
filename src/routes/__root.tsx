@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Tableau de bord — Aperçu" },
-      { name: "description", content: "Suivez vos indicateurs clés, vos revenus et votre activité en un coup d'œil." },
-      { name: "author", content: "Acme Inc" },
-      { property: "og:title", content: "Tableau de bord — Aperçu" },
-      { property: "og:description", content: "Suivez vos indicateurs clés, vos revenus et votre activité en un coup d'œil." },
+      { title: "NEXUS MEDIA — Découvrez anime, séries et films" },
+      { name: "description", content: "Explorez les sorties à venir, les fiches détaillées, les plateformes de streaming et organisez vos anime, séries et films dans vos listes personnelles." },
+      { name: "author", content: "NEXUS MEDIA" },
+      { property: "og:title", content: "NEXUS MEDIA — Découvrez anime, séries et films" },
+      { property: "og:description", content: "La plateforme premium en français pour découvrir et suivre vos anime, séries et films." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -95,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],

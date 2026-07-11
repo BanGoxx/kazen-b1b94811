@@ -9,38 +9,113 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeriesRouteImport } from './routes/series'
+import { Route as FilmsRouteImport } from './routes/films'
+import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnimeIndexRouteImport } from './routes/anime.index'
+import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsRoute = FilmsRouteImport.update({
+  id: '/films',
+  path: '/films',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnimeRoute = AnimeRouteImport.update({
+  id: '/anime',
+  path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnimeIndexRoute = AnimeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AnimeRoute,
+} as any)
+const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
+  id: '/saison',
+  path: '/saison',
+  getParentRoute: () => AnimeRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRouteWithChildren
+  '/films': typeof FilmsRoute
+  '/series': typeof SeriesRoute
+  '/anime/saison': typeof AnimeSaisonRoute
+  '/anime/': typeof AnimeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/films': typeof FilmsRoute
+  '/series': typeof SeriesRoute
+  '/anime/saison': typeof AnimeSaisonRoute
+  '/anime': typeof AnimeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRouteWithChildren
+  '/films': typeof FilmsRoute
+  '/series': typeof SeriesRoute
+  '/anime/saison': typeof AnimeSaisonRoute
+  '/anime/': typeof AnimeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/anime' | '/films' | '/series' | '/anime/saison' | '/anime/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/films' | '/series' | '/anime/saison' | '/anime'
+  id:
+    | '__root__'
+    | '/'
+    | '/anime'
+    | '/films'
+    | '/series'
+    | '/anime/saison'
+    | '/anime/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnimeRoute: typeof AnimeRouteWithChildren
+  FilmsRoute: typeof FilmsRoute
+  SeriesRoute: typeof SeriesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films': {
+      id: '/films'
+      path: '/films'
+      fullPath: '/films'
+      preLoaderRoute: typeof FilmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anime': {
+      id: '/anime'
+      path: '/anime'
+      fullPath: '/anime'
+      preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +123,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/anime/': {
+      id: '/anime/'
+      path: '/'
+      fullPath: '/anime/'
+      preLoaderRoute: typeof AnimeIndexRouteImport
+      parentRoute: typeof AnimeRoute
+    }
+    '/anime/saison': {
+      id: '/anime/saison'
+      path: '/saison'
+      fullPath: '/anime/saison'
+      preLoaderRoute: typeof AnimeSaisonRouteImport
+      parentRoute: typeof AnimeRoute
+    }
   }
 }
 
+interface AnimeRouteChildren {
+  AnimeSaisonRoute: typeof AnimeSaisonRoute
+  AnimeIndexRoute: typeof AnimeIndexRoute
+}
+
+const AnimeRouteChildren: AnimeRouteChildren = {
+  AnimeSaisonRoute: AnimeSaisonRoute,
+  AnimeIndexRoute: AnimeIndexRoute,
+}
+
+const AnimeRouteWithChildren = AnimeRoute._addFileChildren(AnimeRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnimeRoute: AnimeRouteWithChildren,
+  FilmsRoute: FilmsRoute,
+  SeriesRoute: SeriesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

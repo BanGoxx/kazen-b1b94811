@@ -474,6 +474,13 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
       relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
       mediaType: "anime" as const,
     }));
+  const alt = Array.from(
+    new Set(
+      [m.title?.native, ...(m.synonyms ?? [])]
+        .map((s) => (s ?? "").trim())
+        .filter((s) => s && s !== bmedia.title && s !== bmedia.titleOriginal),
+    ),
+  ).slice(0, 6);
   return {
     ...bmedia,
     trailerUrl,
@@ -488,6 +495,16 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
     crew,
     related,
     collectionName: null,
+    titleAlternatives: alt,
+    originSource: m.source ? ANILIST_SOURCE[m.source] ?? null : null,
+    ageRating: m.isAdult ? "18+" : null,
+    countryOfOrigin: m.countryOfOrigin
+      ? COUNTRY_LABELS[m.countryOfOrigin] ?? m.countryOfOrigin
+      : null,
+    endDate: anilistDate(m.endDate),
+    videos: trailerUrl
+      ? [{ key: m.trailer!.id!, label: "Bande-annonce", url: trailerUrl }]
+      : [],
   };
 }
 

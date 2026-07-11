@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ImageOff } from "lucide-react";
 import type { RelatedMedia } from "@/lib/media-types";
+import { SafeImage } from "./SafeImage";
 
 export function RelatedScroller({
   title,

@@ -3,25 +3,42 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { searchMediaQO } from "@/lib/queries";
+import { searchMediaQO, trendingAnimeQO, trendingMoviesQO, trendingSeriesQO } from "@/lib/queries";
 import { rankSuggestions } from "@/lib/search-rank";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";
-
-// Curated fallbacks shown before the user types (no API call needed).
-const POPULAR_TITLES = [
-  "Demon Slayer",
-  "One Piece",
-  "Jujutsu Kaisen",
-  "Frieren",
-  "Dune",
-  "The Last of Us",
-];
 
 function itemYear(item: MediaItem): string | null {
   if (!item.releaseDate) return null;
   const y = item.releaseDate.slice(0, 4);
   return /^\d{4}$/.test(y) ? y : null;
 }
+
+// Interleave the top trending anime / series / movies into one short list so
+// the "on focus" preview already shows real popular titles (with posters and
+// scores) before the user types. These pools are the same React-Query-cached
+// queries used on the homepage, so this adds no extra API calls.
+function blendTrending(
+  anime: MediaItem[] | undefined,
+  series: MediaItem[] | undefined,
+  movies: MediaItem[] | undefined,
+  limit = 6,
+): MediaItem[] {
+  const lists = [anime ?? [], movies ?? [], series ?? []];
+  const out: MediaItem[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; out.length < limit && i < 12; i++) {
+    for (const list of lists) {
+      const item = list[i];
+      if (item && !seen.has(item.key)) {
+        seen.add(item.key);
+        out.push(item);
+        if (out.length >= limit) break;
+      }
+    }
+  }
+  return out;
+}
+
 
 /**
  * Premium predictive search field with a live dropdown preview.

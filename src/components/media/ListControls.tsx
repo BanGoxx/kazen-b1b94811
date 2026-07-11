@@ -232,7 +232,7 @@ export function ListControls({ item }: { item: MediaItem }) {
           value={noteDraft}
           onChange={(e) => setNoteDraft(e.target.value)}
           onBlur={() => {
-            if (noteDraft !== (entry?.notes ?? "")) patch({ notes: noteDraft });
+            if (noteDraft !== (entry?.notes ?? "")) patch({ notes: noteDraft }, "Note enregistrée");
           }}
           placeholder="Vos impressions, où vous en êtes…"
           rows={3}

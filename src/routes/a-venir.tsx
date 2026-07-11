@@ -46,6 +46,9 @@ function monthKey(iso: string): string {
   return iso.slice(0, 7);
 }
 
+const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
+
 const SORT_LABELS: Record<SortOrder, string> = {
   soon: "Les plus proches",
   later: "Les plus lointaines",
@@ -75,7 +78,8 @@ function UpcomingPage() {
       data
         .filter((it) => filter === "all" || it.mediaType === filter)
         .filter((it) => platform === "all" || it.platforms.some((p) => p.id === platform))
-        .filter((it) => it.releaseDate),
+        .filter((it) => it.releaseDate && it.releaseDate >= TODAY_ISO),
+
     [data, filter, platform],
   );
 

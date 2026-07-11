@@ -78,7 +78,8 @@ function UpcomingPage() {
       data
         .filter((it) => filter === "all" || it.mediaType === filter)
         .filter((it) => platform === "all" || it.platforms.some((p) => p.id === platform))
-        .filter((it) => it.releaseDate),
+        .filter((it) => it.releaseDate && it.releaseDate >= TODAY_ISO),
+
     [data, filter, platform],
   );
 

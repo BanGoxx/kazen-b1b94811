@@ -17,9 +17,11 @@ export const Route = createFileRoute("/anime/")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/anime" }],
   }),
   loader: ({ context }) => {
-    // Warm the first tab without blocking: the catalog has its own error/pending
+    // Warm all anime tabs without blocking: the catalog has its own error/pending
     // boundary, so an upstream hiccup degrades locally instead of failing SSR.
     void context.queryClient.ensureInfiniteQueryData(animePageQO("trending"));
+    void context.queryClient.prefetchInfiniteQuery(animePageQO("popular"));
+    void context.queryClient.prefetchInfiniteQuery(animePageQO("upcoming"));
   },
   component: AnimePage,
 });

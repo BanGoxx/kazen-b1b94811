@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
-import { rankForYou } from "@/lib/recommend";
+import { rankForYouAnimeFirst } from "@/lib/recommend";
 import { MediaCarousel } from "./MediaCarousel";
 import { RecommendationAssistant } from "./RecommendationAssistant";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ export function ForYouHomeBlock() {
   const { pool } = useCandidatePool();
   const profile = useTasteProfile();
   const items = useMemo<MediaItem[]>(
-    () => rankForYou(pool, profile, { limit: 18 }).map((s) => s.item),
+    () => rankForYouAnimeFirst(pool, profile, { limit: 18 }).map((s) => s.item),
     [pool, profile],
   );
 

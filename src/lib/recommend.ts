@@ -244,6 +244,23 @@ export function rankForYou(
   return scored.slice(0, limit);
 }
 
+export function rankForYouAnimeFirst(
+  pool: MediaItem[],
+  profile: TasteProfile,
+  opts: { excludeSaved?: boolean; limit?: number; rankBySourceOrder?: boolean } = {},
+): ScoredMedia[] {
+  const limit = opts.limit ?? 24;
+  const anime = rankForYou(pool.filter((item) => item.mediaType === "anime"), profile, {
+    ...opts,
+    limit: Math.ceil(limit * 0.7),
+  });
+  const rest = rankForYou(pool.filter((item) => item.mediaType !== "anime"), profile, {
+    ...opts,
+    limit: Math.max(0, limit - anime.length),
+  });
+  return [...anime, ...rest].slice(0, limit);
+}
+
 /** Items strongly matching a single anchor genre — "Parce que vous aimez…". */
 export function rankByGenre(
   pool: MediaItem[],

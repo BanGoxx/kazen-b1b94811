@@ -230,15 +230,31 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Brand />
               </div>
             </div>
+            {/* Fast keyword search — always visible on desktop */}
+            <div className="mx-2 hidden max-w-md flex-1 md:block lg:mr-4">
+              <SearchAutocomplete
+                showExploreButton={false}
+                placeholder="Rechercher un anime, une série, un film…"
+                inputClassName="h-10"
+              />
+            </div>
             <div className="flex items-center gap-1">
-              <Button asChild variant="ghost" size="icon" aria-label="Recherche">
+              <Button asChild variant="ghost" size="icon" className="md:hidden" aria-label="Recherche">
                 <Link to="/recherche">
                   <Search className="h-5 w-5" />
                 </Link>
               </Button>
+              <RecommendationAssistant
+                trigger={
+                  <Button variant="ghost" size="icon" aria-label="Ouvrir l'assistant KAZEN" title="Assistant">
+                    <Wand2 className="h-5 w-5 text-primary" />
+                  </Button>
+                }
+              />
               <ThemeToggle />
               <AuthMenu />
             </div>
+
           </header>
 
           <main className="flex-1 px-4 py-8 sm:px-6 lg:px-10">{children}</main>

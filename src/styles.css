@@ -237,10 +237,10 @@ h1, h2, h3, .font-display {
 /* ---- Systematic scales exposed as Tailwind utilities ---- */
 @theme {
   /* Shadow system → shadow-card / shadow-float / shadow-glow / shadow-inset-line */
-  --shadow-card: 0 8px 24px -8px oklch(0 0 0 / 0.5);
-  --shadow-float: 0 30px 70px -24px oklch(0 0 0 / 0.7);
-  --shadow-glow: 0 0 40px -8px oklch(0.66 0.25 350 / 0.5);
-  --shadow-inset-line: inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+  --shadow-card: 0 8px 24px -8px oklch(0 0 0 / 0.55);
+  --shadow-float: 0 30px 70px -24px oklch(0 0 0 / 0.75);
+  --shadow-glow: 0 0 34px -10px oklch(0.585 0.2 28 / 0.4);
+  --shadow-inset-line: inset 0 1px 0 0 oklch(1 0 0 / 0.05);
 
   /* Content max-width tokens → max-w-content / max-w-prose-relaxed */
   --spacing-content: 1600px;

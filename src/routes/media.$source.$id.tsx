@@ -263,10 +263,43 @@ function MediaDetailPage() {
           ) : null}
 
           {item.synopsis ? (
-            <div>
-              <h2 className="mb-2 font-display text-xl font-bold">Synopsis</h2>
-              <p className="max-w-3xl leading-relaxed text-muted-foreground">{item.synopsis}</p>
-            </div>
+            <FicheSection title="Synopsis" icon={<Sparkles className="h-5 w-5" />}>
+              <ExpandableText text={item.synopsis} />
+            </FicheSection>
+          ) : null}
+
+          {item.titleAlternatives.length ? (
+            <FicheSection title="Titres alternatifs" icon={<Info className="h-5 w-5" />}>
+              <div className="flex flex-wrap gap-2">
+                {item.titleAlternatives.map((t) => (
+                  <Badge key={t} variant="outline" className="font-normal">{t}</Badge>
+                ))}
+              </div>
+            </FicheSection>
+          ) : null}
+
+          {infos.length ? (
+            <FicheSection title="Informations" icon={<Info className="h-5 w-5" />}>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {infos.map((f) => {
+                  const Icon = f.icon;
+                  return (
+                    <div key={f.label} className="hover-lift rounded-xl border border-border bg-card/60 p-3 backdrop-blur transition-colors hover:border-primary/40">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Icon className="h-3.5 w-3.5 text-primary" /> {f.label}
+                      </div>
+                      <p className="mt-1 font-semibold">{f.value}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </FicheSection>
+          ) : null}
+
+          {item.videos.length ? (
+            <FicheSection title="Bandes-annonces & vidéos" icon={<Clapperboard className="h-5 w-5" />}>
+              <VideoGallery videos={item.videos} title={item.title} />
+            </FicheSection>
           ) : null}
 
           {item.collectionName ? (

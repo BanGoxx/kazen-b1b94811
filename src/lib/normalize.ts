@@ -45,6 +45,19 @@ function aniListStatus(status?: string | null): MediaStatus | null {
   }
 }
 
+// AniList genre (EN enum) -> FR label. Falls back to the raw value if unknown.
+const ANILIST_GENRES: Record<string, string> = {
+  Action: "Action", Adventure: "Aventure", Comedy: "Comédie", Drama: "Drame",
+  Ecchi: "Ecchi", Fantasy: "Fantastique", Horror: "Horreur", "Mahou Shoujo": "Magical Girl",
+  Mecha: "Mecha", Music: "Musique", Mystery: "Mystère", Psychological: "Psychologique",
+  Romance: "Romance", "Sci-Fi": "Science-Fiction", "Slice of Life": "Tranche de vie",
+  Sports: "Sport", Supernatural: "Surnaturel", Thriller: "Thriller",
+};
+
+function aniListGenres(genres?: string[] | null): string[] {
+  return (genres ?? []).map((g) => ANILIST_GENRES[g] ?? g);
+}
+
 export function fromAniList(m: AniListMedia): MediaItem {
   const platforms: Platform[] = [];
   for (const link of m.externalLinks ?? []) {

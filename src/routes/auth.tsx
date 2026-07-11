@@ -108,7 +108,7 @@ function AuthPage() {
             <Hexagon className="h-6 w-6 text-white" strokeWidth={2.5} />
           </span>
           <h1 className="font-display text-2xl font-extrabold">
-            <span className="aurora-text">NEXUS</span> MEDIA
+            <span className="aurora-text">KAZEN</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "login" ? "Connectez-vous à votre espace" : "Créez votre compte"}

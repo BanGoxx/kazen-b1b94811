@@ -50,15 +50,32 @@ function MyListsPage() {
   const { entries, isLoading } = useMyList();
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["value"]>("tous");
   const [type, setType] = useState<MediaType | "tous">("tous");
+  const [platform, setPlatform] = useState<string>("tous");
+  const [tag, setTag] = useState<string>("tous");
+
+  const platforms = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e) => e.item?.platforms.forEach((p) => set.add(p.name)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [entries]);
+
+  const tags = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e) => e.tags.forEach((t) => set.add(t)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "fr"));
+  }, [entries]);
 
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       if (tab === "favoris" && !e.favorite) return false;
       if (tab !== "tous" && tab !== "favoris" && e.status !== tab) return false;
       if (type !== "tous" && e.item?.mediaType !== type) return false;
+      if (platform !== "tous" && !e.item?.platforms.some((p) => p.name === platform))
+        return false;
+      if (tag !== "tous" && !e.tags.includes(tag)) return false;
       return true;
     });
-  }, [entries, tab, type]);
+  }, [entries, tab, type, platform, tag]);
 
   return (
     <AppShell>
@@ -119,7 +136,52 @@ function MyListsPage() {
               </button>
             ))}
           </div>
+          {platforms.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-muted-foreground">
+                Plateforme
+              </span>
+              {["tous", ...platforms].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPlatform(p)}
+                  aria-pressed={platform === p}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    platform === p
+                      ? "border-primary/50 bg-primary/10 text-primary"
+                      : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {p === "tous" ? "Toutes plateformes" : p}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-muted-foreground">Tags</span>
+              {["tous", ...tags].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTag(t)}
+                  aria-pressed={tag === t}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    tag === t
+                      ? "border-accent/50 bg-accent/15 text-accent-foreground"
+                      : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t === "tous" ? "Tous les tags" : t}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
+
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24 text-muted-foreground">

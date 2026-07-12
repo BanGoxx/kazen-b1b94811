@@ -520,6 +520,7 @@ export async function anilistPublicSeasonal(
   };
 }
 
+export async function anilistPublicSearchPaged(q: string, page: number): Promise<{ items: MediaItem[]; hasMore: boolean }> {
   const gql = `
     query ($page: Int, $perPage: Int, $search: String) {
       Page(page: $page, perPage: $perPage) {

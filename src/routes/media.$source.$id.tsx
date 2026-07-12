@@ -157,11 +157,13 @@ function MediaDetailPage() {
     { source, externalId: id },
     item.related,
   );
-  const titleArticles = getArticlesForTitle(
-    source,
-    id,
-    `${universeAnchor.source}:${universeAnchor.externalId}`,
-  ).map(toFicheArticle);
+  const titleArticles = getRelevantArticlesForTitle(source, id, {
+    universeKey: `${universeAnchor.source}:${universeAnchor.externalId}`,
+    relatedRefs: item.related.map((r) => ({
+      source: r.source,
+      externalId: r.externalId,
+    })),
+  }).map(({ article, relevance }) => toFicheArticle(article, relevance));
 
 
   const released = fmtDate(item.releaseDate);

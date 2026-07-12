@@ -123,23 +123,29 @@ export function applyEnrichment(
       ...item.related,
       ...(enr.extra_relations.filter((r) => r && r.key) as RelatedMedia[]),
     ];
-    next.related = dedupeByKey(merged);
+    next.related = dedupeBy(merged, (r) => r.key);
   }
 
   // Curated characters / staff → merge (or supply when provider gave none).
   if (enr.extra_characters?.length) {
-    next.cast = dedupeByKey([...(item.cast ?? []), ...enr.extra_characters]);
+    next.cast = dedupeBy(
+      [...(item.cast ?? []), ...enr.extra_characters],
+      (p) => p.id,
+    );
   }
   if (enr.extra_staff?.length) {
-    next.crew = dedupeByKey([...(item.crew ?? []), ...enr.extra_staff]);
+    next.crew = dedupeBy(
+      [...(item.crew ?? []), ...enr.extra_staff],
+      (p) => p.id,
+    );
   }
 
-  // Extra platforms → merge, dedupe by key.
+  // Extra platforms → merge, dedupe by id.
   if (enr.extra_platforms?.length) {
-    next.platforms = dedupeByKey([
-      ...(item.platforms ?? []),
-      ...enr.extra_platforms,
-    ]);
+    next.platforms = dedupeBy(
+      [...(item.platforms ?? []), ...enr.extra_platforms],
+      (p) => p.id,
+    );
   }
 
   return next;

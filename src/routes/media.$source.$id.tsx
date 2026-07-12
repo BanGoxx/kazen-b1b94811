@@ -180,32 +180,67 @@ function MediaDetailPage() {
     queryFn: () => anilistPublicDetail(Number(id)),
     enabled: needsBrowserDetail && typeof window !== "undefined" && Number.isFinite(Number(id)),
     staleTime: 1000 * 60 * 60,
+    // Bounded: the browser-direct helper already times out (12s) and retries
+    // internally, so a single React-Query retry is enough — never spin forever.
     retry: 1,
   });
-  const item = source === "anilist" ? (browserDetail.data ?? serverItem) : serverItem;
+  // KAZEN enrichment layer (Phase 1): non-blocking public read that supplements
+  // provider data. A miss never blocks or breaks the fiche.
+  const enrichment = useQuery(publicEnrichmentQO(source, id));
+
+  const providerItem = source === "anilist" ? (browserDetail.data ?? serverItem) : serverItem;
+  // Compose: provider/cache data → KAZEN enrichment overrides & extras.
+  const item = providerItem ? applyEnrichment(providerItem, enrichment.data) : providerItem;
+
   if (!item) {
+    // Bounded loading: the browser-direct query resolves (success/error). While
+    // it is genuinely in flight, show a progressive hint. Once it settles with
+    // no data, show a restrained limited-data state with a retry — never an
+    // infinite skeleton, and never a false "introuvable" while a retry is live.
+    const stillTrying =
+      source === "anilist" && (browserDetail.isPending || browserDetail.isFetching);
     return (
       <AppShell>
         <div className="py-24 text-center">
-          <h1 className="font-display text-2xl font-bold">
-            {source === "anilist" && browserDetail.isPending ? "Chargement de la fiche…" : "Fiche introuvable"}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {source === "anilist" && browserDetail.isPending
-              ? "Récupération des données riches depuis AniList."
-              : "Ce contenu n'est pas disponible."}
-          </p>
-          {source === "anilist" && browserDetail.isPending ? (
-            <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          {stillTrying ? (
+            <>
+              <h1 className="font-display text-2xl font-bold">Chargement de la fiche…</h1>
+              <div className="mt-6"><SlowLoadHint /></div>
+            </>
           ) : (
-            <Button asChild className="mt-6">
-              <Link to="/">Retour à la découverte</Link>
-            </Button>
+            <>
+              <h1 className="font-display text-2xl font-bold">Données limitées pour ce titre</h1>
+              <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+                Certaines informations seront complétées progressivement. La source
+                de données est momentanément indisponible pour cette fiche.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                {source === "anilist" ? (
+                  <Button
+                    onClick={() => browserDetail.refetch()}
+                    disabled={browserDetail.isFetching}
+                  >
+                    Réessayer
+                  </Button>
+                ) : null}
+                <Button asChild variant="secondary">
+                  <Link to="/recherche" search={{}}>Rechercher un titre</Link>
+                </Button>
+                {source === "anilist" && Number.isFinite(Number(id)) ? (
+                  <Button asChild variant="ghost">
+                    <a href={`https://anilist.co/anime/${id}`} target="_blank" rel="noopener noreferrer">
+                      Voir sur AniList
+                    </a>
+                  </Button>
+                ) : null}
+              </div>
+            </>
           )}
         </div>
       </AppShell>
     );
   }
+
 
   const universeAnchor = deriveGroupAnchor(
     { source, externalId: id },

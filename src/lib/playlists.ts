@@ -79,6 +79,7 @@ function mapMeta(row: {
   owner_id: string;
   title: string;
   description: string;
+  recommendation?: string | null;
   is_public: boolean;
   created_at: string;
   updated_at: string;
@@ -88,6 +89,7 @@ function mapMeta(row: {
     ownerId: row.owner_id,
     title: row.title,
     description: row.description,
+    recommendation: row.recommendation ?? "",
     isPublic: row.is_public,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

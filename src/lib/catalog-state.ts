@@ -20,7 +20,7 @@ import type { FilterState } from "@/components/media/FilterBar";
 const VERSION = "v1";
 const PREFIX = `kazen:catalog-filters:${VERSION}:`;
 
-const VALID_STATUS = new Set(["all", "airing", "upcoming", "finished"]);
+const VALID_STATUS = new Set(["all", "a_venir", "en_cours", "termine"]);
 
 export function readCatalogFilters(key: string): FilterState | null {
   if (typeof window === "undefined") return null;

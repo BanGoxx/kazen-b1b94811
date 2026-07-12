@@ -225,6 +225,12 @@ function DiscoverPage() {
         <SafeSection>
           <TrendingAnimeRow />
         </SafeSection>
+
+        {/* Actualités KAZEN surfaced high (real editorial only; hidden when empty) */}
+        <SafeSection>
+          <ArticleHighlights />
+        </SafeSection>
+
         <SafeSection>
           <PopularAnimeRow />
         </SafeSection>

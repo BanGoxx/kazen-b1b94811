@@ -353,7 +353,7 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
       relations {
         edges {
           relationType(version: 2)
-          node { id type format title { romaji english } coverImage { large } }
+          node { id type format title { romaji english } coverImage { large } startDate { year } }
         }
       }
     }

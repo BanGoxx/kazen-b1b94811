@@ -7,6 +7,7 @@ import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
 import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
 import { SafeSection } from "./SafeSection";
+import { CatalogLoading, SlowLoadHint } from "./LoadingHint";
 import { Button } from "@/components/ui/button";
 
 // Titles auto-loaded via scroll before we require an explicit click. This keeps
@@ -27,6 +28,10 @@ export function PaginatedCatalog(props: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
+  // Message shown once every available provider page is loaded. Defaults to a
+  // "complete catalogue" phrasing; pass a season/upcoming-specific note when
+  // the total is a genuine complete set rather than an open-ended catalogue.
+  completionLabel?: string;
 }) {
   return (
     <SafeSection minHeight="20rem" pending={<CatalogPending />}>
@@ -36,20 +41,18 @@ export function PaginatedCatalog(props: {
 }
 
 function CatalogPending() {
-  return (
-    <div className="flex items-center justify-center py-24 text-muted-foreground">
-      <Loader2 className="h-6 w-6 animate-spin" />
-    </div>
-  );
+  return <CatalogLoading count={10} />;
 }
 
 function CatalogInner({
   queryOptions,
   emptyLabel,
+  completionLabel,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
+  completionLabel?: string;
 }) {
   const query = useSuspenseInfiniteQuery(queryOptions);
   const [state, setState] = useState<FilterState>({
@@ -126,11 +129,15 @@ function CatalogInner({
               </>
             )}
           </Button>
-          <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
+          {query.isFetchingNextPage ? (
+            <SlowLoadHint />
+          ) : (
+            <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
+          )}
         </div>
       ) : items.length > 0 ? (
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Vous avez atteint la fin du catalogue · {items.length} titres
+          {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
         </p>
       ) : null}
     </div>

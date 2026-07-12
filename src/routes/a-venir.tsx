@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/MediaGrid";
 import { EmptyState } from "@/components/media/EmptyState";
+import { SlowLoadHint } from "@/components/media/LoadingHint";
 import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
@@ -38,6 +39,9 @@ export const Route = createFileRoute("/a-venir")({
   pendingComponent: () => (
     <AppShell>
       <PageHeader title="Sorties à venir" description="Anime, séries et films attendus, du plus proche au plus lointain." />
+      <div className="mb-6">
+        <SlowLoadHint />
+      </div>
       <MediaGridSkeleton count={10} />
     </AppShell>
   ),
@@ -338,6 +342,16 @@ function UpcomingPage() {
           ) : (
             <MediaGrid items={flat} />
           )}
+
+          {/* Finite-state clarity: explain that the upcoming set is intentionally
+              bounded (provider-safe) and refreshes on its own, so users don't
+              read the finite count as a tiny/incomplete catalogue. */}
+          <p className="mt-10 text-center text-xs text-muted-foreground">
+            {visible.length} sortie{visible.length > 1 ? "s" : ""} affichée
+            {visible.length > 1 ? "s" : ""} — les prochaines annonces
+            {counts.anime ? " (dont les nouveaux anime)" : ""} seront ajoutées
+            automatiquement au fil des publications AniList et TMDB.
+          </p>
         </>
       ) : (
         <EmptyState message="Aucune sortie annoncée avec ces filtres." hint="Modifiez le type ou la plateforme, ou revenez bientôt." />

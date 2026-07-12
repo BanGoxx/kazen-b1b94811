@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSuspenseInfiniteQuery, type UseSuspenseInfiniteQueryOptions } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, RotateCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import type { PagedMedia } from "@/lib/tmdb.server";
 import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
@@ -77,7 +77,10 @@ function CatalogInner({
 
   // Auto-load on scroll until the cap, one sequential page at a time.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const canAutoLoad = query.hasNextPage && items.length < AUTO_LOAD_CAP;
+  // Pause auto-load after a failed next-page fetch so a persistently erroring
+  // provider can't trigger a rapid retry loop — the user retries explicitly.
+  const canAutoLoad =
+    query.hasNextPage && items.length < AUTO_LOAD_CAP && !query.isFetchNextPageError;
   useEffect(() => {
     if (!canAutoLoad) return;
     const el = sentinelRef.current;
@@ -111,6 +114,14 @@ function CatalogInner({
 
       {query.hasNextPage ? (
         <div className="mt-8 flex flex-col items-center gap-2">
+          {/* A failed next-page fetch (transient AniList 403/429/timeout) must
+              surface as an explicit retry — never as a silently re-enabled
+              button that forces the user to click blindly several times. */}
+          {query.isFetchNextPageError ? (
+            <p className="text-xs text-destructive" role="status">
+              Le chargement a échoué. Réessayez.
+            </p>
+          ) : null}
           <Button
             type="button"
             variant="outline"
@@ -121,7 +132,11 @@ function CatalogInner({
           >
             {query.isFetchingNextPage ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+                <Loader2 className="h-4 w-4 animate-spin" /> Chargement des anime…
+              </>
+            ) : query.isFetchNextPageError ? (
+              <>
+                <RotateCw className="h-4 w-4" /> Réessayer
               </>
             ) : (
               <>
@@ -131,6 +146,8 @@ function CatalogInner({
           </Button>
           {query.isFetchingNextPage ? (
             <SlowLoadHint />
+          ) : query.isFetchNextPageError ? (
+            <p className="text-xs text-muted-foreground">Connexion à la source de données…</p>
           ) : (
             <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
           )}

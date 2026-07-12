@@ -181,7 +181,12 @@ function PlaylistPage() {
                     {data.items.length} titre{data.items.length > 1 ? "s" : ""}
                   </span>
                 </div>
-                <LikeButton id={id} likeCount={data.likeCount} />
+                <div className="flex items-center gap-2">
+                  <LikeButton id={id} likeCount={data.likeCount} />
+                  {user && user.id !== data.ownerId && data.meta.isPublic && (
+                    <ReportDialog targetType="playlist" targetId={id} label="Signaler" />
+                  )}
+                </div>
               </div>
             </header>
 

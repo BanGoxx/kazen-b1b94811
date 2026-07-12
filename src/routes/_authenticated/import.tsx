@@ -356,7 +356,9 @@ function ImportPage() {
             provider={PROVIDERS.find((p) => p.id === selected)!}
             busy={busy}
             onFile={handleFile}
+            onUsername={handleUsername}
           />
+
         )}
 
         {/* Preview */}

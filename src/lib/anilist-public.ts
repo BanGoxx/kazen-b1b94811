@@ -256,19 +256,55 @@ function relationCategory(relation?: string | null): RelatedMedia["relationCateg
   }
 }
 
+// KAZEN catalog progression, rich fiche hydration and internal navigation are
+// core validated behaviors. This browser-direct AniList path is the primary
+// source in production (the Worker can be Cloudflare-blocked). Keep it
+// resilient: transient network blips must NOT collapse a surface to curated
+// fallback data. Do not remove the retry/backoff or the timeout during polish.
 async function query<T>(gql: string, variables: Record<string, unknown>): Promise<T> {
-  const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ query: gql, variables }),
-  });
-  if (!res.ok) throw new Error(`AniList public ${res.status}`);
-  const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
-  if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join("; "));
-  return json.data as T;
+  const MAX_ATTEMPTS = 3;
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ query: gql, variables }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      // 429 (rate limit) / 5xx are transient: honor Retry-After when present,
+      // otherwise exponential backoff, then retry.
+      if (res.status === 429 || res.status >= 500) {
+        if (attempt < MAX_ATTEMPTS) {
+          const retryAfter = Number(res.headers.get("retry-after"));
+          const wait = Number.isFinite(retryAfter) && retryAfter > 0
+            ? retryAfter * 1000
+            : 400 * 2 ** (attempt - 1);
+          await new Promise((r) => setTimeout(r, Math.min(wait, 5000)));
+          continue;
+        }
+      }
+      if (!res.ok) throw new Error(`AniList public ${res.status}`);
+      const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
+      if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join("; "));
+      return json.data as T;
+    } catch (error) {
+      clearTimeout(timeout);
+      lastError = error;
+      // Network-level failures ("Failed to fetch", aborts) are transient too.
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, 400 * 2 ** (attempt - 1)));
+        continue;
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("AniList public request failed");
 }
 
 function fromAniList(m: AniListMedia): MediaItem {

@@ -123,6 +123,8 @@ const MEDIA_FIELDS = `
   duration
   startDate { year month day }
   nextAiringEpisode { episode airingAt }
+  streamingEpisodes { title thumbnail url site }
+  airingSchedule(perPage: 100, notYetAired: false) { nodes { episode airingAt } }
   externalLinks { site url type }
 `;
 

@@ -579,3 +579,238 @@ export function currentAnimeSeason(date = new Date()): { season: string; year: n
   const season = m < 3 ? "WINTER" : m < 6 ? "SPRING" : m < 9 ? "SUMMER" : "FALL";
   return { season, year: date.getFullYear() };
 }
+
+// ---------- Dedicated entity profiles (characters & staff) ----------
+//
+// Real KAZEN entity pages backed by AniList. Progressive by design: the route
+// serves a full page when a profile is found, and falls back to the lightweight
+// overlay when the id is not a real AniList node. Descriptions arrive in the
+// source language (usually English) — we sanitize them to clean plain text so a
+// French-normalized summary can be swapped in later without touching the UI.
+
+/** Strip AniList's markdown/HTML/spoiler markup down to readable plain text. */
+function cleanEntityDescription(d?: string | null): string | null {
+  if (!d) return null;
+  const s = d
+    .replace(/~!.*?!~/gs, "") // spoiler blocks
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // markdown links
+    .replace(/_{1,3}(.+?)_{1,3}/g, "$1")
+    .replace(/\*{1,3}(.+?)\*{1,3}/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return s.length ? s : null;
+}
+
+const CHARACTER_ROLE_LABELS: Record<string, string> = {
+  MAIN: "Rôle principal",
+  SUPPORTING: "Rôle secondaire",
+  BACKGROUND: "Figuration",
+};
+
+function entityDate(d?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
+  if (!d) return null;
+  if (d.day && d.month) {
+    const mm = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."][d.month - 1] ?? "";
+    return `${d.day} ${mm}${d.year ? ` ${d.year}` : ""}`.trim();
+  }
+  if (d.year) return String(d.year);
+  return null;
+}
+
+function mediaTitle(t?: { romaji?: string | null; english?: string | null } | null): string {
+  return t?.english || t?.romaji || "Sans titre";
+}
+
+interface CharacterRaw {
+  id?: number;
+  name?: { full?: string | null; native?: string | null } | null;
+  image?: { large?: string | null } | null;
+  description?: string | null;
+  gender?: string | null;
+  age?: string | null;
+  dateOfBirth?: { year?: number | null; month?: number | null; day?: number | null } | null;
+  media?: {
+    edges?: {
+      characterRole?: string | null;
+      voiceActors?: { id?: number; name?: { full?: string | null } | null; image?: { medium?: string | null } | null }[] | null;
+      node?: { id?: number; type?: string | null; format?: string | null; title?: { romaji?: string | null; english?: string | null } | null; coverImage?: { large?: string | null } | null; startDate?: { year?: number | null } | null } | null;
+    }[] | null;
+  } | null;
+}
+
+export async function anilistCharacter(id: number): Promise<EntityProfile | null> {
+  const gql = `query ($id: Int) {
+    Character(id: $id) {
+      id
+      name { full native }
+      image { large }
+      description(asHtml: false)
+      gender
+      age
+      dateOfBirth { year month day }
+      media(sort: POPULARITY_DESC, perPage: 16) {
+        edges {
+          characterRole
+          voiceActors(language: JAPANESE, sort: RELEVANCE) { id name { full } image { medium } }
+          node { id type format title { romaji english } coverImage { large } startDate { year } }
+        }
+      }
+    }
+  }`;
+  const data = await query<{ Character: CharacterRaw | null }>(gql, { id });
+  const c = data.Character;
+  if (!c?.id || !c.name?.full) return null;
+
+  const facts: { label: string; value: string }[] = [];
+  if (c.gender) facts.push({ label: "Genre", value: c.gender === "Male" ? "Masculin" : c.gender === "Female" ? "Féminin" : c.gender });
+  if (c.age) facts.push({ label: "Âge", value: c.age });
+  const bday = entityDate(c.dateOfBirth);
+  if (bday) facts.push({ label: "Anniversaire", value: bday });
+
+  const edges = c.media?.edges ?? [];
+  const media: EntityMediaLink[] = edges
+    .filter((e) => e.node?.id)
+    .map((e) => ({
+      id: String(e.node!.id),
+      title: mediaTitle(e.node!.title),
+      posterUrl: e.node!.coverImage?.large ?? null,
+      role: e.characterRole ? CHARACTER_ROLE_LABELS[e.characterRole] ?? null : null,
+      format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
+      year: e.node!.startDate?.year ?? null,
+      hasDetail: e.node!.type === "ANIME",
+    }));
+
+  // Voice actors across the character's roles, de-duplicated.
+  const vaMap = new Map<number, EntityRelatedPerson>();
+  for (const e of edges) {
+    for (const va of e.voiceActors ?? []) {
+      if (va?.id && !vaMap.has(va.id)) {
+        vaMap.set(va.id, {
+          id: `s${va.id}`,
+          kind: "staff",
+          name: va.name?.full ?? "—",
+          photoUrl: va.image?.medium ?? null,
+          role: "Voix (JP)",
+        });
+      }
+    }
+  }
+
+  return {
+    kind: "character",
+    id: String(c.id),
+    name: c.name.full,
+    nameNative: c.name.native ?? null,
+    photoUrl: c.image?.large ?? null,
+    description: cleanEntityDescription(c.description),
+    facts,
+    media,
+    peopleLabel: "Voix japonaises",
+    people: Array.from(vaMap.values()).slice(0, 12),
+    anilistUrl: `https://anilist.co/character/${c.id}`,
+  };
+}
+
+interface StaffRaw {
+  id?: number;
+  name?: { full?: string | null; native?: string | null } | null;
+  image?: { large?: string | null } | null;
+  description?: string | null;
+  primaryOccupations?: (string | null)[] | null;
+  gender?: string | null;
+  homeTown?: string | null;
+  dateOfBirth?: { year?: number | null; month?: number | null; day?: number | null } | null;
+  staffMedia?: {
+    edges?: {
+      staffRole?: string | null;
+      node?: { id?: number; type?: string | null; format?: string | null; title?: { romaji?: string | null; english?: string | null } | null; coverImage?: { large?: string | null } | null; startDate?: { year?: number | null } | null } | null;
+    }[] | null;
+  } | null;
+  characters?: {
+    nodes?: { id?: number; name?: { full?: string | null } | null; image?: { medium?: string | null } | null }[] | null;
+  } | null;
+}
+
+export async function anilistStaff(id: number): Promise<EntityProfile | null> {
+  const gql = `query ($id: Int) {
+    Staff(id: $id) {
+      id
+      name { full native }
+      image { large }
+      description(asHtml: false)
+      primaryOccupations
+      gender
+      homeTown
+      dateOfBirth { year month day }
+      staffMedia(sort: POPULARITY_DESC, perPage: 16) {
+        edges {
+          staffRole
+          node { id type format title { romaji english } coverImage { large } startDate { year } }
+        }
+      }
+      characters(sort: FAVOURITES_DESC, perPage: 12) {
+        nodes { id name { full } image { medium } }
+      }
+    }
+  }`;
+  const data = await query<{ Staff: StaffRaw | null }>(gql, { id });
+  const s = data.Staff;
+  if (!s?.id || !s.name?.full) return null;
+
+  const facts: { label: string; value: string }[] = [];
+  const occ = (s.primaryOccupations ?? []).map((o) => (o ?? "").trim()).filter(Boolean);
+  if (occ.length) facts.push({ label: "Métiers", value: occ.slice(0, 3).join(" · ") });
+  if (s.gender) facts.push({ label: "Genre", value: s.gender === "Male" ? "Masculin" : s.gender === "Female" ? "Féminin" : s.gender });
+  if (s.homeTown) facts.push({ label: "Origine", value: s.homeTown });
+  const bday = entityDate(s.dateOfBirth);
+  if (bday) facts.push({ label: "Naissance", value: bday });
+
+  // De-duplicate works (staff are often credited multiple times per title).
+  const mediaMap = new Map<number, EntityMediaLink>();
+  for (const e of s.staffMedia?.edges ?? []) {
+    const n = e.node;
+    if (!n?.id) continue;
+    const existing = mediaMap.get(n.id);
+    if (existing) {
+      if (e.staffRole && existing.role && !existing.role.includes(e.staffRole)) {
+        existing.role = `${existing.role}, ${e.staffRole}`;
+      }
+      continue;
+    }
+    mediaMap.set(n.id, {
+      id: String(n.id),
+      title: mediaTitle(n.title),
+      posterUrl: n.coverImage?.large ?? null,
+      role: e.staffRole ?? null,
+      format: n.format ? ANILIST_FORMAT[n.format] ?? n.format : null,
+      year: n.startDate?.year ?? null,
+      hasDetail: n.type === "ANIME",
+    });
+  }
+
+  const people: EntityRelatedPerson[] = (s.characters?.nodes ?? [])
+    .filter((n) => n?.id)
+    .map((n) => ({
+      id: `c${n!.id}`,
+      kind: "character" as const,
+      name: n!.name?.full ?? "—",
+      photoUrl: n!.image?.medium ?? null,
+      role: null,
+    }));
+
+  return {
+    kind: "staff",
+    id: String(s.id),
+    name: s.name.full,
+    nameNative: s.name.native ?? null,
+    photoUrl: s.image?.large ?? null,
+    description: cleanEntityDescription(s.description),
+    facts,
+    media: Array.from(mediaMap.values()),
+    peopleLabel: "Personnages notables",
+    people,
+    anilistUrl: `https://anilist.co/staff/${s.id}`,
+  };
+}

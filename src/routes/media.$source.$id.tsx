@@ -150,6 +150,17 @@ function MediaDetailPage() {
   const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
   if (!item) return null;
 
+  const universeAnchor = deriveGroupAnchor(
+    { source, externalId: id },
+    item.related,
+  );
+  const titleArticles = getArticlesForTitle(
+    source,
+    id,
+    `${universeAnchor.source}:${universeAnchor.externalId}`,
+  ).map(toFicheArticle);
+
+
   const released = fmtDate(item.releaseDate);
   const facts: { icon: typeof CalendarDays; label: string; value: string }[] = [];
   if (item.format) facts.push({ icon: Clapperboard, label: "Format", value: item.format });

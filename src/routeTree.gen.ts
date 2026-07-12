@@ -25,6 +25,7 @@ import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authenticated/mes-playlists'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
@@ -108,6 +109,12 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMesPlaylistsRoute =
+  AuthenticatedMesPlaylistsRouteImport.update({
+    id: '/mes-playlists',
+    path: '/mes-playlists',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMesListesRoute = AuthenticatedMesListesRouteImport.update({
   id: '/mes-listes',
   path: '/mes-listes',
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -156,6 +164,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
+  '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -178,6 +187,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
+  '/_authenticated/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soutien'
     | '/mes-listes'
+    | '/mes-playlists'
     | '/profil'
     | '/anime/saison'
     | '/api/chat'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soutien'
     | '/mes-listes'
+    | '/mes-playlists'
     | '/profil'
     | '/anime/saison'
     | '/api/chat'
@@ -240,6 +252,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soutien'
     | '/_authenticated/mes-listes'
+    | '/_authenticated/mes-playlists'
     | '/_authenticated/profil'
     | '/anime/saison'
     | '/api/chat'
@@ -380,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mes-playlists': {
+      id: '/_authenticated/mes-playlists'
+      path: '/mes-playlists'
+      fullPath: '/mes-playlists'
+      preLoaderRoute: typeof AuthenticatedMesPlaylistsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mes-listes': {
       id: '/_authenticated/mes-listes'
       path: '/mes-listes'
@@ -406,11 +426,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
+  AuthenticatedMesPlaylistsRoute: typeof AuthenticatedMesPlaylistsRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
+  AuthenticatedMesPlaylistsRoute: AuthenticatedMesPlaylistsRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 

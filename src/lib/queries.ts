@@ -103,6 +103,28 @@ export function refreshAnimeRails(queryClient: import("@tanstack/react-query").Q
   void queryClient.refetchQueries({ queryKey: ["anime"], type: "active" });
 }
 
+// One-time, post-hydration browser-direct upgrade for a catalog query.
+//
+// Anime/seasonal/upcoming catalogs render from dehydrated SSR data on the first
+// client paint (which may be the curated fallback when the production Worker is
+// AniList-blocked). We must upgrade that to the real browser-direct list — but
+// only ONCE per query per session. Doing it on every mount (the old
+// `staleTime:0 + refetchOnMount:true`) refetched every loaded page on every
+// back-navigation/tab-switch, which lost scroll position, dropped loaded pages
+// and hammered AniList. This upgrades exactly once, then the HOUR staleTime lets
+// back-navigation reuse the in-memory cache instantly.
+const upgradedCatalogKeys = new Set<string>();
+export function upgradeCatalogOnce(
+  queryClient: import("@tanstack/react-query").QueryClient,
+  queryKey: readonly unknown[],
+) {
+  if (!IS_BROWSER) return;
+  const k = JSON.stringify(queryKey);
+  if (upgradedCatalogKeys.has(k)) return;
+  upgradedCatalogKeys.add(k);
+  void queryClient.refetchQueries({ queryKey, exact: true, type: "active" });
+}
+
 
 
 export const trendingMoviesQO = queryOptions({

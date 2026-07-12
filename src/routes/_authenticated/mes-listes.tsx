@@ -309,6 +309,16 @@ function MyListsPage() {
             <span className="text-xs font-semibold text-foreground">
               {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
             </span>
+            {filtersActive ? (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="focus-ring inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <RotateCcw className="h-3 w-3" /> Réinitialiser
+              </button>
+            ) : null}
+
             <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               <span className="hidden sm:inline">Besoin de filtres croisés&nbsp;?</span>
               <PremiumHint featureId="filters" label="Filtres avancés" />

@@ -30,6 +30,7 @@ import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";
 import { NextEpisodeCard } from "@/components/media/NextEpisodeCard";
+import { NextEpisodePill } from "@/components/media/NextEpisodePill";
 import { EpisodeList } from "@/components/media/EpisodeList";
 import { FicheTrackingBadge } from "@/components/media/FicheTrackingBadge";
 import { Badge } from "@/components/ui/badge";

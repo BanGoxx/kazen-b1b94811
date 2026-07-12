@@ -246,7 +246,78 @@ function UniversPage() {
         </div>
       </nav>
 
+      {/* Sort + year filters (operate within the active tab) */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div
+          className="flex items-center gap-1 rounded-full border border-border bg-card/60 p-1"
+          role="group"
+          aria-label="Trier"
+        >
+          <ArrowDownWideNarrow className="ml-1.5 h-4 w-4 text-muted-foreground" />
+          {UNIVERS_SORT_ORDER.map((mode) => {
+            const active = mode === sort;
+            return (
+              <Link
+                key={mode}
+                to="/univers/$source/$id"
+                params={{ source, id }}
+                search={{ type, sort: mode, year: activeYear }}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors sm:text-sm",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {UNIVERS_SORT_LABELS[mode]}
+              </Link>
+            );
+          })}
+        </div>
+
+        {years.length > 1 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Link
+              to="/univers/$source/$id"
+              params={{ source, id }}
+              search={{ type, sort, year: null }}
+              aria-current={activeYear === null ? "true" : undefined}
+              className={cn(
+                "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                activeYear === null
+                  ? "border-transparent aurora-bg text-white"
+                  : "border-border bg-card/60 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Toutes années
+            </Link>
+            {years.map((y) => {
+              const active = y === activeYear;
+              return (
+                <Link
+                  key={y}
+                  to="/univers/$source/$id"
+                  params={{ source, id }}
+                  search={{ type, sort, year: y }}
+                  aria-current={active ? "true" : undefined}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    active
+                      ? "border-transparent aurora-bg text-white"
+                      : "border-border bg-card/60 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {y}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+
       {/* Listing */}
+
       <section aria-live="polite">
         <div className="mb-4 flex items-center gap-2">
           <Layers className="h-5 w-5 text-primary" />

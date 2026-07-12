@@ -25,6 +25,10 @@ export interface ProviderDef {
   description: string;
   /** Whether the parser is functional in this phase. */
   available: boolean;
+  /** Functional but not yet fully validated (shown with an "Expérimental" tag). */
+  experimental?: boolean;
+  /** Extra reassurance lines shown near the upload zone (privacy, scope…). */
+  notes?: string[];
   /** Accepted file extensions / mime hint for the upload input. */
   accept: string;
   /** How the user obtains the file (French, user-initiated only). */
@@ -231,11 +235,17 @@ export const PROVIDERS: ProviderDef[] = [
   {
     id: "nautiljon",
     label: "Nautiljon",
-    description: "Ta liste Nautiljon, à partir d'une page HTML que TU as enregistrée.",
+    description: "Importer depuis un fichier HTML sauvegardé de ta liste Nautiljon.",
     available: true,
+    experimental: true,
     accept: ".html,.htm,text/html",
     howto:
-      "Ouvre ta liste Nautiljon, enregistre la page (Ctrl+S) puis téléverse le fichier HTML. Aucun mot de passe, cookie ou scraping.",
+      "Ouvre ta liste Nautiljon dans ton navigateur, enregistre la page (Ctrl+S) puis téléverse le fichier HTML obtenu.",
+    notes: [
+      "Aucun mot de passe Nautiljon n'est demandé.",
+      "Aucun cookie n'est transmis.",
+      "Seules les données visibles dans votre fichier sont analysées.",
+    ],
     parse: (content) => parseNautiljonList(content).entries,
   },
   {

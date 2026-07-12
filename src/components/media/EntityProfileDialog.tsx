@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Search as SearchIcon, User } from "lucide-react";
+import { ArrowUpRight, IdCard, Search as SearchIcon, User } from "lucide-react";
 import type { CreditPerson } from "@/lib/media-types";
 import {
   Dialog,

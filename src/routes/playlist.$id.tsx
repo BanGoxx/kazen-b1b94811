@@ -125,6 +125,7 @@ function PlaylistPage() {
   const { id } = Route.useParams();
   const router = useRouter();
   const { data, isLoading, isError } = usePlaylist(id);
+  const { user } = useAuth();
 
   return (
     <AppShell>

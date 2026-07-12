@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSuspenseInfiniteQuery, type UseSuspenseInfiniteQueryOptions } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, RotateCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import type { PagedMedia } from "@/lib/tmdb.server";
 import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";

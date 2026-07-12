@@ -25,6 +25,7 @@ import { UserListPanel } from "@/components/media/UserListPanel";
 import { AddToPlaylist } from "@/components/media/AddToPlaylist";
 import { FicheSection } from "@/components/media/FicheSection";
 import { FicheReviews } from "@/components/media/FicheReviews";
+import { FicheArticles } from "@/components/media/FicheArticles";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";

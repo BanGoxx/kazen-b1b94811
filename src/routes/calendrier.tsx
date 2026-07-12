@@ -70,6 +70,22 @@ const TYPE_DOT: Record<MediaType, string> = {
 
 const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const rangeFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+const weekLabelFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+
+// Anime-first ordering keeps scheduling coherent with the rest of KAZEN, then
+// séries, then films; ties broken alphabetically for a stable, readable list.
+const TYPE_ORDER: Record<MediaType, number> = { anime: 0, series: 1, movie: 2 };
+const TYPE_LEGEND: MediaType[] = ["anime", "series", "movie"];
+
+function sortEntries(items: MediaItem[]): MediaItem[] {
+  return [...items].sort(
+    (a, b) =>
+      TYPE_ORDER[a.mediaType] - TYPE_ORDER[b.mediaType] ||
+      a.title.localeCompare(b.title, "fr"),
+  );
+}
+
+
 
 function startOfWeek(d: Date): Date {
   const date = new Date(d);

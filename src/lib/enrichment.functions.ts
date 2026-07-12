@@ -96,7 +96,7 @@ export const upsertEnrichment = createServerFn({ method: "POST" })
       "needs_review",
     ];
     const status = allowedStatus.includes(data.dataQualityStatus ?? "")
-      ? data.dataQualityStatus
+      ? (data.dataQualityStatus as string)
       : "needs_review";
 
     const { error } = await context.supabase.from("media_enrichments").upsert(

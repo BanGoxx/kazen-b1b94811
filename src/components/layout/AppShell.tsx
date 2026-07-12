@@ -17,6 +17,7 @@ import {
   Heart,
   Menu,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ import { SearchAutocomplete } from "@/components/media/SearchAutocomplete";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { signOut, useAuth } from "@/lib/auth";
+import { useIsModerator } from "@/lib/use-moderator";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -133,10 +135,14 @@ function Brand() {
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isModerator = useIsModerator();
+  const items = isModerator
+    ? [...NAV, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+    : NAV;
   return (
     <nav aria-label="Navigation principale">
       <ul className="space-y-1">
-        {NAV.map((item) => {
+        {items.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const Icon = item.icon;
           return (

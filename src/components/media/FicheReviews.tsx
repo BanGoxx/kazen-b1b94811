@@ -18,6 +18,7 @@ import type { FicheReview, ReviewReply } from "@/lib/reviews";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { Button } from "@/components/ui/button";
+import { ReportDialog } from "@/components/moderation/ReportDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -257,16 +258,21 @@ function ReplyItem({
       )}
       <div className="mt-2 flex items-center justify-between">
         <LikeButton small count={count} liked={likedByMe} disabled={toggle.isPending} onToggle={handleLike} />
-        {isOwn && !editing && (
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="mr-1 h-3 w-3" /> Modifier
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
-              <Trash2 className="mr-1 h-3 w-3" /> Supprimer
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {isOwn && !editing && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+                <Pencil className="mr-1 h-3 w-3" /> Modifier
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleDelete}>
+                <Trash2 className="mr-1 h-3 w-3" /> Supprimer
+              </Button>
+            </>
+          )}
+          {!isOwn && currentUserId && (
+            <ReportDialog targetType="reply" targetId={reply.id} label="Signaler" />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -350,7 +356,7 @@ function ReviewItem({
           <span className="font-medium tabular-nums">{replies.length}</span>
           <span>Répondre</span>
         </button>
-        {isOwn && (
+        {isOwn ? (
           <div className="ml-auto flex items-center gap-1">
             {onEdit && (
               <Button variant="ghost" size="sm" onClick={onEdit}>
@@ -363,6 +369,12 @@ function ReviewItem({
               </Button>
             )}
           </div>
+        ) : (
+          currentUserId && (
+            <div className="ml-auto">
+              <ReportDialog targetType="review" targetId={review.id} label="Signaler" />
+            </div>
+          )
         )}
       </div>
 

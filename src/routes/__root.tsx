@@ -119,23 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT = `(function(){try{var t=localStorage.getItem('nexus-theme');if(t==='light'){document.documentElement.classList.add('light');}}catch(e){}})();`;
 
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="fr">
-      <head>
-        {/* Apply saved theme before first paint to avoid a light/dark flash. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 
 function RootComponent() {

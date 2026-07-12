@@ -146,6 +146,134 @@ export type Database = {
         }
         Relationships: []
       }
+      import_batches: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          provider: string
+          source_metadata: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider: string
+          source_metadata?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          source_metadata?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      import_items: {
+        Row: {
+          alt_titles: string[]
+          applied_action: string | null
+          applied_at: string | null
+          batch_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          import_action: string
+          match_confidence: number | null
+          match_status: string
+          matched_media_key: string | null
+          media_type: string | null
+          normalized_title: string | null
+          notes: string | null
+          previous_item: Json | null
+          progress: number | null
+          provider: string
+          provider_ref: string | null
+          raw_title: string
+          release_year: number | null
+          started_at: string | null
+          total_episodes: number | null
+          updated_at: string
+          user_id: string
+          user_score: number | null
+          user_status: string | null
+        }
+        Insert: {
+          alt_titles?: string[]
+          applied_action?: string | null
+          applied_at?: string | null
+          batch_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          import_action?: string
+          match_confidence?: number | null
+          match_status?: string
+          matched_media_key?: string | null
+          media_type?: string | null
+          normalized_title?: string | null
+          notes?: string | null
+          previous_item?: Json | null
+          progress?: number | null
+          provider: string
+          provider_ref?: string | null
+          raw_title: string
+          release_year?: number | null
+          started_at?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+          user_id: string
+          user_score?: number | null
+          user_status?: string | null
+        }
+        Update: {
+          alt_titles?: string[]
+          applied_action?: string | null
+          applied_at?: string | null
+          batch_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          import_action?: string
+          match_confidence?: number | null
+          match_status?: string
+          matched_media_key?: string | null
+          media_type?: string | null
+          normalized_title?: string | null
+          notes?: string | null
+          previous_item?: Json | null
+          progress?: number | null
+          provider?: string
+          provider_ref?: string | null
+          raw_title?: string
+          release_year?: number | null
+          started_at?: string | null
+          total_episodes?: number | null
+          updated_at?: string
+          user_id?: string
+          user_score?: number | null
+          user_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       list_items: {
         Row: {
           created_at: string

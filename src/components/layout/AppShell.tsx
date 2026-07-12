@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  DownloadCloud,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ const NAV: NavItem[] = [
   { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
   { to: "/listes", label: "Listes partagées", icon: ListMusic },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
+  { to: "/import", label: "Importer", icon: DownloadCloud },
 
   { to: "/soutien", label: "Soutien", icon: Heart },
 ];

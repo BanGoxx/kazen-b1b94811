@@ -1,0 +1,462 @@
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import {
+  Upload,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  Copy,
+  HelpCircle,
+  Undo2,
+  Trash2,
+  Clock,
+} from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PROVIDERS, toDbProvider, type ProviderDef, type ProviderId } from "@/lib/import/providers";
+import { ImportParseError, type ImportEntry } from "@/lib/import/import-schema";
+import {
+  createImportBatch,
+  getImportBatches,
+  getImportPreview,
+  confirmImport,
+  rollbackImport,
+  deleteImportBatch,
+} from "@/lib/import.functions";
+
+export const Route = createFileRoute("/_authenticated/import")({
+  head: () => ({
+    meta: [
+      { title: "Importer mes listes — KAZEN" },
+      {
+        name: "description",
+        content:
+          "Importez en toute sécurité vos listes d'anime, séries et films depuis d'autres plateformes vers KAZEN.",
+      },
+    ],
+  }),
+  component: ImportPage,
+});
+
+type PreviewItem = {
+  id: string;
+  raw_title: string;
+  match_status: string;
+  match_confidence: number;
+  matched_media_key: string | null;
+  user_status: string | null;
+  user_score: number | null;
+  progress: number | null;
+  import_action: string;
+};
+
+type Preview = {
+  items: PreviewItem[];
+  summary: {
+    total: number;
+    exact: number;
+    probable: number;
+    needs_confirmation: number;
+    unmatched: number;
+    duplicate: number;
+  };
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  exact: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  probable: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  needs_confirmation: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  duplicate: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+  unmatched: "bg-muted text-muted-foreground border-border",
+};
+const STATUS_LABEL: Record<string, string> = {
+  exact: "Correspondance sûre",
+  probable: "Probable",
+  needs_confirmation: "À confirmer",
+  duplicate: "Déjà présent",
+  unmatched: "Introuvable",
+};
+
+function ImportPage() {
+  const create = useServerFn(createImportBatch);
+  const preview = useServerFn(getImportPreview);
+  const confirm = useServerFn(confirmImport);
+  const rollback = useServerFn(rollbackImport);
+  const del = useServerFn(deleteImportBatch);
+  const listBatches = useServerFn(getImportBatches);
+
+  const [selected, setSelected] = useState<ProviderId | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [batchId, setBatchId] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<Preview | null>(null);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [summary, setSummary] = useState<{ created: number; updated: number; skipped: number } | null>(null);
+  const [batches, setBatches] = useState<Awaited<ReturnType<typeof getImportBatches>>>([]);
+
+  const refreshBatches = async () => {
+    try {
+      setBatches(await listBatches());
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const reset = () => {
+    setBatchId(null);
+    setPreviewData(null);
+    setChecked(new Set());
+    setSummary(null);
+  };
+
+  const handleFile = async (provider: ProviderDef, file: File) => {
+    setBusy(true);
+    reset();
+    try {
+      const text = await file.text();
+      let entries: ImportEntry[];
+      try {
+        entries = provider.parse(text).map((e) => ({ ...e, provider: e.provider }));
+      } catch (err) {
+        if (err instanceof ImportParseError) throw new Error(err.message);
+        throw err;
+      }
+      if (entries.length === 0) throw new Error("Aucune entrée détectée dans ce fichier.");
+
+      const { batchId: id } = await create({
+        data: {
+          provider: toDbProvider(provider.id),
+          sourceMetadata: { fileName: file.name, providerId: provider.id },
+          entries,
+        },
+      });
+      setBatchId(id);
+      const pv = await preview({ data: { batchId: id } });
+      setPreviewData(pv as Preview);
+      // Pre-check safe (exact) matches.
+      setChecked(
+        new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
+      );
+      await refreshBatches();
+      toast.success(`${entries.length} entrées analysées.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'analyse du fichier.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggle = (id: string) => {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!batchId) return;
+    setBusy(true);
+    try {
+      const res = await confirm({ data: { batchId, confirmItemIds: [...checked] } });
+      setSummary(res);
+      setPreviewData(null);
+      await refreshBatches();
+      toast.success(`Import terminé : ${res.created} créés, ${res.updated} mis à jour.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'import.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRollback = async (id: string) => {
+    setBusy(true);
+    try {
+      const res = await rollback({ data: { batchId: id } });
+      await refreshBatches();
+      toast.success(`Import annulé : ${res.reverted} entrées restaurées.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'annulation.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setBusy(true);
+    try {
+      await del({ data: { batchId: id } });
+      await refreshBatches();
+      toast.success("Lot d'import supprimé.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de la suppression.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmableCount = previewData
+    ? previewData.items.filter((i) => i.match_status !== "unmatched" && i.match_status !== "duplicate").length
+    : 0;
+
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-5xl space-y-8">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Importer mes listes</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Rapatrie ta liste personnelle depuis une autre plateforme vers KAZEN. Aucun mot de
+            passe, cookie ni scraping : tu fournis toi-même un fichier exporté, KAZEN prévisualise
+            les correspondances, et rien n'est écrit dans ta liste sans ta confirmation.
+          </p>
+        </header>
+
+        {/* Privacy banner */}
+        <div className="flex items-start gap-3 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
+          <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p>
+            Confidentialité : KAZEN n'importe que tes propres métadonnées de suivi (titre, statut,
+            note, progression). Tu peux annuler ou supprimer un import à tout moment.
+          </p>
+        </div>
+
+        {/* Provider selection */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">1. Choisis une source</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {PROVIDERS.map((p) => {
+              const isSel = selected === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  disabled={!p.available}
+                  onClick={() => {
+                    setSelected(p.id);
+                    reset();
+                  }}
+                  className={`focus-ring flex flex-col gap-1 rounded-xl border p-4 text-left transition ${
+                    isSel ? "border-primary bg-primary/5" : "border-border bg-card/50"
+                  } ${p.available ? "hover:border-primary/60" : "cursor-not-allowed opacity-55"}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{p.label}</span>
+                    {p.available ? (
+                      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
+                        Disponible
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground">
+                        Bientôt
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-sm text-muted-foreground">{p.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Upload */}
+        {selected && (
+          <UploadSection
+            provider={PROVIDERS.find((p) => p.id === selected)!}
+            busy={busy}
+            onFile={handleFile}
+          />
+        )}
+
+        {/* Preview */}
+        {previewData && (
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">3. Aperçu avant import</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <SummaryStat label="Total" value={previewData.summary.total} />
+              <SummaryStat label="Sûres" value={previewData.summary.exact} tone="emerald" />
+              <SummaryStat label="Probables" value={previewData.summary.probable} tone="amber" />
+              <SummaryStat label="À confirmer" value={previewData.summary.needs_confirmation} tone="amber" />
+              <SummaryStat label="Déjà présent" value={previewData.summary.duplicate} tone="sky" />
+              <SummaryStat label="Introuvables" value={previewData.summary.unmatched} />
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-border">
+              <div className="max-h-[26rem] overflow-y-auto divide-y divide-border">
+                {previewData.items.map((it) => {
+                  const selectable =
+                    it.match_status !== "unmatched" && it.match_status !== "duplicate";
+                  return (
+                    <div key={it.id} className="flex items-center gap-3 p-3">
+                      <Checkbox
+                        checked={checked.has(it.id)}
+                        disabled={!selectable}
+                        onCheckedChange={() => toggle(it.id)}
+                        aria-label={`Importer ${it.raw_title}`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{it.raw_title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {it.user_status ?? "—"}
+                          {it.user_score != null ? ` · note ${it.user_score}` : ""}
+                          {it.progress != null ? ` · ${it.progress} ép.` : ""}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={STATUS_STYLE[it.match_status] ?? STATUS_STYLE.unmatched}
+                      >
+                        {STATUS_LABEL[it.match_status] ?? it.match_status}
+                        {it.match_confidence > 0 ? ` ${Math.round(it.match_confidence * 100)}%` : ""}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button onClick={handleConfirm} disabled={busy || checked.size === 0}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                Importer {checked.size} entrée(s)
+              </Button>
+              <Button variant="ghost" onClick={reset} disabled={busy}>
+                Annuler
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {confirmableCount} entrée(s) importables · les introuvables et doublons sont ignorés.
+              </span>
+            </div>
+          </section>
+        )}
+
+        {/* Confirmation summary */}
+        {summary && (
+          <section className="flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-400" />
+            <div>
+              <p className="font-semibold">Import terminé</p>
+              <p className="text-sm text-muted-foreground">
+                {summary.created} ajout(s), {summary.updated} mise(s) à jour, {summary.skipped} ignoré(s).
+                Tu peux annuler cet import depuis l'historique ci-dessous.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* History */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Historique des imports</h2>
+            <Button variant="ghost" size="sm" onClick={refreshBatches}>
+              Actualiser
+            </Button>
+          </div>
+          {batches.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              Aucun import pour le moment.
+            </p>
+          ) : (
+            <div className="divide-y divide-border rounded-xl border border-border">
+              {batches.map((b) => (
+                <div key={b.id} className="flex flex-wrap items-center gap-3 p-3">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium capitalize">{b.provider.replace("_", " ")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(b.created_at).toLocaleString("fr-FR")} · statut : {b.status}
+                    </p>
+                  </div>
+                  {b.status === "completed" && (
+                    <Button variant="outline" size="sm" onClick={() => handleRollback(b.id)} disabled={busy}>
+                      <Undo2 className="h-4 w-4" /> Annuler
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)} disabled={busy}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </AppShell>
+  );
+}
+
+function UploadSection({
+  provider,
+  busy,
+  onFile,
+}: {
+  provider: ProviderDef;
+  busy: boolean;
+  onFile: (p: ProviderDef, f: File) => void;
+}) {
+  if (!provider.available) {
+    return (
+      <section className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+        <AlertTriangle className="mb-2 h-5 w-5 text-amber-400" />
+        L'import {provider.label} arrive prochainement. Sélectionne une source disponible.
+      </section>
+    );
+  }
+  return (
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold">2. Téléverse ton fichier</h2>
+      <p className="flex items-start gap-2 text-sm text-muted-foreground">
+        <Copy className="mt-0.5 h-4 w-4 shrink-0" /> {provider.howto}
+      </p>
+      <label className="focus-ring flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
+        {busy ? (
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        ) : (
+          <Upload className="h-6 w-6 text-primary" />
+        )}
+        <span className="font-medium">Choisir un fichier {provider.label}</span>
+        <span className="text-xs text-muted-foreground">{provider.accept}</span>
+        <input
+          type="file"
+          accept={provider.accept}
+          className="hidden"
+          disabled={busy}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFile(provider, f);
+            e.target.value = "";
+          }}
+        />
+      </label>
+    </section>
+  );
+}
+
+function SummaryStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone?: "emerald" | "amber" | "sky";
+}) {
+  const toneClass =
+    tone === "emerald"
+      ? "text-emerald-400"
+      : tone === "amber"
+        ? "text-amber-400"
+        : tone === "sky"
+          ? "text-sky-400"
+          : "text-foreground";
+  return (
+    <div className="rounded-xl border border-border bg-card/50 p-3 text-center">
+      <p className={`text-2xl font-bold ${toneClass}`}>{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}

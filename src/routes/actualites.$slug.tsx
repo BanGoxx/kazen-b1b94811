@@ -2,15 +2,16 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Newspaper } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { getArticleBySlug, type NewsArticle } from "@/lib/news";
+import { getArticleBySlug, type ArticleBlock, type NewsArticle } from "@/lib/news";
 
 /**
- * KAZEN article / news detail (Step C).
+ * KAZEN article / news detail.
  *
  * French-first, premium editorial layout for title-scoped articles. Content
- * comes from the safe registry in `src/lib/news.ts` — when no article matches
- * the slug we render a graceful not-found instead of fabricated content. Each
- * article links back to the titles it covers to keep internal navigation first.
+ * comes from the validated registry in `src/lib/news.ts` — when no article
+ * matches the slug we render a graceful not-found instead of fabricated
+ * content. Every article links back to the titles it covers and to Découverte
+ * to keep internal KAZEN navigation first.
  */
 export const Route = createFileRoute("/actualites/$slug")({
   loader: async ({ params }) => {
@@ -40,7 +41,10 @@ export const Route = createFileRoute("/actualites/$slug")({
         { property: "og:description", content: article.excerpt },
         { property: "og:type", content: "article" },
         ...(article.thumbnailUrl
-          ? [{ property: "og:image", content: article.thumbnailUrl }]
+          ? [
+              { property: "og:image", content: article.thumbnailUrl },
+              { name: "twitter:image", content: article.thumbnailUrl },
+            ]
           : []),
       ],
     };
@@ -51,15 +55,8 @@ export const Route = createFileRoute("/actualites/$slug")({
 
 function ArticlePage() {
   const { article } = Route.useLoaderData();
-  const dateFmt = new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const when =
-    article.publishedAt && !Number.isNaN(new Date(article.publishedAt).getTime())
-      ? dateFmt.format(new Date(article.publishedAt))
-      : null;
+  const when = formatFr(article.publishedAt);
+  const primary = article.titles[0] ?? null;
 
   return (
     <AppShell>
@@ -70,19 +67,32 @@ function ArticlePage() {
           </Link>
         </Button>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1 font-medium text-primary">
-            <Newspaper className="h-3.5 w-3.5" /> {article.source}
-          </span>
-          {when ? <span>· {when}</span> : null}
-        </div>
+        {/* Hero / title area */}
+        <header className="border-b border-border pb-6">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {article.category ? (
+              <span className="rounded-full bg-primary/15 px-2.5 py-0.5 font-medium text-primary">
+                {article.category}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-1 font-medium">
+              <Newspaper className="h-3.5 w-3.5" /> {article.source}
+            </span>
+            {when ? <span aria-hidden>·</span> : null}
+            {when ? <time dateTime={article.publishedAt}>{when}</time> : null}
+          </div>
 
-        <h1 className="mt-2 font-display text-2xl font-bold leading-tight sm:text-3xl">
-          {article.title}
-        </h1>
+          <h1 className="mt-3 font-display text-2xl font-bold leading-tight sm:text-4xl">
+            {article.title}
+          </h1>
+
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+            {article.excerpt}
+          </p>
+        </header>
 
         {article.thumbnailUrl ? (
-          <div className="mt-5 aspect-video overflow-hidden rounded-2xl border border-border bg-muted/40">
+          <div className="mt-6 aspect-video overflow-hidden rounded-2xl border border-border bg-muted/40">
             <img
               src={article.thumbnailUrl}
               alt=""
@@ -91,20 +101,58 @@ function ArticlePage() {
           </div>
         ) : null}
 
-        <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-foreground/90">
-          {article.body.map((p: string, i: number) => (
-            <p key={i}>{p}</p>
+        {/* Body */}
+        <div className="mt-6 space-y-5 text-[15px] leading-relaxed text-foreground/90 sm:text-base">
+          {article.blocks.map((block: ArticleBlock, i: number) => (
+            <ArticleBlockView key={i} block={block} />
           ))}
         </div>
 
         <TitleLinks article={article} />
+
+        {/* Footer navigation */}
+        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
+          {primary ? (
+            <Button asChild size="sm">
+              <Link
+                to="/media/$source/$id"
+                params={{ source: primary.source, id: primary.externalId }}
+              >
+                Voir la fiche <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          ) : null}
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Découverte
+            </Link>
+          </Button>
+        </div>
       </article>
     </AppShell>
   );
 }
 
+function ArticleBlockView({ block }: { block: ArticleBlock }) {
+  if (block.kind === "heading") {
+    return (
+      <h2 className="pt-2 font-display text-lg font-bold sm:text-xl">
+        {block.text}
+      </h2>
+    );
+  }
+  if (block.kind === "quote") {
+    return (
+      <blockquote className="border-l-2 border-primary/60 pl-4 italic text-foreground/80">
+        {block.text}
+      </blockquote>
+    );
+  }
+  return <p>{block.text}</p>;
+}
+
 function TitleLinks({ article }: { article: NewsArticle }) {
-  if (!article.titles.length) return null;
+  if (article.titles.length <= 1) return null;
   return (
     <div className="mt-8 border-t border-border pt-6">
       <p className="mb-3 text-sm font-semibold text-muted-foreground">
@@ -129,6 +177,15 @@ function TitleLinks({ article }: { article: NewsArticle }) {
       </div>
     </div>
   );
+}
+
+function formatFr(iso: string): string | null {
+  if (!iso || Number.isNaN(new Date(iso).getTime())) return null;
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(iso));
 }
 
 function ArticleNotFound() {

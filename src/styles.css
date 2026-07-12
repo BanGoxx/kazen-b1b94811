@@ -410,6 +410,54 @@ body,
     color 0.35s ease;
 }
 
+/* Smoother anchored navigation, offset so headings clear any sticky header. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* Premium, unobtrusive scrollbar that matches the graphite & ember theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.42 0.02 265) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.38 0.015 265 / 0.7);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.04 28 / 0.8);
+  background-clip: content-box;
+}
+
+/* Consistent, snappy transitions on common interactive controls. */
+a,
+button,
+[role="button"],
+summary {
+  transition:
+    color 0.2s var(--ease-soft),
+    background-color 0.2s var(--ease-soft),
+    border-color 0.2s var(--ease-soft),
+    opacity 0.2s var(--ease-soft),
+    transform 0.2s var(--ease-soft);
+}
+
+/* Media fades in gently once decoded instead of popping in. */
+img {
+  transition: opacity 0.4s var(--ease-soft);
+}
+
+
 
 @media (prefers-reduced-motion: reduce) {
   *,

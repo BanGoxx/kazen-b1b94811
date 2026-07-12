@@ -117,6 +117,11 @@ function CatalogInner({
   }, [items, state]);
 
   const sourceEmpty = items.length === 0;
+  // True when the user has narrowed the loaded set (genre or status). Used to
+  // phrase the finite-state footer around the *selection* rather than implying
+  // the whole catalogue is exhausted.
+  const filtersActive = state.genres.length > 0 || state.status !== "all";
+
 
   // Auto-load on scroll until the cap, one sequential page at a time.
   const sentinelRef = useRef<HTMLDivElement | null>(null);

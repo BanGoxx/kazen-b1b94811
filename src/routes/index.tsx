@@ -220,6 +220,7 @@ function DiscoverPage() {
         {/* ----- Univers anime (priorité KAZEN) ----- */}
         <CategoryBand
           icon={Sparkles}
+          kicker="L'essentiel KAZEN"
           label="Univers anime"
           description="Tendances, valeurs sûres et sorties attendues de l'animation"
         />

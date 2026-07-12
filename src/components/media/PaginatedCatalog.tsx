@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSuspenseInfiniteQuery, type UseSuspenseInfiniteQueryOptions } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useQueryClient,
+  type UseSuspenseInfiniteQueryOptions,
+} from "@tanstack/react-query";
 import { Loader2, Plus, RotateCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import type { PagedMedia } from "@/lib/tmdb.server";
 import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
+import { readCatalogFilters, writeCatalogFilters } from "@/lib/catalog-state";
+import { upgradeCatalogOnce } from "@/lib/queries";
 import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
 import { SafeSection } from "./SafeSection";
@@ -32,6 +38,12 @@ export function PaginatedCatalog(props: {
   // "complete catalogue" phrasing; pass a season/upcoming-specific note when
   // the total is a genuine complete set rather than an open-ended catalogue.
   completionLabel?: string;
+  // When true, upgrade the SSR/curated first page to real browser-direct data
+  // once after hydration (anime/seasonal catalogs that can be Worker-blocked).
+  upgradeOnMount?: boolean;
+  // Stable id used to persist/restore the filter selection across
+  // back-navigation. Defaults to the query key when omitted.
+  stateKey?: string;
 }) {
   return (
     <SafeSection minHeight="20rem" pending={<CatalogPending />}>
@@ -48,18 +60,43 @@ function CatalogInner({
   queryOptions,
   emptyLabel,
   completionLabel,
+  upgradeOnMount,
+  stateKey,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
   completionLabel?: string;
+  upgradeOnMount?: boolean;
+  stateKey?: string;
 }) {
   const query = useSuspenseInfiniteQuery(queryOptions);
+  const queryClient = useQueryClient();
+  const persistKey = stateKey ?? JSON.stringify(queryOptions.queryKey);
   const [state, setState] = useState<FilterState>({
     genres: [],
     status: "all",
     sort: "trending",
   });
+
+  // Restore any persisted filter selection AFTER mount (post-hydration only, so
+  // it can never cause an SSR/client mismatch). This makes browser Back from a
+  // fiche return to the same filtered view the router restores scroll against.
+  useEffect(() => {
+    const saved = readCatalogFilters(persistKey);
+    if (saved) setState(saved);
+  }, [persistKey]);
+
+  useEffect(() => {
+    writeCatalogFilters(persistKey, state);
+  }, [persistKey, state]);
+
+  // One-time browser-direct upgrade of the curated SSR first page (see
+  // upgradeCatalogOnce). Runs once per query per session — never on every mount.
+  useEffect(() => {
+    if (upgradeOnMount) upgradeCatalogOnce(queryClient, queryOptions.queryKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const items = useMemo<MediaItem[]>(
     () => (query.data?.pages ?? []).flatMap((p: PagedMedia) => p.items),

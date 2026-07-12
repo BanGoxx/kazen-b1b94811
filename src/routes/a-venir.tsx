@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { CalendarClock } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
@@ -11,7 +11,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO } from "@/lib/queries";
+import { upcomingAllQO, upgradeCatalogOnce } from "@/lib/queries";
 import {
   Select,
   SelectContent,
@@ -150,9 +150,15 @@ function SpotlightCard({ item }: { item: MediaItem }) {
 
 function UpcomingPage() {
   const { data } = useSuspenseQuery(upcomingAllQO);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("all");
   const [platform, setPlatform] = useState<string>("all");
   const [sort, setSort] = useState<SortOrder>("soon");
+
+  useEffect(() => {
+    upgradeCatalogOnce(queryClient, upcomingAllQO.queryKey);
+  }, [queryClient]);
+
 
   const counts = useMemo(() => {
     const c: Record<Filter, number> = { all: data.length, anime: 0, series: 0, movie: 0 };

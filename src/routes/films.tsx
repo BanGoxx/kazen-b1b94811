@@ -1,11 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { moviePageQO } from "@/lib/queries";
 
+const FILM_TABS = new Set(["trending", "popular", "upcoming", "animated", "asian"]);
+
 export const Route = createFileRoute("/films")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" && FILM_TABS.has(search.tab) ? search.tab : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Films — KAZEN" },
@@ -23,10 +28,17 @@ export const Route = createFileRoute("/films")({
 });
 
 function MoviesPage() {
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <AppShell>
       <PageHeader title="Films" description="Du blockbuster au film culte, sans oublier l'animation." />
-      <Tabs defaultValue="trending">
+      <Tabs
+        value={tab ?? "trending"}
+        onValueChange={(value) =>
+          navigate({ to: "/films", search: { tab: value }, replace: true })
+        }
+      >
         <TabsList>
           <TabsTrigger value="trending">Tendance</TabsTrigger>
           <TabsTrigger value="popular">Populaires</TabsTrigger>

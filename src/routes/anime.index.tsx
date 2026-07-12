@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { animePageQO } from "@/lib/queries";
 
+const TABS = new Set(["trending", "popular", "upcoming"]);
+
 export const Route = createFileRoute("/anime/")({
+  // Keep the active tab in the URL so browser back/forward and refresh restore
+  // it (and each tab gets its own scroll-restoration entry).
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" && TABS.has(search.tab) ? search.tab : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Anime — KAZEN" },
@@ -27,24 +34,32 @@ export const Route = createFileRoute("/anime/")({
 });
 
 function AnimePage() {
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <AppShell>
       <PageHeader title="Anime" description="Le meilleur de l'animation, tendance et à venir." />
-      <Tabs defaultValue="trending">
+      <Tabs
+        value={tab ?? "trending"}
+        onValueChange={(value) =>
+          navigate({ to: "/anime", search: { tab: value }, replace: true })
+        }
+      >
         <TabsList>
           <TabsTrigger value="trending">Tendance</TabsTrigger>
           <TabsTrigger value="popular">Populaires</TabsTrigger>
           <TabsTrigger value="upcoming">À venir</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <PaginatedCatalog queryOptions={animePageQO("trending")} />
+          <PaginatedCatalog queryOptions={animePageQO("trending")} upgradeOnMount />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <PaginatedCatalog queryOptions={animePageQO("popular")} />
+          <PaginatedCatalog queryOptions={animePageQO("popular")} upgradeOnMount />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
           <PaginatedCatalog
             queryOptions={animePageQO("upcoming")}
+            upgradeOnMount
             emptyLabel="Aucun anime à venir listé pour le moment."
           />
         </TabsContent>

@@ -44,6 +44,7 @@ function SeasonPage() {
       />
       <PaginatedCatalog
         queryOptions={seasonalAnimePageQO()}
+        upgradeOnMount
         emptyLabel="Aucun anime pour cette saison."
         completionLabel="Saison complète — tous les anime de la saison sont affichés"
       />

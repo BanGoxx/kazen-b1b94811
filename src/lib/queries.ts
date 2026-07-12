@@ -103,6 +103,28 @@ export function refreshAnimeRails(queryClient: import("@tanstack/react-query").Q
   void queryClient.refetchQueries({ queryKey: ["anime"], type: "active" });
 }
 
+// One-time, post-hydration browser-direct upgrade for a catalog query.
+//
+// Anime/seasonal/upcoming catalogs render from dehydrated SSR data on the first
+// client paint (which may be the curated fallback when the production Worker is
+// AniList-blocked). We must upgrade that to the real browser-direct list — but
+// only ONCE per query per session. Doing it on every mount (the old
+// `staleTime:0 + refetchOnMount:true`) refetched every loaded page on every
+// back-navigation/tab-switch, which lost scroll position, dropped loaded pages
+// and hammered AniList. This upgrades exactly once, then the HOUR staleTime lets
+// back-navigation reuse the in-memory cache instantly.
+const upgradedCatalogKeys = new Set<string>();
+export function upgradeCatalogOnce(
+  queryClient: import("@tanstack/react-query").QueryClient,
+  queryKey: readonly unknown[],
+) {
+  if (!IS_BROWSER) return;
+  const k = JSON.stringify(queryKey);
+  if (upgradedCatalogKeys.has(k)) return;
+  upgradedCatalogKeys.add(k);
+  void queryClient.refetchQueries({ queryKey, exact: true, type: "active" });
+}
+
 
 
 export const trendingMoviesQO = queryOptions({
@@ -180,8 +202,10 @@ export const upcomingAllQO = queryOptions({
     }
   },
 
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  // Reuse the in-memory cache on back-navigation (HOUR fresh); the real
+  // browser-direct anime merge is applied once post-hydration via
+  // upgradeCatalogOnce(["upcoming","all"]) instead of on every mount.
+  staleTime: HOUR,
   retry: 3,
 });
 
@@ -270,12 +294,12 @@ export const animePageQO = (kind: string) =>
     },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
-    // Server SSR may only have the curated fallback when the production Worker
-    // is blocked by AniList. On the client, mark it stale so the browser CORS
-    // path immediately replaces page 1 with real AniList data, then page 2+
-    // keeps progressive loading alive.
-    staleTime: typeof window === "undefined" ? HOUR : 0,
-    refetchOnMount: true,
+    // SSR may only hold the curated fallback when the Worker is AniList-blocked.
+    // Rather than refetch every loaded page on every mount (old staleTime:0 +
+    // refetchOnMount:true — which lost scroll/pages on back-navigation), the
+    // catalog upgrades page 1 to real browser-direct data ONCE post-hydration
+    // via upgradeCatalogOnce(); HOUR staleTime then serves back-nav from cache.
+    staleTime: HOUR,
     retry: 3,
   });
 
@@ -314,7 +338,8 @@ export const seasonalAnimePageQO = (season?: string, year?: number) =>
     },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
-    staleTime: typeof window === "undefined" ? HOUR : 0,
-    refetchOnMount: true,
+    // Upgraded once post-hydration via upgradeCatalogOnce(); back-navigation
+    // then reuses the cached season pages instantly (no full refetch loop).
+    staleTime: HOUR,
     retry: 3,
   });

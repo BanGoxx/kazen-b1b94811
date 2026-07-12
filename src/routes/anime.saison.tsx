@@ -1,10 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { MediaGrid } from "@/components/media/MediaGrid";
-import { SafeSection } from "@/components/media/SafeSection";
-import { seasonalAnimeQO } from "@/lib/queries";
+import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
+import { seasonalAnimePageQO } from "@/lib/queries";
+
+const SEASON_LABELS: Record<string, string> = {
+  WINTER: "Hiver",
+  SPRING: "Printemps",
+  SUMMER: "Été",
+  FALL: "Automne",
+};
+
+function currentSeasonLabel(): string {
+  const now = new Date();
+  const m = now.getMonth();
+  const season = m < 3 ? "WINTER" : m < 6 ? "SPRING" : m < 9 ? "SUMMER" : "FALL";
+  return `${SEASON_LABELS[season]} ${now.getFullYear()}`;
+}
 
 export const Route = createFileRoute("/anime/saison")({
   head: () => ({
@@ -18,30 +30,22 @@ export const Route = createFileRoute("/anime/saison")({
     links: [{ rel: "canonical", href: "https://kazen.lovable.app/anime/saison" }],
   }),
   loader: async ({ context }) => {
-    void context.queryClient.ensureQueryData(seasonalAnimeQO());
+    void context.queryClient.ensureInfiniteQueryData(seasonalAnimePageQO());
   },
   component: SeasonPage,
 });
 
-function SeasonContent() {
-  const { data } = useSuspenseQuery(seasonalAnimeQO());
-  return (
-    <>
-      <PageHeader
-        title={`Saison anime — ${data.label} ${data.year}`}
-        description="Les sorties anime de la saison en cours."
-      />
-      <MediaGrid items={data.items} emptyLabel="Aucun anime pour cette saison." />
-    </>
-  );
-}
-
 function SeasonPage() {
   return (
     <AppShell>
-      <SafeSection minHeight="24rem">
-        <SeasonContent />
-      </SafeSection>
+      <PageHeader
+        title={`Saison anime — ${currentSeasonLabel()}`}
+        description="Les sorties anime de la saison en cours."
+      />
+      <PaginatedCatalog
+        queryOptions={seasonalAnimePageQO()}
+        emptyLabel="Aucun anime pour cette saison."
+      />
     </AppShell>
   );
 }

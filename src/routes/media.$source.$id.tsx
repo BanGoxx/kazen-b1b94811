@@ -41,6 +41,12 @@ import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
 import { getRelevantArticlesForTitle, toFicheArticle } from "@/lib/news";
 
+// PRESERVATION: KAZEN rich fiches (synopsis, épisodes, personnages & voix,
+// équipe, source/relations, franchise/univers, vidéos, plateformes, article
+// relevance, avis, actions liste) are validated core product behaviors.
+// Do not remove, simplify, or hide these sections during visual polish.
+
+
 export const Route = createFileRoute("/media/$source/$id")({
   loader: async ({ context, params }) => {
     const item = await context.queryClient.ensureQueryData(

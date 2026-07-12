@@ -47,12 +47,22 @@ const STATUS_TABS: { value: WatchStatus | "tous" | "favoris"; label: string }[] 
 
 const TYPES: (MediaType | "tous")[] = ["tous", "anime", "series", "movie"];
 
+const SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: "recent", label: "Récemment mis à jour" },
+  { value: "note", label: "Meilleure note" },
+  { value: "titre", label: "Titre (A→Z)" },
+  { value: "priorite", label: "Priorité" },
+];
+
+const PRIORITY_ORDER: Record<string, number> = { haute: 0, normale: 1, basse: 2 };
+
 function MyListsPage() {
   const { entries, isLoading } = useMyList();
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["value"]>("tous");
   const [type, setType] = useState<MediaType | "tous">("tous");
   const [platform, setPlatform] = useState<string>("tous");
   const [tag, setTag] = useState<string>("tous");
+  const [sort, setSort] = useState<string>("recent");
 
   const platforms = useMemo(() => {
     const set = new Set<string>();
@@ -67,7 +77,7 @@ function MyListsPage() {
   }, [entries]);
 
   const filtered = useMemo(() => {
-    return entries.filter((e) => {
+    const list = entries.filter((e) => {
       if (tab === "favoris" && !e.favorite) return false;
       if (tab !== "tous" && tab !== "favoris" && e.status !== tab) return false;
       if (type !== "tous" && e.item?.mediaType !== type) return false;
@@ -76,7 +86,25 @@ function MyListsPage() {
       if (tag !== "tous" && !e.tags.includes(tag)) return false;
       return true;
     });
-  }, [entries, tab, type, platform, tag]);
+    const sorted = [...list];
+    sorted.sort((a, b) => {
+      switch (sort) {
+        case "note":
+          return (b.rating ?? -1) - (a.rating ?? -1);
+        case "titre":
+          return (a.item?.title ?? "").localeCompare(b.item?.title ?? "", "fr");
+        case "priorite":
+          return (
+            (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1)
+          );
+        case "recent":
+        default:
+          return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
+      }
+    });
+    return sorted;
+  }, [entries, tab, type, platform, tag, sort]);
+
 
   return (
     <AppShell>

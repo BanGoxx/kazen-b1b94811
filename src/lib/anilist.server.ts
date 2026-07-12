@@ -1,6 +1,7 @@
 // Server-only AniList GraphQL access. AniList is a public keyless GraphQL API.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { fromAniList } from "./normalize";
+import { orderEpisodes, parseStreamingTitle } from "./episodes";
 import type {
   CreditPerson,
   EntityMediaLink,

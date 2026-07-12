@@ -67,10 +67,13 @@ export function RelatedScroller({
       ) : null}
       <ul className="flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
         {items.map((it) => {
-          // Anime have a real KAZEN fiche → link internally. Other formats
-          // (manga / LN / OST) get a safe outbound AniList reference when the
-          // id is real, so the item stays explorable; otherwise a static card.
-          const clickable = it.hasDetail !== false;
+          // Any real AniList id (anime OR manga/LN) now resolves to an internal
+          // KAZEN fiche via the universal detail query + browser-direct
+          // fallback, so we link internally instead of bouncing to AniList.
+          // Non-AniList items honour their hasDetail flag; a real-id fallback
+          // keeps the card explorable rather than a dead "introuvable".
+          const anilistReal = it.source === "anilist" && /^\d+$/.test(it.externalId);
+          const clickable = anilistReal || it.hasDetail !== false;
           const external = clickable ? null : externalRefUrl(it);
           const inner: ReactNode = <Poster it={it} />;
           return (

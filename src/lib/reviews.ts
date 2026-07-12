@@ -110,3 +110,212 @@ export function useReviewMutations(source: string, externalId: string) {
 
   return { upsert, remove };
 }
+
+// ---------------------------------------------------------------------------
+// Likes & réponses (brique communautaire 3)
+// ---------------------------------------------------------------------------
+
+export interface ReviewReply {
+  id: string;
+  reviewId: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  authorName: string;
+  authorAvatar: string | null;
+}
+
+async function attachProfiles<T extends { user_id: string }>(rows: T[]) {
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
+  if (userIds.length === 0) return new Map<string, { display_name: string | null; avatar_url: string | null }>();
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id,display_name,avatar_url")
+    .in("id", userIds);
+  return new Map((profiles ?? []).map((p) => [p.id, p]));
+}
+
+// --- Likes on a review ------------------------------------------------------
+
+function reviewLikesKey(reviewId: string) {
+  return ["review-likes", reviewId] as const;
+}
+
+export function useReviewLikes(reviewId: string) {
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: reviewLikesKey(reviewId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("review_likes")
+        .select("user_id")
+        .eq("review_id", reviewId);
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((r) => r.user_id);
+    },
+    staleTime: 30_000,
+  });
+  const likers = query.data ?? [];
+  return {
+    count: likers.length,
+    likedByMe: user ? likers.includes(user.id) : false,
+    isLoading: query.isLoading,
+  };
+}
+
+export function useReviewLikeToggle(reviewId: string) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (currentlyLiked: boolean) => {
+      if (!user) throw new Error("not-auth");
+      if (currentlyLiked) {
+        const { error } = await supabase
+          .from("review_likes")
+          .delete()
+          .eq("review_id", reviewId)
+          .eq("user_id", user.id);
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await supabase
+          .from("review_likes")
+          .insert({ review_id: reviewId, user_id: user.id });
+        if (error) throw new Error(error.message);
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: reviewLikesKey(reviewId) }),
+  });
+}
+
+// --- Replies on a review ----------------------------------------------------
+
+function repliesKey(reviewId: string) {
+  return ["review-replies", reviewId] as const;
+}
+
+export function useReviewReplies(reviewId: string) {
+  return useQuery({
+    queryKey: repliesKey(reviewId),
+    queryFn: async (): Promise<ReviewReply[]> => {
+      const { data, error } = await supabase
+        .from("review_replies")
+        .select("id,review_id,user_id,body,created_at,updated_at")
+        .eq("review_id", reviewId)
+        .order("created_at", { ascending: true });
+      if (error) throw new Error(error.message);
+      const rows = data ?? [];
+      const byId = await attachProfiles(rows);
+      return rows.map((r) => {
+        const p = byId.get(r.user_id);
+        return {
+          id: r.id,
+          reviewId: r.review_id,
+          userId: r.user_id,
+          body: r.body,
+          createdAt: r.created_at,
+          updatedAt: r.updated_at,
+          authorName: p?.display_name || "Membre KAZEN",
+          authorAvatar: p?.avatar_url ?? null,
+        };
+      });
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useReplyMutations(reviewId: string) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const invalidate = () => qc.invalidateQueries({ queryKey: repliesKey(reviewId) });
+
+  const add = useMutation({
+    mutationFn: async (body: string) => {
+      if (!user) throw new Error("not-auth");
+      const { error } = await supabase
+        .from("review_replies")
+        .insert({ review_id: reviewId, user_id: user.id, body: body.trim() });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  const update = useMutation({
+    mutationFn: async ({ id, body }: { id: string; body: string }) => {
+      if (!user) throw new Error("not-auth");
+      const { error } = await supabase
+        .from("review_replies")
+        .update({ body: body.trim() })
+        .eq("id", id)
+        .eq("user_id", user.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error("not-auth");
+      const { error } = await supabase
+        .from("review_replies")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  return { add, update, remove };
+}
+
+// --- Likes on a reply -------------------------------------------------------
+
+function replyLikesKey(replyId: string) {
+  return ["reply-likes", replyId] as const;
+}
+
+export function useReplyLikes(replyId: string) {
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: replyLikesKey(replyId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reply_likes")
+        .select("user_id")
+        .eq("reply_id", replyId);
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((r) => r.user_id);
+    },
+    staleTime: 30_000,
+  });
+  const likers = query.data ?? [];
+  return {
+    count: likers.length,
+    likedByMe: user ? likers.includes(user.id) : false,
+  };
+}
+
+export function useReplyLikeToggle(replyId: string) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (currentlyLiked: boolean) => {
+      if (!user) throw new Error("not-auth");
+      if (currentlyLiked) {
+        const { error } = await supabase
+          .from("reply_likes")
+          .delete()
+          .eq("reply_id", replyId)
+          .eq("user_id", user.id);
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await supabase
+          .from("reply_likes")
+          .insert({ reply_id: replyId, user_id: user.id });
+        if (error) throw new Error(error.message);
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: replyLikesKey(replyId) }),
+  });
+}

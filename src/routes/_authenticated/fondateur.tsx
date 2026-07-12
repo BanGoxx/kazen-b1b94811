@@ -29,7 +29,6 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import { ROLE_LABELS, type AppRole } from "@/lib/roles";
 import {
   useBadgeCatalog,
@@ -70,7 +69,6 @@ function DiagValue({ value }: { value: number | null }) {
 }
 
 function FounderConsole() {
-  const { user } = useAuth();
   const diagFn = useServerFn(founderDiagnostics);
   const { data: diag } = useQuery({
     queryKey: ["founder-diagnostics"],

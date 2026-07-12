@@ -219,7 +219,8 @@ function UniversPage() {
                 key={cat}
                 to="/univers/$source/$id"
                 params={{ source, id }}
-                search={{ type: cat }}
+                search={{ type: cat, sort, year: null }}
+
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "focus-ring flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",

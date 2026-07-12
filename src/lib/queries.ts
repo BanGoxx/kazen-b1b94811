@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import {
   getTrendingAnime,
   getPopularAnime,
@@ -17,6 +17,10 @@ import {
   getAsianAnimationMovies,
 } from "./discover.functions";
 import { getEntityProfile } from "./entity.functions";
+import {
+  anilistPublicPage,
+  anilistPublicSearchPaged,
+} from "./anilist-public";
 
 const HOUR = 1000 * 60 * 60;
 
@@ -120,7 +124,6 @@ export const entityProfileQO = (kind: string, id: string) =>
     retry: 2,
   });
 
-import { infiniteQueryOptions } from "@tanstack/react-query";
 import { getAnimePage, getMoviePage, getSeriesPage, searchMediaPaged } from "./discover.functions";
 import type { PagedMedia } from "./tmdb.server";
 
@@ -135,7 +138,25 @@ interface SearchPage {
 export const searchMediaInfiniteQO = (q: string) =>
   infiniteQueryOptions({
     queryKey: ["search", "infinite", q],
-    queryFn: ({ pageParam }) => searchMediaPaged({ data: { q, page: pageParam } }),
+    queryFn: async ({ pageParam }) => {
+      const page = Number(pageParam) || 1;
+      if (typeof window === "undefined") return searchMediaPaged({ data: { q, page } });
+
+      const [baseResult, animeResult] = await Promise.allSettled([
+        searchMediaPaged({ data: { q, page } }),
+        q.trim().length >= 2 ? anilistPublicSearchPaged(q, page) : Promise.resolve({ items: [], hasMore: false }),
+      ]);
+      const base: SearchPage =
+        baseResult.status === "fulfilled"
+          ? baseResult.value
+          : { anime: [], series: [], movies: [], page, hasMore: false };
+      if (animeResult.status !== "fulfilled") return base;
+      return {
+        ...base,
+        anime: animeResult.value.items.length ? animeResult.value.items : base.anime,
+        hasMore: base.hasMore || animeResult.value.hasMore,
+      };
+    },
     initialPageParam: 1,
     getNextPageParam: (last: SearchPage) => (last.hasMore ? last.page + 1 : undefined),
     staleTime: 1000 * 60 * 5,
@@ -149,7 +170,17 @@ void pagedInitial;
 export const animePageQO = (kind: string) =>
   infiniteQueryOptions({
     queryKey: ["anime", "page", kind],
-    queryFn: ({ pageParam }) => getAnimePage({ data: { kind, page: pageParam } }),
+    queryFn: async ({ pageParam }) => {
+      const page = Number(pageParam) || 1;
+      if (typeof window !== "undefined") {
+        try {
+          return await anilistPublicPage(kind, page);
+        } catch (error) {
+          console.error("anilistPublicPage", error);
+        }
+      }
+      return getAnimePage({ data: { kind, page } });
+    },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
     staleTime: HOUR,

@@ -139,7 +139,10 @@ export function fallbackSeasonalAnime(limit = 50): { items: MediaItem[]; season:
 export function fallbackAnimePage(kind: string, page: number, perPage = 30) {
   const source = kind === "popular" ? POPULAR : kind === "upcoming" ? UPCOMING : TRENDING;
   if (page > 1) return { items: [], page, hasMore: false };
-  return { items: source.slice(0, perPage), page, hasMore: false };
+  // Production note: when the Worker-side AniList path is blocked but the
+  // browser CORS path can still load real pages, page 1 must not dead-end the
+  // infinite catalogue. The client fetches page 2+ directly from AniList.
+  return { items: source.slice(0, perPage), page, hasMore: true };
 }
 /** All curated fallback anime, deduplicated by external id. */
 const ALL_FALLBACK: MediaItem[] = (() => {

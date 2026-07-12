@@ -17,6 +17,7 @@ const ENDPOINT = "https://graphql.anilist.co";
 const CACHE_TTL_MS = 1000 * 60 * 20;
 const STALE_TTL_MS = 1000 * 60 * 60 * 24;
 const REQUEST_TIMEOUT_MS = 6500;
+const ANILIST_HEADER_PROFILE = "browser-ua-origin-referer-v2";
 
 // Shared (cross-isolate) cache. In-memory cache is L1 (fast, per worker
 // isolate); Postgres (via SECURITY DEFINER RPCs) is L2 — survives cold starts
@@ -101,6 +102,23 @@ async function fetchWithTimeout(init: RequestInit): Promise<Response> {
   }
 }
 
+async function logAniListFailure(res: Response): Promise<void> {
+  if (res.status !== 403 && res.status !== 429) return;
+  let bodyPreview = "";
+  try {
+    bodyPreview = (await res.clone().text()).slice(0, 160);
+  } catch {
+    bodyPreview = "unavailable";
+  }
+  console.error("AniList production diagnostic", {
+    status: res.status,
+    headerProfile: ANILIST_HEADER_PROFILE,
+    cfRay: res.headers.get("cf-ray"),
+    rateLimitRemaining: res.headers.get("x-ratelimit-remaining"),
+    bodyPreview,
+  });
+}
+
 function queuedAniListFetch(init: RequestInit): Promise<Response> {
   const run = anilistQueue.then(async () => {
     const elapsed = Date.now() - lastAniListRequestAt;
@@ -179,7 +197,10 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
           continue;
         }
 
-        if (!res.ok) throw new Error(`AniList ${res.status}`);
+        if (!res.ok) {
+          await logAniListFailure(res);
+          throw new Error(`AniList ${res.status}`);
+        }
 
         const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
         if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join("; "));

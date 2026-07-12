@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, ArrowUpRight, Search as SearchIcon, User, Users } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { FicheSection } from "@/components/media/FicheSection";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ENTITY_KIND_LABELS } from "@/lib/media-types";
 import { entityProfileQO } from "@/lib/queries";
+import { anilistPublicCharacter, anilistPublicStaff } from "@/lib/anilist-public";
 
 export const Route = createFileRoute("/entite/$kind/$id")({
   loader: async ({ context, params }) => {
@@ -16,7 +17,6 @@ export const Route = createFileRoute("/entite/$kind/$id")({
     const profile = await context.queryClient.ensureQueryData(
       entityProfileQO(params.kind, params.id),
     );
-    if (!profile) throw notFound();
     return { profile };
   },
   head: ({ loaderData, params }) => {
@@ -82,8 +82,39 @@ export const Route = createFileRoute("/entite/$kind/$id")({
 function EntityPage() {
   const { kind, id } = Route.useParams();
   const router = useRouter();
-  const { data: p } = useSuspenseQuery(entityProfileQO(kind, id));
-  if (!p) return null;
+  const { data: serverProfile } = useSuspenseQuery(entityProfileQO(kind, id));
+  const browserProfile = useQuery({
+    queryKey: ["entity", "anilist-public", kind, id],
+    queryFn: () => (kind === "character" ? anilistPublicCharacter(Number(id)) : anilistPublicStaff(Number(id))),
+    enabled:
+      (kind === "character" || kind === "staff") &&
+      typeof window !== "undefined" &&
+      Number.isFinite(Number(id)),
+    staleTime: 1000 * 60 * 60,
+    retry: 1,
+  });
+  const p = browserProfile.data ?? serverProfile;
+  if (!p) {
+    return (
+      <AppShell>
+        <div className="py-24 text-center">
+          <h1 className="font-display text-2xl font-bold">
+            {browserProfile.isPending ? "Chargement du profil…" : "Profil introuvable"}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {browserProfile.isPending ? "Récupération des données d'entité." : "Ce profil n'est pas disponible."}
+          </p>
+          {browserProfile.isPending ? (
+            <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          ) : (
+            <Button asChild className="mt-6">
+              <Link to="/">Retour à la découverte</Link>
+            </Button>
+          )}
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

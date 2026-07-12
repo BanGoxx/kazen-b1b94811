@@ -8,6 +8,7 @@ import {
   Film,
   Flame,
   Globe,
+  Network,
   Info,
   Layers,
   ShieldCheck,

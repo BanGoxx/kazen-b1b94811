@@ -59,13 +59,15 @@ function ListCard({ list, featured = false }: { list: PublicPlaylistCard; featur
       to="/playlist/$id"
       params={{ id: list.id }}
       className={cn(
-        "group flex flex-col gap-3 rounded-2xl border border-border bg-card/50 p-4 backdrop-blur transition-colors hover:border-primary/50 hover:bg-card/70",
-        featured && "ring-1 ring-primary/20",
+        "group hover-lift flex flex-col gap-3 rounded-2xl border border-border bg-card/50 p-4 backdrop-blur transition-colors duration-300 hover:border-primary/50 hover:bg-card/70",
+        featured && "ring-1 ring-primary/25",
       )}
     >
-      <PosterStack posters={list.posters} />
+      <div className="overflow-hidden rounded-xl">
+        <PosterStack posters={list.posters} />
+      </div>
       <div className="min-w-0 space-y-1">
-        <h3 className="line-clamp-1 text-base font-semibold text-foreground group-hover:text-primary">
+        <h3 className="line-clamp-1 text-base font-semibold tracking-[-0.01em] text-foreground transition-colors group-hover:text-primary">
           {list.title}
         </h3>
         {list.description && (
@@ -74,7 +76,7 @@ function ListCard({ list, featured = false }: { list: PublicPlaylistCard; featur
           </p>
         )}
       </div>
-      <div className="mt-auto flex items-center justify-between pt-1">
+      <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-3">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Avatar className="h-5 w-5">
             {list.ownerAvatar && <AvatarImage src={list.ownerAvatar} alt="" />}

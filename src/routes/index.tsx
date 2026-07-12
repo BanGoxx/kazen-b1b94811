@@ -9,6 +9,7 @@ import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import { CategoryBand } from "@/components/media/CategoryBand";
+import { ArticleHighlights } from "@/components/media/ArticleHighlights";
 import { SafeSection } from "@/components/media/SafeSection";
 import type { MediaItem } from "@/lib/media-types";
 import {
@@ -261,7 +262,13 @@ function DiscoverPage() {
         </SafeSection>
 
         <PlatformHighlights />
+
+        {/* ----- Actualités KAZEN (real editorial only; hidden when empty) ----- */}
+        <SafeSection>
+          <ArticleHighlights />
+        </SafeSection>
       </div>
+
 
     </AppShell>
   );

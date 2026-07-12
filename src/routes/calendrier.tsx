@@ -10,7 +10,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType, WatchStatus } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO, onAirSeriesQO } from "@/lib/queries";
+import { upcomingAllQO, onAirSeriesQO, trendingAnimeQO, popularAnimeQO } from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
 import { useAuth } from "@/lib/auth";
 import {

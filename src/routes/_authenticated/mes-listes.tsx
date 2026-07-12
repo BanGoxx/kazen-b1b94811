@@ -18,6 +18,7 @@ import { PremiumHint } from "@/components/premium/PremiumHint";
 import { useMyList, type ListEntry } from "@/lib/use-list";
 import {
   MEDIA_TYPE_LABELS,
+  PRIORITY_LABELS,
   WATCH_STATUS_LABELS,
   type MediaType,
   type WatchStatus,

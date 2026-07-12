@@ -97,6 +97,15 @@ export interface ImportEntry {
   rewatchCount?: number | null;
   isRewatching?: boolean;
 
+  /**
+   * Canonical KAZEN media key (`${source}:${externalId}`) when the provider
+   * resolves an exact catalog identity (id-based providers such as AniList).
+   * Lets the preview match by exact id instead of fuzzy title matching.
+   */
+  mediaKey?: string | null;
+  /** Full catalog snapshot for id-based providers (see ImportMediaSnapshot). */
+  mediaSnapshot?: ImportMediaSnapshot | null;
+
   importedAt: string;
 }
 

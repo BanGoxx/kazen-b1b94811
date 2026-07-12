@@ -28,10 +28,17 @@ export const Route = createFileRoute("/series")({
 });
 
 function SeriesPage() {
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <AppShell>
       <PageHeader title="Séries" description="Les séries à ne pas manquer, d'ici et d'ailleurs." />
-      <Tabs defaultValue="trending">
+      <Tabs
+        value={tab ?? "trending"}
+        onValueChange={(value) =>
+          navigate({ to: "/series", search: { tab: value }, replace: true })
+        }
+      >
         <TabsList>
           <TabsTrigger value="trending">Tendance</TabsTrigger>
           <TabsTrigger value="popular">Populaires</TabsTrigger>

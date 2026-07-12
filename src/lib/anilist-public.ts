@@ -520,6 +520,31 @@ export async function anilistPublicSeasonal(
   };
 }
 
+export async function anilistPublicSeasonalPage(
+  season: string | undefined,
+  year: number | undefined,
+  page: number,
+): Promise<{ items: MediaItem[]; page: number; hasMore: boolean }> {
+  const fallback = clientCurrentSeason();
+  const s = season ?? fallback.season;
+  const y = year ?? fallback.year;
+  const gql = `
+    query ($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo { hasNextPage }
+        media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: POPULARITY_DESC, isAdult: false) {
+          ${MEDIA_FIELDS}
+        }
+      }
+    }`;
+  const data = await query<PageResult>(gql, { season: s, seasonYear: y, page, perPage: 30 });
+  return {
+    items: (data.Page?.media ?? []).filter((media) => media && media.id != null).map(fromAniList),
+    page,
+    hasMore: Boolean(data.Page?.pageInfo?.hasNextPage),
+  };
+}
+
 export async function anilistPublicSearchPaged(q: string, page: number): Promise<{ items: MediaItem[]; hasMore: boolean }> {
   const gql = `
     query ($page: Int, $perPage: Int, $search: String) {

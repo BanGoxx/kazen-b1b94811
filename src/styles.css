@@ -406,3 +406,14 @@ a[href*="lovable.app"][class*="badge"],
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* Assistant chat markdown rendering */
+.prose-assistant p { margin: 0 0 0.5rem; }
+.prose-assistant p:last-child { margin-bottom: 0; }
+.prose-assistant strong { font-weight: 700; color: var(--foreground); }
+.prose-assistant ul, .prose-assistant ol { margin: 0.25rem 0 0.5rem; padding-left: 1.1rem; }
+.prose-assistant li { margin: 0.15rem 0; }
+.prose-assistant ul { list-style: disc; }
+.prose-assistant ol { list-style: decimal; }
+.prose-assistant a { color: var(--primary); text-decoration: underline; }
+.prose-assistant h1, .prose-assistant h2, .prose-assistant h3 { font-weight: 700; margin: 0.5rem 0 0.25rem; }

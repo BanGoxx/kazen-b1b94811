@@ -56,10 +56,59 @@ export type Database = {
         }
         Relationships: []
       }
+      content_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_note: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["moderation_target_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["moderation_target_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["moderation_target_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fiche_reviews: {
         Row: {
           body: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           media_external_id: string
           media_source: string
@@ -70,6 +119,10 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           media_external_id: string
           media_source: string
@@ -80,6 +133,10 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           media_external_id?: string
           media_source?: string
@@ -190,9 +247,57 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_actions: {
+        Row: {
+          action: Database["public"]["Enums"]["moderation_action_type"]
+          actor_id: string
+          created_at: string
+          id: string
+          note: string
+          reason: string
+          report_id: string | null
+          target_id: string
+          target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["moderation_action_type"]
+          actor_id: string
+          created_at?: string
+          id?: string
+          note?: string
+          reason?: string
+          report_id?: string | null
+          target_id: string
+          target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["moderation_action_type"]
+          actor_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          reason?: string
+          report_id?: string | null
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "content_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlist_items: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           media_key: string
           note: string
@@ -201,6 +306,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           media_key: string
           note?: string
@@ -209,6 +318,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           media_key?: string
           note?: string
@@ -264,7 +377,11 @@ export type Database = {
       playlists: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           description: string
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_public: boolean
           owner_id: string
@@ -273,7 +390,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_public?: boolean
           owner_id: string
@@ -282,7 +403,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_public?: boolean
           owner_id?: string
@@ -389,6 +514,10 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           review_id: string
           updated_at: string
@@ -397,6 +526,10 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           review_id: string
           updated_at?: string
@@ -405,6 +538,10 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           review_id?: string
           updated_at?: string
@@ -474,6 +611,26 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_moderator: { Args: { _user_id: string }; Returns: boolean }
+      moderate_content: {
+        Args: {
+          _action: Database["public"]["Enums"]["moderation_action_type"]
+          _note?: string
+          _reason?: string
+          _report_id?: string
+          _target_id: string
+          _target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Returns: undefined
+      }
+      resolve_report: {
+        Args: {
+          _note?: string
+          _report_id: string
+          _status: Database["public"]["Enums"]["report_status"]
+        }
+        Returns: undefined
+      }
       revoke_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -485,6 +642,15 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: number
       }
+      submit_content_report: {
+        Args: {
+          _details?: string
+          _reason: string
+          _target_id: string
+          _target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
@@ -494,7 +660,19 @@ export type Database = {
         | "editorial_contributor"
         | "trusted_member"
         | "member"
+      moderation_action_type:
+        | "hide"
+        | "unhide"
+        | "soft_delete"
+        | "restore"
+        | "lock"
+        | "unlock"
+        | "warn"
+        | "timeout"
+        | "dismiss_report"
+      moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
       priority_level: "basse" | "normale" | "haute"
+      report_status: "pending" | "reviewing" | "dismissed" | "action_taken"
       watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
     }
     CompositeTypes: {
@@ -631,7 +809,20 @@ export const Constants = {
         "trusted_member",
         "member",
       ],
+      moderation_action_type: [
+        "hide",
+        "unhide",
+        "soft_delete",
+        "restore",
+        "lock",
+        "unlock",
+        "warn",
+        "timeout",
+        "dismiss_report",
+      ],
+      moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
       priority_level: ["basse", "normale", "haute"],
+      report_status: ["pending", "reviewing", "dismissed", "action_taken"],
       watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],
     },
   },

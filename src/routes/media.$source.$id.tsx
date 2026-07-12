@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CalendarDays,
@@ -40,6 +40,7 @@ import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
 import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
 import { getRelevantArticlesForTitle, toFicheArticle } from "@/lib/news";
+import { anilistPublicDetail } from "@/lib/anilist-public";
 
 // PRESERVATION: KAZEN rich fiches (synopsis, épisodes, personnages & voix,
 // équipe, source/relations, franchise/univers, vidéos, plateformes, article
@@ -52,13 +53,27 @@ export const Route = createFileRoute("/media/$source/$id")({
     const item = await context.queryClient.ensureQueryData(
       mediaDetailQO(params.source, params.id),
     );
-    if (!item) throw notFound();
+    if (!item && params.source !== "anilist") throw notFound();
     return { item };
   },
   head: ({ loaderData, params }) => {
     const canonical = `https://kazen.lovable.app/media/${params.source}/${params.id}`;
     const item = loaderData?.item;
     if (!item) {
+      if (params.source === "anilist") {
+        return {
+          meta: [
+            { title: "Fiche anime — KAZEN" },
+            { name: "description", content: "Découvrez cette fiche anime sur KAZEN : synopsis, personnages, équipe, épisodes, plateformes et univers lié." },
+            { property: "og:title", content: "Fiche anime — KAZEN" },
+            { property: "og:description", content: "Fiche anime enrichie sur KAZEN." },
+            { property: "og:type", content: "video.other" },
+            { property: "og:url", content: canonical },
+            { name: "twitter:card", content: "summary" },
+          ],
+          links: [{ rel: "canonical", href: canonical }],
+        };
+      }
       return {
         meta: [
           { title: "Fiche introuvable — KAZEN" },
@@ -156,8 +171,41 @@ function fmtDate(iso: string | null): string | null {
 function MediaDetailPage() {
   const { source, id } = Route.useParams();
   const router = useRouter();
-  const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
-  if (!item) return null;
+  const { data: serverItem } = useSuspenseQuery(mediaDetailQO(source, id));
+  const needsBrowserDetail =
+    source === "anilist" &&
+    (!serverItem || !serverItem.synopsis || !serverItem.cast.length || !serverItem.crew.length);
+  const browserDetail = useQuery({
+    queryKey: ["media", "anilist-public-detail", id],
+    queryFn: () => anilistPublicDetail(Number(id)),
+    enabled: needsBrowserDetail && typeof window !== "undefined" && Number.isFinite(Number(id)),
+    staleTime: 1000 * 60 * 60,
+    retry: 1,
+  });
+  const item = source === "anilist" ? (browserDetail.data ?? serverItem) : serverItem;
+  if (!item) {
+    return (
+      <AppShell>
+        <div className="py-24 text-center">
+          <h1 className="font-display text-2xl font-bold">
+            {source === "anilist" && browserDetail.isPending ? "Chargement de la fiche…" : "Fiche introuvable"}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {source === "anilist" && browserDetail.isPending
+              ? "Récupération des données riches depuis AniList."
+              : "Ce contenu n'est pas disponible."}
+          </p>
+          {source === "anilist" && browserDetail.isPending ? (
+            <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          ) : (
+            <Button asChild className="mt-6">
+              <Link to="/">Retour à la découverte</Link>
+            </Button>
+          )}
+        </div>
+      </AppShell>
+    );
+  }
 
   const universeAnchor = deriveGroupAnchor(
     { source, externalId: id },

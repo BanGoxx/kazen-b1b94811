@@ -168,6 +168,18 @@ function MediaDetailPage() {
   if (item.countryOfOrigin) infos.push({ icon: Globe, label: "Origine", value: item.countryOfOrigin });
   if (endReleased) infos.push({ icon: CalendarDays, label: "Fin de diffusion", value: endReleased });
 
+  // At-a-glance strip: the few facts a user scans first, kept ultra-compact.
+  const releaseYear = item.releaseDate ? item.releaseDate.slice(0, 4) : null;
+  const heroStats: string[] = [];
+  if (item.format) heroStats.push(item.format);
+  if (releaseYear) heroStats.push(releaseYear);
+  if (item.status) heroStats.push(STATUS_LABELS[item.status]);
+  if (item.episodesCount) heroStats.push(`${item.episodesCount} ép.`);
+  else if (item.seasonsCount) heroStats.push(`${item.seasonsCount} saison${item.seasonsCount > 1 ? "s" : ""}`);
+  if (item.runtime) heroStats.push(`${item.runtime} min`);
+
+
+
   return (
     <AppShell>
       {/* Cinematic backdrop */}

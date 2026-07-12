@@ -431,3 +431,25 @@ export async function tmdbSearch(q: string): Promise<MediaItem[]> {
   return out;
 }
 
+/** Paginated TMDB multi search for infinite scroll on the search page. */
+export async function tmdbSearchPaged(
+  q: string,
+  page: number,
+): Promise<{ items: MediaItem[]; hasMore: boolean }> {
+  const data = await tmdb<TmdbListResponse<{ media_type?: string } & Record<string, unknown>>>(
+    "/search/multi",
+    { query: q, include_adult: "false", page: String(page) },
+  );
+  const items: MediaItem[] = [];
+  for (const r of data?.results ?? []) {
+    if (r.media_type === "movie") {
+      items.push(fromTmdbMovie(r as unknown as Parameters<typeof fromTmdbMovie>[0]));
+    } else if (r.media_type === "tv") {
+      items.push(fromTmdbTv(r as unknown as Parameters<typeof fromTmdbTv>[0]));
+    }
+  }
+  const hasMore = (data?.page ?? page) < (data?.total_pages ?? page);
+  return { items, hasMore };
+}
+
+

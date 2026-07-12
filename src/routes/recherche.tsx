@@ -10,7 +10,18 @@ import { EmptyState } from "@/components/media/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { searchMediaInfiniteQO } from "@/lib/queries";
+import {
+  searchMediaInfiniteQO,
+  trendingAnimeQO,
+  popularAnimeQO,
+  trendingSeriesQO,
+  popularSeriesQO,
+  trendingMoviesQO,
+  popularMoviesQO,
+  animatedMoviesQO,
+} from "@/lib/queries";
+import type { MediaItem } from "@/lib/media-types";
+
 
 import {
   availableGenres,

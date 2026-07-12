@@ -469,7 +469,57 @@ export async function anilistPublicPage(kind: string, page: number): Promise<{ i
   };
 }
 
-export async function anilistPublicSearchPaged(q: string, page: number): Promise<{ items: MediaItem[]; hasMore: boolean }> {
+/**
+ * Browser-direct fetch for the homepage anime rails (trending / popular /
+ * upcoming). Mirrors the server list handlers so that when the production
+ * Worker is 403-blocked by AniList, the browser CORS path still delivers the
+ * real, complete list instead of the curated fallback.
+ */
+export async function anilistPublicList(kind: string): Promise<MediaItem[]> {
+  const { items } = await anilistPublicPage(kind, 1);
+  return items;
+}
+
+const CLIENT_SEASONS = ["WINTER", "SPRING", "SUMMER", "FALL"] as const;
+const CLIENT_SEASON_LABELS: Record<string, string> = {
+  WINTER: "Hiver",
+  SPRING: "Printemps",
+  SUMMER: "Été",
+  FALL: "Automne",
+};
+
+/** Client-safe current anime season (AniList seasons are 3-month blocks). */
+function clientCurrentSeason(): { season: string; year: number } {
+  const now = new Date();
+  const season = CLIENT_SEASONS[Math.floor(now.getMonth() / 3)];
+  return { season, year: now.getFullYear() };
+}
+
+/** Browser-direct seasonal anime fetch matching getSeasonalAnime's shape. */
+export async function anilistPublicSeasonal(
+  season?: string,
+  year?: number,
+): Promise<{ items: MediaItem[]; season: string; year: number; label: string }> {
+  const fallback = clientCurrentSeason();
+  const s = season ?? fallback.season;
+  const y = year ?? fallback.year;
+  const gql = `
+    query ($season: MediaSeason, $seasonYear: Int, $perPage: Int) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: POPULARITY_DESC, isAdult: false) {
+          ${MEDIA_FIELDS}
+        }
+      }
+    }`;
+  const data = await query<PageResult>(gql, { season: s, seasonYear: y, perPage: 50 });
+  return {
+    items: (data.Page?.media ?? []).filter((media) => media && media.id != null).map(fromAniList),
+    season: s,
+    year: y,
+    label: CLIENT_SEASON_LABELS[s] ?? s,
+  };
+}
+
   const gql = `
     query ($page: Int, $perPage: Int, $search: String) {
       Page(page: $page, perPage: $perPage) {

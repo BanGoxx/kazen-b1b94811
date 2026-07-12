@@ -30,6 +30,7 @@ import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";
 import { NextEpisodeCard } from "@/components/media/NextEpisodeCard";
+import { EpisodeList } from "@/components/media/EpisodeList";
 import { FicheTrackingBadge } from "@/components/media/FicheTrackingBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -378,6 +379,14 @@ function MediaDetailPage() {
               <VideoGallery videos={item.videos} title={item.title} />
             </FicheSection>
           ) : null}
+
+          {item.mediaType !== "movie" && item.episodes.length ? (
+            <FicheSection title="Épisodes" icon={<Clapperboard className="h-5 w-5" />}>
+              <EpisodeList episodes={item.episodes} />
+            </FicheSection>
+          ) : null}
+
+
 
           <CreditScroller title={item.castLabel} people={item.cast} kind="character" />
           <CreditScroller title={item.crewLabel} people={item.crew} kind="staff" />

@@ -183,5 +183,6 @@ export function fallbackAnimeDetail(id: string): MediaDetail | null {
     countryOfOrigin: "Japon",
     endDate: null,
     videos: [],
+    episodes: [],
   };
 }

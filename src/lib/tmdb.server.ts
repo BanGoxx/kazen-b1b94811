@@ -2,9 +2,11 @@
 // Reads the key inside functions (never at module scope). Language fr-FR, region FR.
 import { fromTmdbMovie, fromTmdbTv, isAsianAnimationTv } from "./normalize";
 import { resolvePlatform, dedupePlatforms } from "./platforms";
+import { orderEpisodes } from "./episodes";
 import type {
   CreditPerson,
   MediaDetail,
+  MediaEpisode,
   MediaVideo,
   MediaItem,
   Platform,
@@ -240,6 +242,8 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
     original_name?: string | null;
     last_air_date?: string | null;
     content_ratings?: { results?: { iso_3166_1?: string; rating?: string }[] } | null;
+    number_of_seasons?: number | null;
+    seasons?: { season_number?: number | null; episode_count?: number | null }[] | null;
   }>(
     `/tv/${id}`,
     { append_to_response: "watch/providers,credits,videos,recommendations,content_ratings" },
@@ -247,6 +251,7 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
   if (!data) return null;
   const bmedia = fromTmdbTv(data, extractPlatforms(data));
   bmedia.synopsis = await overviewFallback("tv", id, bmedia.synopsis);
+  const episodes = await tmdbLatestSeasonEpisodes(id, data.seasons);
   return augmentTmdb(bmedia, data, "tv", {
     studios: (data.networks ?? []).map((n) => n.name ?? "").filter(Boolean),
     format: "Série",
@@ -254,7 +259,43 @@ export async function tmdbTvDetail(id: number): Promise<MediaDetail | null> {
     ageRating: tmdbTvCert(data.content_ratings),
     titleAlternatives: [data.original_name].filter((t): t is string => !!t && t !== bmedia.title),
     endDate: data.last_air_date ?? null,
+    episodes,
   });
+}
+
+/**
+ * Fetch the most recent real season's episodes for a TMDB series (Step D).
+ * Skips "Specials" (season 0) and returns [] on any failure so a transient
+ * upstream issue never collapses the fiche.
+ */
+async function tmdbLatestSeasonEpisodes(
+  id: number,
+  seasons?: { season_number?: number | null; episode_count?: number | null }[] | null,
+): Promise<MediaEpisode[]> {
+  const real = (seasons ?? []).filter(
+    (s) => typeof s.season_number === "number" && s.season_number > 0 && (s.episode_count ?? 0) > 0,
+  );
+  if (real.length === 0) return [];
+  const latest = real.reduce((a, b) => ((b.season_number ?? 0) > (a.season_number ?? 0) ? b : a));
+  const season = await tmdb<{
+    episodes?: {
+      episode_number?: number | null;
+      name?: string | null;
+      air_date?: string | null;
+      still_path?: string | null;
+    }[] | null;
+  }>(`/tv/${id}/season/${latest.season_number}`);
+  const raw: MediaEpisode[] = (season?.episodes ?? []).map((e) => {
+    const airDate = e.air_date || null;
+    return {
+      number: typeof e.episode_number === "number" ? e.episode_number : 0,
+      title: e.name ?? null,
+      airDate,
+      thumbnailUrl: e.still_path ? `https://image.tmdb.org/t/p/w300${e.still_path}` : null,
+      isAired: airDate ? new Date(airDate).getTime() <= Date.now() : false,
+    };
+  });
+  return orderEpisodes(raw);
 }
 
 interface TmdbExtra {
@@ -329,6 +370,7 @@ function augmentTmdb(
     ageRating?: string | null;
     titleAlternatives?: string[];
     endDate?: string | null;
+    episodes?: MediaEpisode[];
   },
 ): MediaDetail {
   const cast: CreditPerson[] = (data.credits?.cast ?? []).slice(0, 14).map((c) => ({
@@ -390,6 +432,7 @@ function augmentTmdb(
     countryOfOrigin: extra.countryOfOrigin ?? null,
     endDate: extra.endDate ?? null,
     videos,
+    episodes: extra.episodes ?? [],
   };
 }
 

@@ -202,8 +202,10 @@ export const upcomingAllQO = queryOptions({
     }
   },
 
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  // Reuse the in-memory cache on back-navigation (HOUR fresh); the real
+  // browser-direct anime merge is applied once post-hydration via
+  // upgradeCatalogOnce(["upcoming","all"]) instead of on every mount.
+  staleTime: HOUR,
   retry: 3,
 });
 

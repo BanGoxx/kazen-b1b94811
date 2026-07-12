@@ -311,9 +311,22 @@ p {
 
 /* Subtle interactive lift for clickable surfaces (respects reduced motion). */
 @utility hover-lift {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s ease;
   &:hover { transform: translateY(-2px); }
+  &:active { transform: translateY(0) scale(0.99); }
 }
+
+/* Tactile press feedback for buttons / tappable controls. */
+@utility press {
+  transition: transform 0.18s var(--ease-soft);
+  &:active { transform: scale(0.97); }
+}
+
+/* Opt-in entrance reveal for sections/cards (respects reduced motion). */
+@utility reveal {
+  animation: rise 0.6s var(--ease-out-expo) both;
+}
+
 
 /* Thin gradient hairline used above active nav / section separators. */
 @utility aurora-hairline {

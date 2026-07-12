@@ -69,7 +69,9 @@ export function FicheArticles({
       <ul className="grid gap-3 sm:grid-cols-2">
         {shown.map((a) => {
           const when =
-            a.publishedAt && !Number.isNaN(new Date(a.publishedAt).getTime())
+            !a.evergreen &&
+            a.publishedAt &&
+            !Number.isNaN(new Date(a.publishedAt).getTime())
               ? dateFmt.format(new Date(a.publishedAt))
               : null;
           const tag =

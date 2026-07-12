@@ -245,6 +245,7 @@ function MediaDetailPage() {
                 {MEDIA_TYPE_LABELS[item.mediaType]}
               </span>
               <RatingBadge score={item.score} />
+              <NextEpisodePill nextEpisode={item.nextEpisode} className="text-xs" />
               {item.studios.length ? (
                 <span className="text-sm text-muted-foreground">
                   {item.studios.slice(0, 2).join(" · ")}

@@ -215,7 +215,20 @@ export function parseNautiljonList(html: string): ImportParseResult {
     // Title + link: prefer a header-mapped title cell, else first anchor.
     const titleCell = colIndex.has("title") ? cells[colIndex.get("title")!] : cells[0];
     const anchor = (titleCell ?? row).querySelector("a[href]") as HTMLAnchorElement | null;
-    const title = cleanText(anchor?.textContent) || cellAt("title") || cleanText(titleCell?.textContent);
+
+    // Alt titles: italic subtitles / secondary titles inside the title cell.
+    const altTitles = Array.from(titleCell?.querySelectorAll("i, .sous_titre, small") ?? [])
+      .map((n) => cleanText(n.textContent))
+      .filter(Boolean);
+
+    // Main title excludes the subtitle nodes so it never absorbs alt titles.
+    let title = "";
+    if (anchor) {
+      const clone = anchor.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll("i, .sous_titre, small").forEach((n) => n.remove());
+      title = cleanText(clone.textContent);
+    }
+    title = title || cellAt("title") || cleanText(titleCell?.textContent);
 
     if (!title) {
       warnings.push(`Ligne ${rowIdx + 1} ignorée : titre introuvable.`);
@@ -226,10 +239,8 @@ export function parseNautiljonList(html: string): ImportParseResult {
       ? new URL(anchor.getAttribute("href")!, "https://www.nautiljon.com").href
       : null;
 
-    // Alt titles: other anchors / italic subtitles inside the title cell.
-    const altTitles = Array.from(titleCell?.querySelectorAll("i, .sous_titre, small") ?? [])
-      .map((n) => cleanText(n.textContent))
-      .filter((t) => t && t !== title);
+    const uniqueAlts = altTitles.filter((t) => t !== title);
+
 
     // Progress like "5/12" -> progress 5, episodes 12.
     const progRaw = cellAt("progress");

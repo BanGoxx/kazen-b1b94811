@@ -198,8 +198,16 @@ function TrendingMoviesRow() {
 }
 
 function DiscoverPage() {
+  const queryClient = useQueryClient();
+  // After hydration, pull the complete browser-direct AniList lists (important
+  // in production where the Worker is AniList-blocked and SSR data is curated).
+  // Running this post-mount avoids swapping data mid-hydration.
+  useEffect(() => {
+    refreshAnimeRails(queryClient);
+  }, [queryClient]);
   return (
     <AppShell>
+
       <h1 className="sr-only">KAZEN — Votre hub anime, séries et films en français</h1>
 
       <div className="relative">

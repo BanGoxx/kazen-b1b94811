@@ -251,12 +251,22 @@ export const PROVIDERS: ProviderDef[] = [
   {
     id: "myanimelist",
     label: "MyAnimeList",
-    description: "Import depuis un export XML MyAnimeList.",
-    available: false,
+    description: "Importer un export XML MyAnimeList de ta liste d'anime.",
+    available: true,
+    experimental: true,
     accept: ".xml,text/xml",
-    howto: "Bientôt disponible.",
-    parse: comingLater("mal"),
+    howto:
+      "Sur MyAnimeList : Profil → List → Export (ou myanimelist.net/panel.php?go=export), choisis « Anime List », télécharge puis décompresse le fichier .gz pour obtenir le .xml, et téléverse-le ici.",
+    notes: [
+      "Aucun identifiant ni mot de passe MyAnimeList n'est demandé.",
+      "Aucun cookie ni jeton de session n'est transmis.",
+      "Seul le fichier XML que tu fournis est analysé (statut, note, progression, dates, tags, commentaires).",
+      "Champs pris en charge : titre, ID MAL, type, épisodes, épisodes vus, statut, note, dates de début/fin, tags, commentaires, visionnages.",
+      "Limites : seules les listes d'anime sont gérées (pas les mangas) ; la progression, les dates et les visionnages sont conservés dans l'aperçu mais pas encore appliqués à ta liste.",
+    ],
+    parse: (content) => parseMalXml(content).entries,
   },
+
   {
     id: "anilist",
     label: "AniList",

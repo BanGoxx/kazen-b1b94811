@@ -41,6 +41,8 @@ import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
 import { getRelevantArticlesForTitle, toFicheArticle } from "@/lib/news";
 import { anilistPublicDetail } from "@/lib/anilist-public";
+import { applyEnrichment, publicEnrichmentQO } from "@/lib/enrichment";
+import { SlowLoadHint } from "@/components/media/LoadingHint";
 
 // PRESERVATION: KAZEN rich fiches (synopsis, épisodes, personnages & voix,
 // équipe, source/relations, franchise/univers, vidéos, plateformes, article

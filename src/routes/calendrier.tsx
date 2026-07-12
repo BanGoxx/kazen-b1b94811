@@ -103,6 +103,22 @@ function isoDay(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * The date KAZEN places an item on in the calendar.
+ *
+ * For currently-airing anime we prefer the NEXT EPISODE air date (event-like)
+ * so weekly episodes actually surface — relying on `releaseDate` alone only
+ * ever showed the series premiere, hiding shows that are mid-run. Everything
+ * else (unreleased anime, films, séries) falls back to `releaseDate`.
+ */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+function calendarDate(it: MediaItem): string | null {
+  const ep = it.nextEpisode?.airDate?.slice(0, 10);
+  if (ep && ISO_DATE.test(ep)) return ep;
+  const rel = it.releaseDate?.slice(0, 10);
+  return rel && ISO_DATE.test(rel) ? rel : null;
+}
+
 type StatusFilter = MediaType | "all";
 type WatchFilter = WatchStatus | "all" | "tracked" | "untracked";
 

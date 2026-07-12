@@ -95,6 +95,18 @@ export function EntityProfileDialog({
             </DialogHeader>
 
             <div className="mt-2 flex flex-col gap-2">
+              {nodeId ? (
+                <Button asChild className="justify-start">
+                  <Link
+                    to="/entite/$kind/$id"
+                    params={{ kind, id: nodeId }}
+                    onClick={() => onOpenChange(false)}
+                  >
+                    <IdCard className="mr-2 h-4 w-4" />
+                    Voir la fiche KAZEN complète
+                  </Link>
+                </Button>
+              ) : null}
               <Button asChild variant="secondary" className="justify-start">
                 <Link
                   to="/recherche"

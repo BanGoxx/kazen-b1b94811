@@ -28,6 +28,10 @@ export function PaginatedCatalog(props: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
+  // Message shown once every available provider page is loaded. Defaults to a
+  // "complete catalogue" phrasing; pass a season/upcoming-specific note when
+  // the total is a genuine complete set rather than an open-ended catalogue.
+  completionLabel?: string;
 }) {
   return (
     <SafeSection minHeight="20rem" pending={<CatalogPending />}>

@@ -328,7 +328,14 @@ function UniversPage() {
         </div>
 
         {activeItems.length === 0 ? (
-          <EmptyState message={EMPTY_COPY[type]} hint="Essayez une autre catégorie ci-dessus." />
+          activeYear !== null ? (
+            <EmptyState
+              message={`Aucun titre pour l'année ${activeYear} dans cette catégorie.`}
+              hint="Choisissez « Toutes années » ou une autre année."
+            />
+          ) : (
+            <EmptyState message={EMPTY_COPY[type]} hint="Essayez une autre catégorie ci-dessus." />
+          )
         ) : (
           <div className="cv-auto grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
             {activeItems.map((it) => (

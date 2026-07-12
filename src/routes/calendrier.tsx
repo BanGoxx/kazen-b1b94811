@@ -125,6 +125,8 @@ type WatchFilter = WatchStatus | "all" | "tracked" | "untracked";
 function CalendarPage() {
   const { data: upcoming } = useSuspenseQuery(upcomingAllQO);
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
+  const { data: trending } = useSuspenseQuery(trendingAnimeQO);
+  const { data: popular } = useSuspenseQuery(popularAnimeQO);
   const userList = useUserList();
   const { user } = useAuth();
 
@@ -135,7 +137,21 @@ function CalendarPage() {
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
 
-  const all = useMemo<MediaItem[]>(() => [...upcoming, ...series], [upcoming, series]);
+  // Merge sources and de-dupe by key. Trending/popular anime carry the airing
+  // `nextEpisode`, so when the same title also appears in another source we keep
+  // the variant that has an episode air date (the calendar-relevant one).
+  const all = useMemo<MediaItem[]>(() => {
+    const map = new Map<string, MediaItem>();
+    for (const it of [...trending, ...popular, ...upcoming, ...series]) {
+      const existing = map.get(it.key);
+      if (!existing) {
+        map.set(it.key, it);
+      } else if (!existing.nextEpisode?.airDate && it.nextEpisode?.airDate) {
+        map.set(it.key, it);
+      }
+    }
+    return [...map.values()];
+  }, [trending, popular, upcoming, series]);
 
   const availablePlatforms = useMemo(() => {
     const ids = new Set<string>();

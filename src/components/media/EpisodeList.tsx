@@ -49,7 +49,7 @@ export function EpisodeList({ episodes }: EpisodeListProps) {
                 <SafeImage
                   src={ep.thumbnailUrl ?? undefined}
                   alt={ep.title ?? `Épisode ${ep.number}`}
-                  kind="backdrop"
+                  variant="backdrop"
                   className="h-full w-full object-cover"
                 />
                 {ep.isAired ? (

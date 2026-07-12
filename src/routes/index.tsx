@@ -24,7 +24,9 @@ import {
   upcomingMoviesQO,
   popularSeriesQO,
   seasonalAnimeQO,
+  refreshAnimeRails,
 } from "@/lib/queries";
+
 
 const QUICK_NAV = [
   { to: "/anime", label: "Anime", icon: Sparkles },

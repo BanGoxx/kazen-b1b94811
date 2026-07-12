@@ -317,15 +317,94 @@ export function getDiscoverArticles(limit = 4): NewsArticle[] {
 }
 
 /** Normalize a NewsArticle into the presentational FicheArticle shape. */
-export function toFicheArticle(a: NewsArticle): FicheArticle {
+export function toFicheArticle(
+  a: NewsArticle,
+  relevance?: ArticleRelevance,
+): FicheArticle {
   return {
     id: a.slug,
     title: a.title,
     source: a.source,
+    category: a.category ?? null,
     publishedAt: a.publishedAt,
     excerpt: a.excerpt,
     url: a.externalUrl ?? null,
     slug: a.externalUrl ? null : a.slug,
     thumbnailUrl: a.thumbnailUrl ?? null,
+    relevance: relevance ?? null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Article-to-fiche relevance (Phase 1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Relevance tier of an article relative to a specific fiche. Precision-first:
+ *  - `exact`     → article is directly linked to this exact media record.
+ *  - `franchise` → article is linked to the same universe / franchise anchor.
+ *  - `related`   → article is linked to a clearly related work (same source
+ *                  material / related media on this fiche).
+ * A broader studio/genre/theme fallback is intentionally NOT surfaced here to
+ * avoid diluting a fiche with unrelated generic news (documented future work).
+ */
+export type ArticleRelevance = "exact" | "franchise" | "related";
+
+const RELEVANCE_RANK: Record<ArticleRelevance, number> = {
+  exact: 0,
+  franchise: 1,
+  related: 2,
+};
+
+/** French label for the non-exact relevance tiers (calm, discreet). */
+export const RELEVANCE_LABEL: Record<ArticleRelevance, string | null> = {
+  exact: null,
+  franchise: "Même univers",
+  related: "Œuvre liée",
+};
+
+export interface RelevantArticle {
+  article: NewsArticle;
+  relevance: ArticleRelevance;
+}
+
+/**
+ * Return the articles that are genuinely relevant to a fiche, ordered by
+ * relevance tier first (exact → franchise → related) then newest-first inside
+ * each tier. De-duplicated by slug (best tier wins). Returns an empty array
+ * when nothing is truly relevant, so the fiche block hides itself — a fiche
+ * never shows unrelated generic articles just to fill space.
+ */
+export function getRelevantArticlesForTitle(
+  source: MediaSource,
+  externalId: string,
+  opts?: { universeKey?: string | null; relatedRefs?: NewsTitleRef[] },
+): RelevantArticle[] {
+  const self = `${source}:${externalId}`;
+  const universeKey = opts?.universeKey ?? null;
+  const relatedSet = new Set((opts?.relatedRefs ?? []).map(titleKey));
+  relatedSet.delete(self);
+
+  const out: RelevantArticle[] = [];
+  for (const a of NEWS_ARTICLES) {
+    const keys = a.titles.map(titleKey);
+    let relevance: ArticleRelevance | null = null;
+    if (keys.includes(self)) relevance = "exact";
+    else if (universeKey && (a.universeKeys ?? []).includes(universeKey))
+      relevance = "franchise";
+    else if (keys.some((k) => relatedSet.has(k))) relevance = "related";
+    if (!relevance) continue;
+    out.push({ article: a, relevance });
+  }
+
+  out.sort((x, y) => {
+    const r = RELEVANCE_RANK[x.relevance] - RELEVANCE_RANK[y.relevance];
+    if (r !== 0) return r;
+    return byRecent(x.article, y.article);
+  });
+
+  const seen = new Set<string>();
+  return out.filter((x) =>
+    seen.has(x.article.slug) ? false : (seen.add(x.article.slug), true),
+  );
 }

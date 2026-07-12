@@ -67,9 +67,11 @@ export function RelatedScroller({
       ) : null}
       <ul className="flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
         {items.map((it) => {
-          // Only anime have a real KAZEN fiche; manga / LN / OST are shown as
-          // static cards so we never link to a broken detail page.
+          // Anime have a real KAZEN fiche → link internally. Other formats
+          // (manga / LN / OST) get a safe outbound AniList reference when the
+          // id is real, so the item stays explorable; otherwise a static card.
           const clickable = it.hasDetail !== false;
+          const external = clickable ? null : externalRefUrl(it);
           const inner: ReactNode = <Poster it={it} />;
           return (
             <li key={it.key} className="w-32 shrink-0 snap-start">
@@ -81,6 +83,18 @@ export function RelatedScroller({
                 >
                   {inner}
                 </Link>
+              ) : external ? (
+                <a
+                  href={external}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block focus-visible:outline-none"
+                >
+                  <span className="absolute right-1.5 top-1.5 z-10 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
+                    <ArrowUpRight className="h-3 w-3" />
+                  </span>
+                  {inner}
+                </a>
               ) : (
                 <div className="group block cursor-default">{inner}</div>
               )}
@@ -88,6 +102,7 @@ export function RelatedScroller({
           );
         })}
       </ul>
+
     </section>
   );
 }

@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, ListChecks, Loader2, Pencil, Star } from "lucide-react";
+import {
+  Flame,
+  Heart,
+  ListChecks,
+  Loader2,
+  Pencil,
+  RotateCcw,
+  StickyNote,
+  Star,
+  Tag as TagIcon,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Layers, Network } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { mediaDetailQO } from "@/lib/queries";
+import { anilistPublicDetail } from "@/lib/anilist-public";
 import {
   buildFranchiseGroup,
   decadeOf,
@@ -27,7 +28,9 @@ export const Route = createFileRoute("/franchise/$source/$id")({
     const item = await context.queryClient.ensureQueryData(
       mediaDetailQO(params.source, params.id),
     );
-    if (!item) throw notFound();
+    // For AniList, the production Worker can be 403-blocked (null item); the
+    // component recovers via the browser-direct path. Only 404 non-AniList.
+    if (!item && params.source !== "anilist") throw notFound();
     return { item };
   },
   head: ({ loaderData, params }) => {
@@ -86,7 +89,19 @@ export const Route = createFileRoute("/franchise/$source/$id")({
 
 function GroupPage() {
   const { source, id } = Route.useParams();
-  const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
+  const { data: serverItem } = useSuspenseQuery(mediaDetailQO(source, id));
+  // Recover rich franchise data via browser-direct AniList when the server
+  // item is missing or its relations are empty (production Worker 403).
+  const needsBrowserDetail =
+    source === "anilist" && (!serverItem || !serverItem.related.length);
+  const browserDetail = useQuery({
+    queryKey: ["media", "anilist-public-detail", id],
+    queryFn: () => anilistPublicDetail(Number(id)),
+    enabled: needsBrowserDetail && typeof window !== "undefined" && Number.isFinite(Number(id)),
+    staleTime: 1000 * 60 * 60,
+    retry: 1,
+  });
+  const item = source === "anilist" ? (browserDetail.data ?? serverItem) : serverItem;
   const group = useMemo<FranchiseGroup | null>(
     () => (item ? buildFranchiseGroup(item) : null),
     [item],
@@ -94,6 +109,19 @@ function GroupPage() {
 
   const [typeFilter, setTypeFilter] = useState<FormatGroup | "all">("all");
   const [decadeFilter, setDecadeFilter] = useState<string | "all">("all");
+
+  if (source === "anilist" && !serverItem && browserDetail.isPending) {
+    return (
+      <AppShell>
+        <div className="py-24 text-center">
+          <h1 className="font-display text-2xl font-bold">Chargement du groupe…</h1>
+          <p className="mt-2 text-muted-foreground">Récupération des données liées depuis AniList.</p>
+          <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+        </div>
+      </AppShell>
+    );
+  }
+
 
   if (!item || !group || !isRealGroup(group)) {
     return (

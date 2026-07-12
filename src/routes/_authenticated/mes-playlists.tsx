@@ -70,7 +70,7 @@ function MyPlaylistsPage() {
   };
 
   return (
-    <AppShell title="Mes playlists">
+    <AppShell>
       <div className="mx-auto max-w-4xl space-y-8 pb-16">
         <header className="space-y-2">
           <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">

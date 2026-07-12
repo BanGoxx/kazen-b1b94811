@@ -359,7 +359,7 @@ function ResultSection({
           Explorer
         </Link>
       </div>
-      <MediaGrid items={items} />
+      <SearchResultGrid items={items} />
     </section>
   );
 }

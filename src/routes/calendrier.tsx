@@ -157,8 +157,10 @@ function CalendarPage() {
       arr.push(it);
       map.set(key, arr);
     }
+    for (const [k, arr] of map) map.set(k, sortEntries(arr));
     return map;
   }, [filtered]);
+
 
   const todayIso = isoDay(new Date());
   const weekEnd = days[days.length - 1];

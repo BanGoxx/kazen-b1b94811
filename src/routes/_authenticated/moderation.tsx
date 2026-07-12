@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { useState, type ReactNode } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -237,12 +237,12 @@ function ModerationPage() {
                           : "Visible"}
                     </p>
                     {selected.target.link && (
-                      <Link
-                        to={selected.target.link}
+                      <a
+                        href={selected.target.link}
                         className="inline-flex items-center gap-1 text-primary hover:underline"
                       >
                         <ExternalLink className="h-3 w-3" /> Voir le contenu
-                      </Link>
+                      </a>
                     )}
                   </div>
 
@@ -405,7 +405,7 @@ function ActionBtn({
   destructive,
   className,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   onClick: () => void;
   destructive?: boolean;

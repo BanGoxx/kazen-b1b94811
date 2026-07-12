@@ -28,6 +28,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
 import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authenticated/mes-playlists'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as UniversSourceIdRouteImport } from './routes/univers.$source.$id'
@@ -129,6 +130,11 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMesPlaylistsRoute =
   AuthenticatedMesPlaylistsRouteImport.update({
     id: '/mes-playlists',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
+  '/moderation': typeof AuthenticatedModerationRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/soutien': typeof SoutienRoute
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
+  '/moderation': typeof AuthenticatedModerationRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/soutien': typeof SoutienRoute
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
+  '/_authenticated/moderation': typeof AuthenticatedModerationRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/soutien'
     | '/mes-listes'
     | '/mes-playlists'
+    | '/moderation'
     | '/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/soutien'
     | '/mes-listes'
     | '/mes-playlists'
+    | '/moderation'
     | '/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/soutien'
     | '/_authenticated/mes-listes'
     | '/_authenticated/mes-playlists'
+    | '/_authenticated/moderation'
     | '/_authenticated/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -479,6 +491,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/moderation': {
+      id: '/_authenticated/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof AuthenticatedModerationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mes-playlists': {
       id: '/_authenticated/mes-playlists'
       path: '/mes-playlists'
@@ -527,12 +546,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
   AuthenticatedMesPlaylistsRoute: typeof AuthenticatedMesPlaylistsRoute
+  AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
   AuthenticatedMesPlaylistsRoute: AuthenticatedMesPlaylistsRoute,
+  AuthenticatedModerationRoute: AuthenticatedModerationRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 

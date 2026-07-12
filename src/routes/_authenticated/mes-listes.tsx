@@ -369,12 +369,43 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
     <div className="space-y-2">
       <div className="relative">
         <MediaCard item={entry.item} />
-        {entry.favorite ? (
-          <span className="absolute right-2 top-2 rounded-full bg-rose-500/90 p-1.5 text-white shadow">
-            <Heart className="h-3.5 w-3.5 fill-current" />
-          </span>
-        ) : null}
+        <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+          {entry.favorite ? (
+            <span
+              className="rounded-full bg-rose-500/90 p-1.5 text-white shadow"
+              aria-label="Favori"
+            >
+              <Heart className="h-3.5 w-3.5 fill-current" />
+            </span>
+          ) : null}
+          {entry.priority === "haute" ? (
+            <span
+              className="inline-flex items-center gap-0.5 rounded-full bg-ember-500/90 bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white shadow"
+              title={`Priorité ${PRIORITY_LABELS.haute}`}
+            >
+              <Flame className="h-3 w-3" /> Haute
+            </span>
+          ) : null}
+        </div>
       </div>
+      {entry.tags.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1">
+          <TagIcon className="h-3 w-3 text-muted-foreground" />
+          {entry.tags.slice(0, 2).map((t) => (
+            <span
+              key={t}
+              className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-accent-foreground"
+            >
+              {t}
+            </span>
+          ))}
+          {entry.tags.length > 2 ? (
+            <span className="text-[0.65rem] text-muted-foreground">
+              +{entry.tags.length - 2}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {entry.status ? (
@@ -387,7 +418,17 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
               <Star className="h-3 w-3 fill-current" /> {entry.rating}
             </span>
           ) : null}
+          {entry.notes?.trim() ? (
+            <span
+              className="inline-flex items-center text-muted-foreground"
+              title="Note personnelle"
+              aria-label="Contient une note personnelle"
+            >
+              <StickyNote className="h-3 w-3" />
+            </span>
+          ) : null}
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Modifier">

@@ -75,11 +75,11 @@ function nonEmpty(v: string | null | undefined): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }
 
-function dedupeByKey<T extends { key?: string | null }>(items: T[]): T[] {
+function dedupeBy<T>(items: T[], keyOf: (item: T) => string): T[] {
   const seen = new Set<string>();
   const out: T[] = [];
   for (const it of items) {
-    const k = it.key ?? JSON.stringify(it);
+    const k = keyOf(it);
     if (seen.has(k)) continue;
     seen.add(k);
     out.push(it);

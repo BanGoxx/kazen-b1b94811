@@ -34,12 +34,14 @@ export function normTitle(s: string): string {
     .trim();
 }
 
-/** Normalized Levenshtein similarity in 0..1. */
+/** Normalized similarity in 0..1, blending edit distance with token containment. */
 export function titleSimilarity(a: string, b: string): number {
   const s = normTitle(a);
   const t = normTitle(b);
   if (!s || !t) return 0;
   if (s === t) return 1;
+
+  // Edit-distance similarity.
   const m = s.length;
   const n = t.length;
   const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
@@ -50,9 +52,22 @@ export function titleSimilarity(a: string, b: string): number {
       dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
     }
   }
-  const dist = dp[m][n];
-  return 1 - dist / Math.max(m, n);
+  const edit = 1 - dp[m][n] / Math.max(m, n);
+
+  // Token-containment similarity: how many of the shorter title's tokens appear
+  // in the longer one (handles "Frieren" vs "Frieren: Beyond Journey's End").
+  const sa = new Set(s.split(" "));
+  const sb = new Set(t.split(" "));
+  const [small, big] = sa.size <= sb.size ? [sa, sb] : [sb, sa];
+  let hit = 0;
+  small.forEach((tok) => {
+    if (big.has(tok)) hit++;
+  });
+  const contain = small.size ? hit / small.size : 0;
+
+  return Math.max(edit, contain);
 }
+
 
 /** Best title similarity across the entry's title + alt titles vs a candidate. */
 function bestTitleSim(entry: ImportEntry, cand: MediaItem): number {

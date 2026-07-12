@@ -418,7 +418,17 @@ function UploadSection({
       <p className="flex items-start gap-2 text-sm text-muted-foreground">
         <Copy className="mt-0.5 h-4 w-4 shrink-0" /> {provider.howto}
       </p>
-      <label className="focus-ring flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
+      {provider.notes && provider.notes.length > 0 && (
+        <ul className="space-y-1 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
+          {provider.notes.map((n) => (
+            <li key={n} className="flex items-start gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+              {n}
+            </li>
+          ))}
+        </ul>
+      )}
+      <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
         {busy ? (
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         ) : (
@@ -429,7 +439,7 @@ function UploadSection({
         <input
           type="file"
           accept={provider.accept}
-          className="hidden"
+          className="sr-only"
           disabled={busy}
           onChange={(e) => {
             const f = e.target.files?.[0];

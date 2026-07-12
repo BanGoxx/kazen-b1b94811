@@ -33,7 +33,7 @@ export interface ProviderDef {
   parse: (content: string) => ImportEntry[];
 }
 
-function comingLater(id: ProviderId): (content: string) => ImportEntry[] {
+function comingLater(id: string): (content: string) => ImportEntry[] {
   return () => {
     throw new ImportParseError(
       `L'import ${id} sera disponible prochainement.`,

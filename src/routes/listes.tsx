@@ -130,11 +130,17 @@ function ListesPage() {
         {isLoading ? (
           <p className="py-16 text-center text-muted-foreground">Chargement des listes…</p>
         ) : recent.length === 0 ? (
-          <div className="rounded-3xl border border-border bg-card/40 py-16 text-center">
-            <p className="text-muted-foreground">
-              Aucune liste partagée pour l'instant. Soyez le premier à en créer une !
+          <div className="flex flex-col items-center rounded-3xl border border-dashed border-border bg-card/40 px-6 py-20 text-center">
+            <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 to-transparent text-primary">
+              <ListMusic className="h-6 w-6" />
+            </span>
+            <p className="text-base font-semibold text-foreground">
+              Aucune liste partagée pour l'instant
             </p>
-            <Button asChild variant="aurora" size="sm" className="mt-4 gap-1">
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              Soyez le premier à composer une collection et à la partager avec la communauté KAZEN.
+            </p>
+            <Button asChild variant="aurora" size="sm" className="mt-5 gap-1">
               <Link to={user ? "/mes-playlists" : "/auth"} search={user ? undefined : { redirect: "/mes-playlists" }}>
                 <Plus className="h-4 w-4" /> Créer une liste
               </Link>

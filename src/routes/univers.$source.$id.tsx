@@ -122,7 +122,8 @@ export const Route = createFileRoute("/univers/$source/$id")({
 
 function UniversPage() {
   const { source, id } = Route.useParams();
-  const { type } = Route.useSearch() as UniversSearch;
+  const { type, sort, year } = Route.useSearch() as UniversSearch;
+
   const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
 
   const group = useMemo<FranchiseGroup | null>(

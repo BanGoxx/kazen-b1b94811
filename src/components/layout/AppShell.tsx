@@ -18,7 +18,9 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Crown,
   DownloadCloud,
+
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";

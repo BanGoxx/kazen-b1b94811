@@ -560,6 +560,43 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
         .filter((s) => s && s !== bmedia.title && s !== bmedia.titleOriginal),
     ),
   ).slice(0, 6);
+
+  // Merge streamingEpisodes (titles/thumbnails) with airingSchedule (dates)
+  // by episode number to build a coherent episode list.
+  const scheduleByEp = new Map<number, number>();
+  for (const n of m.airingSchedule?.nodes ?? []) {
+    if (typeof n.episode === "number" && typeof n.airingAt === "number") {
+      scheduleByEp.set(n.episode, n.airingAt);
+    }
+  }
+  const episodes: MediaEpisode[] = (m.streamingEpisodes ?? []).map((se, idx) => {
+    const parsed = parseStreamingTitle(se.title);
+    const number = parsed.number ?? idx + 1;
+    const airingAt = scheduleByEp.get(number);
+    const airDate = airingAt ? new Date(airingAt * 1000).toISOString() : null;
+    return {
+      number,
+      title: parsed.title,
+      airDate,
+      thumbnailUrl: se.thumbnail ?? null,
+      isAired: airDate ? new Date(airDate).getTime() <= Date.now() : true,
+    };
+  });
+  // If we only have a schedule (no streaming titles), still expose aired episodes.
+  if (episodes.length === 0 && scheduleByEp.size > 0) {
+    for (const [number, airingAt] of scheduleByEp) {
+      const airDate = new Date(airingAt * 1000).toISOString();
+      episodes.push({
+        number,
+        title: null,
+        airDate,
+        thumbnailUrl: null,
+        isAired: new Date(airDate).getTime() <= Date.now(),
+      });
+    }
+  }
+  const orderedEpisodes = orderEpisodes(episodes);
+
   return {
     ...bmedia,
     trailerUrl,

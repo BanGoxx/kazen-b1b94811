@@ -28,6 +28,8 @@ export interface ProviderDef {
   available: boolean;
   /** Functional but not yet fully validated (shown with an "Expérimental" tag). */
   experimental?: boolean;
+  /** Import by public username via a live provider fetch (no file upload). */
+  usernameBased?: boolean;
   /** Extra reassurance lines shown near the upload zone (privacy, scope…). */
   notes?: string[];
   /** Accepted file extensions / mime hint for the upload input. */
@@ -293,10 +295,20 @@ export const PROVIDERS: ProviderDef[] = [
   {
     id: "anilist",
     label: "AniList",
-    description: "Import depuis AniList (JSON / API).",
-    available: false,
-    accept: ".json,application/json",
-    howto: "Bientôt disponible.",
+    description: "Importer ta liste d'anime publique AniList via ton nom d'utilisateur.",
+    available: true,
+    experimental: true,
+    usernameBased: true,
+    accept: "",
+    howto:
+      "Saisis ton nom d'utilisateur AniList (celui de l'URL anilist.co/user/…). Ton profil doit être public. KAZEN lit uniquement ta liste d'anime, sans mot de passe ni connexion.",
+    notes: [
+      "Aucun mot de passe ni connexion AniList n'est demandé.",
+      "Seule ta liste d'anime publique est lue (aucun manga, aucun contenu privé).",
+      "Aucune synchronisation automatique : tu déclenches toi-même l'import.",
+      "Champs pris en charge : titre, statut, note, progression, dates, visionnages (repeat).",
+      "Vérifie les correspondances avant de confirmer : rien n'est écrit sans ton accord.",
+    ],
     parse: comingLater("anilist"),
   },
   {

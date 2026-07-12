@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PROVIDERS, toDbProvider, type ProviderDef, type ProviderId } from "@/lib/import/providers";
 import { ImportParseError, type ImportEntry } from "@/lib/import/import-schema";
+import { fetchAniListImport, AniListImportError } from "@/lib/import/anilist-list";
 import {
   createImportBatch,
   getImportBatches,
@@ -126,6 +127,30 @@ function ImportPage() {
     setSummary(null);
   };
 
+  const processEntries = async (
+    provider: ProviderDef,
+    entries: ImportEntry[],
+    sourceMetadata: Record<string, unknown>,
+  ) => {
+    if (entries.length === 0) throw new Error("Aucune entrée détectée.");
+    const { batchId: id } = await create({
+      data: {
+        provider: toDbProvider(provider.id),
+        sourceMetadata,
+        entries,
+      },
+    });
+    setBatchId(id);
+    const pv = await preview({ data: { batchId: id } });
+    setPreviewData(pv as Preview);
+    // Pre-check safe (exact) matches.
+    setChecked(
+      new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
+    );
+    await refreshBatches();
+    toast.success(`${entries.length} entrées analysées.`);
+  };
+
   const handleFile = async (provider: ProviderDef, file: File) => {
     setBusy(true);
     reset();
@@ -139,29 +164,32 @@ function ImportPage() {
         throw err;
       }
       if (entries.length === 0) throw new Error("Aucune entrée détectée dans ce fichier.");
-
-      const { batchId: id } = await create({
-        data: {
-          provider: toDbProvider(provider.id),
-          sourceMetadata: { fileName: file.name, providerId: provider.id },
-          entries,
-        },
-      });
-      setBatchId(id);
-      const pv = await preview({ data: { batchId: id } });
-      setPreviewData(pv as Preview);
-      // Pre-check safe (exact) matches.
-      setChecked(
-        new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
-      );
-      await refreshBatches();
-      toast.success(`${entries.length} entrées analysées.`);
+      await processEntries(provider, entries, { fileName: file.name, providerId: provider.id });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec de l'analyse du fichier.");
     } finally {
       setBusy(false);
     }
   };
+
+  const handleUsername = async (provider: ProviderDef, username: string) => {
+    setBusy(true);
+    reset();
+    try {
+      const { entries, warnings } = await fetchAniListImport(username);
+      for (const w of warnings) toast.message(w);
+      await processEntries(provider, entries, { username: username.trim(), providerId: provider.id });
+    } catch (err) {
+      toast.error(
+        err instanceof AniListImportError || err instanceof Error
+          ? err.message
+          : "Échec de la récupération de la liste AniList.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
 
   const toggle = (id: string) => {
     setChecked((prev) => {
@@ -328,7 +356,9 @@ function ImportPage() {
             provider={PROVIDERS.find((p) => p.id === selected)!}
             busy={busy}
             onFile={handleFile}
+            onUsername={handleUsername}
           />
+
         )}
 
         {/* Preview */}
@@ -514,11 +544,14 @@ function UploadSection({
   provider,
   busy,
   onFile,
+  onUsername,
 }: {
   provider: ProviderDef;
   busy: boolean;
   onFile: (p: ProviderDef, f: File) => void;
+  onUsername: (p: ProviderDef, username: string) => void;
 }) {
+  const [username, setUsername] = useState("");
   if (!provider.available) {
     return (
       <section className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
@@ -527,9 +560,10 @@ function UploadSection({
       </section>
     );
   }
+  const heading = provider.usernameBased ? "2. Renseigne ton nom d'utilisateur" : "2. Téléverse ton fichier";
   return (
     <section className="space-y-3">
-      <h2 className="text-lg font-semibold">2. Téléverse ton fichier</h2>
+      <h2 className="text-lg font-semibold">{heading}</h2>
       <p className="flex items-start gap-2 text-sm text-muted-foreground">
         <Copy className="mt-0.5 h-4 w-4 shrink-0" /> {provider.howto}
       </p>
@@ -543,26 +577,51 @@ function UploadSection({
           ))}
         </ul>
       )}
-      <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
-        {busy ? (
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        ) : (
-          <Upload className="h-6 w-6 text-primary" />
-        )}
-        <span className="font-medium">Choisir un fichier {provider.label}</span>
-        <span className="text-xs text-muted-foreground">{provider.accept}</span>
-        <input
-          type="file"
-          accept={provider.accept}
-          className="sr-only"
-          disabled={busy}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onFile(provider, f);
-            e.target.value = "";
+      {provider.usernameBased ? (
+        <form
+          className="flex flex-col gap-3 rounded-xl border border-border bg-card/50 p-4 sm:flex-row sm:items-center"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (username.trim() && !busy) onUsername(provider, username);
           }}
-        />
-      </label>
+        >
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={busy}
+            placeholder="Nom d'utilisateur AniList"
+            aria-label="Nom d'utilisateur AniList"
+            autoComplete="off"
+            className="focus-ring flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+          />
+          <Button type="submit" disabled={busy || !username.trim()}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            Récupérer ma liste
+          </Button>
+        </form>
+      ) : (
+        <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
+          {busy ? (
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          ) : (
+            <Upload className="h-6 w-6 text-primary" />
+          )}
+          <span className="font-medium">Choisir un fichier {provider.label}</span>
+          <span className="text-xs text-muted-foreground">{provider.accept}</span>
+          <input
+            type="file"
+            accept={provider.accept}
+            className="sr-only"
+            disabled={busy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(provider, f);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      )}
     </section>
   );
 }

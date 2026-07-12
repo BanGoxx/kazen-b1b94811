@@ -67,6 +67,9 @@ export const createImportBatch = createServerFn({ method: "POST" })
       user_tags: e.userTags ?? [],
       rewatch_count: e.rewatchCount ?? null,
       is_rewatching: e.isRewatching ?? false,
+      // Id-based providers (AniList) carry an exact catalog key + snapshot so the
+      // preview can match by id and confirm can seed media_records directly.
+      media_snapshot: (e.mediaSnapshot ?? null) as never,
     }));
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);
@@ -111,6 +114,33 @@ export const getImportPreview = createServerFn({ method: "GET" })
 
     const results = [];
     for (const it of items ?? []) {
+      // Fast path: id-based providers (AniList) carry an exact catalog key +
+      // snapshot, so we skip fuzzy title matching entirely and match by id.
+      const snapshot = it.media_snapshot as { key?: string } | null;
+      const snapshotKey = snapshot?.key ?? null;
+      if (snapshotKey) {
+        const isDup = existingKeys.has(snapshotKey);
+        const matchStatus: MatchStatus = isDup ? "duplicate" : "exact";
+        const action: ImportAction = isDup ? "skip" : "create";
+        await context.supabase
+          .from("import_items")
+          .update({
+            matched_media_key: snapshotKey,
+            match_confidence: 1,
+            match_status: matchStatus,
+            import_action: action,
+          })
+          .eq("id", it.id);
+        results.push({
+          ...it,
+          matched_media_key: snapshotKey,
+          match_confidence: 1,
+          match_status: matchStatus,
+          import_action: action,
+        });
+        continue;
+      }
+
       // Candidate lookup against the shared KAZEN catalog (media_records).
       const firstWord = (it.normalized_title ?? it.raw_title).split(/\s+/)[0] ?? "";
       const { data: cands } = await context.supabase
@@ -219,6 +249,51 @@ export const confirmImport = createServerFn({ method: "POST" })
           .eq("id", it.id);
         skipped++;
         continue;
+      }
+
+      // Id-based providers (AniList) carry a full catalog snapshot. Seed the
+      // shared media_records row so titles absent from KAZEN's catalog still
+      // import cleanly (and so the list_items row can reference a real record).
+      const snapshot = it.media_snapshot as {
+        key?: string;
+        source?: string;
+        externalId?: string;
+        mediaType?: string;
+        title?: string;
+        titleOriginal?: string | null;
+        posterUrl?: string | null;
+        backdropUrl?: string | null;
+        releaseDate?: string | null;
+        genres?: string[];
+        platforms?: unknown;
+        score?: number | null;
+      } | null;
+      if (snapshot?.key && snapshot.key === it.matched_media_key) {
+        const { error: mErr } = await context.supabase.from("media_records").upsert(
+          {
+            media_key: snapshot.key,
+            source: snapshot.source ?? "anilist",
+            external_id: snapshot.externalId ?? snapshot.key.split(":")[1] ?? "",
+            media_type: snapshot.mediaType ?? "anime",
+            title: snapshot.title ?? it.raw_title,
+            title_original: snapshot.titleOriginal ?? null,
+            poster_url: snapshot.posterUrl ?? null,
+            backdrop_url: snapshot.backdropUrl ?? null,
+            release_date: snapshot.releaseDate ?? null,
+            genres: snapshot.genres ?? [],
+            platforms: (snapshot.platforms ?? []) as never,
+            score: snapshot.score ?? null,
+          },
+          { onConflict: "media_key" },
+        );
+        if (mErr) {
+          await context.supabase
+            .from("import_items")
+            .update({ applied_action: "skipped", applied_at: new Date().toISOString() })
+            .eq("id", it.id);
+          skipped++;
+          continue;
+        }
       }
 
       // Snapshot any existing row for rollback (including tracking fields).

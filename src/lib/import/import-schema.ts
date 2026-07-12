@@ -35,6 +35,27 @@ export type ImportStatus =
   | "dropped" // -> abandonne
   | "unknown";
 
+/**
+ * Full media metadata captured by providers that fetch structured data (e.g.
+ * AniList). When present, the import backbone can upsert the KAZEN catalog
+ * record (media_records) directly instead of relying on fuzzy title matching,
+ * so titles absent from the catalog still import cleanly and by exact id.
+ */
+export interface ImportMediaSnapshot {
+  key: string;
+  source: string;
+  externalId: string;
+  mediaType: string;
+  title: string;
+  titleOriginal: string | null;
+  posterUrl: string | null;
+  backdropUrl: string | null;
+  releaseDate: string | null;
+  genres: string[];
+  platforms: unknown;
+  score: number | null;
+}
+
 /** A single tracked entry, provider-independent. */
 export interface ImportEntry {
   /** Source site the row came from. */
@@ -75,6 +96,15 @@ export interface ImportEntry {
   userTags?: string[];
   rewatchCount?: number | null;
   isRewatching?: boolean;
+
+  /**
+   * Canonical KAZEN media key (`${source}:${externalId}`) when the provider
+   * resolves an exact catalog identity (id-based providers such as AniList).
+   * Lets the preview match by exact id instead of fuzzy title matching.
+   */
+  mediaKey?: string | null;
+  /** Full catalog snapshot for id-based providers (see ImportMediaSnapshot). */
+  mediaSnapshot?: ImportMediaSnapshot | null;
 
   importedAt: string;
 }

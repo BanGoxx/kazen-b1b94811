@@ -37,6 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
 import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
+import { getArticlesForTitle, toFicheArticle } from "@/lib/news";
 
 export const Route = createFileRoute("/media/$source/$id")({
   loader: async ({ context, params }) => {

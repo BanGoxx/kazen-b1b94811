@@ -56,6 +56,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 function ProfilePage() {
   const { user } = useAuth();
+  const { isSupporter } = usePremium();
   const isOwner = useIsOwner();
   const { data: myBadges } = useUserBadges(user?.id);
   const navigate = useNavigate();

@@ -126,6 +126,30 @@ function ImportPage() {
     setSummary(null);
   };
 
+  const processEntries = async (
+    provider: ProviderDef,
+    entries: ImportEntry[],
+    sourceMetadata: Record<string, unknown>,
+  ) => {
+    if (entries.length === 0) throw new Error("Aucune entrée détectée.");
+    const { batchId: id } = await create({
+      data: {
+        provider: toDbProvider(provider.id),
+        sourceMetadata,
+        entries,
+      },
+    });
+    setBatchId(id);
+    const pv = await preview({ data: { batchId: id } });
+    setPreviewData(pv as Preview);
+    // Pre-check safe (exact) matches.
+    setChecked(
+      new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
+    );
+    await refreshBatches();
+    toast.success(`${entries.length} entrées analysées.`);
+  };
+
   const handleFile = async (provider: ProviderDef, file: File) => {
     setBusy(true);
     reset();
@@ -139,29 +163,32 @@ function ImportPage() {
         throw err;
       }
       if (entries.length === 0) throw new Error("Aucune entrée détectée dans ce fichier.");
-
-      const { batchId: id } = await create({
-        data: {
-          provider: toDbProvider(provider.id),
-          sourceMetadata: { fileName: file.name, providerId: provider.id },
-          entries,
-        },
-      });
-      setBatchId(id);
-      const pv = await preview({ data: { batchId: id } });
-      setPreviewData(pv as Preview);
-      // Pre-check safe (exact) matches.
-      setChecked(
-        new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
-      );
-      await refreshBatches();
-      toast.success(`${entries.length} entrées analysées.`);
+      await processEntries(provider, entries, { fileName: file.name, providerId: provider.id });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec de l'analyse du fichier.");
     } finally {
       setBusy(false);
     }
   };
+
+  const handleUsername = async (provider: ProviderDef, username: string) => {
+    setBusy(true);
+    reset();
+    try {
+      const { entries, warnings } = await fetchAniListImport(username);
+      for (const w of warnings) toast.message(w);
+      await processEntries(provider, entries, { username: username.trim(), providerId: provider.id });
+    } catch (err) {
+      toast.error(
+        err instanceof AniListImportError || err instanceof Error
+          ? err.message
+          : "Échec de la récupération de la liste AniList.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
 
   const toggle = (id: string) => {
     setChecked((prev) => {

@@ -28,6 +28,8 @@ export interface ProviderDef {
   available: boolean;
   /** Functional but not yet fully validated (shown with an "Expérimental" tag). */
   experimental?: boolean;
+  /** Import by public username via a live provider fetch (no file upload). */
+  usernameBased?: boolean;
   /** Extra reassurance lines shown near the upload zone (privacy, scope…). */
   notes?: string[];
   /** Accepted file extensions / mime hint for the upload input. */

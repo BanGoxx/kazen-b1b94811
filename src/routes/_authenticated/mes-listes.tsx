@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, ListChecks, Loader2, Pencil, Star } from "lucide-react";
+import {
+  Flame,
+  Heart,
+  ListChecks,
+  Loader2,
+  Pencil,
+  RotateCcw,
+  StickyNote,
+  Star,
+  Tag as TagIcon,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";
@@ -8,6 +18,7 @@ import { PremiumHint } from "@/components/premium/PremiumHint";
 import { useMyList, type ListEntry } from "@/lib/use-list";
 import {
   MEDIA_TYPE_LABELS,
+  PRIORITY_LABELS,
   WATCH_STATUS_LABELS,
   type MediaType,
   type WatchStatus,
@@ -105,6 +116,35 @@ function MyListsPage() {
     return sorted;
   }, [entries, tab, type, platform, tag, sort]);
 
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {
+      tous: entries.length,
+      favoris: 0,
+      a_voir: 0,
+      en_cours: 0,
+      termine: 0,
+      en_pause: 0,
+      abandonne: 0,
+    };
+    entries.forEach((e) => {
+      if (e.favorite) map.favoris += 1;
+      if (e.status) map[e.status] = (map[e.status] ?? 0) + 1;
+    });
+    return map;
+  }, [entries]);
+
+  const filtersActive =
+    tab !== "tous" || type !== "tous" || platform !== "tous" || tag !== "tous";
+
+  const resetFilters = () => {
+    setTab("tous");
+    setType("tous");
+    setPlatform("tous");
+    setTag("tous");
+  };
+
+
+
 
   return (
     <AppShell>
@@ -122,6 +162,39 @@ function MyListsPage() {
           </p>
         </header>
 
+        {entries.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+            {STATUS_TABS.filter((s) => s.value !== "tous").map((s) => {
+              const active = tab === s.value;
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setTab(active ? "tous" : s.value)}
+                  aria-pressed={active}
+                  className={cn(
+                    "focus-ring flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
+                    active
+                      ? "border-primary/50 bg-primary/10 shadow-[var(--shadow-glow)]"
+                      : "border-border bg-card/40 hover:border-primary/30 hover:bg-card/70",
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                    {s.value === "favoris" ? (
+                      <Heart className="h-3 w-3 text-rose-400" />
+                    ) : null}
+                    {s.label}
+                  </span>
+                  <span className="font-display text-2xl font-extrabold tabular-nums">
+                    {counts[s.value] ?? 0}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
+
         <div className="space-y-4 rounded-2xl border border-border bg-card/40 p-4 backdrop-blur">
           <div className="flex flex-wrap gap-1.5">
             {STATUS_TABS.map((s) => (
@@ -137,13 +210,21 @@ function MyListsPage() {
                     : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
                 )}
               >
-                {s.value === "favoris" ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Heart className="h-3.5 w-3.5" /> {s.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {s.value === "favoris" ? <Heart className="h-3.5 w-3.5" /> : null}
+                  {s.label}
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[0.65rem] font-bold tabular-nums",
+                      tab === s.value
+                        ? "bg-white/20 text-white"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {counts[s.value] ?? 0}
                   </span>
-                ) : (
-                  s.label
-                )}
+                </span>
+
               </button>
             ))}
           </div>
@@ -228,6 +309,16 @@ function MyListsPage() {
             <span className="text-xs font-semibold text-foreground">
               {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
             </span>
+            {filtersActive ? (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="focus-ring inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <RotateCcw className="h-3 w-3" /> Réinitialiser
+              </button>
+            ) : null}
+
             <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               <span className="hidden sm:inline">Besoin de filtres croisés&nbsp;?</span>
               <PremiumHint featureId="filters" label="Filtres avancés" />
@@ -278,12 +369,43 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
     <div className="space-y-2">
       <div className="relative">
         <MediaCard item={entry.item} />
-        {entry.favorite ? (
-          <span className="absolute right-2 top-2 rounded-full bg-rose-500/90 p-1.5 text-white shadow">
-            <Heart className="h-3.5 w-3.5 fill-current" />
-          </span>
-        ) : null}
+        <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+          {entry.favorite ? (
+            <span
+              className="rounded-full bg-rose-500/90 p-1.5 text-white shadow"
+              aria-label="Favori"
+            >
+              <Heart className="h-3.5 w-3.5 fill-current" />
+            </span>
+          ) : null}
+          {entry.priority === "haute" ? (
+            <span
+              className="inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-primary-foreground shadow"
+              title={`Priorité ${PRIORITY_LABELS.haute}`}
+            >
+              <Flame className="h-3 w-3" /> Haute
+            </span>
+          ) : null}
+        </div>
       </div>
+      {entry.tags.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1">
+          <TagIcon className="h-3 w-3 text-muted-foreground" />
+          {entry.tags.slice(0, 2).map((t) => (
+            <span
+              key={t}
+              className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-accent-foreground"
+            >
+              {t}
+            </span>
+          ))}
+          {entry.tags.length > 2 ? (
+            <span className="text-[0.65rem] text-muted-foreground">
+              +{entry.tags.length - 2}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {entry.status ? (
@@ -296,7 +418,17 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
               <Star className="h-3 w-3 fill-current" /> {entry.rating}
             </span>
           ) : null}
+          {entry.notes?.trim() ? (
+            <span
+              className="inline-flex items-center text-muted-foreground"
+              title="Note personnelle"
+              aria-label="Contient une note personnelle"
+            >
+              <StickyNote className="h-3 w-3" />
+            </span>
+          ) : null}
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Modifier">

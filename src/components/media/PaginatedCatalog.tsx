@@ -129,11 +129,15 @@ function CatalogInner({
               </>
             )}
           </Button>
-          <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
+          {query.isFetchingNextPage ? (
+            <SlowLoadHint />
+          ) : (
+            <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
+          )}
         </div>
       ) : items.length > 0 ? (
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Vous avez atteint la fin du catalogue · {items.length} titres
+          {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
         </p>
       ) : null}
     </div>

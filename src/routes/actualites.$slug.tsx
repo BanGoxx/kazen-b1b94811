@@ -103,7 +103,7 @@ function ArticlePage() {
 
         {/* Body */}
         <div className="mt-6 space-y-5 text-[15px] leading-relaxed text-foreground/90 sm:text-base">
-          {article.blocks.map((block, i) => (
+          {article.blocks.map((block: ArticleBlock, i: number) => (
             <ArticleBlockView key={i} block={block} />
           ))}
         </div>

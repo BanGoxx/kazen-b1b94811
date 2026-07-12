@@ -384,6 +384,51 @@ export type Database = {
         }
         Relationships: []
       }
+      media_requests: {
+        Row: {
+          created_at: string
+          external_url: string
+          id: string
+          media_type: string
+          note: string
+          requester_id: string
+          review_note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          external_url?: string
+          id?: string
+          media_type: string
+          note?: string
+          requester_id: string
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          external_url?: string
+          id?: string
+          media_type?: string
+          note?: string
+          requester_id?: string
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       moderation_actions: {
         Row: {
           action: Database["public"]["Enums"]["moderation_action_type"]
@@ -522,6 +567,7 @@ export type Database = {
           id: string
           is_public: boolean
           owner_id: string
+          recommendation: string
           title: string
           updated_at: string
         }
@@ -535,6 +581,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           owner_id: string
+          recommendation?: string
           title: string
           updated_at?: string
         }
@@ -548,6 +595,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           owner_id?: string
+          recommendation?: string
           title?: string
           updated_at?: string
         }

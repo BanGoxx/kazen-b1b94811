@@ -83,11 +83,14 @@ function EntityPage() {
   const { kind, id } = Route.useParams();
   const router = useRouter();
   const { data: serverProfile } = useSuspenseQuery(entityProfileQO(kind, id));
+  const needsBrowserProfile =
+    (kind === "character" || kind === "staff") &&
+    (!serverProfile || (!serverProfile.media.length && !serverProfile.description));
   const browserProfile = useQuery({
     queryKey: ["entity", "anilist-public", kind, id],
     queryFn: () => (kind === "character" ? anilistPublicCharacter(Number(id)) : anilistPublicStaff(Number(id))),
     enabled:
-      (kind === "character" || kind === "staff") &&
+      needsBrowserProfile &&
       typeof window !== "undefined" &&
       Number.isFinite(Number(id)),
     staleTime: 1000 * 60 * 60,

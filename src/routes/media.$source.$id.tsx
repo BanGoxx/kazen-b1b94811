@@ -158,10 +158,13 @@ function MediaDetailPage() {
   const { source, id } = Route.useParams();
   const router = useRouter();
   const { data: serverItem } = useSuspenseQuery(mediaDetailQO(source, id));
+  const needsBrowserDetail =
+    source === "anilist" &&
+    (!serverItem || !serverItem.synopsis || !serverItem.cast.length || !serverItem.crew.length);
   const browserDetail = useQuery({
     queryKey: ["media", "anilist-public-detail", id],
     queryFn: () => anilistPublicDetail(Number(id)),
-    enabled: source === "anilist" && typeof window !== "undefined" && Number.isFinite(Number(id)),
+    enabled: needsBrowserDetail && typeof window !== "undefined" && Number.isFinite(Number(id)),
     staleTime: 1000 * 60 * 60,
     retry: 1,
   });

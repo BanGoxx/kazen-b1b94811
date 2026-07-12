@@ -183,7 +183,12 @@ export const animePageQO = (kind: string) =>
     },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
-    staleTime: HOUR,
+    // Server SSR may only have the curated fallback when the production Worker
+    // is blocked by AniList. On the client, mark it stale so the browser CORS
+    // path immediately replaces page 1 with real AniList data, then page 2+
+    // keeps progressive loading alive.
+    staleTime: typeof window === "undefined" ? HOUR : 0,
+    refetchOnMount: true,
     retry: 3,
   });
 

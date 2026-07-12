@@ -382,6 +382,19 @@ export function getDiscoverArticles(limit = 4): NewsArticle[] {
     .slice(0, limit);
 }
 
+/**
+ * Newest-first recent articles for the Découverte sidebar. Strictly real,
+ * internal (clickable) KAZEN articles, ordered by publication date (2026
+ * entries naturally surface first when present). New entries added to
+ * ARTICLE_SOURCES appear automatically; returns an empty array when none
+ * exist, so the sidebar hides cleanly.
+ */
+export function getRecentArticles(limit = 5): NewsArticle[] {
+  return NEWS_ARTICLES.filter((a) => !a.externalUrl)
+    .sort(byRecent)
+    .slice(0, limit);
+}
+
 /** Normalize a NewsArticle into the presentational FicheArticle shape. */
 export function toFicheArticle(
   a: NewsArticle,

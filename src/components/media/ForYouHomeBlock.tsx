@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
 import { rankForYouAnimeFirst } from "@/lib/recommend";
 import { MediaCarousel } from "./MediaCarousel";
@@ -9,6 +9,12 @@ import type { MediaItem } from "@/lib/media-types";
 
 /** Compact "Pour vous" rail for the homepage, linking to the full page. */
 export function ForYouHomeBlock() {
+  // This rail derives from auth + the user's list + personalized signals, which
+  // only exist on the client. Rendering it during SSR / first hydration pass
+  // produces a server/client mismatch, so we reveal it only after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { pool } = useCandidatePool();
   const profile = useTasteProfile();
   const items = useMemo<MediaItem[]>(
@@ -16,7 +22,8 @@ export function ForYouHomeBlock() {
     [pool, profile],
   );
 
-  if (!items.length) return null;
+  if (!mounted || !items.length) return null;
+
 
   return (
     <section className="animate-fade-in">

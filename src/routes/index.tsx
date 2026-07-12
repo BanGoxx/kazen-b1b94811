@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+
 import { Sparkles, Tv, Film, CalendarClock, Leaf } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { RotatingHero } from "@/components/media/RotatingHero";
@@ -22,7 +24,9 @@ import {
   upcomingMoviesQO,
   popularSeriesQO,
   seasonalAnimeQO,
+  refreshAnimeRails,
 } from "@/lib/queries";
+
 
 const QUICK_NAV = [
   { to: "/anime", label: "Anime", icon: Sparkles },
@@ -61,18 +65,25 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    // Warm caches without blocking render: a transient upstream failure must
-    // never turn the whole homepage into a 500 / crash screen. Each section
-    // below is wrapped in its own error boundary and refetches with retry.
-    void context.queryClient.prefetchQuery(trendingAnimeQO);
-    void context.queryClient.prefetchQuery(popularAnimeQO);
-    void context.queryClient.prefetchQuery(upcomingAnimeQO);
-    void context.queryClient.prefetchQuery(seasonalAnimeQO());
-    void context.queryClient.prefetchQuery(trendingSeriesQO);
-    void context.queryClient.prefetchQuery(trendingMoviesQO);
-    void context.queryClient.prefetchQuery(upcomingMoviesQO);
-    void context.queryClient.prefetchQuery(popularSeriesQO);
+    // Populate the query cache on the server so it dehydrates into the client
+    // with the SAME data the server rendered. Awaiting here (vs fire-and-forget
+    // prefetch) removes the hydration race where the server rendered curated
+    // fallback cards while the client hydrated with browser-direct AniList data.
+    // Each section still has its own error boundary + retry, and the client
+    // upgrades to browser-direct data via a background refetch after hydration,
+    // so a transient upstream failure never turns the homepage into a crash.
+    await Promise.allSettled([
+      context.queryClient.ensureQueryData(trendingAnimeQO),
+      context.queryClient.ensureQueryData(popularAnimeQO),
+      context.queryClient.ensureQueryData(upcomingAnimeQO),
+      context.queryClient.ensureQueryData(seasonalAnimeQO()),
+      context.queryClient.ensureQueryData(trendingSeriesQO),
+      context.queryClient.ensureQueryData(trendingMoviesQO),
+      context.queryClient.ensureQueryData(upcomingMoviesQO),
+      context.queryClient.ensureQueryData(popularSeriesQO),
+    ]);
   },
+
   component: DiscoverPage,
 });
 
@@ -187,8 +198,16 @@ function TrendingMoviesRow() {
 }
 
 function DiscoverPage() {
+  const queryClient = useQueryClient();
+  // After hydration, pull the complete browser-direct AniList lists (important
+  // in production where the Worker is AniList-blocked and SSR data is curated).
+  // Running this post-mount avoids swapping data mid-hydration.
+  useEffect(() => {
+    refreshAnimeRails(queryClient);
+  }, [queryClient]);
   return (
     <AppShell>
+
       <h1 className="sr-only">KAZEN — Votre hub anime, séries et films en français</h1>
 
       <div className="relative">

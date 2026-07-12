@@ -51,24 +51,26 @@ async function isoAnimeList(
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],
   queryFn: () => isoAnimeList("trending", getTrendingAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  // Keep the dehydrated server data authoritative for the first client render
+  // (staleTime HOUR, no forced refetchOnMount) so SSR and hydration match. The
+  // browser-direct upgrade is triggered deliberately AFTER hydration via
+  // refreshAnimeRails(), which avoids the mid-hydration data swap that crashed.
+  staleTime: HOUR,
   retry: 3,
 });
 export const popularAnimeQO = queryOptions({
   queryKey: ["anime", "popular"],
   queryFn: () => isoAnimeList("popular", getPopularAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  staleTime: HOUR,
   retry: 3,
 });
 export const upcomingAnimeQO = queryOptions({
   queryKey: ["anime", "upcoming"],
   queryFn: () => isoAnimeList("upcoming", getUpcomingAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  staleTime: HOUR,
   retry: 3,
 });
+
 export const seasonalAnimeQO = (season?: string, year?: number) =>
   queryOptions({
     queryKey: ["anime", "seasonal", season ?? "current", year ?? "current"],
@@ -83,10 +85,24 @@ export const seasonalAnimeQO = (season?: string, year?: number) =>
       }
       return getSeasonalAnime({ data: { season, year } });
     },
-    staleTime: IS_BROWSER ? 0 : HOUR,
-    refetchOnMount: true,
+    staleTime: HOUR,
     retry: 3,
   });
+
+/**
+ * Post-hydration browser-direct upgrade for the AniList home rails.
+ *
+ * The rail queries render from dehydrated server data on the first client paint
+ * (so SSR and hydration match and React does not crash). Once the app has
+ * hydrated, call this to pull the complete browser-direct AniList lists — this
+ * matters in production, where the Worker is often AniList-blocked and the SSR
+ * data is a curated fallback. Runs only in the browser and only when needed.
+ */
+export function refreshAnimeRails(queryClient: import("@tanstack/react-query").QueryClient) {
+  if (typeof window === "undefined") return;
+  void queryClient.refetchQueries({ queryKey: ["anime"], type: "active" });
+}
+
 
 
 export const trendingMoviesQO = queryOptions({

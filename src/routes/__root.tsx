@@ -4,15 +4,15 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { setIdentityCallback } from "../lib/auth";
+import { RootShell } from "../components/RootShell";
+
 
 function NotFoundComponent() {
   return (
@@ -119,23 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT = `(function(){try{var t=localStorage.getItem('nexus-theme');if(t==='light'){document.documentElement.classList.add('light');}}catch(e){}})();`;
 
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="fr">
-      <head>
-        {/* Apply saved theme before first paint to avoid a light/dark flash. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 
 function RootComponent() {

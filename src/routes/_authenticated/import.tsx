@@ -467,6 +467,44 @@ function ImportPage() {
             </div>
           )}
         </section>
+
+        {/* Export */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Exporter mes données</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Téléchargez une copie de vos listes KAZEN en JSON ou CSV. L'export ne contient que vos
+            propres données de suivi (titres, statuts, notes, progression, dates, tags).
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              onClick={() => handleExport("json")}
+              disabled={exporting !== null}
+            >
+              {exporting === "json" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileJson className="h-4 w-4" />
+              )}
+              Exporter en JSON
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleExport("csv")}
+              disabled={exporting !== null}
+            >
+              {exporting === "csv" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )}
+              Exporter en CSV
+            </Button>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Download className="h-3.5 w-3.5" /> Le fichier JSON peut être réimporté dans KAZEN.
+            </span>
+          </div>
+        </section>
       </div>
     </AppShell>
   );

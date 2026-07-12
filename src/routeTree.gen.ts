@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as PourVousRouteImport } from './routes/pour-vous'
+import { Route as ListesRouteImport } from './routes/listes'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -57,6 +58,11 @@ const RechercheRoute = RechercheRouteImport.update({
 const PourVousRoute = PourVousRouteImport.update({
   id: '/pour-vous',
   path: '/pour-vous',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListesRoute = ListesRouteImport.update({
+  id: '/listes',
+  path: '/listes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FilmsRoute = FilmsRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/listes': typeof ListesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/listes': typeof ListesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
   '/films': typeof FilmsRoute
+  '/listes': typeof ListesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/listes'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/listes'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendrier'
     | '/films'
+    | '/listes'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -317,6 +329,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
   FilmsRoute: typeof FilmsRoute
+  ListesRoute: typeof ListesRoute
   PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
@@ -366,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/pour-vous'
       fullPath: '/pour-vous'
       preLoaderRoute: typeof PourVousRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listes': {
+      id: '/listes'
+      path: '/listes'
+      fullPath: '/listes'
+      preLoaderRoute: typeof ListesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/films': {
@@ -539,6 +559,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
   FilmsRoute: FilmsRoute,
+  ListesRoute: ListesRoute,
   PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,

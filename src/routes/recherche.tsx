@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/MediaGrid";
@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/media/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { searchMediaQO } from "@/lib/queries";
+import { searchMediaInfiniteQO } from "@/lib/queries";
+
 import {
   availableGenres,
   filterAndSort,
@@ -61,8 +62,23 @@ function SearchPage() {
     setQ(initialQ ?? "");
   }, [initialQ]);
 
-  const { data, isFetching } = useQuery(searchMediaQO(q));
+  const {
+    data: pages,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(searchMediaInfiniteQO(q));
   const trimmed = q.trim();
+
+  const data = useMemo(() => {
+    if (!pages) return undefined;
+    return {
+      anime: pages.pages.flatMap((p) => p.anime),
+      series: pages.pages.flatMap((p) => p.series),
+      movies: pages.pages.flatMap((p) => p.movies),
+    };
+  }, [pages]);
 
   const filters: SearchFilters = useMemo(
     () => ({
@@ -87,6 +103,21 @@ function SearchPage() {
       movies: apply(data?.movies),
     };
   }, [data, filters, trimmed]);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) fetchNextPage();
+      },
+      { rootMargin: "600px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, trimmed]);
+
 
   const counts = {
     anime: filtered.anime.length,
@@ -283,8 +314,28 @@ function SearchPage() {
               </TabsContent>
             </Tabs>
           )}
+
+          {/* Infinite scroll sentinel + fallback button */}
+          {hasNextPage ? (
+            <div ref={sentinelRef} className="mt-10 flex justify-center">
+              {isFetchingNextPage ? (
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className="focus-ring hover-lift rounded-full border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold text-foreground backdrop-blur hover:border-primary/40"
+                >
+                  Charger plus de résultats
+                </button>
+              )}
+            </div>
+          ) : null}
         </>
       )}
+
     </AppShell>
   );
 }

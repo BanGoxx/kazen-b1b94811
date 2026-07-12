@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
+import { MediaRequestsPanel } from "@/components/moderation/MediaRequestsPanel";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,

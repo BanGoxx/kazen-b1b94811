@@ -81,12 +81,19 @@ export function groupRelated(related: RelatedMedia[]): RelatedGroup[] {
   const groups: RelatedGroup[] = [];
   for (const [category, items] of buckets) {
     if (category === "franchise") {
+      // Canonical franchise order: narrative relation first (préquelle →
+      // suite → spin-off…), then release chronology, then title as a stable
+      // final fallback so items never shuffle unpredictably.
       items.sort((a, b) => {
         const wa = FRANCHISE_RELATION_ORDER[a.relation] ?? 99;
         const wb = FRANCHISE_RELATION_ORDER[b.relation] ?? 99;
         if (wa !== wb) return wa - wb;
-        return a.title.localeCompare(b.title, "fr");
+        return compareCanon(a, b);
       });
+    } else {
+      // Adaptations / recommendations / other: earliest-first chronology with
+      // a title fallback so the visible order feels coherent, not random.
+      items.sort(compareDateAsc);
     }
     const meta = CATEGORY_META[category];
     groups.push({ category, title: meta.title, description: meta.description, items });

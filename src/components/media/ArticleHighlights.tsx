@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Newspaper, ArrowUpRight } from "lucide-react";
-import { getDiscoverArticles } from "@/lib/news";
+import { getDiscoverArticles, type NewsArticle } from "@/lib/news";
 
 /**
  * Découverte "Actualités KAZEN" block.
@@ -8,16 +8,18 @@ import { getDiscoverArticles } from "@/lib/news";
  * Renders only real, internal, featured articles from the KAZEN editorial
  * registry. If none exist, the whole block is hidden — never a placeholder or
  * a dead-end card. Every card links to a real /actualites/$slug page.
+ *
+ * Layout: a prominent lead article beside a compact side list. This richer
+ * editorial layout is intentionally applied only now that real articles
+ * exist; with a single entry it degrades gracefully to just the lead card.
+ * Evergreen analyses never render a specific publication date (no fake
+ * "published on X" claim) — they show their editorial format instead.
  */
 export function ArticleHighlights() {
   const articles = getDiscoverArticles(4);
   if (!articles.length) return null;
 
-  const dateFmt = new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const [lead, ...rest] = articles;
 
   return (
     <section aria-labelledby="actus-kazen">
@@ -33,34 +35,62 @@ export function ArticleHighlights() {
         </p>
       </div>
 
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {articles.map((a) => {
-          const when = !Number.isNaN(new Date(a.publishedAt).getTime())
-            ? dateFmt.format(new Date(a.publishedAt))
-            : null;
-          return (
-            <li key={a.slug}>
-              <Link
-                to="/actualites/$slug"
-                params={{ slug: a.slug }}
-                className="focus-ring hover-lift group flex h-full flex-col gap-2 rounded-2xl border border-border bg-card/60 p-4 backdrop-blur transition-colors hover:border-primary/40"
-              >
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {a.category ? (
-                    <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">
-                      {a.category}
-                    </span>
-                  ) : null}
-                  {when ? <span>{when}</span> : null}
-                  <ArrowUpRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-                <p className="line-clamp-3 text-sm font-semibold leading-snug">{a.title}</p>
-                <p className="line-clamp-3 text-xs text-muted-foreground">{a.excerpt}</p>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
+        <LeadArticle article={lead} />
+        {rest.length ? (
+          <ul className="flex flex-col gap-3">
+            {rest.map((a) => (
+              <li key={a.slug}>
+                <SideArticle article={a} />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
     </section>
+  );
+}
+
+/** Format label shown in place of a date for evergreen editorial. */
+function metaLabel(a: NewsArticle): string {
+  return a.category ?? "Analyse";
+}
+
+function LeadArticle({ article: a }: { article: NewsArticle }) {
+  return (
+    <Link
+      to="/actualites/$slug"
+      params={{ slug: a.slug }}
+      className="focus-ring hover-lift group flex h-full flex-col gap-3 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur transition-colors hover:border-primary/40"
+    >
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">
+          {metaLabel(a)}
+        </span>
+        <span className="font-medium">À la une</span>
+        <ArrowUpRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
+      <p className="font-display text-lg font-bold leading-snug sm:text-xl">{a.title}</p>
+      <p className="line-clamp-3 text-sm text-muted-foreground">{a.excerpt}</p>
+    </Link>
+  );
+}
+
+function SideArticle({ article: a }: { article: NewsArticle }) {
+  return (
+    <Link
+      to="/actualites/$slug"
+      params={{ slug: a.slug }}
+      className="focus-ring group flex h-full flex-col gap-1.5 rounded-2xl border border-border bg-card/60 p-4 backdrop-blur transition-colors hover:border-primary/40"
+    >
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium text-primary">
+          {metaLabel(a)}
+        </span>
+        <ArrowUpRight className="ml-auto h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
+      <p className="line-clamp-2 text-sm font-semibold leading-snug">{a.title}</p>
+      <p className="line-clamp-2 text-xs text-muted-foreground">{a.excerpt}</p>
+    </Link>
   );
 }

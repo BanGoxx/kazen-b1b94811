@@ -105,6 +105,11 @@ function ImportPage() {
     }
   };
 
+  useEffect(() => {
+    void refreshBatches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const reset = () => {
     setBatchId(null);
     setPreviewData(null);

@@ -412,7 +412,23 @@ const ANILIST_FORMAT: Record<string, string> = {
   OVA: "OVA",
   ONA: "ONA",
   MUSIC: "Clip",
+  MANGA: "Manga",
+  NOVEL: "Light novel",
+  ONE_SHOT: "One shot",
 };
+
+// Classify an AniList node into a coarse format family for group pages.
+function anilistFormatGroup(
+  type?: string | null,
+  format?: string | null,
+): import("./media-types").FormatGroup {
+  if (format === "MUSIC") return "music";
+  if (format === "NOVEL") return "novel";
+  if (format === "MANGA" || format === "ONE_SHOT") return "manga";
+  if (type === "MANGA") return format === "NOVEL" ? "novel" : "manga";
+  if (type === "ANIME") return "anime";
+  return "other";
+}
 
 const ANILIST_SEASON: Record<string, string> = {
   WINTER: "Hiver",

@@ -225,6 +225,35 @@ export type Database = {
           },
         ]
       }
+      playlist_likes: {
+        Row: {
+          created_at: string
+          id: string
+          playlist_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          playlist_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          playlist_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_likes_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlists: {
         Row: {
           created_at: string

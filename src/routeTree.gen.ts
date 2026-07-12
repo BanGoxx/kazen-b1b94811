@@ -22,6 +22,7 @@ import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
@@ -92,6 +93,11 @@ const AnimeIndexRoute = AnimeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AnimeRoute,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   id: '/saison',
   path: '/saison',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
+  '/api/chat': typeof ApiChatRoute
   '/anime/': typeof AnimeIndexRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
+  '/api/chat': typeof ApiChatRoute
   '/anime': typeof AnimeIndexRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/anime/saison': typeof AnimeSaisonRoute
+  '/api/chat': typeof ApiChatRoute
   '/anime/': typeof AnimeIndexRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/profil'
     | '/anime/saison'
+    | '/api/chat'
     | '/anime/'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/profil'
     | '/anime/saison'
+    | '/api/chat'
     | '/anime'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mes-listes'
     | '/_authenticated/profil'
     | '/anime/saison'
+    | '/api/chat'
     | '/anime/'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   SeriesRoute: typeof SeriesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoutienRoute: typeof SoutienRoute
+  ApiChatRoute: typeof ApiChatRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
 }
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeIndexRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime/saison': {
       id: '/anime/saison'
       path: '/saison'
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeriesRoute: SeriesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoutienRoute: SoutienRoute,
+  ApiChatRoute: ApiChatRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,
 }

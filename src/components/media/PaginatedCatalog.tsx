@@ -180,7 +180,7 @@ function CatalogInner({
           >
             {query.isFetchingNextPage ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Chargement des anime…
+                <Loader2 className="h-4 w-4 animate-spin" /> {loadingLabel}
               </>
             ) : query.isFetchNextPageError ? (
               <>
@@ -193,7 +193,7 @@ function CatalogInner({
             )}
           </Button>
           {query.isFetchingNextPage ? (
-            <SlowLoadHint />
+            <SlowLoadHint label={loadingLabel} />
           ) : query.isFetchNextPageError ? (
             <p className="text-xs text-muted-foreground">Connexion à la source de données…</p>
           ) : (
@@ -201,9 +201,20 @@ function CatalogInner({
           )}
         </div>
       ) : items.length > 0 ? (
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
-        </p>
+        // Finite state. When a filter is active we make it explicit that these
+        // are ALL available titles for the current selection (e.g. a genre with
+        // few results for a season) so the user never thinks scroll is broken.
+        filtersActive ? (
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            {visible.length} titre{visible.length > 1 ? "s" : ""} trouvé
+            {visible.length > 1 ? "s" : ""} pour cette sélection · tous les titres
+            disponibles sont affichés
+          </p>
+        ) : (
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
+          </p>
+        )
       ) : null}
     </div>
   );

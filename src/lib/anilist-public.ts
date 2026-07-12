@@ -412,8 +412,10 @@ function fromAniListDetail(m: AniListDetailRaw): MediaDetail {
 }
 
 export async function anilistPublicDetail(id: number): Promise<MediaDetail | null> {
+  // No `type` filter: resolve ANY AniList id (anime OR manga/LN) as a clean
+  // source fallback so navigation never hits a false "introuvable".
   const gql = `query ($id: Int) {
-    Media(id: $id, type: ANIME) {
+    Media(id: $id) {
       ${MEDIA_FIELDS}
       format
       popularity

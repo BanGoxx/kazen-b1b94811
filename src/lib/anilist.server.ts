@@ -361,8 +361,11 @@ export async function anilistSearchPaged(
 
 
 export async function anilistDetail(id: number): Promise<MediaDetail | null> {
+  // No `type` filter: KAZEN resolves ANY AniList id (anime OR manga/LN) so
+  // source-material and related-work clicks always land on a real fiche
+  // (clean source fallback) instead of a false "introuvable".
   const gql = `query ($id: Int) {
-    Media(id: $id, type: ANIME) {
+    Media(id: $id) {
       ${MEDIA_FIELDS}
       format
       popularity

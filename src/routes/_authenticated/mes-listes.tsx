@@ -209,10 +209,31 @@ function MyListsPage() {
               ))}
             </div>
           ) : null}
-          <div className="flex items-center gap-2 border-t border-border/50 pt-3 text-xs text-muted-foreground">
-            <span>Besoin de filtres croisés et de collections&nbsp;?</span>
-            <PremiumHint featureId="filters" label="Filtres avancés" />
+          <div className="flex flex-wrap items-center gap-3 border-t border-border/50 pt-3">
+            <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              Trier par
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                aria-label="Trier les titres"
+                className="focus-ring rounded-lg border border-border bg-background/60 px-2.5 py-1 text-xs font-semibold text-foreground"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="text-xs font-semibold text-foreground">
+              {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
+            </span>
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="hidden sm:inline">Besoin de filtres croisés&nbsp;?</span>
+              <PremiumHint featureId="filters" label="Filtres avancés" />
+            </div>
           </div>
+
         </div>
 
 

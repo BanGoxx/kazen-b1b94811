@@ -83,15 +83,6 @@ function SearchPage() {
   } = useInfiniteQuery(searchMediaInfiniteQO(q));
   const trimmed = q.trim();
 
-  const data = useMemo(() => {
-    if (!pages) return undefined;
-    return {
-      anime: pages.pages.flatMap((p) => p.anime),
-      series: pages.pages.flatMap((p) => p.series),
-      movies: pages.pages.flatMap((p) => p.movies),
-    };
-  }, [pages]);
-
   const filters: SearchFilters = useMemo(
     () => ({
       sort: sort ?? "pertinence",
@@ -101,20 +92,81 @@ function SearchPage() {
     [sort, min, genresParam],
   );
 
+  // Genre-only browsing: when the user arrives from a fiche genre chip (a genre
+  // filter, no text query) we surface a pool of trending/popular titles and let
+  // the SAME genre filter apply — no parallel search logic, just a content pool.
+  const browseMode = trimmed.length < 2 && filters.genres.length > 0;
+
+  const searchData = useMemo(() => {
+    if (!pages) return undefined;
+    return {
+      anime: pages.pages.flatMap((p) => p.anime),
+      series: pages.pages.flatMap((p) => p.series),
+      movies: pages.pages.flatMap((p) => p.movies),
+    };
+  }, [pages]);
+
+  // Reuse existing catalog queries as the browse pool (cached, no new API layer).
+  const trAnime = useQuery({ ...trendingAnimeQO, enabled: browseMode });
+  const poAnime = useQuery({ ...popularAnimeQO, enabled: browseMode });
+  const trSeries = useQuery({ ...trendingSeriesQO, enabled: browseMode });
+  const poSeries = useQuery({ ...popularSeriesQO, enabled: browseMode });
+  const trMovies = useQuery({ ...trendingMoviesQO, enabled: browseMode });
+  const poMovies = useQuery({ ...popularMoviesQO, enabled: browseMode });
+  const anMovies = useQuery({ ...animatedMoviesQO, enabled: browseMode });
+
+  const browseFetching =
+    trAnime.isFetching ||
+    poAnime.isFetching ||
+    trSeries.isFetching ||
+    poSeries.isFetching ||
+    trMovies.isFetching ||
+    poMovies.isFetching ||
+    anMovies.isFetching;
+
+  const browseData = useMemo(() => {
+    if (!browseMode) return undefined;
+    const dedupe = (arr: (MediaItem | undefined)[]): MediaItem[] => {
+      const map = new Map<string, MediaItem>();
+      for (const item of arr) if (item && !map.has(item.key)) map.set(item.key, item);
+      return [...map.values()];
+    };
+    return {
+      anime: dedupe([...(trAnime.data ?? []), ...(poAnime.data ?? [])]),
+      series: dedupe([...(trSeries.data ?? []), ...(poSeries.data ?? [])]),
+      movies: dedupe([
+        ...(trMovies.data ?? []),
+        ...(poMovies.data ?? []),
+        ...(anMovies.data ?? []),
+      ]),
+    };
+  }, [
+    browseMode,
+    trAnime.data,
+    poAnime.data,
+    trSeries.data,
+    poSeries.data,
+    trMovies.data,
+    poMovies.data,
+    anMovies.data,
+  ]);
+
+  const data = browseMode ? browseData : searchData;
+
   const genreOptions = useMemo(
     () => availableGenres(data?.anime, data?.series, data?.movies),
     [data],
   );
 
   const filtered = useMemo(() => {
-    const apply = (list?: import("@/lib/media-types").MediaItem[]) =>
-      filterAndSort(list ?? [], filters, trimmed);
+    const apply = (list?: MediaItem[]) => filterAndSort(list ?? [], filters, trimmed);
     return {
       anime: apply(data?.anime),
       series: apply(data?.series),
       movies: apply(data?.movies),
     };
   }, [data, filters, trimmed]);
+
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

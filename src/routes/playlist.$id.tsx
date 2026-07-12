@@ -41,9 +41,10 @@ function year(date: string | null): string | null {
 
 function LikeButton({ id, likeCount }: { id: string; likeCount: number }) {
   const { liked, toggle, canLike } = usePlaylistLike(id);
-  // Reflect the optimistic total so the count feels instant.
-  const displayed = likeCount + (liked ? 1 : 0) - (liked && likeCount > 0 ? 0 : 0);
-  const total = canLike ? likeCount + (liked ? 1 : 0) : likeCount;
+  // likeCount already includes the current user's like (from the detail query),
+  // so we display it directly and let query invalidation refresh after toggle.
+  const total = likeCount;
+
 
   if (!canLike) {
     return (

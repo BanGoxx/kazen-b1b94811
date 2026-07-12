@@ -38,6 +38,9 @@ export const Route = createFileRoute("/a-venir")({
   pendingComponent: () => (
     <AppShell>
       <PageHeader title="Sorties à venir" description="Anime, séries et films attendus, du plus proche au plus lointain." />
+      <div className="mb-6">
+        <SlowLoadHint />
+      </div>
       <MediaGridSkeleton count={10} />
     </AppShell>
   ),

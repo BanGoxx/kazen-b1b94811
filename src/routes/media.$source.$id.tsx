@@ -262,14 +262,25 @@ function MediaDetailPage() {
                     item.related,
                   );
                   return (
-                    <Link
-                      to="/franchise/$source/$id"
-                      params={{ source: anchor.source, id: anchor.externalId }}
-                      className="focus-ring inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
-                    >
-                      <Network className="h-3.5 w-3.5" />
-                      Groupe : {item.title} — voir l'univers complet
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        to="/univers/$source/$id"
+                        params={{ source: anchor.source, id: anchor.externalId }}
+                        search={{ type: "anime" }}
+                        className="focus-ring inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+                      >
+                        <Network className="h-3.5 w-3.5" />
+                        Voir l'univers de {item.title}
+                      </Link>
+                      <Link
+                        to="/franchise/$source/$id"
+                        params={{ source: anchor.source, id: anchor.externalId }}
+                        className="focus-ring inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                      >
+                        <Network className="h-3.5 w-3.5" />
+                        Groupe complet
+                      </Link>
+                    </div>
                   );
                 })()
               : null}

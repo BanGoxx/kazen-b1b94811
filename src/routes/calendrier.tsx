@@ -10,7 +10,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType, WatchStatus } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO, onAirSeriesQO } from "@/lib/queries";
+import { upcomingAllQO, onAirSeriesQO, trendingAnimeQO, popularAnimeQO } from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
 import { useAuth } from "@/lib/auth";
 import {
@@ -44,6 +44,10 @@ export const Route = createFileRoute("/calendrier")({
   loader: async ({ context }) => {
     void context.queryClient.ensureQueryData(upcomingAllQO);
     void context.queryClient.prefetchQuery(onAirSeriesQO);
+    // Currently-airing anime carry `nextEpisode`; prefetch so weekly episodes
+    // (not just premieres) can populate the grid.
+    void context.queryClient.prefetchQuery(trendingAnimeQO);
+    void context.queryClient.prefetchQuery(popularAnimeQO);
   },
   component: CalendarPage,
   pendingComponent: () => (
@@ -99,12 +103,30 @@ function isoDay(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+/**
+ * The date KAZEN places an item on in the calendar.
+ *
+ * For currently-airing anime we prefer the NEXT EPISODE air date (event-like)
+ * so weekly episodes actually surface — relying on `releaseDate` alone only
+ * ever showed the series premiere, hiding shows that are mid-run. Everything
+ * else (unreleased anime, films, séries) falls back to `releaseDate`.
+ */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+function calendarDate(it: MediaItem): string | null {
+  const ep = it.nextEpisode?.airDate?.slice(0, 10);
+  if (ep && ISO_DATE.test(ep)) return ep;
+  const rel = it.releaseDate?.slice(0, 10);
+  return rel && ISO_DATE.test(rel) ? rel : null;
+}
+
 type StatusFilter = MediaType | "all";
 type WatchFilter = WatchStatus | "all" | "tracked" | "untracked";
 
 function CalendarPage() {
   const { data: upcoming } = useSuspenseQuery(upcomingAllQO);
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
+  const { data: trending } = useSuspenseQuery(trendingAnimeQO);
+  const { data: popular } = useSuspenseQuery(popularAnimeQO);
   const userList = useUserList();
   const { user } = useAuth();
 
@@ -115,7 +137,21 @@ function CalendarPage() {
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
 
-  const all = useMemo<MediaItem[]>(() => [...upcoming, ...series], [upcoming, series]);
+  // Merge sources and de-dupe by key. Trending/popular anime carry the airing
+  // `nextEpisode`, so when the same title also appears in another source we keep
+  // the variant that has an episode air date (the calendar-relevant one).
+  const all = useMemo<MediaItem[]>(() => {
+    const map = new Map<string, MediaItem>();
+    for (const it of [...trending, ...popular, ...upcoming, ...series]) {
+      const existing = map.get(it.key);
+      if (!existing) {
+        map.set(it.key, it);
+      } else if (!existing.nextEpisode?.airDate && it.nextEpisode?.airDate) {
+        map.set(it.key, it);
+      }
+    }
+    return [...map.values()];
+  }, [trending, popular, upcoming, series]);
 
   const availablePlatforms = useMemo(() => {
     const ids = new Set<string>();
@@ -136,7 +172,8 @@ function CalendarPage() {
   const filtered = useMemo(() => {
     const weekKeys = new Set(days.map(isoDay));
     return all.filter((it) => {
-      if (!it.releaseDate || !weekKeys.has(it.releaseDate.slice(0, 10))) return false;
+      const date = calendarDate(it);
+      if (!date || !weekKeys.has(date)) return false;
       if (type !== "all" && it.mediaType !== type) return false;
       if (platform !== "all" && !it.platforms.some((p) => p.id === platform)) return false;
       if (watch !== "all") {
@@ -152,7 +189,7 @@ function CalendarPage() {
   const byDay = useMemo(() => {
     const map = new Map<string, MediaItem[]>();
     for (const it of filtered) {
-      const key = it.releaseDate!.slice(0, 10);
+      const key = calendarDate(it)!;
       const arr = map.get(key) ?? [];
       arr.push(it);
       map.set(key, arr);
@@ -389,6 +426,14 @@ function SignInFilterPrompt() {
 
 
 function CalendarEntry({ item }: { item: MediaItem }) {
+  // When the item is placed on its next-episode date, surface the episode
+  // number — the clearest signal that this is an airing anime, not a premiere.
+  const epDate = item.nextEpisode?.airDate?.slice(0, 10);
+  const onEpisode = !!epDate && epDate === calendarDate(item);
+  const epLabel =
+    onEpisode && Number.isFinite(item.nextEpisode!.number) && item.nextEpisode!.number > 0
+      ? `Ép. ${item.nextEpisode!.number}`
+      : null;
   return (
     <Link
       to="/media/$source/$id"
@@ -403,7 +448,12 @@ function CalendarEntry({ item }: { item: MediaItem }) {
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", TYPE_DOT[item.mediaType])} />
           <span className="truncate text-[0.7rem] font-semibold group-hover:text-primary">{item.title}</span>
         </div>
-        {item.platforms[0] ? (
+        {epLabel ? (
+          <span className="truncate text-[0.65rem] font-semibold text-primary">
+            {epLabel}
+            {item.platforms[0] ? <span className="font-normal text-muted-foreground"> · {item.platforms[0].name}</span> : null}
+          </span>
+        ) : item.platforms[0] ? (
           <span className="truncate text-[0.65rem] text-muted-foreground">{item.platforms[0].name}</span>
         ) : (
           <span className="text-[0.65rem] text-muted-foreground">{MEDIA_TYPE_LABELS[item.mediaType]}</span>

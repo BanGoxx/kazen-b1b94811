@@ -210,13 +210,21 @@ function MyListsPage() {
                     : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
                 )}
               >
-                {s.value === "favoris" ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Heart className="h-3.5 w-3.5" /> {s.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {s.value === "favoris" ? <Heart className="h-3.5 w-3.5" /> : null}
+                  {s.label}
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[0.65rem] font-bold tabular-nums",
+                      tab === s.value
+                        ? "bg-white/20 text-white"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {counts[s.value] ?? 0}
                   </span>
-                ) : (
-                  s.label
-                )}
+                </span>
+
               </button>
             ))}
           </div>

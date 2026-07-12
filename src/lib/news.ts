@@ -218,6 +218,7 @@ const ARTICLE_SOURCES: ArticleInput[] = [
     category: "Analyse",
     popularity: 90,
     featured: true,
+    evergreen: true,
     titles: [{ source: "anilist", externalId: "113415" }],
   },
   {

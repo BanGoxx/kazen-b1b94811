@@ -51,24 +51,26 @@ async function isoAnimeList(
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],
   queryFn: () => isoAnimeList("trending", getTrendingAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  // Keep the dehydrated server data authoritative for the first client render
+  // (staleTime HOUR, no forced refetchOnMount) so SSR and hydration match. The
+  // browser-direct upgrade is triggered deliberately AFTER hydration via
+  // refreshAnimeRails(), which avoids the mid-hydration data swap that crashed.
+  staleTime: HOUR,
   retry: 3,
 });
 export const popularAnimeQO = queryOptions({
   queryKey: ["anime", "popular"],
   queryFn: () => isoAnimeList("popular", getPopularAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  staleTime: HOUR,
   retry: 3,
 });
 export const upcomingAnimeQO = queryOptions({
   queryKey: ["anime", "upcoming"],
   queryFn: () => isoAnimeList("upcoming", getUpcomingAnime),
-  staleTime: IS_BROWSER ? 0 : HOUR,
-  refetchOnMount: true,
+  staleTime: HOUR,
   retry: 3,
 });
+
 export const seasonalAnimeQO = (season?: string, year?: number) =>
   queryOptions({
     queryKey: ["anime", "seasonal", season ?? "current", year ?? "current"],

@@ -111,6 +111,14 @@ function CatalogInner({
 
       {query.hasNextPage ? (
         <div className="mt-8 flex flex-col items-center gap-2">
+          {/* A failed next-page fetch (transient AniList 403/429/timeout) must
+              surface as an explicit retry — never as a silently re-enabled
+              button that forces the user to click blindly several times. */}
+          {query.isFetchNextPageError ? (
+            <p className="text-xs text-destructive" role="status">
+              Le chargement a échoué. Réessayez.
+            </p>
+          ) : null}
           <Button
             type="button"
             variant="outline"
@@ -121,7 +129,11 @@ function CatalogInner({
           >
             {query.isFetchingNextPage ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+                <Loader2 className="h-4 w-4 animate-spin" /> Chargement des anime…
+              </>
+            ) : query.isFetchNextPageError ? (
+              <>
+                <RotateCw className="h-4 w-4" /> Réessayer
               </>
             ) : (
               <>
@@ -131,6 +143,8 @@ function CatalogInner({
           </Button>
           {query.isFetchingNextPage ? (
             <SlowLoadHint />
+          ) : query.isFetchNextPageError ? (
+            <p className="text-xs text-muted-foreground">Connexion à la source de données…</p>
           ) : (
             <p className="text-xs text-muted-foreground">{items.length} titres chargés</p>
           )}

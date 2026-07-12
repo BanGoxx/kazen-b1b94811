@@ -161,7 +161,14 @@ async function query<T>(gql: string, variables: Record<string, unknown>): Promis
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            "User-Agent": "KAZEN/1.0 (+https://kazen.lovable.app)",
+            // AniList sits behind Cloudflare bot-protection that returns 403 to
+            // requests carrying a non-browser User-Agent (our old "KAZEN/1.0"
+            // token was blocked from Cloudflare Workers in production). A
+            // realistic browser UA + Origin/Referer clears the challenge.
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            Origin: "https://anilist.co",
+            Referer: "https://anilist.co/",
           },
           body: JSON.stringify({ query: gql, variables }),
         });

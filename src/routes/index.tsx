@@ -268,6 +268,10 @@ function DiscoverPage() {
         </SafeSection>
 
         <PlatformHighlights />
+
+        <SafeSection>
+          <CommunityListsBand />
+        </SafeSection>
       </div>
 
 

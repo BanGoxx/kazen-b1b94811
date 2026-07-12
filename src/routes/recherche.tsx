@@ -314,8 +314,28 @@ function SearchPage() {
               </TabsContent>
             </Tabs>
           )}
+
+          {/* Infinite scroll sentinel + fallback button */}
+          {hasNextPage ? (
+            <div ref={sentinelRef} className="mt-10 flex justify-center">
+              {isFetchingNextPage ? (
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className="focus-ring hover-lift rounded-full border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold text-foreground backdrop-blur hover:border-primary/40"
+                >
+                  Charger plus de résultats
+                </button>
+              )}
+            </div>
+          ) : null}
         </>
       )}
+
     </AppShell>
   );
 }

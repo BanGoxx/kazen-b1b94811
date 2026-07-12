@@ -217,6 +217,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "playlist_items_media_key_fkey"
+            columns: ["media_key"]
+            isOneToOne: false
+            referencedRelation: "media_records"
+            referencedColumns: ["media_key"]
+          },
+          {
             foreignKeyName: "playlist_items_playlist_id_fkey"
             columns: ["playlist_id"]
             isOneToOne: false

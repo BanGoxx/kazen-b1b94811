@@ -175,6 +175,12 @@ function ImportPage() {
   };
 
   const handleRollback = async (id: string) => {
+    if (
+      !window.confirm(
+        "Annuler cet import ? Les titres ajoutés par cet import seront retirés et les titres modifiés seront restaurés à leur état précédent. Le reste de ta liste n'est pas affecté.",
+      )
+    )
+      return;
     setBusy(true);
     try {
       const res = await rollback({ data: { batchId: id } });
@@ -188,6 +194,12 @@ function ImportPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Supprimer ce lot d'import de l'historique ? Cela n'annule pas les titres déjà importés dans ta liste (utilise « Annuler » pour cela). Seul l'historique de ce lot est effacé.",
+      )
+    )
+      return;
     setBusy(true);
     try {
       await del({ data: { batchId: id } });

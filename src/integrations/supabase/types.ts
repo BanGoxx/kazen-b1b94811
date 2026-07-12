@@ -56,6 +56,39 @@ export type Database = {
         }
         Relationships: []
       }
+      fiche_reviews: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          media_external_id: string
+          media_source: string
+          rating: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          media_external_id: string
+          media_source: string
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          media_external_id?: string
+          media_source?: string
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       list_items: {
         Row: {
           created_at: string

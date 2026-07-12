@@ -39,7 +39,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
 import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
-import { getArticlesForTitle, toFicheArticle } from "@/lib/news";
+import { getRelevantArticlesForTitle, toFicheArticle } from "@/lib/news";
 
 export const Route = createFileRoute("/media/$source/$id")({
   loader: async ({ context, params }) => {
@@ -157,11 +157,13 @@ function MediaDetailPage() {
     { source, externalId: id },
     item.related,
   );
-  const titleArticles = getArticlesForTitle(
-    source,
-    id,
-    `${universeAnchor.source}:${universeAnchor.externalId}`,
-  ).map(toFicheArticle);
+  const titleArticles = getRelevantArticlesForTitle(source, id, {
+    universeKey: `${universeAnchor.source}:${universeAnchor.externalId}`,
+    relatedRefs: item.related.map((r) => ({
+      source: r.source,
+      externalId: r.externalId,
+    })),
+  }).map(({ article, relevance }) => toFicheArticle(article, relevance));
 
 
   const released = fmtDate(item.releaseDate);
@@ -396,7 +398,7 @@ function MediaDetailPage() {
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
           {/* Editorial context — renders only when a title-linked article exists. */}
-          <FicheArticles articles={titleArticles} />
+          <FicheArticles articles={titleArticles} titleLabel={item.title} />
         </div>
       </div>
     </AppShell>

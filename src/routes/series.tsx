@@ -8,6 +8,9 @@ import { seriesPageQO } from "@/lib/queries";
 const SERIES_TABS = new Set(["trending", "popular", "onair"]);
 
 export const Route = createFileRoute("/series")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" && SERIES_TABS.has(search.tab) ? search.tab : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Séries — KAZEN" },

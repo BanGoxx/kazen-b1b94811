@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Newspaper, ArrowUpRight } from "lucide-react";
-import { getFeaturedArticles } from "@/lib/news";
+import { getDiscoverArticles } from "@/lib/news";
 
 /**
  * Découverte "Actualités KAZEN" block.

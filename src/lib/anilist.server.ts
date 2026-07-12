@@ -398,6 +398,7 @@ interface AniListDetailRaw {
         format?: string | null;
         title?: { romaji?: string | null; english?: string | null } | null;
         coverImage?: { large?: string | null } | null;
+        startDate?: { year?: number | null } | null;
       } | null;
     }[] | null;
   } | null;

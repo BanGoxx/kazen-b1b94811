@@ -69,7 +69,7 @@ export const createImportBatch = createServerFn({ method: "POST" })
       is_rewatching: e.isRewatching ?? false,
       // Id-based providers (AniList) carry an exact catalog key + snapshot so the
       // preview can match by id and confirm can seed media_records directly.
-      media_snapshot: e.mediaSnapshot ?? null,
+      media_snapshot: (e.mediaSnapshot ?? null) as never,
     }));
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);

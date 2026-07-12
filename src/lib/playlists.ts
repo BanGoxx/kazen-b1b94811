@@ -107,7 +107,7 @@ export function useMyPlaylists() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("playlists")
-        .select("id,owner_id,title,description,is_public,created_at,updated_at,playlist_items(id)")
+        .select("id,owner_id,title,description,recommendation,is_public,created_at,updated_at,playlist_items(id)")
         .order("updated_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []).map((row) => ({
@@ -135,7 +135,7 @@ export function usePlaylist(id: string) {
     queryFn: async (): Promise<PlaylistDetail | null> => {
       const { data: pl, error } = await supabase
         .from("playlists")
-        .select("id,owner_id,title,description,is_public,created_at,updated_at")
+        .select("id,owner_id,title,description,recommendation,is_public,created_at,updated_at")
         .eq("id", id)
         .maybeSingle();
       if (error) throw new Error(error.message);
@@ -207,7 +207,7 @@ export function usePublicPlaylists() {
       const { data, error } = await supabase
         .from("playlists")
         .select(
-          "id,owner_id,title,description,created_at,updated_at,playlist_items(media_records(poster_url))",
+          "id,owner_id,title,description,recommendation,created_at,updated_at,playlist_items(media_records(poster_url))",
         )
         .eq("is_public", true)
         .order("updated_at", { ascending: false })

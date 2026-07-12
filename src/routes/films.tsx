@@ -8,6 +8,9 @@ import { moviePageQO } from "@/lib/queries";
 const FILM_TABS = new Set(["trending", "popular", "upcoming", "animated", "asian"]);
 
 export const Route = createFileRoute("/films")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" && FILM_TABS.has(search.tab) ? search.tab : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Films — KAZEN" },

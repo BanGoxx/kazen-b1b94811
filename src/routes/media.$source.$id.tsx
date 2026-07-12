@@ -22,6 +22,7 @@ import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
 import { UserListPanel } from "@/components/media/UserListPanel";
+import { AddToPlaylist } from "@/components/media/AddToPlaylist";
 import { FicheSection } from "@/components/media/FicheSection";
 import { FicheReviews } from "@/components/media/FicheReviews";
 import { ExpandableText } from "@/components/media/ExpandableText";

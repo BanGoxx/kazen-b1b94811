@@ -407,11 +407,17 @@ function ImportPage() {
                   </div>
                   {b.status === "completed" && (
                     <Button variant="outline" size="sm" onClick={() => handleRollback(b.id)} disabled={busy}>
-                      <Undo2 className="h-4 w-4" /> Annuler
+                      <Undo2 className="h-4 w-4" /> Annuler l'import
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)} disabled={busy}>
-                    <Trash2 className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(b.id)}
+                    disabled={busy}
+                    aria-label="Supprimer ce lot de l'historique"
+                  >
+                    <Trash2 className="h-4 w-4" /> Supprimer
                   </Button>
                 </div>
               ))}

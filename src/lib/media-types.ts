@@ -222,6 +222,8 @@ export interface MediaDetail extends MediaItem {
   countryOfOrigin: string | null;
   endDate: string | null;
   videos: MediaVideo[];
+  /** Ordered episode list (anime/series). Empty when no episode data exists. */
+  episodes: MediaEpisode[];
 }
 
 // ---------- Personal tracking (user data) ----------

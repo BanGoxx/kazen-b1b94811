@@ -15,6 +15,7 @@ import {
   type ImportMediaType,
 } from "./import-schema";
 import { parseNautiljonList } from "./nautiljon-parser";
+import { parseMalXml } from "./mal-parser";
 
 export type ProviderId = ImportProvider | "kazen_csv" | "kazen_json";
 

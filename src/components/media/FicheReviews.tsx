@@ -18,6 +18,7 @@ import type { FicheReview, ReviewReply } from "@/lib/reviews";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { Button } from "@/components/ui/button";
+import { ReportDialog } from "@/components/moderation/ReportDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";

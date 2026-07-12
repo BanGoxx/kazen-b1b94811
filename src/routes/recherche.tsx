@@ -235,7 +235,16 @@ function SearchPage() {
         />
       </div>
 
-      {trimmed.length < 2 ? (
+      {browseMode ? (
+        <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
+          Parcours par genre — titres populaires correspondant à{" "}
+          <span className="font-semibold text-foreground">{filters.genres.join(", ")}</span>.
+          Saisissez un titre ci-dessus pour une recherche précise.
+        </p>
+      ) : null}
+
+      {trimmed.length < 2 && !browseMode ? (
+
         <div className="max-w-2xl space-y-4">
           <p className="text-sm font-semibold text-muted-foreground">Suggestions populaires</p>
           <div className="flex flex-wrap gap-2">

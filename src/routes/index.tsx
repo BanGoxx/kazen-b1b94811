@@ -220,6 +220,7 @@ function DiscoverPage() {
         {/* ----- Univers anime (priorité KAZEN) ----- */}
         <CategoryBand
           icon={Sparkles}
+          kicker="L'essentiel KAZEN"
           label="Univers anime"
           description="Tendances, valeurs sûres et sorties attendues de l'animation"
         />
@@ -247,6 +248,7 @@ function DiscoverPage() {
         {/* ----- Côté séries ----- */}
         <CategoryBand
           icon={Tv}
+          kicker="Petit écran"
           label="Côté séries"
           description="Drames, thrillers et pépites à ne pas manquer"
         />
@@ -258,6 +260,7 @@ function DiscoverPage() {
         {/* ----- Grand écran ----- */}
         <CategoryBand
           icon={Film}
+          kicker="Cinéma"
           label="Grand écran"
           description="Films tendance et prochaines sorties ciné & streaming"
         />

@@ -9,23 +9,26 @@ export function CategoryBand({
   icon: Icon,
   label,
   description,
+  kicker = "Chapitre",
   className,
 }: {
   icon: LucideIcon;
   label: string;
   description?: string;
+  kicker?: string;
   className?: string;
 }) {
   return (
     <div className={cn("flex items-center gap-4 sm:gap-5", className)}>
       <span
         aria-hidden="true"
-        className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-card/70 text-primary shadow-[var(--shadow-inset-line)] backdrop-blur"
+        className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/15 to-transparent text-primary shadow-[var(--shadow-inset-line)] backdrop-blur transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105"
       >
         <Icon className="h-5 w-5" />
       </span>
       <div className="min-w-0">
-        <h2 className="font-display text-[1.6rem] font-extrabold leading-none tracking-[-0.03em] sm:text-4xl">
+        <span className="eyebrow block text-[0.62rem] text-primary/80">{kicker}</span>
+        <h2 className="mt-0.5 font-display text-[1.6rem] font-extrabold leading-none tracking-[-0.03em] sm:text-4xl">
           {label}
         </h2>
         {description ? (

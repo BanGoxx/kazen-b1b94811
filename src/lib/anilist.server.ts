@@ -621,6 +621,7 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
     videos: trailerUrl
       ? [{ key: m.trailer!.id!, label: "Bande-annonce", url: trailerUrl }]
       : [],
+    episodes: orderedEpisodes,
   };
 }
 

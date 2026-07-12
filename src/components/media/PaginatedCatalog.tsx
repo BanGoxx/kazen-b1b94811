@@ -38,6 +38,12 @@ export function PaginatedCatalog(props: {
   // "complete catalogue" phrasing; pass a season/upcoming-specific note when
   // the total is a genuine complete set rather than an open-ended catalogue.
   completionLabel?: string;
+  // When true, upgrade the SSR/curated first page to real browser-direct data
+  // once after hydration (anime/seasonal catalogs that can be Worker-blocked).
+  upgradeOnMount?: boolean;
+  // Stable id used to persist/restore the filter selection across
+  // back-navigation. Defaults to the query key when omitted.
+  stateKey?: string;
 }) {
   return (
     <SafeSection minHeight="20rem" pending={<CatalogPending />}>

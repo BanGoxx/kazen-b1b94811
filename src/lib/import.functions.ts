@@ -114,6 +114,33 @@ export const getImportPreview = createServerFn({ method: "GET" })
 
     const results = [];
     for (const it of items ?? []) {
+      // Fast path: id-based providers (AniList) carry an exact catalog key +
+      // snapshot, so we skip fuzzy title matching entirely and match by id.
+      const snapshot = it.media_snapshot as { key?: string } | null;
+      const snapshotKey = snapshot?.key ?? null;
+      if (snapshotKey) {
+        const isDup = existingKeys.has(snapshotKey);
+        const matchStatus: MatchStatus = isDup ? "duplicate" : "exact";
+        const action: ImportAction = isDup ? "skip" : "create";
+        await context.supabase
+          .from("import_items")
+          .update({
+            matched_media_key: snapshotKey,
+            match_confidence: 1,
+            match_status: matchStatus,
+            import_action: action,
+          })
+          .eq("id", it.id);
+        results.push({
+          ...it,
+          matched_media_key: snapshotKey,
+          match_confidence: 1,
+          match_status: matchStatus,
+          import_action: action,
+        });
+        continue;
+      }
+
       // Candidate lookup against the shared KAZEN catalog (media_records).
       const firstWord = (it.normalized_title ?? it.raw_title).split(/\s+/)[0] ?? "";
       const { data: cands } = await context.supabase

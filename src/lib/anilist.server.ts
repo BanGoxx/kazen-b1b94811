@@ -623,6 +623,15 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
       });
     }
   }
+  // Last resort: AniList has an episode count but no per-episode metadata
+  // (common for finished/simulcast titles). Synthesize a numbered list so the
+  // "Épisodes" section still renders instead of disappearing.
+  if (episodes.length === 0 && typeof m.episodes === "number" && m.episodes > 0) {
+    const total = Math.min(m.episodes, 500);
+    for (let n = 1; n <= total; n++) {
+      episodes.push({ number: n, title: null, airDate: null, thumbnailUrl: null, isAired: true });
+    }
+  }
   const orderedEpisodes = orderEpisodes(episodes);
 
   return {

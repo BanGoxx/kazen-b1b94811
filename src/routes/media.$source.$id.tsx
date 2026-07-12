@@ -37,6 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
 import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
+import { getArticlesForTitle, toFicheArticle } from "@/lib/news";
 
 export const Route = createFileRoute("/media/$source/$id")({
   loader: async ({ context, params }) => {
@@ -149,6 +150,17 @@ function MediaDetailPage() {
   const router = useRouter();
   const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
   if (!item) return null;
+
+  const universeAnchor = deriveGroupAnchor(
+    { source, externalId: id },
+    item.related,
+  );
+  const titleArticles = getArticlesForTitle(
+    source,
+    id,
+    `${universeAnchor.source}:${universeAnchor.externalId}`,
+  ).map(toFicheArticle);
+
 
   const released = fmtDate(item.releaseDate);
   const facts: { icon: typeof CalendarDays; label: string; value: string }[] = [];
@@ -372,8 +384,8 @@ function MediaDetailPage() {
 
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
-          {/* Editorial context — renders only when a safe article source exists. */}
-          <FicheArticles articles={[]} />
+          {/* Editorial context — renders only when a title-linked article exists. */}
+          <FicheArticles articles={titleArticles} />
         </div>
       </div>
     </AppShell>

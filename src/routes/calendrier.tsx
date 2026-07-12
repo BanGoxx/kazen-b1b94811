@@ -426,6 +426,14 @@ function SignInFilterPrompt() {
 
 
 function CalendarEntry({ item }: { item: MediaItem }) {
+  // When the item is placed on its next-episode date, surface the episode
+  // number — the clearest signal that this is an airing anime, not a premiere.
+  const epDate = item.nextEpisode?.airDate?.slice(0, 10);
+  const onEpisode = !!epDate && epDate === calendarDate(item);
+  const epLabel =
+    onEpisode && Number.isFinite(item.nextEpisode!.number) && item.nextEpisode!.number > 0
+      ? `Ép. ${item.nextEpisode!.number}`
+      : null;
   return (
     <Link
       to="/media/$source/$id"
@@ -440,7 +448,12 @@ function CalendarEntry({ item }: { item: MediaItem }) {
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", TYPE_DOT[item.mediaType])} />
           <span className="truncate text-[0.7rem] font-semibold group-hover:text-primary">{item.title}</span>
         </div>
-        {item.platforms[0] ? (
+        {epLabel ? (
+          <span className="truncate text-[0.65rem] font-semibold text-primary">
+            {epLabel}
+            {item.platforms[0] ? <span className="font-normal text-muted-foreground"> · {item.platforms[0].name}</span> : null}
+          </span>
+        ) : item.platforms[0] ? (
           <span className="truncate text-[0.65rem] text-muted-foreground">{item.platforms[0].name}</span>
         ) : (
           <span className="text-[0.65rem] text-muted-foreground">{MEDIA_TYPE_LABELS[item.mediaType]}</span>

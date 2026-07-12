@@ -228,6 +228,24 @@ function MediaDetailPage() {
               <p className="text-lg text-muted-foreground">{item.titleOriginal}</p>
             ) : null}
             <FicheTrackingBadge mediaKey={item.key} />
+            {hasFranchiseLinks(item.related)
+              ? (() => {
+                  const anchor = deriveGroupAnchor(
+                    { source: item.source, externalId: item.externalId },
+                    item.related,
+                  );
+                  return (
+                    <Link
+                      to="/franchise/$source/$id"
+                      params={{ source: anchor.source, id: anchor.externalId }}
+                      className="focus-ring inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+                    >
+                      <Network className="h-3.5 w-3.5" />
+                      Groupe : {item.title} — voir l'univers complet
+                    </Link>
+                  );
+                })()
+              : null}
             {item.genres.length ? (
               <div className="flex flex-wrap gap-2 pt-1">
                 {item.genres.map((g) => (

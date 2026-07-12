@@ -372,8 +372,8 @@ function MediaDetailPage() {
 
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
-          {/* Editorial context — renders only when a safe article source exists. */}
-          <FicheArticles articles={[]} />
+          {/* Editorial context — renders only when a title-linked article exists. */}
+          <FicheArticles articles={titleArticles} />
         </div>
       </div>
     </AppShell>

@@ -41,20 +41,18 @@ export function PaginatedCatalog(props: {
 }
 
 function CatalogPending() {
-  return (
-    <div className="flex items-center justify-center py-24 text-muted-foreground">
-      <Loader2 className="h-6 w-6 animate-spin" />
-    </div>
-  );
+  return <CatalogLoading count={10} />;
 }
 
 function CatalogInner({
   queryOptions,
   emptyLabel,
+  completionLabel,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
+  completionLabel?: string;
 }) {
   const query = useSuspenseInfiniteQuery(queryOptions);
   const [state, setState] = useState<FilterState>({

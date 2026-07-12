@@ -4,7 +4,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
-import { MediaGrid, MediaGridSkeleton } from "@/components/media/MediaGrid";
+import { MediaGridSkeleton } from "@/components/media/MediaGrid";
+import { SearchResultGrid } from "@/components/media/SearchResultCard";
 import { EmptyState } from "@/components/media/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -304,13 +305,13 @@ function SearchPage() {
                 <ResultSection title="Films" to="/films" items={filtered.movies} />
               </TabsContent>
               <TabsContent value="anime" className="mt-6">
-                <MediaGrid items={filtered.anime} />
+                <SearchResultGrid items={filtered.anime} />
               </TabsContent>
               <TabsContent value="series" className="mt-6">
-                <MediaGrid items={filtered.series} />
+                <SearchResultGrid items={filtered.series} />
               </TabsContent>
               <TabsContent value="movies" className="mt-6">
-                <MediaGrid items={filtered.movies} />
+                <SearchResultGrid items={filtered.movies} />
               </TabsContent>
             </Tabs>
           )}
@@ -358,7 +359,7 @@ function ResultSection({
           Explorer
         </Link>
       </div>
-      <MediaGrid items={items} />
+      <SearchResultGrid items={items} />
     </section>
   );
 }

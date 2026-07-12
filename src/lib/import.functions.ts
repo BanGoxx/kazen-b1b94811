@@ -63,6 +63,10 @@ export const createImportBatch = createServerFn({ method: "POST" })
       progress: e.progress,
       started_at: e.startedAt,
       completed_at: e.completedAt,
+      notes: e.comments ?? null,
+      user_tags: e.userTags ?? [],
+      rewatch_count: e.rewatchCount ?? null,
+      is_rewatching: e.isRewatching ?? false,
     }));
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);

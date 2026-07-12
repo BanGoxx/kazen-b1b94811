@@ -203,7 +203,7 @@ export function usePlaylistMutations() {
       isPublic?: boolean;
     }) => {
       if (!user) throw new Error("not-auth");
-      const patch: Record<string, unknown> = {};
+      const patch: { title?: string; description?: string; is_public?: boolean } = {};
       if (input.title !== undefined) patch.title = input.title.trim();
       if (input.description !== undefined) patch.description = input.description.trim();
       if (input.isPublic !== undefined) patch.is_public = input.isPublic;

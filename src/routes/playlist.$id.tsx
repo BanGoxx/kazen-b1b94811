@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight } from "lucide-react";
+import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight, Quote } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
 import { usePlaylist, usePlaylistLike } from "@/lib/playlists";
@@ -170,6 +170,14 @@ function PlaylistPage() {
                 <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
                   {data.meta.description}
                 </p>
+              )}
+              {data.meta.recommendation && (
+                <blockquote className="max-w-2xl rounded-2xl border-l-2 border-primary/60 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/90">
+                  <span className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                    <Quote className="h-3.5 w-3.5" /> Pourquoi cette liste
+                  </span>
+                  {data.meta.recommendation}
+                </blockquote>
               )}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 <div className="flex items-center gap-2">

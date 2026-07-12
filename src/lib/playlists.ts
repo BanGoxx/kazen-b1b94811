@@ -22,6 +22,7 @@ export interface PlaylistMeta {
   ownerId: string;
   title: string;
   description: string;
+  recommendation: string;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;
@@ -78,6 +79,7 @@ function mapMeta(row: {
   owner_id: string;
   title: string;
   description: string;
+  recommendation?: string | null;
   is_public: boolean;
   created_at: string;
   updated_at: string;
@@ -87,6 +89,7 @@ function mapMeta(row: {
     ownerId: row.owner_id,
     title: row.title,
     description: row.description,
+    recommendation: row.recommendation ?? "",
     isPublic: row.is_public,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -104,7 +107,7 @@ export function useMyPlaylists() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("playlists")
-        .select("id,owner_id,title,description,is_public,created_at,updated_at,playlist_items(id)")
+        .select("id,owner_id,title,description,recommendation,is_public,created_at,updated_at,playlist_items(id)")
         .order("updated_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []).map((row) => ({
@@ -132,7 +135,7 @@ export function usePlaylist(id: string) {
     queryFn: async (): Promise<PlaylistDetail | null> => {
       const { data: pl, error } = await supabase
         .from("playlists")
-        .select("id,owner_id,title,description,is_public,created_at,updated_at")
+        .select("id,owner_id,title,description,recommendation,is_public,created_at,updated_at")
         .eq("id", id)
         .maybeSingle();
       if (error) throw new Error(error.message);
@@ -182,6 +185,7 @@ export interface PublicPlaylistCard {
   id: string;
   title: string;
   description: string;
+  recommendation: string;
   ownerName: string;
   ownerAvatar: string | null;
   count: number;
@@ -189,6 +193,35 @@ export interface PublicPlaylistCard {
   posters: string[];
   updatedAt: string;
   createdAt: string;
+  rankScore: number;
+}
+
+/**
+ * Transparent popularity score for a public shared list. Blends four signals
+ * so likes help a list rise without being the only factor:
+ *  - likes (strongest weight)
+ *  - number of visible items (breadth, capped)
+ *  - editorial completeness (has an intro / a recommendation note)
+ *  - recency (gentle boost, decays over 3 weeks)
+ * Empty / hidden / soft-deleted lists never reach this function.
+ */
+export function playlistRankScore(c: {
+  likeCount: number;
+  count: number;
+  description: string;
+  recommendation: string;
+  updatedAt: string;
+}): number {
+  const ageDays = (Date.now() - new Date(c.updatedAt).getTime()) / 86_400_000;
+  const recencyBoost = Math.max(0, 21 - ageDays) / 21; // 0..1 over 3 weeks
+  const completeness =
+    (c.description.trim().length >= 20 ? 1 : 0) + (c.recommendation.trim().length >= 20 ? 1 : 0);
+  return (
+    c.likeCount * 3 +
+    Math.min(c.count, 20) * 0.4 +
+    completeness * 1.5 +
+    recencyBoost * 2
+  );
 }
 
 /**
@@ -204,7 +237,7 @@ export function usePublicPlaylists() {
       const { data, error } = await supabase
         .from("playlists")
         .select(
-          "id,owner_id,title,description,created_at,updated_at,playlist_items(media_records(poster_url))",
+          "id,owner_id,title,description,recommendation,created_at,updated_at,playlist_items(media_records(poster_url))",
         )
         .eq("is_public", true)
         .order("updated_at", { ascending: false })
@@ -241,17 +274,24 @@ export function usePublicPlaylists() {
             .filter((p): p is string => Boolean(p))
             .slice(0, 4);
           const prof = profileMap.get(row.owner_id);
+          const description = row.description ?? "";
+          const recommendation = (row as { recommendation?: string | null }).recommendation ?? "";
+          const count = rawItems.length;
+          const likeCount = likeMap.get(row.id) ?? 0;
+          const updatedAt = row.updated_at;
           return {
             id: row.id,
             title: row.title,
-            description: row.description,
+            description,
+            recommendation,
             ownerName: prof?.display_name || "Membre KAZEN",
             ownerAvatar: prof?.avatar_url ?? null,
-            count: rawItems.length,
-            likeCount: likeMap.get(row.id) ?? 0,
+            count,
+            likeCount,
             posters,
-            updatedAt: row.updated_at,
+            updatedAt,
             createdAt: row.created_at,
+            rankScore: playlistRankScore({ likeCount, count, description, recommendation, updatedAt }),
           };
         })
         // Hide empty lists from public discovery for a curated feel.
@@ -259,15 +299,8 @@ export function usePublicPlaylists() {
 
       const recent = cards.slice(0, 24);
       const popular = [...cards]
-        .filter((c) => c.likeCount > 0 || c.count >= 3)
-        .sort((a, b) => {
-          const score = (c: PublicPlaylistCard) => {
-            const ageDays = (Date.now() - new Date(c.updatedAt).getTime()) / 86_400_000;
-            const recencyBoost = Math.max(0, 14 - ageDays) / 14; // 0..1 over 2 weeks
-            return c.likeCount * 3 + Math.min(c.count, 20) * 0.4 + recencyBoost * 2;
-          };
-          return score(b) - score(a);
-        })
+        .filter((c) => c.likeCount > 0 || c.count >= 3 || c.recommendation.trim().length >= 20)
+        .sort((a, b) => b.rankScore - a.rankScore)
         .slice(0, 12);
 
       return { recent, popular };
@@ -332,7 +365,12 @@ export function usePlaylistMutations() {
   const invalidateMine = () => qc.invalidateQueries({ queryKey: ["my-playlists"] });
 
   const create = useMutation({
-    mutationFn: async (input: { title: string; description?: string; isPublic?: boolean }) => {
+    mutationFn: async (input: {
+      title: string;
+      description?: string;
+      recommendation?: string;
+      isPublic?: boolean;
+    }) => {
       if (!user) throw new Error("not-auth");
       const { data, error } = await supabase
         .from("playlists")
@@ -340,6 +378,7 @@ export function usePlaylistMutations() {
           owner_id: user.id,
           title: input.title.trim(),
           description: input.description?.trim() ?? "",
+          recommendation: input.recommendation?.trim() ?? "",
           is_public: input.isPublic ?? true,
         })
         .select("id")
@@ -355,12 +394,19 @@ export function usePlaylistMutations() {
       id: string;
       title?: string;
       description?: string;
+      recommendation?: string;
       isPublic?: boolean;
     }) => {
       if (!user) throw new Error("not-auth");
-      const patch: { title?: string; description?: string; is_public?: boolean } = {};
+      const patch: {
+        title?: string;
+        description?: string;
+        recommendation?: string;
+        is_public?: boolean;
+      } = {};
       if (input.title !== undefined) patch.title = input.title.trim();
       if (input.description !== undefined) patch.description = input.description.trim();
+      if (input.recommendation !== undefined) patch.recommendation = input.recommendation.trim();
       if (input.isPublic !== undefined) patch.is_public = input.isPublic;
       const { error } = await supabase
         .from("playlists")
@@ -372,6 +418,7 @@ export function usePlaylistMutations() {
     onSuccess: (_d, vars) => {
       invalidateMine();
       qc.invalidateQueries({ queryKey: ["playlist", vars.id] });
+      qc.invalidateQueries({ queryKey: ["public-playlists"] });
     },
   });
 

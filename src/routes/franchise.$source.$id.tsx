@@ -154,8 +154,9 @@ function GroupPage() {
           </div>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Tout l'univers regroupé : {group.items.length} contenus liés (animes, manga,
-          light novels, musiques…), ordonnés par année et par format.
+          Tout l'univers regroupé : {group.items.length} contenus liés (
+          {group.sections.map((s) => FORMAT_GROUP_LABELS[s.formatGroup]).join(", ")}),
+          ordonnés par année et par format.
         </p>
       </div>
 

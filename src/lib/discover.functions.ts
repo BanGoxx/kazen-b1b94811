@@ -1,12 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { MediaDetail, MediaItem } from "./media-types";
-import { anilistList, anilistDetail, currentAnimeSeason } from "./anilist.server";
+import { anilistList, anilistDetail, currentAnimeSeason, anilistSearchPaged } from "./anilist.server";
 import {
   tmdbMovieList,
   tmdbTvList,
   tmdbMovieDetail,
   tmdbTvDetail,
   tmdbSearch,
+  tmdbSearchPaged,
   tmdbAnimatedMovies,
 } from "./tmdb.server";
 import type { PagedMedia } from "./tmdb.server";

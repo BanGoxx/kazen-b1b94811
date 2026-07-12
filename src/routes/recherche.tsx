@@ -62,8 +62,23 @@ function SearchPage() {
     setQ(initialQ ?? "");
   }, [initialQ]);
 
-  const { data, isFetching } = useQuery(searchMediaQO(q));
+  const {
+    data: pages,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(searchMediaInfiniteQO(q));
   const trimmed = q.trim();
+
+  const data = useMemo(() => {
+    if (!pages) return undefined;
+    return {
+      anime: pages.pages.flatMap((p) => p.anime),
+      series: pages.pages.flatMap((p) => p.series),
+      movies: pages.pages.flatMap((p) => p.movies),
+    };
+  }, [pages]);
 
   const filters: SearchFilters = useMemo(
     () => ({
@@ -88,6 +103,21 @@ function SearchPage() {
       movies: apply(data?.movies),
     };
   }, [data, filters, trimmed]);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) fetchNextPage();
+      },
+      { rootMargin: "600px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, trimmed]);
+
 
   const counts = {
     anime: filtered.anime.length,

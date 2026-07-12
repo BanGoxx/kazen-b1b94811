@@ -74,10 +74,10 @@
      premium rather than aggressive. */
   --primary: oklch(0.63 0.168 32);
   --primary-foreground: oklch(0.99 0.01 60);
-  --secondary: oklch(0.238 0.009 264);
+  --secondary: oklch(0.239 0.01 286);
   --secondary-foreground: oklch(0.96 0.005 90);
-  --muted: oklch(0.218 0.008 264);
-  --muted-foreground: oklch(0.735 0.012 264);
+  --muted: oklch(0.219 0.009 286);
+  --muted-foreground: oklch(0.738 0.012 286);
   --accent: oklch(0.855 0.05 85);
   --accent-foreground: oklch(0.2 0.02 60);
   --destructive: oklch(0.62 0.21 22);

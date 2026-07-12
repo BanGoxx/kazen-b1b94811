@@ -506,14 +506,36 @@ function EnrichmentSection() {
           <Button variant="ghost" onClick={() => setForm({ ...EMPTY_FORM })}>
             Nouveau
           </Button>
-          <Button
-            variant="ghost"
-            className="text-destructive"
-            disabled={delMut.isPending || !form.externalId.trim()}
-            onClick={() => delMut.mutate()}
-          >
-            <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                className="text-destructive"
+                disabled={delMut.isPending || !form.externalId.trim()}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer cet enrichissement ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  L'enrichissement KAZEN pour {form.source} #{form.externalId} sera
+                  définitivement supprimé. Les données du fournisseur (AniList/TMDB)
+                  ne sont pas affectées. Cette action est irréversible.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => delMut.mutate()}
+                >
+                  Supprimer définitivement
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </SectionCard>
     </div>

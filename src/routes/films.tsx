@@ -28,10 +28,17 @@ export const Route = createFileRoute("/films")({
 });
 
 function MoviesPage() {
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <AppShell>
       <PageHeader title="Films" description="Du blockbuster au film culte, sans oublier l'animation." />
-      <Tabs defaultValue="trending">
+      <Tabs
+        value={tab ?? "trending"}
+        onValueChange={(value) =>
+          navigate({ to: "/films", search: { tab: value }, replace: true })
+        }
+      >
         <TabsList>
           <TabsTrigger value="trending">Tendance</TabsTrigger>
           <TabsTrigger value="popular">Populaires</TabsTrigger>

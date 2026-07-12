@@ -18,6 +18,11 @@ const AUTO_LOAD_CAP = 600;
 // time (hybrid: auto on scroll up to a cap, then manual button) — never in
 // parallel — so the AniList queue and TMDB safeguards stay intact. Client-side
 // genre/status filters and sorting apply over everything already loaded.
+//
+// PRESERVATION RULE (KAZEN): infinite scroll + the "Voir plus" fallback are
+// expected catalog behavior. Do not remove them during visual/design polish.
+// If anime catalogs ever stop paginating, check AniList upstream (403/rate
+// limiting) first — the curated fallback returns hasMore:false by design.
 export function PaginatedCatalog(props: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;

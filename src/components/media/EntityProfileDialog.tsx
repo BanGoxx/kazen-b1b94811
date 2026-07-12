@@ -44,7 +44,8 @@ export function EntityProfileDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const external = person ? anilistUrl(person, kind) : null;
+  const nodeId = person ? anilistNodeId(person) : null;
+  const external = nodeId ? anilistUrl(nodeId, kind) : null;
   const roleLabel =
     kind === "character" ? "Voix / rôle" : "Rôle";
 

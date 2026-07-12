@@ -11,6 +11,7 @@ import {
   Search,
   Leaf,
   ListChecks,
+  ListMusic,
   LogOut,
   UserRound,
   Heart,

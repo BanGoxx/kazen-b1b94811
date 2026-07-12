@@ -370,6 +370,7 @@ function augmentTmdb(
     ageRating?: string | null;
     titleAlternatives?: string[];
     endDate?: string | null;
+    episodes?: MediaEpisode[];
   },
 ): MediaDetail {
   const cast: CreditPerson[] = (data.credits?.cast ?? []).slice(0, 14).map((c) => ({

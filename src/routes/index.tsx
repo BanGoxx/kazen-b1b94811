@@ -296,6 +296,13 @@ function DiscoverPage() {
         <SafeSection>
           <CommunityListsBand />
         </SafeSection>
+        </div>
+
+        <aside className="mt-14 lg:mt-0">
+          <SafeSection minHeight="0">
+            <RecentArticles />
+          </SafeSection>
+        </aside>
       </div>
 
 

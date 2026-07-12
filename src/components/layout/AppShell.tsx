@@ -143,11 +143,16 @@ function Brand() {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isModerator = useIsModerator();
+  const isOwner = useIsOwner();
   const { user } = useAuth();
   const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
-  const items = isModerator
-    ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
-    : base;
+  // Owner gets the unified "Espace fondateur" (which embeds Modération).
+  // Non-owner moderators (future, post-beta) keep the direct Modération link.
+  const items = isOwner
+    ? [...base, { to: "/fondateur", label: "Espace fondateur", icon: Crown }]
+    : isModerator
+      ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+      : base;
   return (
     <nav aria-label="Navigation principale">
       <ul className="space-y-1">

@@ -3,6 +3,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { fromAniList } from "./normalize";
 import type {
   CreditPerson,
+  EntityMediaLink,
+  EntityProfile,
+  EntityRelatedPerson,
   MediaDetail,
   MediaItem,
   RelatedMedia,

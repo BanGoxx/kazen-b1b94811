@@ -22,6 +22,8 @@ export interface FicheArticle {
   /** Internal KAZEN article slug (/actualites/$slug). Null for external ones. */
   slug?: string | null;
   publishedAt?: string | null;
+  /** Evergreen analysis — no dated publication claim is rendered. */
+  evergreen?: boolean;
   excerpt?: string | null;
   thumbnailUrl?: string | null;
   /** Why this article is shown on this fiche (drives a discreet tag). */
@@ -67,7 +69,9 @@ export function FicheArticles({
       <ul className="grid gap-3 sm:grid-cols-2">
         {shown.map((a) => {
           const when =
-            a.publishedAt && !Number.isNaN(new Date(a.publishedAt).getTime())
+            !a.evergreen &&
+            a.publishedAt &&
+            !Number.isNaN(new Date(a.publishedAt).getTime())
               ? dateFmt.format(new Date(a.publishedAt))
               : null;
           const tag =

@@ -164,7 +164,7 @@ function ReviewItem({
         {review.rating !== null && <RatingStars value={review.rating} />}
       </header>
       <div className="mt-3">
-        <ExpandableText text={review.body} clampLines={5} />
+        <ExpandableText text={review.body} limit={320} />
       </div>
       {isOwn && (
         <div className="mt-3 flex items-center justify-end gap-1">

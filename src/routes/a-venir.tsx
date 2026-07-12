@@ -151,11 +151,49 @@ function SpotlightCard({ item }: { item: MediaItem }) {
 }
 
 function UpcomingPage() {
-  const { data } = useSuspenseQuery(upcomingAllQO);
+  const { data: baseData } = useSuspenseQuery(upcomingAllQO);
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("all");
   const [platform, setPlatform] = useState<string>("all");
   const [sort, setSort] = useState<SortOrder>("soon");
+
+  // "Charger plus" state — additional bounded upcoming AniList pages loaded on
+  // demand (UI-only; no new provider, no schema). Pages 1-3 arrive via
+  // upcomingAllQO; manual loading continues from page 4, isAdult:false is
+  // preserved by anilistPublicPage("upcoming") and duplicates are removed by key.
+  const [extraAnime, setExtraAnime] = useState<MediaItem[]>([]);
+  const [nextPage, setNextPage] = useState(4);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [exhausted, setExhausted] = useState(false);
+
+  // Combined dataset with de-dupe by key so appended pages never duplicate a
+  // title already present (stable ordering: base first, then loaded pages).
+  const data = useMemo(() => {
+    if (!extraAnime.length) return baseData;
+    const seen = new Set(baseData.map((it) => it.key));
+    return [...baseData, ...extraAnime.filter((it) => !seen.has(it.key))];
+  }, [baseData, extraAnime]);
+
+  const loadMore = useCallback(async () => {
+    setLoadingMore(true);
+    setLoadError(false);
+    try {
+      const res = await anilistPublicPage("upcoming", nextPage);
+      setExtraAnime((prev) => {
+        const seen = new Set([...baseData, ...prev].map((it) => it.key));
+        const fresh = res.items.filter((it) => !seen.has(it.key));
+        return [...prev, ...fresh];
+      });
+      setNextPage((p) => p + 1);
+      if (!res.hasMore) setExhausted(true);
+    } catch (error) {
+      console.error("upcoming load more", error);
+      setLoadError(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [nextPage, baseData]);
 
   useEffect(() => {
     upgradeCatalogOnce(queryClient, upcomingAllQO.queryKey);

@@ -1,0 +1,1 @@
+ALTER TABLE public.import_items ADD COLUMN IF NOT EXISTS media_snapshot jsonb;

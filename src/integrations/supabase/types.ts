@@ -193,6 +193,7 @@ export type Database = {
           match_confidence: number | null
           match_status: string
           matched_media_key: string | null
+          media_snapshot: Json | null
           media_type: string | null
           normalized_title: string | null
           notes: string | null
@@ -224,6 +225,7 @@ export type Database = {
           match_confidence?: number | null
           match_status?: string
           matched_media_key?: string | null
+          media_snapshot?: Json | null
           media_type?: string | null
           normalized_title?: string | null
           notes?: string | null
@@ -255,6 +257,7 @@ export type Database = {
           match_confidence?: number | null
           match_status?: string
           matched_media_key?: string | null
+          media_snapshot?: Json | null
           media_type?: string | null
           normalized_title?: string | null
           notes?: string | null

@@ -253,6 +253,263 @@ function SoonPill() {
   );
 }
 
+const QUALITY_OPTIONS: DataQualityStatus[] = [
+  "complete",
+  "partial",
+  "provider_limited",
+  "needs_review",
+];
+
+const EMPTY_FORM = {
+  source: "anilist",
+  externalId: "",
+  titleOverride: "",
+  nativeTitleOverride: "",
+  synopsisOverride: "",
+  posterUrlOverride: "",
+  backdropUrlOverride: "",
+  statusNote: "",
+  dataQualityStatus: "needs_review" as DataQualityStatus,
+  enrichmentNotes: "",
+  isPublished: false,
+};
+
+function EnrichmentSection() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listEnrichments);
+  const getFn = useServerFn(getEnrichment);
+  const upsertFn = useServerFn(upsertEnrichment);
+  const deleteFn = useServerFn(deleteEnrichment);
+
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
+  const [form, setForm] = useState({ ...EMPTY_FORM });
+
+  const { data: rows, isFetching } = useQuery({
+    queryKey: ["enrichments", query],
+    queryFn: () => listFn({ data: { search: query } }),
+  });
+
+  const loadRecord = async (source: string, externalId: string) => {
+    try {
+      const row = (await getFn({ data: { source, externalId } })) as any;
+      if (!row) {
+        setForm({ ...EMPTY_FORM, source, externalId });
+        return;
+      }
+      setForm({
+        source: row.source,
+        externalId: row.external_id,
+        titleOverride: row.title_override ?? "",
+        nativeTitleOverride: row.native_title_override ?? "",
+        synopsisOverride: row.synopsis_override ?? "",
+        posterUrlOverride: row.poster_url_override ?? "",
+        backdropUrlOverride: row.backdrop_url_override ?? "",
+        statusNote: row.status_note ?? "",
+        dataQualityStatus: (row.data_quality_status ?? "needs_review") as DataQualityStatus,
+        enrichmentNotes: row.enrichment_notes ?? "",
+        isPublished: Boolean(row.is_published),
+      });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const saveMut = useMutation({
+    mutationFn: () => upsertFn({ data: form }),
+    onSuccess: () => {
+      toast.success("Enrichissement enregistré.");
+      qc.invalidateQueries({ queryKey: ["enrichments"] });
+      qc.invalidateQueries({
+        queryKey: ["enrichment", "public", form.source, form.externalId],
+      });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const delMut = useMutation({
+    mutationFn: () =>
+      deleteFn({ data: { source: form.source, externalId: form.externalId } }),
+    onSuccess: () => {
+      toast.success("Enrichissement supprimé.");
+      setForm({ ...EMPTY_FORM });
+      qc.invalidateQueries({ queryKey: ["enrichments"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const set = (k: keyof typeof form, v: string | boolean) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+      <SectionCard
+        title="Rechercher une fiche"
+        desc="Recherche par identifiant ou titre enrichi. Réservé au Fondateur."
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setQuery(search.trim());
+          }}
+          className="flex gap-2"
+        >
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Titre ou ID externe…"
+          />
+          <Button type="submit" size="icon" variant="secondary">
+            <Search className="h-4 w-4" />
+          </Button>
+        </form>
+        <div className="space-y-2">
+          {isFetching ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+            </p>
+          ) : (rows ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Aucun enrichissement pour le moment.
+            </p>
+          ) : (
+            (rows ?? []).map((r: any) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => loadRecord(r.source, r.external_id)}
+                className="focus-ring block w-full rounded-lg border border-border bg-card/60 p-3 text-left transition-colors hover:border-primary/40"
+              >
+                <p className="truncate text-sm font-semibold">
+                  {r.title_override || `${r.source}:${r.external_id}`}
+                </p>
+                <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>{r.source}:{r.external_id}</span>
+                  <span>·</span>
+                  <span>{DATA_QUALITY_LABELS[r.data_quality_status as DataQualityStatus]}</span>
+                  {r.is_published ? (
+                    <span className="text-primary">· publié</span>
+                  ) : (
+                    <span>· brouillon</span>
+                  )}
+                </p>
+              </button>
+            ))
+          )}
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Enrichissement des fiches"
+        desc="Complète ou corrige une fiche quand la source externe est faible. Les champs vides n'écrasent jamais les données AniList/TMDB."
+      >
+        <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+          <div className="space-y-1.5">
+            <Label>Source</Label>
+            <select
+              value={form.source}
+              onChange={(e) => set("source", e.target.value)}
+              className="focus-ring h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="anilist">anilist</option>
+              <option value="tmdb_movie">tmdb_movie</option>
+              <option value="tmdb_tv">tmdb_tv</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Identifiant externe</Label>
+            <Input
+              value={form.externalId}
+              onChange={(e) => set("externalId", e.target.value)}
+              placeholder="ex. 21"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Titre (remplacement)</Label>
+            <Input value={form.titleOverride} onChange={(e) => set("titleOverride", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Titre natif (remplacement)</Label>
+            <Input value={form.nativeTitleOverride} onChange={(e) => set("nativeTitleOverride", e.target.value)} />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Synopsis (remplacement)</Label>
+          <Textarea rows={4} value={form.synopsisOverride} onChange={(e) => set("synopsisOverride", e.target.value)} />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Affiche (URL)</Label>
+            <Input value={form.posterUrlOverride} onChange={(e) => set("posterUrlOverride", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Image de fond (URL)</Label>
+            <Input value={form.backdropUrlOverride} onChange={(e) => set("backdropUrlOverride", e.target.value)} />
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Statut des données</Label>
+            <select
+              value={form.dataQualityStatus}
+              onChange={(e) => set("dataQualityStatus", e.target.value)}
+              className="focus-ring h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {QUALITY_OPTIONS.map((s) => (
+                <option key={s} value={s}>{DATA_QUALITY_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Note de statut (publique)</Label>
+            <Input value={form.statusNote} onChange={(e) => set("statusNote", e.target.value)} />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Notes internes (privées)</Label>
+          <Textarea rows={2} value={form.enrichmentNotes} onChange={(e) => set("enrichmentNotes", e.target.value)} />
+          <p className="text-xs text-muted-foreground">Jamais exposées publiquement.</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Switch checked={form.isPublished} onCheckedChange={(v) => set("isPublished", v)} />
+          <Label className="cursor-pointer">Publier (visible sur la fiche publique)</Label>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <Button
+            variant="aurora"
+            disabled={saveMut.isPending || !form.externalId.trim()}
+            onClick={() => saveMut.mutate()}
+          >
+            {saveMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Enregistrer
+          </Button>
+          <Button variant="ghost" onClick={() => setForm({ ...EMPTY_FORM })}>
+            Nouveau
+          </Button>
+          <Button
+            variant="ghost"
+            className="text-destructive"
+            disabled={delMut.isPending || !form.externalId.trim()}
+            onClick={() => delMut.mutate()}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+          </Button>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+
 function RolesSection() {
   const qc = useQueryClient();
   const { data: badges } = useBadgeCatalog(true);

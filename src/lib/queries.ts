@@ -143,7 +143,15 @@ export const upcomingAllQO = queryOptions({
     const server = await getUpcomingAll();
     if (!IS_BROWSER) return server;
     try {
-      const anime = await anilistPublicList("upcoming");
+      // Pull several pages of real upcoming anime so the Anime tab has depth
+      // (the Worker's curated fallback is only a handful). Sequential + bounded
+      // to respect AniList rate limits; stop as soon as a page runs dry.
+      const anime: import("./media-types").MediaItem[] = [];
+      for (let page = 1; page <= 3; page++) {
+        const res = await anilistPublicPage("upcoming", page);
+        anime.push(...res.items);
+        if (!res.hasMore) break;
+      }
       if (!anime.length) return server;
       const seen = new Set(anime.map((a) => a.key));
       // Drop the server's curated anime placeholders in favor of the real list,
@@ -155,6 +163,7 @@ export const upcomingAllQO = queryOptions({
       return server;
     }
   },
+
   staleTime: IS_BROWSER ? 0 : HOUR,
   refetchOnMount: true,
   retry: 3,

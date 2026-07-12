@@ -28,7 +28,9 @@ export const Route = createFileRoute("/franchise/$source/$id")({
     const item = await context.queryClient.ensureQueryData(
       mediaDetailQO(params.source, params.id),
     );
-    if (!item) throw notFound();
+    // For AniList, the production Worker can be 403-blocked (null item); the
+    // component recovers via the browser-direct path. Only 404 non-AniList.
+    if (!item && params.source !== "anilist") throw notFound();
     return { item };
   },
   head: ({ loaderData, params }) => {

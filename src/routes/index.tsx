@@ -268,11 +268,6 @@ function DiscoverPage() {
         </SafeSection>
 
         <PlatformHighlights />
-
-        {/* ----- Actualités KAZEN (real editorial only; hidden when empty) ----- */}
-        <SafeSection>
-          <ArticleHighlights />
-        </SafeSection>
       </div>
 
 

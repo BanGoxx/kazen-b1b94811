@@ -234,7 +234,9 @@ export function usePublicPlaylists() {
           const rawItems = Array.isArray(row.playlist_items) ? row.playlist_items : [];
           const posters = rawItems
             .map(
-              (i) => (i.media_records as { poster_url: string | null } | null)?.poster_url ?? null,
+              (i) =>
+                (i.media_records as unknown as { poster_url: string | null } | null)?.poster_url ??
+                null,
             )
             .filter((p): p is string => Boolean(p))
             .slice(0, 4);

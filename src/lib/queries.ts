@@ -163,7 +163,8 @@ export const entityProfileQO = (kind: string, id: string) =>
     retry: 2,
   });
 
-import { getAnimePage, getMoviePage, getSeriesPage, searchMediaPaged } from "./discover.functions";
+import { getAnimePage, getMoviePage, getSeriesPage, searchMediaPaged, getSeasonalAnimePage } from "./discover.functions";
+import { anilistPublicSeasonalPage } from "./anilist-public";
 import type { PagedMedia } from "./tmdb.server";
 
 interface SearchPage {

@@ -165,11 +165,20 @@
 
 body {
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Comfortable measure + tidy wrapping for body paragraphs. */
+p {
+  text-wrap: pretty;
 }
 
 /* Brand wordmark: KAZEN set with confident, cinematic tracking. */
@@ -186,6 +195,9 @@ h1, h2, h3, .font-display {
 @theme {
   --animate-fade-in: fade-in 0.5s ease-out both;
   --animate-rise: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Shared motion easings for a consistent, premium feel across the app. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes fade-in {
@@ -202,6 +214,7 @@ h1, h2, h3, .font-display {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.55; }
 }
+
 
 @utility aurora-text {
   background: var(--gradient-aurora);
@@ -298,9 +311,22 @@ h1, h2, h3, .font-display {
 
 /* Subtle interactive lift for clickable surfaces (respects reduced motion). */
 @utility hover-lift {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s ease;
   &:hover { transform: translateY(-2px); }
+  &:active { transform: translateY(0) scale(0.99); }
 }
+
+/* Tactile press feedback for buttons / tappable controls. */
+@utility press {
+  transition: transform 0.18s var(--ease-soft);
+  &:active { transform: scale(0.97); }
+}
+
+/* Opt-in entrance reveal for sections/cards (respects reduced motion). */
+@utility reveal {
+  animation: rise 0.6s var(--ease-out-expo) both;
+}
+
 
 /* Thin gradient hairline used above active nav / section separators. */
 @utility aurora-hairline {
@@ -384,8 +410,59 @@ body,
     color 0.35s ease;
 }
 
+/* Smoother anchored navigation, offset so headings clear any sticky header. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* Premium, unobtrusive scrollbar that matches the graphite & ember theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.42 0.02 265) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.38 0.015 265 / 0.7);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.04 28 / 0.8);
+  background-clip: content-box;
+}
+
+/* Consistent, snappy transitions on common interactive controls. */
+a,
+button,
+[role="button"],
+summary {
+  transition:
+    color 0.2s var(--ease-soft),
+    background-color 0.2s var(--ease-soft),
+    border-color 0.2s var(--ease-soft),
+    opacity 0.2s var(--ease-soft),
+    transform 0.2s var(--ease-soft);
+}
+
+/* Media fades in gently once decoded instead of popping in. */
+img {
+  transition: opacity 0.4s var(--ease-soft);
+}
+
+
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
@@ -393,6 +470,7 @@ body,
     transition-duration: 0.001ms !important;
   }
 }
+
 
 /* Hide the injected "Made with Lovable" / "Edit with Lovable" badge without
    affecting document flow or layout. Uses display:none so no space is reserved. */

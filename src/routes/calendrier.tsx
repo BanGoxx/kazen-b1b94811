@@ -44,6 +44,10 @@ export const Route = createFileRoute("/calendrier")({
   loader: async ({ context }) => {
     void context.queryClient.ensureQueryData(upcomingAllQO);
     void context.queryClient.prefetchQuery(onAirSeriesQO);
+    // Currently-airing anime carry `nextEpisode`; prefetch so weekly episodes
+    // (not just premieres) can populate the grid.
+    void context.queryClient.prefetchQuery(trendingAnimeQO);
+    void context.queryClient.prefetchQuery(popularAnimeQO);
   },
   component: CalendarPage,
   pendingComponent: () => (

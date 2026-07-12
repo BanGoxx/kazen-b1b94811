@@ -9,6 +9,7 @@ import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import { CategoryBand } from "@/components/media/CategoryBand";
+import { ArticleHighlights } from "@/components/media/ArticleHighlights";
 import { SafeSection } from "@/components/media/SafeSection";
 import type { MediaItem } from "@/lib/media-types";
 import {

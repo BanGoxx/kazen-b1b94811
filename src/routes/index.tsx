@@ -240,8 +240,9 @@ function DiscoverPage() {
         <CategoryBand
           icon={Tv}
           label="Côté séries"
-          description="Les incontournables et nouveautés du petit écran"
+          description="Drames, thrillers et pépites à ne pas manquer"
         />
+
         <SafeSection>
           <FeaturedSeriesRow />
         </SafeSection>

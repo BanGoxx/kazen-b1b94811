@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MEDIA_TYPE_LABELS, STATUS_LABELS } from "@/lib/media-types";
+import { deriveGroupAnchor, hasFranchiseLinks } from "@/lib/franchise";
 import { mediaDetailQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/media/$source/$id")({

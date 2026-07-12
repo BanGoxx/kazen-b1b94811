@@ -61,22 +61,23 @@
 
 :root {
   --radius: 0.9rem;
-  /* Deep tinted near-black — cinematic, never pure black. Distinct surface
-     levels: background < sidebar < card < popover for clear depth. */
-  --background: oklch(0.145 0.006 264);
+  /* Deep obsidian with a whisper of night-plum/indigo undertone — cinematic,
+     never pure black. Distinct surface levels: background < sidebar < card <
+     popover for clear depth. */
+  --background: oklch(0.144 0.008 286);
   --foreground: oklch(0.972 0.004 90);
-  --card: oklch(0.196 0.008 264);
+  --card: oklch(0.197 0.009 286);
   --card-foreground: oklch(0.972 0.004 90);
-  --popover: oklch(0.21 0.009 264);
+  --popover: oklch(0.213 0.01 286);
   --popover-foreground: oklch(0.972 0.004 90);
   /* Ember/coral primary — warmed toward coral, chroma dialed back so red reads
      premium rather than aggressive. */
   --primary: oklch(0.63 0.168 32);
   --primary-foreground: oklch(0.99 0.01 60);
-  --secondary: oklch(0.238 0.009 264);
+  --secondary: oklch(0.239 0.01 286);
   --secondary-foreground: oklch(0.96 0.005 90);
-  --muted: oklch(0.218 0.008 264);
-  --muted-foreground: oklch(0.735 0.012 264);
+  --muted: oklch(0.219 0.009 286);
+  --muted-foreground: oklch(0.738 0.012 286);
   --accent: oklch(0.855 0.05 85);
   --accent-foreground: oklch(0.2 0.02 60);
   --destructive: oklch(0.62 0.21 22);
@@ -88,25 +89,25 @@
   --warning-foreground: oklch(0.2 0.03 78);
   --info: oklch(0.7 0.1 235);
   --info-foreground: oklch(0.16 0.02 235);
-  --border: oklch(0.68 0.01 264 / 20%);
-  --input: oklch(0.68 0.01 264 / 22%);
+  --border: oklch(0.72 0.012 286 / 15%);
+  --input: oklch(0.72 0.012 286 / 18%);
   --ring: oklch(0.63 0.168 32);
   --chart-1: oklch(0.63 0.168 32);
   --chart-2: oklch(0.855 0.05 85);
   --chart-3: oklch(0.62 0.15 44);
   --chart-4: oklch(0.72 0.08 90);
   --chart-5: oklch(0.6 0.08 235);
-  --sidebar: oklch(0.163 0.006 264);
+  --sidebar: oklch(0.163 0.008 286);
   --sidebar-foreground: oklch(0.95 0.006 90);
   --sidebar-primary: oklch(0.63 0.168 32);
   --sidebar-primary-foreground: oklch(0.99 0.01 60);
-  --sidebar-accent: oklch(0.224 0.009 264);
+  --sidebar-accent: oklch(0.225 0.01 286);
   --sidebar-accent-foreground: oklch(0.96 0.005 90);
-  --sidebar-border: oklch(0.62 0.01 264 / 24%);
+  --sidebar-border: oklch(0.66 0.012 286 / 16%);
   --sidebar-ring: oklch(0.63 0.168 32);
   /* Theme-aware glass surface (header, sidebar, drawers). */
-  --glass-bg: oklch(0.182 0.008 264 / 0.8);
-  --glass-border: oklch(0.85 0.04 80 / 0.09);
+  --glass-bg: oklch(0.183 0.009 286 / 0.82);
+  --glass-border: oklch(0.85 0.04 80 / 0.08);
 }
 
 
@@ -174,7 +175,7 @@
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --gradient-aurora: linear-gradient(115deg, oklch(0.66 0.185 34), oklch(0.58 0.17 26) 46%, oklch(0.82 0.065 84));
-  --gradient-surface: linear-gradient(180deg, oklch(0.2 0.008 264), oklch(0.155 0.006 264));
+  --gradient-surface: linear-gradient(180deg, oklch(0.2 0.01 286), oklch(0.155 0.008 286));
   --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
   --shadow-md: 0 10px 28px -12px oklch(0 0 0 / 0.5);
   --shadow-lg: 0 34px 74px -28px oklch(0 0 0 / 0.7);
@@ -269,6 +270,37 @@ p {
 @keyframes glow-pulse {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.55; }
+}
+
+/* Premium loading shimmer — a soft light sweep across skeleton surfaces. */
+@keyframes shimmer {
+  0% { background-position: -160% 0; }
+  100% { background-position: 260% 0; }
+}
+
+/* Subtle sheen sweep used for the Founder badge micro-interaction. */
+@keyframes badge-sheen {
+  0% { transform: translateX(-140%); }
+  60%, 100% { transform: translateX(260%); }
+}
+
+/* Refined skeleton: base tone + animated diagonal sheen. Respects reduced
+   motion (global rule disables the animation). */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--color-muted) 70%, transparent);
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--color-foreground) 7%, transparent) 42%,
+    color-mix(in oklab, var(--color-foreground) 10%, transparent) 50%,
+    color-mix(in oklab, var(--color-foreground) 7%, transparent) 58%,
+    transparent 80%
+  );
+  background-size: 240% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s var(--ease-soft) infinite;
 }
 
 

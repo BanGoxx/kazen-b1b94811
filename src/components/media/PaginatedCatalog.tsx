@@ -60,18 +60,43 @@ function CatalogInner({
   queryOptions,
   emptyLabel,
   completionLabel,
+  upgradeOnMount,
+  stateKey,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
   completionLabel?: string;
+  upgradeOnMount?: boolean;
+  stateKey?: string;
 }) {
   const query = useSuspenseInfiniteQuery(queryOptions);
+  const queryClient = useQueryClient();
+  const persistKey = stateKey ?? JSON.stringify(queryOptions.queryKey);
   const [state, setState] = useState<FilterState>({
     genres: [],
     status: "all",
     sort: "trending",
   });
+
+  // Restore any persisted filter selection AFTER mount (post-hydration only, so
+  // it can never cause an SSR/client mismatch). This makes browser Back from a
+  // fiche return to the same filtered view the router restores scroll against.
+  useEffect(() => {
+    const saved = readCatalogFilters(persistKey);
+    if (saved) setState(saved);
+  }, [persistKey]);
+
+  useEffect(() => {
+    writeCatalogFilters(persistKey, state);
+  }, [persistKey, state]);
+
+  // One-time browser-direct upgrade of the curated SSR first page (see
+  // upgradeCatalogOnce). Runs once per query per session — never on every mount.
+  useEffect(() => {
+    if (upgradeOnMount) upgradeCatalogOnce(queryClient, queryOptions.queryKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const items = useMemo<MediaItem[]>(
     () => (query.data?.pages ?? []).flatMap((p: PagedMedia) => p.items),

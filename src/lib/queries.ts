@@ -135,9 +135,40 @@ export const onAirSeriesQO = queryOptions({
 
 export const upcomingAllQO = queryOptions({
   queryKey: ["upcoming", "all"],
-  queryFn: () => getUpcomingAll(),
-  staleTime: HOUR,
+  // Isomorphic: the server function provides upcoming films/series (TMDB) and a
+  // curated anime fallback. On the client we additionally pull real upcoming
+  // anime browser-direct (Worker can be AniList-blocked) so the Anime tab is
+  // never thin. Merge + de-dupe by key, keeping the richest anime set.
+  queryFn: async () => {
+    const server = await getUpcomingAll();
+    if (!IS_BROWSER) return server;
+    try {
+      // Pull several pages of real upcoming anime so the Anime tab has depth
+      // (the Worker's curated fallback is only a handful). Sequential + bounded
+      // to respect AniList rate limits; stop as soon as a page runs dry.
+      const anime: import("./media-types").MediaItem[] = [];
+      for (let page = 1; page <= 3; page++) {
+        const res = await anilistPublicPage("upcoming", page);
+        anime.push(...res.items);
+        if (!res.hasMore) break;
+      }
+      if (!anime.length) return server;
+      const seen = new Set(anime.map((a) => a.key));
+      // Drop the server's curated anime placeholders in favor of the real list,
+      // keep every film/series the server returned.
+      const nonAnime = server.filter((it) => it.mediaType !== "anime" && !seen.has(it.key));
+      return [...anime, ...nonAnime];
+    } catch (error) {
+      console.error("upcomingAll anime merge", error);
+      return server;
+    }
+  },
+
+  staleTime: IS_BROWSER ? 0 : HOUR,
+  refetchOnMount: true,
+  retry: 3,
 });
+
 
 export const mediaDetailQO = (source: string, id: string) =>
   queryOptions({

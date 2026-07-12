@@ -355,7 +355,7 @@ function ReviewItem({
           <span className="font-medium tabular-nums">{replies.length}</span>
           <span>Répondre</span>
         </button>
-        {isOwn && (
+        {isOwn ? (
           <div className="ml-auto flex items-center gap-1">
             {onEdit && (
               <Button variant="ghost" size="sm" onClick={onEdit}>
@@ -368,6 +368,12 @@ function ReviewItem({
               </Button>
             )}
           </div>
+        ) : (
+          currentUserId && (
+            <div className="ml-auto">
+              <ReportDialog targetType="review" targetId={review.id} label="Signaler" />
+            </div>
+          )
         )}
       </div>
 

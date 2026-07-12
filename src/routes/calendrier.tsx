@@ -268,39 +268,82 @@ function CalendarPage() {
         </div>
       </div>
 
-      {/* Weekly grid */}
+      {/* Legend + result count */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {TYPE_LEGEND.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1.5 text-[0.7rem] font-medium text-muted-foreground">
+              <span className={cn("h-2 w-2 rounded-full", TYPE_DOT[t])} />
+              {MEDIA_TYPE_LABELS[t]}
+            </span>
+          ))}
+        </div>
+        <span className="text-xs font-medium text-muted-foreground">
+          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks === 1 ? "1 semaine" : "2 semaines"}
+        </span>
+      </div>
+
+      {/* Weekly grid — one labelled block per week for clear separation */}
       {filtered.length ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
-          {days.map((d, i) => {
-            const key = isoDay(d);
-            const items = byDay.get(key) ?? [];
-            const isToday = key === todayIso;
+        <div className="space-y-6">
+          {Array.from({ length: weeks }).map((_, wi) => {
+            const weekDays = days.slice(wi * 7, wi * 7 + 7);
+            const wStart = weekDays[0];
+            const wEnd = weekDays[6];
+            const weekCount = weekDays.reduce((n, d) => n + (byDay.get(isoDay(d))?.length ?? 0), 0);
             return (
-              <div
-                key={key}
-                className={cn(
-                  "flex min-h-40 flex-col rounded-2xl border p-2",
-                  isToday ? "border-primary/50 bg-primary/5" : "border-border bg-card/40",
-                )}
-              >
-                <div className="mb-2 flex items-baseline justify-between px-1">
-                  <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
-                    {DAY_LABELS[i % 7]}
-                  </span>
-                  <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
+              <section key={isoDay(wStart)}>
+                {weeks > 1 ? (
+                  <div className="mb-2 flex items-baseline justify-between px-1">
+                    <h2 className="font-display text-sm font-bold capitalize text-foreground/90">
+                      Semaine du {weekLabelFmt.format(wStart)}
+                      <span className="text-muted-foreground"> – {weekLabelFmt.format(wEnd)}</span>
+                    </h2>
+                    <span className="text-[0.7rem] font-medium text-muted-foreground">
+                      {weekCount} sortie{weekCount > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                  {weekDays.map((d, i) => {
+                    const key = isoDay(d);
+                    const items = byDay.get(key) ?? [];
+                    const isToday = key === todayIso;
+                    const isPast = key < todayIso;
+                    return (
+                      <div
+                        key={key}
+                        className={cn(
+                          "flex min-h-40 flex-col rounded-2xl border p-2 transition-opacity",
+                          isToday
+                            ? "border-primary/50 bg-primary/5"
+                            : "border-border bg-card/40",
+                          isPast && !isToday && "opacity-55",
+                        )}
+                      >
+                        <div className="mb-2 flex items-baseline justify-between px-1">
+                          <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
+                            {DAY_LABELS[i % 7]}
+                          </span>
+                          <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
+                        </div>
+                        <div className="flex flex-1 flex-col gap-1.5">
+                          {items.length ? (
+                            items.map((it) => <CalendarEntry key={it.key} item={it} />)
+                          ) : (
+                            <span className="px-1 text-[0.7rem] text-muted-foreground/60">—</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex flex-1 flex-col gap-1.5">
-                  {items.length ? (
-                    items.map((it) => <CalendarEntry key={it.key} item={it} />)
-                  ) : (
-                    <span className="px-1 text-[0.7rem] text-muted-foreground/60">—</span>
-                  )}
-                </div>
-              </div>
+              </section>
             );
           })}
         </div>
       ) : (
+
         <EmptyState message="Aucune sortie cette semaine avec ces filtres." hint="Changez de semaine ou réinitialisez les filtres." />
       )}
     </AppShell>

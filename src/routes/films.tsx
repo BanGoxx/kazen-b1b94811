@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { PaginatedCatalog } from "@/components/media/PaginatedCatalog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { moviePageQO } from "@/lib/queries";
+
+const FILM_TABS = new Set(["trending", "popular", "upcoming", "animated", "asian"]);
 
 export const Route = createFileRoute("/films")({
   head: () => ({

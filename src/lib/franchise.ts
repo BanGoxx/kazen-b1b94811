@@ -8,7 +8,15 @@
 // It is deliberately source-agnostic and side-effect free so it can later back
 // dedicated franchise/group pages (e.g. /franchise/$key) without a rewrite.
 
-import type { MediaSource, RelatedMedia, RelationCategory } from "./media-types";
+import {
+  FORMAT_GROUP_LABELS,
+  FORMAT_GROUP_ORDER,
+  type FormatGroup,
+  type MediaDetail,
+  type MediaSource,
+  type RelatedMedia,
+  type RelationCategory,
+} from "./media-types";
 
 export interface RelatedGroup {
   category: RelationCategory;

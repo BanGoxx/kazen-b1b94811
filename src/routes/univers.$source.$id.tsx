@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Layers, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowDownWideNarrow, Layers, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
 import { EmptyState } from "@/components/media/EmptyState";
@@ -14,16 +14,26 @@ import {
   isRealGroup,
   itemsByUniversCategory,
   isUniversCategory,
+  isUniversSort,
+  sortUniversItems,
+  distinctYears,
+  filterByYear,
   UNIVERS_CATEGORY_LABELS,
   UNIVERS_CATEGORY_ORDER,
+  UNIVERS_SORT_ORDER,
+  UNIVERS_SORT_LABELS,
   DEFAULT_UNIVERS_CATEGORY,
+  DEFAULT_UNIVERS_SORT,
   type FranchiseGroup,
   type UniversCategory,
+  type UniversSort,
 } from "@/lib/franchise";
 import type { RelatedMedia } from "@/lib/media-types";
 
 interface UniversSearch {
   type: UniversCategory;
+  sort: UniversSort;
+  year: number | null;
 }
 
 const EMPTY_COPY: Record<UniversCategory, string> = {
@@ -39,9 +49,15 @@ const EMPTY_COPY: Record<UniversCategory, string> = {
 };
 
 export const Route = createFileRoute("/univers/$source/$id")({
-  validateSearch: (search: Record<string, unknown>): UniversSearch => ({
-    type: isUniversCategory(search.type) ? search.type : DEFAULT_UNIVERS_CATEGORY,
-  }),
+  validateSearch: (search: Record<string, unknown>): UniversSearch => {
+    const rawYear = Number(search.year);
+    return {
+      type: isUniversCategory(search.type) ? search.type : DEFAULT_UNIVERS_CATEGORY,
+      sort: isUniversSort(search.sort) ? search.sort : DEFAULT_UNIVERS_SORT,
+      year: Number.isFinite(rawYear) && rawYear > 0 ? Math.trunc(rawYear) : null,
+    };
+  },
+
   loader: async ({ context, params }) => {
     const item = await context.queryClient.ensureQueryData(
       mediaDetailQO(params.source, params.id),

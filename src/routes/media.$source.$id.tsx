@@ -332,6 +332,7 @@ function MediaDetailPage() {
           <CreditScroller title={item.castLabel} people={item.cast} />
           <CreditScroller title={item.crewLabel} people={item.crew} />
           <RelatedContent related={item.related} collectionName={item.collectionName} />
+          <FicheReviews source={source} externalId={id} />
         </div>
       </div>
     </AppShell>

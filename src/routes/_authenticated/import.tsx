@@ -626,8 +626,6 @@ function UploadSection({
   );
 }
 
-}
-
 function SummaryStat({
   label,
   value,

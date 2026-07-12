@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/MediaGrid";
 import { EmptyState } from "@/components/media/EmptyState";
+import { SlowLoadHint } from "@/components/media/LoadingHint";
 import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";

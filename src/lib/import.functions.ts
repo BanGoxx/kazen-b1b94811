@@ -333,6 +333,13 @@ export const rollbackImport = createServerFn({ method: "POST" })
           rating?: number | null;
           notes?: string;
           tags?: string[];
+          progress?: number | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          rewatch_count?: number | null;
+          is_rewatching?: boolean;
+          import_provider?: string | null;
+          import_ref?: string | null;
         };
         await context.supabase
           .from("list_items")
@@ -343,6 +350,13 @@ export const rollbackImport = createServerFn({ method: "POST" })
             rating: prev.rating ?? null,
             notes: prev.notes ?? "",
             tags: prev.tags ?? [],
+            progress: prev.progress ?? null,
+            started_at: prev.started_at ?? null,
+            completed_at: prev.completed_at ?? null,
+            rewatch_count: prev.rewatch_count ?? 0,
+            is_rewatching: prev.is_rewatching ?? false,
+            import_provider: prev.import_provider ?? null,
+            import_ref: prev.import_ref ?? null,
           })
           .eq("user_id", context.userId)
           .eq("media_key", it.matched_media_key);

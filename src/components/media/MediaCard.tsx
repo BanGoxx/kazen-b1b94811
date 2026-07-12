@@ -5,6 +5,7 @@ import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
+import { NextEpisodePill } from "./NextEpisodePill";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {

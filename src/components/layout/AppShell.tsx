@@ -140,9 +140,11 @@ function Brand() {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isModerator = useIsModerator();
+  const { user } = useAuth();
+  const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
   const items = isModerator
-    ? [...NAV, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
-    : NAV;
+    ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+    : base;
   return (
     <nav aria-label="Navigation principale">
       <ul className="space-y-1">

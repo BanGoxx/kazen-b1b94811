@@ -196,9 +196,14 @@ body {
 
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
+  font-weight: 700;
   letter-spacing: -0.022em;
   text-wrap: balance;
 }
+
+/* Section headings: tighter tracking + comfortable leading for a premium rhythm. */
+h2 { letter-spacing: -0.026em; line-height: 1.14; }
+h3 { letter-spacing: -0.02em; line-height: 1.2; }
 
 /* Stately page titles get a touch more optical tightening and weight. */
 h1, .font-display-xl {
@@ -209,6 +214,7 @@ h1, .font-display-xl {
 /* Comfortable measure + tidy wrapping for body paragraphs. */
 p {
   text-wrap: pretty;
+  line-height: 1.65;
 }
 
 /* Uppercase eyebrow/label treatment for metadata rows and section kickers. */

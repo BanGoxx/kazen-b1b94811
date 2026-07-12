@@ -185,6 +185,7 @@ export interface PublicPlaylistCard {
   id: string;
   title: string;
   description: string;
+  recommendation: string;
   ownerName: string;
   ownerAvatar: string | null;
   count: number;
@@ -192,6 +193,35 @@ export interface PublicPlaylistCard {
   posters: string[];
   updatedAt: string;
   createdAt: string;
+  rankScore: number;
+}
+
+/**
+ * Transparent popularity score for a public shared list. Blends four signals
+ * so likes help a list rise without being the only factor:
+ *  - likes (strongest weight)
+ *  - number of visible items (breadth, capped)
+ *  - editorial completeness (has an intro / a recommendation note)
+ *  - recency (gentle boost, decays over 3 weeks)
+ * Empty / hidden / soft-deleted lists never reach this function.
+ */
+export function playlistRankScore(c: {
+  likeCount: number;
+  count: number;
+  description: string;
+  recommendation: string;
+  updatedAt: string;
+}): number {
+  const ageDays = (Date.now() - new Date(c.updatedAt).getTime()) / 86_400_000;
+  const recencyBoost = Math.max(0, 21 - ageDays) / 21; // 0..1 over 3 weeks
+  const completeness =
+    (c.description.trim().length >= 20 ? 1 : 0) + (c.recommendation.trim().length >= 20 ? 1 : 0);
+  return (
+    c.likeCount * 3 +
+    Math.min(c.count, 20) * 0.4 +
+    completeness * 1.5 +
+    recencyBoost * 2
+  );
 }
 
 /**

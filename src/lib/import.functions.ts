@@ -286,7 +286,14 @@ export const rollbackImport = createServerFn({ method: "POST" })
           .eq("media_key", it.matched_media_key);
         reverted++;
       } else if (it.applied_action === "updated" && it.previous_item) {
-        const prev = it.previous_item as Record<string, unknown>;
+        const prev = it.previous_item as {
+          status?: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne" | null;
+          favorite?: boolean;
+          priority?: "basse" | "normale" | "haute";
+          rating?: number | null;
+          notes?: string;
+          tags?: string[];
+        };
         await context.supabase
           .from("list_items")
           .update({

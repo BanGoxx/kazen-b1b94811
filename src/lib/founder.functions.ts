@@ -31,7 +31,9 @@ export const founderDiagnostics = createServerFn({ method: "GET" })
       apply?: (q: any) => any,
     ): Promise<number | null> => {
       try {
-        let q = supabase.from(table).select("*", { count: "exact", head: true });
+        let q = (supabase as any)
+          .from(table)
+          .select("*", { count: "exact", head: true });
         if (apply) q = apply(q);
         const { count, error } = await q;
         if (error) return null;

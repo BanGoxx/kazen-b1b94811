@@ -325,6 +325,17 @@ function ImportPage() {
               </div>
             </div>
 
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+              <p className="text-muted-foreground">
+                Confirmer ajoutera ou mettra à jour{" "}
+                <span className="font-semibold text-foreground">{checked.size} titre(s)</span> dans ta
+                liste personnelle KAZEN. Les titres introuvables et les doublons sont ignorés
+                automatiquement, et les cases décochées ne seront pas importées. Tout import reste
+                annulable depuis l'historique.
+              </p>
+            </div>
+
             <div className="flex flex-wrap items-center gap-3">
               <Button onClick={handleConfirm} disabled={busy || checked.size === 0}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}

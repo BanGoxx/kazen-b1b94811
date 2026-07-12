@@ -45,7 +45,12 @@ function SeasonPage() {
       <PaginatedCatalog
         queryOptions={seasonalAnimePageQO()}
         emptyLabel="Aucun anime pour cette saison."
+        completionLabel="Saison complète — tous les anime de la saison sont affichés"
       />
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        La liste couvre l'intégralité de la saison en cours (source AniList).
+        Les nouveaux titres annoncés apparaissent automatiquement.
+      </p>
     </AppShell>
   );
 }

@@ -16,6 +16,7 @@ import {
   getAnimatedMovies,
   getAsianAnimationMovies,
 } from "./discover.functions";
+import { getEntityProfile } from "./entity.functions";
 
 const HOUR = 1000 * 60 * 60;
 
@@ -109,6 +110,14 @@ export const searchMediaQO = (q: string) =>
     queryFn: () => searchMedia({ data: { q } }),
     staleTime: 1000 * 60 * 5,
     enabled: q.trim().length >= 2,
+  });
+
+export const entityProfileQO = (kind: string, id: string) =>
+  queryOptions({
+    queryKey: ["entity", kind, id],
+    queryFn: () => getEntityProfile({ data: { kind, id } }),
+    staleTime: HOUR,
+    retry: 2,
   });
 
 import { infiniteQueryOptions } from "@tanstack/react-query";

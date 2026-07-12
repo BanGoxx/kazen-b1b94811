@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Search as SearchIcon, User } from "lucide-react";
+import { ArrowUpRight, IdCard, Search as SearchIcon, User } from "lucide-react";
 import type { CreditPerson } from "@/lib/media-types";
 import {
   Dialog,
@@ -13,15 +13,18 @@ import { Button } from "@/components/ui/button";
 export type EntityKind = "character" | "staff";
 
 /**
- * Derive the AniList public profile URL for a credit entity when its id encodes
- * a real AniList node ("c<id>" for characters, "s<id>" for staff). Fallback ids
- * (random) never produce a link, so we never expose a dead outbound URL.
+ * Extract the raw AniList node id when the credit id encodes a real node
+ * ("c<id>" for characters, "s<id>" for staff). Fallback/random ids return null
+ * so we never link to a dead entity page or outbound profile.
  */
-function anilistUrl(person: CreditPerson, kind: EntityKind): string | null {
+function anilistNodeId(person: CreditPerson): string | null {
   const raw = person.id?.slice(1) ?? "";
-  if (!/^\d+$/.test(raw)) return null;
+  return /^\d+$/.test(raw) ? raw : null;
+}
+
+function anilistUrl(nodeId: string, kind: EntityKind): string {
   const segment = kind === "character" ? "character" : "staff";
-  return `https://anilist.co/${segment}/${raw}`;
+  return `https://anilist.co/${segment}/${nodeId}`;
 }
 
 /**
@@ -41,7 +44,8 @@ export function EntityProfileDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const external = person ? anilistUrl(person, kind) : null;
+  const nodeId = person ? anilistNodeId(person) : null;
+  const external = nodeId ? anilistUrl(nodeId, kind) : null;
   const roleLabel =
     kind === "character" ? "Voix / rôle" : "Rôle";
 
@@ -91,6 +95,18 @@ export function EntityProfileDialog({
             </DialogHeader>
 
             <div className="mt-2 flex flex-col gap-2">
+              {nodeId ? (
+                <Button asChild className="justify-start">
+                  <Link
+                    to="/entite/$kind/$id"
+                    params={{ kind, id: nodeId }}
+                    onClick={() => onOpenChange(false)}
+                  >
+                    <IdCard className="mr-2 h-4 w-4" />
+                    Voir la fiche KAZEN complète
+                  </Link>
+                </Button>
+              ) : null}
               <Button asChild variant="secondary" className="justify-start">
                 <Link
                   to="/recherche"

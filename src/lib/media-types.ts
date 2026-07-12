@@ -81,6 +81,56 @@ export interface CreditPerson {
   photoUrl: string | null;
 }
 
+// ---------- Dedicated entity pages (characters & staff) ----------
+
+export type EntityKind = "character" | "staff";
+
+export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
+  character: "Personnage",
+  staff: "Équipe / Auteur",
+};
+
+/** A work linked to an entity (anime a character appears in, staff credits…). */
+export interface EntityMediaLink {
+  id: string; // AniList media id
+  title: string;
+  posterUrl: string | null;
+  /** Role within that work, e.g. "Principal", "Réalisation". */
+  role: string | null;
+  format: string | null;
+  year: number | null;
+  /** True when KAZEN has a real internal fiche (anime only for now). */
+  hasDetail: boolean;
+}
+
+/** A person linked to an entity (voice actor of a character, cast of a staff). */
+export interface EntityRelatedPerson {
+  /** Prefixed id ("c<id>" / "s<id>") so it can reopen an entity page. */
+  id: string;
+  kind: EntityKind;
+  name: string;
+  photoUrl: string | null;
+  role: string | null;
+}
+
+export interface EntityProfile {
+  kind: EntityKind;
+  /** Raw AniList node id (numeric string). */
+  id: string;
+  name: string;
+  nameNative: string | null;
+  photoUrl: string | null;
+  /** Normalized plain-text summary (source language, French display-ready). */
+  description: string | null;
+  /** Small key/value facts (genre, naissance, métiers…) — French labels. */
+  facts: { label: string; value: string }[];
+  media: EntityMediaLink[];
+  peopleLabel: string;
+  people: EntityRelatedPerson[];
+  /** Safe outbound AniList reference. */
+  anilistUrl: string;
+}
+
 /**
  * Coarse relation buckets used to group linked content on fiches and, later,
  * to power dedicated franchise/group pages. Keep these stable — UI and the

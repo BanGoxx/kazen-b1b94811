@@ -231,7 +231,8 @@ function DiscoverPage() {
         </div>
       </div>
 
-      <div className="space-y-14">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start lg:gap-10">
+        <div className="space-y-14 min-w-0">
         <SafeSection>
           <ForYouHomeBlock />
         </SafeSection>

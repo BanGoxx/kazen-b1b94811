@@ -253,7 +253,7 @@ export function parseNautiljonList(html: string): ImportParseResult {
       providerUrl,
       providerId: providerIdFromUrl(providerUrl),
       title,
-      altTitles,
+      altTitles: uniqueAlts,
       mediaType: normalizeType(cellAt("type")),
       releaseYear: parseYear(cellAt("year")),
       totalEpisodes: parseIntSafe(cellAt("episodes")) ?? episodesFromProgress,

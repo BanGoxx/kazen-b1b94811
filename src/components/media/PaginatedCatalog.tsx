@@ -38,6 +38,10 @@ export function PaginatedCatalog(props: {
   // "complete catalogue" phrasing; pass a season/upcoming-specific note when
   // the total is a genuine complete set rather than an open-ended catalogue.
   completionLabel?: string;
+  // Contextual loading copy (e.g. "Chargement des films…"). Passed down to the
+  // pending skeleton, the slow-load hint and the "Voir plus" button so a Films
+  // or Séries catalogue never shows anime-specific wording.
+  loadingLabel?: string;
   // When true, upgrade the SSR/curated first page to real browser-direct data
   // once after hydration (anime/seasonal catalogs that can be Worker-blocked).
   upgradeOnMount?: boolean;
@@ -46,20 +50,21 @@ export function PaginatedCatalog(props: {
   stateKey?: string;
 }) {
   return (
-    <SafeSection minHeight="20rem" pending={<CatalogPending />}>
+    <SafeSection minHeight="20rem" pending={<CatalogPending label={props.loadingLabel} />}>
       <CatalogInner {...props} />
     </SafeSection>
   );
 }
 
-function CatalogPending() {
-  return <CatalogLoading count={10} />;
+function CatalogPending({ label }: { label?: string }) {
+  return <CatalogLoading count={10} label={label} />;
 }
 
 function CatalogInner({
   queryOptions,
   emptyLabel,
   completionLabel,
+  loadingLabel = "Chargement des titres…",
   upgradeOnMount,
   stateKey,
 }: {
@@ -67,6 +72,7 @@ function CatalogInner({
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
   completionLabel?: string;
+  loadingLabel?: string;
   upgradeOnMount?: boolean;
   stateKey?: string;
 }) {

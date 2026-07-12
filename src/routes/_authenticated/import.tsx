@@ -244,15 +244,21 @@ function ImportPage() {
                     isSel ? "border-primary bg-primary/5" : "border-border bg-card/50"
                   } ${p.available ? "hover:border-primary/60" : "cursor-not-allowed opacity-55"}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold">{p.label}</span>
                     {p.available ? (
-                      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
-                        Disponible
-                      </Badge>
+                      p.experimental ? (
+                        <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-400">
+                          Expérimental
+                        </Badge>
+                      ) : (
+                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
+                          Disponible
+                        </Badge>
+                      )
                     ) : (
                       <Badge variant="outline" className="text-muted-foreground">
-                        Bientôt
+                        Bientôt disponible
                       </Badge>
                     )}
                   </div>

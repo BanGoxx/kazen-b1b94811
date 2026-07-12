@@ -7,7 +7,7 @@ import { ExpandableText } from "@/components/media/ExpandableText";
 import { SafeImage } from "@/components/media/SafeImage";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ENTITY_KIND_LABELS, type EntityKind } from "@/lib/media-types";
+import { ENTITY_KIND_LABELS } from "@/lib/media-types";
 import { entityProfileQO } from "@/lib/queries";
 
 export const Route = createFileRoute("/entite/$kind/$id")({

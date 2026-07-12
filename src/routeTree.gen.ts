@@ -30,6 +30,7 @@ import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authent
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
+import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
 
 const SoutienRoute = SoutienRouteImport.update({
   id: '/soutien',
@@ -136,6 +137,11 @@ const FranchiseSourceIdRoute = FranchiseSourceIdRouteImport.update({
   path: '/franchise/$source/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntiteKindIdRoute = EntiteKindIdRouteImport.update({
+  id: '/entite/$kind/$id',
+  path: '/entite/$kind/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/anime/': typeof AnimeIndexRoute
+  '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
 }
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/anime': typeof AnimeIndexRoute
+  '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
 }
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/anime/': typeof AnimeIndexRoute
+  '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
 }
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/playlist/$id'
     | '/anime/'
+    | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/playlist/$id'
     | '/anime'
+    | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
   id:
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/playlist/$id'
     | '/anime/'
+    | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
   fileRoutesById: FileRoutesById
@@ -288,6 +300,7 @@ export interface RootRouteChildren {
   SoutienRoute: typeof SoutienRoute
   ApiChatRoute: typeof ApiChatRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
+  EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
 }
@@ -441,6 +454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FranchiseSourceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entite/$kind/$id': {
+      id: '/entite/$kind/$id'
+      path: '/entite/$kind/$id'
+      fullPath: '/entite/$kind/$id'
+      preLoaderRoute: typeof EntiteKindIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -486,6 +506,7 @@ const rootRouteChildren: RootRouteChildren = {
   SoutienRoute: SoutienRoute,
   ApiChatRoute: ApiChatRoute,
   PlaylistIdRoute: PlaylistIdRoute,
+  EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,
 }

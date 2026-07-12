@@ -333,6 +333,87 @@ export type Database = {
           },
         ]
       }
+      media_enrichments: {
+        Row: {
+          backdrop_url_override: string | null
+          created_at: string
+          created_by: string | null
+          data_quality_status: string
+          enrichment_notes: string | null
+          external_id: string
+          external_links: Json | null
+          extra_characters: Json | null
+          extra_platforms: Json | null
+          extra_relations: Json | null
+          extra_sources: Json | null
+          extra_staff: Json | null
+          extra_titles: Json | null
+          id: string
+          is_published: boolean
+          native_title_override: string | null
+          poster_url_override: string | null
+          qa_flags: Json | null
+          source: string
+          status_note: string | null
+          synopsis_override: string | null
+          title_override: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          backdrop_url_override?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_quality_status?: string
+          enrichment_notes?: string | null
+          external_id: string
+          external_links?: Json | null
+          extra_characters?: Json | null
+          extra_platforms?: Json | null
+          extra_relations?: Json | null
+          extra_sources?: Json | null
+          extra_staff?: Json | null
+          extra_titles?: Json | null
+          id?: string
+          is_published?: boolean
+          native_title_override?: string | null
+          poster_url_override?: string | null
+          qa_flags?: Json | null
+          source: string
+          status_note?: string | null
+          synopsis_override?: string | null
+          title_override?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          backdrop_url_override?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_quality_status?: string
+          enrichment_notes?: string | null
+          external_id?: string
+          external_links?: Json | null
+          extra_characters?: Json | null
+          extra_platforms?: Json | null
+          extra_relations?: Json | null
+          extra_sources?: Json | null
+          extra_staff?: Json | null
+          extra_titles?: Json | null
+          id?: string
+          is_published?: boolean
+          native_title_override?: string | null
+          poster_url_override?: string | null
+          qa_flags?: Json | null
+          source?: string
+          status_note?: string | null
+          synopsis_override?: string | null
+          title_override?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       media_records: {
         Row: {
           backdrop_url: string | null
@@ -855,6 +936,27 @@ export type Database = {
       }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
       founder_user_ids: { Args: never; Returns: string[] }
+      get_public_enrichment: {
+        Args: { _external_id: string; _source: string }
+        Returns: {
+          backdrop_url_override: string
+          data_quality_status: string
+          external_id: string
+          external_links: Json
+          extra_characters: Json
+          extra_platforms: Json
+          extra_relations: Json
+          extra_sources: Json
+          extra_staff: Json
+          extra_titles: Json
+          native_title_override: string
+          poster_url_override: string
+          source: string
+          status_note: string
+          synopsis_override: string
+          title_override: string
+        }[]
+      }
       grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -171,6 +171,14 @@ function PlaylistPage() {
                   {data.meta.description}
                 </p>
               )}
+              {data.meta.recommendation && (
+                <blockquote className="max-w-2xl rounded-2xl border-l-2 border-primary/60 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/90">
+                  <span className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                    <Quote className="h-3.5 w-3.5" /> Pourquoi cette liste
+                  </span>
+                  {data.meta.recommendation}
+                </blockquote>
+              )}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7">

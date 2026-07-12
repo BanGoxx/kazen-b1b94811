@@ -116,6 +116,35 @@ function MyListsPage() {
     return sorted;
   }, [entries, tab, type, platform, tag, sort]);
 
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {
+      tous: entries.length,
+      favoris: 0,
+      a_voir: 0,
+      en_cours: 0,
+      termine: 0,
+      en_pause: 0,
+      abandonne: 0,
+    };
+    entries.forEach((e) => {
+      if (e.favorite) map.favoris += 1;
+      if (e.status) map[e.status] = (map[e.status] ?? 0) + 1;
+    });
+    return map;
+  }, [entries]);
+
+  const filtersActive =
+    tab !== "tous" || type !== "tous" || platform !== "tous" || tag !== "tous";
+
+  const resetFilters = () => {
+    setTab("tous");
+    setType("tous");
+    setPlatform("tous");
+    setTag("tous");
+  };
+
+
+
 
   return (
     <AppShell>

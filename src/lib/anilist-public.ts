@@ -371,6 +371,14 @@ function fromAniListDetail(m: AniListDetailRaw): MediaDetail {
       episodes.push({ number, title: null, airDate, thumbnailUrl: null, isAired: new Date(airDate).getTime() <= Date.now() });
     }
   }
+  // Synthesize a numbered list from the episode count when AniList exposes no
+  // per-episode metadata, so the "Épisodes" section renders on the client too.
+  if (!episodes.length && typeof m.episodes === "number" && m.episodes > 0) {
+    const total = Math.min(m.episodes, 500);
+    for (let n = 1; n <= total; n++) {
+      episodes.push({ number: n, title: null, airDate: null, thumbnailUrl: null, isAired: true });
+    }
+  }
 
   const alternatives = Array.from(
     new Set(

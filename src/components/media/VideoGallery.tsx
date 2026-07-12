@@ -36,7 +36,20 @@ export function VideoGallery({ videos, title }: VideoGalleryProps) {
               alt={v.label}
               loading="lazy"
               className="h-full w-full object-cover opacity-80 transition group-hover:scale-105 group-hover:opacity-100"
+              onError={(e) => {
+                // YouTube serves a gray 404 stub when hqdefault is missing; try
+                // mqdefault once, then hide the img so the themed card + play
+                // glyph remain (never a broken-image icon).
+                const img = e.currentTarget;
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = "1";
+                  img.src = `https://img.youtube.com/vi/${v.key}/mqdefault.jpg`;
+                } else {
+                  img.style.display = "none";
+                }
+              }}
             />
+
             <span className="absolute inset-0 flex items-center justify-center">
               <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/90 text-primary-foreground shadow-lg transition group-hover:scale-110">
                 <Play className="h-5 w-5 fill-current" />

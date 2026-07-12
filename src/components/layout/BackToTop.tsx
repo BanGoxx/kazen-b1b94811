@@ -35,7 +35,10 @@ export function BackToTop({ threshold = 600 }: { threshold?: number }) {
       title="Remonter en haut"
       tabIndex={visible ? 0 : -1}
       className={cn(
-        "focus-ring fixed bottom-24 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card/80 text-foreground shadow-lg backdrop-blur transition-all duration-300 hover:border-primary/40 hover:text-primary sm:bottom-6 lg:right-6",
+        // Stacked directly above the assistant launcher (h-14 at bottom-5/6,
+        // right-5/6) on every breakpoint so the two floating controls never
+        // overlap. Right edges align with the launcher for a clean column.
+        "focus-ring fixed bottom-24 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card/80 text-foreground shadow-lg backdrop-blur transition-all duration-300 hover:border-primary/40 hover:text-primary sm:right-6",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-3 opacity-0",

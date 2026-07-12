@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
@@ -10,7 +10,18 @@ import { EmptyState } from "@/components/media/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { searchMediaInfiniteQO } from "@/lib/queries";
+import {
+  searchMediaInfiniteQO,
+  trendingAnimeQO,
+  popularAnimeQO,
+  trendingSeriesQO,
+  popularSeriesQO,
+  trendingMoviesQO,
+  popularMoviesQO,
+  animatedMoviesQO,
+} from "@/lib/queries";
+import type { MediaItem } from "@/lib/media-types";
+
 
 import {
   availableGenres,
@@ -72,15 +83,6 @@ function SearchPage() {
   } = useInfiniteQuery(searchMediaInfiniteQO(q));
   const trimmed = q.trim();
 
-  const data = useMemo(() => {
-    if (!pages) return undefined;
-    return {
-      anime: pages.pages.flatMap((p) => p.anime),
-      series: pages.pages.flatMap((p) => p.series),
-      movies: pages.pages.flatMap((p) => p.movies),
-    };
-  }, [pages]);
-
   const filters: SearchFilters = useMemo(
     () => ({
       sort: sort ?? "pertinence",
@@ -90,20 +92,81 @@ function SearchPage() {
     [sort, min, genresParam],
   );
 
+  // Genre-only browsing: when the user arrives from a fiche genre chip (a genre
+  // filter, no text query) we surface a pool of trending/popular titles and let
+  // the SAME genre filter apply — no parallel search logic, just a content pool.
+  const browseMode = trimmed.length < 2 && filters.genres.length > 0;
+
+  const searchData = useMemo(() => {
+    if (!pages) return undefined;
+    return {
+      anime: pages.pages.flatMap((p) => p.anime),
+      series: pages.pages.flatMap((p) => p.series),
+      movies: pages.pages.flatMap((p) => p.movies),
+    };
+  }, [pages]);
+
+  // Reuse existing catalog queries as the browse pool (cached, no new API layer).
+  const trAnime = useQuery({ ...trendingAnimeQO, enabled: browseMode });
+  const poAnime = useQuery({ ...popularAnimeQO, enabled: browseMode });
+  const trSeries = useQuery({ ...trendingSeriesQO, enabled: browseMode });
+  const poSeries = useQuery({ ...popularSeriesQO, enabled: browseMode });
+  const trMovies = useQuery({ ...trendingMoviesQO, enabled: browseMode });
+  const poMovies = useQuery({ ...popularMoviesQO, enabled: browseMode });
+  const anMovies = useQuery({ ...animatedMoviesQO, enabled: browseMode });
+
+  const browseFetching =
+    trAnime.isFetching ||
+    poAnime.isFetching ||
+    trSeries.isFetching ||
+    poSeries.isFetching ||
+    trMovies.isFetching ||
+    poMovies.isFetching ||
+    anMovies.isFetching;
+
+  const browseData = useMemo(() => {
+    if (!browseMode) return undefined;
+    const dedupe = (arr: (MediaItem | undefined)[]): MediaItem[] => {
+      const map = new Map<string, MediaItem>();
+      for (const item of arr) if (item && !map.has(item.key)) map.set(item.key, item);
+      return [...map.values()];
+    };
+    return {
+      anime: dedupe([...(trAnime.data ?? []), ...(poAnime.data ?? [])]),
+      series: dedupe([...(trSeries.data ?? []), ...(poSeries.data ?? [])]),
+      movies: dedupe([
+        ...(trMovies.data ?? []),
+        ...(poMovies.data ?? []),
+        ...(anMovies.data ?? []),
+      ]),
+    };
+  }, [
+    browseMode,
+    trAnime.data,
+    poAnime.data,
+    trSeries.data,
+    poSeries.data,
+    trMovies.data,
+    poMovies.data,
+    anMovies.data,
+  ]);
+
+  const data = browseMode ? browseData : searchData;
+
   const genreOptions = useMemo(
     () => availableGenres(data?.anime, data?.series, data?.movies),
     [data],
   );
 
   const filtered = useMemo(() => {
-    const apply = (list?: import("@/lib/media-types").MediaItem[]) =>
-      filterAndSort(list ?? [], filters, trimmed);
+    const apply = (list?: MediaItem[]) => filterAndSort(list ?? [], filters, trimmed);
     return {
       anime: apply(data?.anime),
       series: apply(data?.series),
       movies: apply(data?.movies),
     };
   }, [data, filters, trimmed]);
+
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -172,7 +235,16 @@ function SearchPage() {
         />
       </div>
 
-      {trimmed.length < 2 ? (
+      {browseMode ? (
+        <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
+          Parcours par genre — titres populaires correspondant à{" "}
+          <span className="font-semibold text-foreground">{filters.genres.join(", ")}</span>.
+          Saisissez un titre ci-dessus pour une recherche précise.
+        </p>
+      ) : null}
+
+      {trimmed.length < 2 && !browseMode ? (
+
         <div className="max-w-2xl space-y-4">
           <p className="text-sm font-semibold text-muted-foreground">Suggestions populaires</p>
           <div className="flex flex-wrap gap-2">
@@ -191,13 +263,14 @@ function SearchPage() {
             <EmptyState message="Saisissez au moins 2 caractères pour lancer une recherche." />
           </div>
         </div>
-      ) : isFetching && !data ? (
+      ) : (browseMode ? browseFetching : isFetching) && !data ? (
         <MediaGridSkeleton />
-      ) : (data && total === 0 && !filtersActive) ? (
+      ) : (data && total === 0 && !browseMode && !filtersActive) ? (
         <EmptyState
           message={`Aucun résultat pour « ${trimmed} ».`}
           hint="Essayez un autre titre ou une autre orthographe."
         />
+
       ) : (
         <>
           {/* Filter & sort toolbar */}

@@ -8,6 +8,7 @@ import type {
   EntityProfile,
   EntityRelatedPerson,
   MediaDetail,
+  MediaEpisode,
   MediaItem,
   RelatedMedia,
 } from "./media-types";

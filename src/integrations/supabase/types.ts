@@ -734,6 +734,7 @@ export type Database = {
         Args: { p_key: string; p_payload: Json; p_token: string }
         Returns: undefined
       }
+      can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
       grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -759,6 +760,13 @@ export type Database = {
           _target_type: Database["public"]["Enums"]["moderation_target_type"]
         }
         Returns: undefined
+      }
+      my_moderation_access: {
+        Args: never
+        Returns: {
+          can_moderate: boolean
+          is_owner: boolean
+        }[]
       }
       resolve_report: {
         Args: {

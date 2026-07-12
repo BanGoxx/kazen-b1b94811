@@ -225,10 +225,24 @@ function MediaDetailPage() {
             {item.titleOriginal && item.titleOriginal !== item.title ? (
               <p className="text-lg text-muted-foreground">{item.titleOriginal}</p>
             ) : null}
+            <FicheTrackingBadge mediaKey={item.key} />
             {item.genres.length ? (
               <div className="flex flex-wrap gap-2 pt-1">
                 {item.genres.map((g) => (
-                  <Badge key={g} variant="secondary">{g}</Badge>
+                  <Link
+                    key={g}
+                    to="/recherche"
+                    search={{ genres: g }}
+                    className="focus-ring rounded-full"
+                    aria-label={`Explorer le genre ${g}`}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="cursor-pointer transition-colors hover:bg-primary/20 hover:text-primary"
+                    >
+                      {g}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             ) : null}

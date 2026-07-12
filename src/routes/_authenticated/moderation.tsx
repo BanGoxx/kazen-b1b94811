@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/moderation")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/auth", search: { redirect: "/moderation" } });
-    const { data: isMod } = await supabase.rpc("is_moderator", {
+    const { data: isMod } = await supabase.rpc("can_moderate_now", {
       _user_id: data.user.id,
     });
     if (!isMod) throw redirect({ to: "/" });

@@ -61,7 +61,7 @@ export const listReports = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     // Only moderators/admins/owner are allowed to moderate at all.
     const { data: isMod, error: roleErr } = await context.supabase.rpc(
-      "is_moderator",
+      "can_moderate_now",
       { _user_id: context.userId },
     );
     if (roleErr) throw new Error(roleErr.message);
@@ -124,7 +124,7 @@ export const resolveReport = createServerFn({ method: "POST" })
 export const myModeratorStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("is_moderator", {
+    const { data, error } = await context.supabase.rpc("can_moderate_now", {
       _user_id: context.userId,
     });
     if (error) throw new Error(error.message);
@@ -236,7 +236,7 @@ export const moderationQueue = createServerFn({ method: "GET" })
   .inputValidator((data: { status?: ReportStatus } | undefined) => data ?? {})
   .handler(async ({ data, context }) => {
     const { data: isMod, error: roleErr } = await context.supabase.rpc(
-      "is_moderator",
+      "can_moderate_now",
       { _user_id: context.userId },
     );
     if (roleErr) throw new Error(roleErr.message);
@@ -283,7 +283,7 @@ export const targetModerationHistory = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     const { data: isMod, error: roleErr } = await context.supabase.rpc(
-      "is_moderator",
+      "can_moderate_now",
       { _user_id: context.userId },
     );
     if (roleErr) throw new Error(roleErr.message);

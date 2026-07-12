@@ -420,6 +420,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -436,8 +460,40 @@ export type Database = {
         Args: { p_key: string; p_payload: Json; p_token: string }
         Returns: undefined
       }
+      grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _target: string
+        }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _target: string
+        }
+        Returns: undefined
+      }
+      role_rank: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: number
+      }
     }
     Enums: {
+      app_role:
+        | "owner"
+        | "admin"
+        | "moderator"
+        | "editorial_contributor"
+        | "trusted_member"
+        | "member"
       priority_level: "basse" | "normale" | "haute"
       watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
     }
@@ -567,6 +623,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: [
+        "owner",
+        "admin",
+        "moderator",
+        "editorial_contributor",
+        "trusted_member",
+        "member",
+      ],
       priority_level: ["basse", "normale", "haute"],
       watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],
     },

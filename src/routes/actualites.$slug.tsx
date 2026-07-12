@@ -92,7 +92,7 @@ function ArticlePage() {
         ) : null}
 
         <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-foreground/90">
-          {article.body.map((p, i) => (
+          {article.body.map((p: string, i: number) => (
             <p key={i}>{p}</p>
           ))}
         </div>

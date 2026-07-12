@@ -97,23 +97,76 @@ function EntityPage() {
     retry: 1,
   });
   const p = browserProfile.data ?? serverProfile;
+  const numericId = Number(id);
+  const hasValidId = Number.isFinite(numericId) && numericId > 0;
+  const kindLabel = ENTITY_KIND_LABELS[kind as keyof typeof ENTITY_KIND_LABELS] ?? "Profil";
+
   if (!p) {
+    // Still fetching the browser-direct fallback: show a calm loading state.
+    if (browserProfile.isPending && needsBrowserProfile) {
+      return (
+        <AppShell>
+          <div className="py-24 text-center">
+            <h1 className="font-display text-2xl font-bold">Chargement du profil…</h1>
+            <p className="mt-2 text-muted-foreground">Connexion à la source de données.</p>
+            <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          </div>
+        </AppShell>
+      );
+    }
+
+    // Limited-data fallback: as long as we hold a valid external ID, offer a
+    // useful page (type, external reference, search on KAZEN) instead of a dead
+    // "introuvable". Only a genuinely invalid ID falls through to not-found.
+    if (hasValidId) {
+      const anilistUrl = `https://anilist.co/${kind === "staff" ? "staff" : "character"}/${numericId}`;
+      return (
+        <AppShell>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => router.history.back()}
+            className="mb-6"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" /> Retour
+          </Button>
+          <div className="mx-auto max-w-xl py-12 text-center">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-card">
+              {kind === "staff" ? <Users className="h-7 w-7 text-muted-foreground" /> : <User className="h-7 w-7 text-muted-foreground" />}
+            </div>
+            <span className="inline-block rounded-full aurora-bg px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+              {kindLabel}
+            </span>
+            <h1 className="mt-3 font-display text-2xl font-bold">Fiche en données limitées</h1>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Les détails complets de ce profil ne sont pas disponibles pour le moment.
+              Vous pouvez consulter la source externe ou explorer KAZEN.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Button asChild variant="outline">
+                <a href={anilistUrl} target="_blank" rel="noopener noreferrer">
+                  <ArrowUpRight className="mr-2 h-4 w-4" /> Référence externe (AniList)
+                </a>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link to="/recherche" search={{}}>
+                  <SearchIcon className="mr-2 h-4 w-4" /> Rechercher sur KAZEN
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </AppShell>
+      );
+    }
+
     return (
       <AppShell>
         <div className="py-24 text-center">
-          <h1 className="font-display text-2xl font-bold">
-            {browserProfile.isPending ? "Chargement du profil…" : "Profil introuvable"}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {browserProfile.isPending ? "Récupération des données d'entité." : "Ce profil n'est pas disponible."}
-          </p>
-          {browserProfile.isPending ? (
-            <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-          ) : (
-            <Button asChild className="mt-6">
-              <Link to="/">Retour à la découverte</Link>
-            </Button>
-          )}
+          <h1 className="font-display text-2xl font-bold">Profil introuvable</h1>
+          <p className="mt-2 text-muted-foreground">Ce profil n'est pas disponible.</p>
+          <Button asChild className="mt-6">
+            <Link to="/">Retour à la découverte</Link>
+          </Button>
         </div>
       </AppShell>
     );

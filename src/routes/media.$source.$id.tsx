@@ -198,18 +198,9 @@ function MediaDetailPage() {
             </div>
           </div>
 
-          {item.platforms.length ? (
-            <div className="rounded-2xl border border-border bg-card/60 p-4 backdrop-blur">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Disponible sur
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {item.platforms.map((p) => (
-                  <PlatformBadge key={p.id} platform={p} />
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <NextEpisodeCard nextEpisode={item.nextEpisode} />
+
+          <WhereToWatch platforms={item.platforms} />
 
           <UserListPanel item={item} />
         </div>

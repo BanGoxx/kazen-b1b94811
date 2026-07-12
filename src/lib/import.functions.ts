@@ -221,26 +221,53 @@ export const confirmImport = createServerFn({ method: "POST" })
         continue;
       }
 
-      // Snapshot any existing row for rollback.
+      // Snapshot any existing row for rollback (including tracking fields).
       const { data: existing } = await context.supabase
         .from("list_items")
-        .select("media_key,status,favorite,priority,rating,notes,tags")
+        .select(
+          "media_key,status,favorite,priority,rating,notes,tags,progress,started_at,completed_at,rewatch_count,is_rewatching,import_provider,import_ref",
+        )
         .eq("user_id", context.userId)
         .eq("media_key", it.matched_media_key)
         .maybeSingle();
 
       const patch: Record<string, unknown> = {};
       const st = toKazenStatus(it.user_status as never);
-      if (st) patch.status = st;
       const rating = toKazenRating(it.user_score);
-      if (rating != null) patch.rating = rating;
 
-      // Only seed notes/tags on CREATE so we never clobber the user's own
-      // existing notes/tags on an update. Progress, dates and rewatch data have
-      // no list_items column yet and stay in the import preview (future work).
       if (!existing) {
+        // On CREATE, seed every available tracking field from the import.
+        if (st) patch.status = st;
+        if (rating != null) patch.rating = rating;
         if (it.notes) patch.notes = it.notes;
         if (Array.isArray(it.user_tags) && it.user_tags.length > 0) patch.tags = it.user_tags;
+        if (it.progress != null) patch.progress = it.progress;
+        if (it.started_at) patch.started_at = it.started_at;
+        if (it.completed_at) patch.completed_at = it.completed_at;
+        if (it.rewatch_count != null) patch.rewatch_count = it.rewatch_count;
+        if (it.is_rewatching) patch.is_rewatching = it.is_rewatching;
+        patch.import_provider = it.provider;
+        if (it.provider_ref) patch.import_ref = it.provider_ref;
+      } else {
+        // On UPDATE (explicitly confirmed duplicate), never clobber the user's
+        // own non-null data — only fill fields that are currently empty.
+        if (st && !existing.status) patch.status = st;
+        if (rating != null && existing.rating == null) patch.rating = rating;
+        if (it.notes && (!existing.notes || existing.notes.length === 0)) patch.notes = it.notes;
+        if (
+          Array.isArray(it.user_tags) &&
+          it.user_tags.length > 0 &&
+          (!existing.tags || existing.tags.length === 0)
+        )
+          patch.tags = it.user_tags;
+        if (it.progress != null && existing.progress == null) patch.progress = it.progress;
+        if (it.started_at && !existing.started_at) patch.started_at = it.started_at;
+        if (it.completed_at && !existing.completed_at) patch.completed_at = it.completed_at;
+        if (it.rewatch_count != null && (existing.rewatch_count ?? 0) === 0)
+          patch.rewatch_count = it.rewatch_count;
+        if (it.is_rewatching && !existing.is_rewatching) patch.is_rewatching = it.is_rewatching;
+        if (!existing.import_provider) patch.import_provider = it.provider;
+        if (it.provider_ref && !existing.import_ref) patch.import_ref = it.provider_ref;
       }
 
       const { error: upErr } = await context.supabase.from("list_items").upsert(

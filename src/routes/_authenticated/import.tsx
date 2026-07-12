@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -105,6 +105,11 @@ function ImportPage() {
     }
   };
 
+  useEffect(() => {
+    void refreshBatches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const reset = () => {
     setBatchId(null);
     setPreviewData(null);
@@ -175,6 +180,12 @@ function ImportPage() {
   };
 
   const handleRollback = async (id: string) => {
+    if (
+      !window.confirm(
+        "Annuler cet import ? Les titres ajoutés par cet import seront retirés et les titres modifiés seront restaurés à leur état précédent. Le reste de ta liste n'est pas affecté.",
+      )
+    )
+      return;
     setBusy(true);
     try {
       const res = await rollback({ data: { batchId: id } });
@@ -188,6 +199,12 @@ function ImportPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Supprimer ce lot d'import de l'historique ? Cela n'annule pas les titres déjà importés dans ta liste (utilise « Annuler » pour cela). Seul l'historique de ce lot est effacé.",
+      )
+    )
+      return;
     setBusy(true);
     try {
       await del({ data: { batchId: id } });
@@ -244,15 +261,21 @@ function ImportPage() {
                     isSel ? "border-primary bg-primary/5" : "border-border bg-card/50"
                   } ${p.available ? "hover:border-primary/60" : "cursor-not-allowed opacity-55"}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold">{p.label}</span>
                     {p.available ? (
-                      <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
-                        Disponible
-                      </Badge>
+                      p.experimental ? (
+                        <Badge className="border-amber-500/30 bg-amber-500/15 text-amber-400">
+                          Expérimental
+                        </Badge>
+                      ) : (
+                        <Badge className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
+                          Disponible
+                        </Badge>
+                      )
                     ) : (
                       <Badge variant="outline" className="text-muted-foreground">
-                        Bientôt
+                        Bientôt disponible
                       </Badge>
                     )}
                   </div>
@@ -319,6 +342,17 @@ function ImportPage() {
               </div>
             </div>
 
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+              <p className="text-muted-foreground">
+                Confirmer ajoutera ou mettra à jour{" "}
+                <span className="font-semibold text-foreground">{checked.size} titre(s)</span> dans ta
+                liste personnelle KAZEN. Les titres introuvables et les doublons sont ignorés
+                automatiquement, et les cases décochées ne seront pas importées. Tout import reste
+                annulable depuis l'historique.
+              </p>
+            </div>
+
             <div className="flex flex-wrap items-center gap-3">
               <Button onClick={handleConfirm} disabled={busy || checked.size === 0}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
@@ -373,11 +407,17 @@ function ImportPage() {
                   </div>
                   {b.status === "completed" && (
                     <Button variant="outline" size="sm" onClick={() => handleRollback(b.id)} disabled={busy}>
-                      <Undo2 className="h-4 w-4" /> Annuler
+                      <Undo2 className="h-4 w-4" /> Annuler l'import
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)} disabled={busy}>
-                    <Trash2 className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(b.id)}
+                    disabled={busy}
+                    aria-label="Supprimer ce lot de l'historique"
+                  >
+                    <Trash2 className="h-4 w-4" /> Supprimer
                   </Button>
                 </div>
               ))}
@@ -412,7 +452,17 @@ function UploadSection({
       <p className="flex items-start gap-2 text-sm text-muted-foreground">
         <Copy className="mt-0.5 h-4 w-4 shrink-0" /> {provider.howto}
       </p>
-      <label className="focus-ring flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
+      {provider.notes && provider.notes.length > 0 && (
+        <ul className="space-y-1 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
+          {provider.notes.map((n) => (
+            <li key={n} className="flex items-start gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+              {n}
+            </li>
+          ))}
+        </ul>
+      )}
+      <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
         {busy ? (
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         ) : (
@@ -423,7 +473,7 @@ function UploadSection({
         <input
           type="file"
           accept={provider.accept}
-          className="hidden"
+          className="sr-only"
           disabled={busy}
           onChange={(e) => {
             const f = e.target.files?.[0];

@@ -544,11 +544,14 @@ function UploadSection({
   provider,
   busy,
   onFile,
+  onUsername,
 }: {
   provider: ProviderDef;
   busy: boolean;
   onFile: (p: ProviderDef, f: File) => void;
+  onUsername: (p: ProviderDef, username: string) => void;
 }) {
+  const [username, setUsername] = useState("");
   if (!provider.available) {
     return (
       <section className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
@@ -557,9 +560,10 @@ function UploadSection({
       </section>
     );
   }
+  const heading = provider.usernameBased ? "2. Renseigne ton nom d'utilisateur" : "2. Téléverse ton fichier";
   return (
     <section className="space-y-3">
-      <h2 className="text-lg font-semibold">2. Téléverse ton fichier</h2>
+      <h2 className="text-lg font-semibold">{heading}</h2>
       <p className="flex items-start gap-2 text-sm text-muted-foreground">
         <Copy className="mt-0.5 h-4 w-4 shrink-0" /> {provider.howto}
       </p>
@@ -573,28 +577,55 @@ function UploadSection({
           ))}
         </ul>
       )}
-      <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
-        {busy ? (
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        ) : (
-          <Upload className="h-6 w-6 text-primary" />
-        )}
-        <span className="font-medium">Choisir un fichier {provider.label}</span>
-        <span className="text-xs text-muted-foreground">{provider.accept}</span>
-        <input
-          type="file"
-          accept={provider.accept}
-          className="sr-only"
-          disabled={busy}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onFile(provider, f);
-            e.target.value = "";
+      {provider.usernameBased ? (
+        <form
+          className="flex flex-col gap-3 rounded-xl border border-border bg-card/50 p-4 sm:flex-row sm:items-center"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (username.trim() && !busy) onUsername(provider, username);
           }}
-        />
-      </label>
+        >
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={busy}
+            placeholder="Nom d'utilisateur AniList"
+            aria-label="Nom d'utilisateur AniList"
+            autoComplete="off"
+            className="focus-ring flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+          />
+          <Button type="submit" disabled={busy || !username.trim()}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            Récupérer ma liste
+          </Button>
+        </form>
+      ) : (
+        <label className="focus-within:ring-2 focus-within:ring-primary/60 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-card/50 p-8 text-center transition hover:border-primary/60">
+          {busy ? (
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          ) : (
+            <Upload className="h-6 w-6 text-primary" />
+          )}
+          <span className="font-medium">Choisir un fichier {provider.label}</span>
+          <span className="text-xs text-muted-foreground">{provider.accept}</span>
+          <input
+            type="file"
+            accept={provider.accept}
+            className="sr-only"
+            disabled={busy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(provider, f);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      )}
     </section>
   );
+}
+
 }
 
 function SummaryStat({

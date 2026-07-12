@@ -57,6 +57,13 @@ export interface ArticleInput {
   source?: string;
   category?: string;
   featured?: boolean;
+  /**
+   * Evergreen editorial (analysis / dossier) with no time-sensitive news
+   * claim. `publishedAt` is kept for internal ordering only; the UI must NOT
+   * render a specific publication date for evergreen entries, so KAZEN never
+   * makes a fake "published on X" claim about undated analysis.
+   */
+  evergreen?: boolean;
   popularity?: number;
   /** Titles this article is directly about. At least one is required. */
   titles: NewsTitleRef[];

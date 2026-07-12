@@ -259,9 +259,10 @@ export const PROVIDERS: ProviderDef[] = [
     howto:
       "Sur MyAnimeList : Profil → List → Export (ou myanimelist.net/panel.php?go=export), choisis « Anime List », télécharge puis décompresse le fichier .gz pour obtenir le .xml, et téléverse-le ici.",
     notes: [
-      "Aucun identifiant ni mot de passe MyAnimeList n'est demandé.",
+      "Aucun identifiant MyAnimeList n'est demandé.",
       "Aucun cookie ni jeton de session n'est transmis.",
-      "Seul le fichier XML que tu fournis est analysé (statut, note, progression, dates, tags, commentaires).",
+      "Aucune synchronisation automatique : tu importes uniquement le fichier que tu fournis.",
+      "Vérifiez les correspondances avant confirmation : rien n'est écrit dans ta liste sans ton accord.",
       "Champs pris en charge : titre, ID MAL, type, épisodes, épisodes vus, statut, note, dates de début/fin, tags, commentaires, visionnages.",
       "Limites : seules les listes d'anime sont gérées (pas les mangas) ; la progression, les dates et les visionnages sont conservés dans l'aperçu mais pas encore appliqués à ta liste.",
     ],

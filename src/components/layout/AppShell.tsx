@@ -38,6 +38,7 @@ import { RecommendationAssistant } from "@/components/media/RecommendationAssist
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
+import { useIsOwner } from "@/lib/founder";
 import { cn } from "@/lib/utils";
 
 interface NavItem {

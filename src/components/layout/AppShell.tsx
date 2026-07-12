@@ -17,6 +17,7 @@ import {
   Heart,
   Menu,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";

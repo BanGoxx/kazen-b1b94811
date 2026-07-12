@@ -22,6 +22,8 @@ export interface FicheArticle {
   /** Internal KAZEN article slug (/actualites/$slug). Null for external ones. */
   slug?: string | null;
   publishedAt?: string | null;
+  /** Evergreen analysis — no dated publication claim is rendered. */
+  evergreen?: boolean;
   excerpt?: string | null;
   thumbnailUrl?: string | null;
   /** Why this article is shown on this fiche (drives a discreet tag). */

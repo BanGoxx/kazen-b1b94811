@@ -42,6 +42,8 @@ interface NavItem {
   to: string;
   label: string;
   icon: typeof Compass;
+  /** Only shown to authenticated members (also enforced server-side + RLS). */
+  memberOnly?: boolean;
 }
 
 const NAV: NavItem[] = [

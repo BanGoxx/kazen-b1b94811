@@ -273,6 +273,16 @@ h1, h2, h3, .font-display {
   @media (min-width: 1024px) { padding-inline: 2.5rem; }
 }
 
+/* Perf: skip rendering/layout of off-screen secondary blocks until scrolled
+   near. content-visibility is SSR-safe (pure CSS, no hydration mismatch) and
+   keeps long fiches fast without JS-gated mounting. The size hint reserves
+   space so the scrollbar stays stable. */
+@utility cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+
 /* Base pill — compose with color utilities for status/genre/platform tags. */
 @utility pill {
   display: inline-flex;

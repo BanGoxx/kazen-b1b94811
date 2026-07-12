@@ -17,7 +17,6 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { RatingBadge } from "@/components/media/RatingBadge";
 import { SafeImage } from "@/components/media/SafeImage";
-import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
@@ -25,6 +24,9 @@ import { UserListPanel } from "@/components/media/UserListPanel";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
+import { WhereToWatch } from "@/components/media/WhereToWatch";
+import { NextEpisodeCard } from "@/components/media/NextEpisodeCard";
+import { FicheTrackingBadge } from "@/components/media/FicheTrackingBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -196,18 +198,9 @@ function MediaDetailPage() {
             </div>
           </div>
 
-          {item.platforms.length ? (
-            <div className="rounded-2xl border border-border bg-card/60 p-4 backdrop-blur">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Disponible sur
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {item.platforms.map((p) => (
-                  <PlatformBadge key={p.id} platform={p} />
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <NextEpisodeCard nextEpisode={item.nextEpisode} />
+
+          <WhereToWatch platforms={item.platforms} />
 
           <UserListPanel item={item} />
         </div>
@@ -232,10 +225,24 @@ function MediaDetailPage() {
             {item.titleOriginal && item.titleOriginal !== item.title ? (
               <p className="text-lg text-muted-foreground">{item.titleOriginal}</p>
             ) : null}
+            <FicheTrackingBadge mediaKey={item.key} />
             {item.genres.length ? (
               <div className="flex flex-wrap gap-2 pt-1">
                 {item.genres.map((g) => (
-                  <Badge key={g} variant="secondary">{g}</Badge>
+                  <Link
+                    key={g}
+                    to="/recherche"
+                    search={{ genres: g }}
+                    className="focus-ring rounded-full"
+                    aria-label={`Explorer le genre ${g}`}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="cursor-pointer transition-colors hover:bg-primary/20 hover:text-primary"
+                    >
+                      {g}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             ) : null}

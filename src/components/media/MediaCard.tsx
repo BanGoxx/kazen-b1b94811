@@ -8,9 +8,9 @@ import { MediaBadges } from "./MediaBadges";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {
-  anime: "bg-primary/90 text-primary-foreground",
-  series: "bg-accent/90 text-accent-foreground",
-  movie: "bg-chart-3/90 text-white",
+  anime: "bg-primary/85 text-primary-foreground ring-primary/30",
+  series: "bg-accent/85 text-accent-foreground ring-accent/30",
+  movie: "bg-chart-3/85 text-white ring-chart-3/30",
 };
 
 export function MediaCard({

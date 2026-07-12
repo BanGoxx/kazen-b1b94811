@@ -29,6 +29,7 @@ import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authenticated/mes-playlists'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
+import { Route as UniversSourceIdRouteImport } from './routes/univers.$source.$id'
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
 import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
@@ -133,6 +134,11 @@ const AuthenticatedMesListesRoute = AuthenticatedMesListesRouteImport.update({
   path: '/mes-listes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const UniversSourceIdRoute = UniversSourceIdRouteImport.update({
+  id: '/univers/$source/$id',
+  path: '/univers/$source/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaSourceIdRoute = MediaSourceIdRouteImport.update({
   id: '/media/$source/$id',
   path: '/media/$source/$id',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
+  '/univers/$source/$id': typeof UniversSourceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
+  '/univers/$source/$id': typeof UniversSourceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
+  '/univers/$source/$id': typeof UniversSourceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
+    | '/univers/$source/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
+    | '/univers/$source/$id'
   id:
     | '__root__'
     | '/'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
+    | '/univers/$source/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
+  UniversSourceIdRoute: typeof UniversSourceIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -460,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMesListesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/univers/$source/$id': {
+      id: '/univers/$source/$id'
+      path: '/univers/$source/$id'
+      fullPath: '/univers/$source/$id'
+      preLoaderRoute: typeof UniversSourceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media/$source/$id': {
       id: '/media/$source/$id'
       path: '/media/$source/$id'
@@ -530,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,
+  UniversSourceIdRoute: UniversSourceIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,6 +5,8 @@ import { SafeImage } from "@/components/media/SafeImage";
 import { usePlaylist, usePlaylistLike } from "@/lib/playlists";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ReportDialog } from "@/components/moderation/ReportDialog";
+import { useAuth } from "@/lib/auth";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import type { PlaylistItem } from "@/lib/playlists";
 import { cn } from "@/lib/utils";
@@ -183,7 +185,7 @@ function PlaylistPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <LikeButton id={id} likeCount={data.likeCount} />
-                  {user && user.id !== data.ownerId && data.meta.isPublic && (
+                  {user && user.id !== data.meta.ownerId && data.meta.isPublic && (
                     <ReportDialog targetType="playlist" targetId={id} label="Signaler" />
                   )}
                 </div>

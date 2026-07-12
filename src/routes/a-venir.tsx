@@ -12,6 +12,8 @@ import type { MediaItem, MediaType } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
 import { upcomingAllQO, upgradeCatalogOnce } from "@/lib/queries";
+import { anilistPublicPage } from "@/lib/anilist-public";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,

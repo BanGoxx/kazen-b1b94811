@@ -285,39 +285,60 @@ export type Database = {
       }
       list_items: {
         Row: {
+          completed_at: string | null
           created_at: string
           favorite: boolean
           id: string
+          import_provider: string | null
+          import_ref: string | null
+          is_rewatching: boolean
           media_key: string
           notes: string
           priority: Database["public"]["Enums"]["priority_level"]
+          progress: number | null
           rating: number | null
+          rewatch_count: number
+          started_at: string | null
           status: Database["public"]["Enums"]["watch_status"] | null
           tags: string[]
           updated_at: string
           user_id: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           favorite?: boolean
           id?: string
+          import_provider?: string | null
+          import_ref?: string | null
+          is_rewatching?: boolean
           media_key: string
           notes?: string
           priority?: Database["public"]["Enums"]["priority_level"]
+          progress?: number | null
           rating?: number | null
+          rewatch_count?: number
+          started_at?: string | null
           status?: Database["public"]["Enums"]["watch_status"] | null
           tags?: string[]
           updated_at?: string
           user_id?: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           favorite?: boolean
           id?: string
+          import_provider?: string | null
+          import_ref?: string | null
+          is_rewatching?: boolean
           media_key?: string
           notes?: string
           priority?: Database["public"]["Enums"]["priority_level"]
+          progress?: number | null
           rating?: number | null
+          rewatch_count?: number
+          started_at?: string | null
           status?: Database["public"]["Enums"]["watch_status"] | null
           tags?: string[]
           updated_at?: string

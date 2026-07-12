@@ -12,6 +12,9 @@ import {
   Undo2,
   Trash2,
   Clock,
+  Download,
+  FileJson,
+  FileSpreadsheet,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -27,6 +30,9 @@ import {
   rollbackImport,
   deleteImportBatch,
 } from "@/lib/import.functions";
+import { exportMyData } from "@/lib/export.functions";
+import { toCsv, downloadFile, exportFileName } from "@/lib/export";
+
 
 export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
@@ -89,8 +95,11 @@ function ImportPage() {
   const del = useServerFn(deleteImportBatch);
   const listBatches = useServerFn(getImportBatches);
 
+  const runExport = useServerFn(exportMyData);
+
   const [selected, setSelected] = useState<ProviderId | null>(null);
   const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<Preview | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -216,6 +225,33 @@ function ImportPage() {
       setBusy(false);
     }
   };
+
+  const handleExport = async (format: "json" | "csv") => {
+    setExporting(format);
+    try {
+      const payload = await runExport();
+      if (format === "json") {
+        downloadFile(
+          JSON.stringify(payload, null, 2),
+          exportFileName("json"),
+          "application/json",
+        );
+      } else {
+        downloadFile(toCsv(payload), exportFileName("csv"), "text/csv;charset=utf-8");
+      }
+      toast.success(
+        payload.count === 0
+          ? "Export généré (liste vide)."
+          : `${payload.count} entrée(s) exportée(s) en ${format.toUpperCase()}.`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'export.");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+
 
   const confirmableCount = previewData
     ? previewData.items.filter((i) => i.match_status !== "unmatched" && i.match_status !== "duplicate").length
@@ -430,6 +466,44 @@ function ImportPage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Export */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Exporter mes données</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Téléchargez une copie de vos listes KAZEN en JSON ou CSV. L'export ne contient que vos
+            propres données de suivi (titres, statuts, notes, progression, dates, tags).
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              onClick={() => handleExport("json")}
+              disabled={exporting !== null}
+            >
+              {exporting === "json" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileJson className="h-4 w-4" />
+              )}
+              Exporter en JSON
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleExport("csv")}
+              disabled={exporting !== null}
+            >
+              {exporting === "csv" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )}
+              Exporter en CSV
+            </Button>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Download className="h-3.5 w-3.5" /> Le fichier JSON peut être réimporté dans KAZEN.
+            </span>
+          </div>
         </section>
       </div>
     </AppShell>

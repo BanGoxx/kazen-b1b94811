@@ -191,20 +191,41 @@ function parseKazenJson(content: string): ImportEntry[] {
     const r = raw as Record<string, unknown>;
     const title = String(r.title ?? r.titre ?? r.name ?? "").trim();
     if (!title) continue;
+    const started = r.startedAt ?? r.started_at;
+    const completed = r.completedAt ?? r.completed_at;
+    const scoreVal = r.score ?? r.rating;
+    const rewatch = r.rewatchCount ?? r.rewatch_count;
+    const rewatching = r.isRewatching ?? r.is_rewatching;
+    const tags = Array.isArray(r.userTags)
+      ? (r.userTags as string[])
+      : Array.isArray(r.tags)
+        ? (r.tags as string[])
+        : [];
+    const altTitles = Array.isArray(r.altTitles)
+      ? (r.altTitles as string[])
+      : r.original_title
+        ? [String(r.original_title)]
+        : [];
     entries.push({
       provider: "nautiljon",
-      providerUrl: (r.url as string) ?? null,
+      providerUrl: (r.url as string) ?? (r.import_ref as string) ?? null,
       providerId: r.id != null ? String(r.id) : null,
       title,
-      altTitles: Array.isArray(r.altTitles) ? (r.altTitles as string[]) : [],
+      altTitles,
       mediaType: normType(String(r.mediaType ?? r.type ?? "")),
-      releaseYear: intOrNull(r.releaseYear != null ? String(r.releaseYear) : undefined),
+      releaseYear: intOrNull(
+        r.releaseYear != null ? String(r.releaseYear) : r.year != null ? String(r.year) : undefined,
+      ),
       totalEpisodes: intOrNull(r.totalEpisodes != null ? String(r.totalEpisodes) : undefined),
       status: normStatus(String(r.status ?? "")),
-      score: numOrNull(r.score != null ? String(r.score) : undefined),
+      score: numOrNull(scoreVal != null ? String(scoreVal) : undefined),
       progress: intOrNull(r.progress != null ? String(r.progress) : undefined),
-      startedAt: r.startedAt ? String(r.startedAt).slice(0, 10) : null,
-      completedAt: r.completedAt ? String(r.completedAt).slice(0, 10) : null,
+      startedAt: started ? String(started).slice(0, 10) : null,
+      completedAt: completed ? String(completed).slice(0, 10) : null,
+      comments: r.notes != null ? String(r.notes) : (r.comments as string) ?? null,
+      userTags: tags,
+      rewatchCount: intOrNull(rewatch != null ? String(rewatch) : undefined),
+      isRewatching: Boolean(rewatching),
       importedAt: now,
     });
   }

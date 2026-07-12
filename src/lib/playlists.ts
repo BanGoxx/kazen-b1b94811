@@ -274,17 +274,24 @@ export function usePublicPlaylists() {
             .filter((p): p is string => Boolean(p))
             .slice(0, 4);
           const prof = profileMap.get(row.owner_id);
+          const description = row.description ?? "";
+          const recommendation = (row as { recommendation?: string | null }).recommendation ?? "";
+          const count = rawItems.length;
+          const likeCount = likeMap.get(row.id) ?? 0;
+          const updatedAt = row.updated_at;
           return {
             id: row.id,
             title: row.title,
-            description: row.description,
+            description,
+            recommendation,
             ownerName: prof?.display_name || "Membre KAZEN",
             ownerAvatar: prof?.avatar_url ?? null,
-            count: rawItems.length,
-            likeCount: likeMap.get(row.id) ?? 0,
+            count,
+            likeCount,
             posters,
-            updatedAt: row.updated_at,
+            updatedAt,
             createdAt: row.created_at,
+            rankScore: playlistRankScore({ likeCount, count, description, recommendation, updatedAt }),
           };
         })
         // Hide empty lists from public discovery for a curated feel.
@@ -292,15 +299,8 @@ export function usePublicPlaylists() {
 
       const recent = cards.slice(0, 24);
       const popular = [...cards]
-        .filter((c) => c.likeCount > 0 || c.count >= 3)
-        .sort((a, b) => {
-          const score = (c: PublicPlaylistCard) => {
-            const ageDays = (Date.now() - new Date(c.updatedAt).getTime()) / 86_400_000;
-            const recencyBoost = Math.max(0, 14 - ageDays) / 14; // 0..1 over 2 weeks
-            return c.likeCount * 3 + Math.min(c.count, 20) * 0.4 + recencyBoost * 2;
-          };
-          return score(b) - score(a);
-        })
+        .filter((c) => c.likeCount > 0 || c.count >= 3 || c.recommendation.trim().length >= 20)
+        .sort((a, b) => b.rankScore - a.rankScore)
         .slice(0, 12);
 
       return { recent, popular };

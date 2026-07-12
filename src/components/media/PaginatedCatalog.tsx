@@ -7,6 +7,7 @@ import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
 import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
 import { SafeSection } from "./SafeSection";
+import { CatalogLoading, SlowLoadHint } from "./LoadingHint";
 import { Button } from "@/components/ui/button";
 
 // Titles auto-loaded via scroll before we require an explicit click. This keeps

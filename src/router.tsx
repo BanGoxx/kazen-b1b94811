@@ -25,5 +25,8 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
   });
 
-  return router;
+  // Dehydrate the TanStack Query cache across the SSR boundary so the client's
+  // first render matches server HTML (prevents hydration mismatch crashes on
+  // every useSuspenseQuery surface — home rails, catalogs, fiches).
+  return routerWithQueryClient(router, queryClient);
 };

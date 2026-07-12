@@ -172,7 +172,8 @@ function CalendarPage() {
   const filtered = useMemo(() => {
     const weekKeys = new Set(days.map(isoDay));
     return all.filter((it) => {
-      if (!it.releaseDate || !weekKeys.has(it.releaseDate.slice(0, 10))) return false;
+      const date = calendarDate(it);
+      if (!date || !weekKeys.has(date)) return false;
       if (type !== "all" && it.mediaType !== type) return false;
       if (platform !== "all" && !it.platforms.some((p) => p.id === platform)) return false;
       if (watch !== "all") {
@@ -188,7 +189,7 @@ function CalendarPage() {
   const byDay = useMemo(() => {
     const map = new Map<string, MediaItem[]>();
     for (const it of filtered) {
-      const key = it.releaseDate!.slice(0, 10);
+      const key = calendarDate(it)!;
       const arr = map.get(key) ?? [];
       arr.push(it);
       map.set(key, arr);

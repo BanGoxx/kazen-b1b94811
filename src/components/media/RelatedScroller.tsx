@@ -4,15 +4,24 @@ import { SafeImage } from "./SafeImage";
 
 export function RelatedScroller({
   title,
+  description,
   items,
 }: {
   title: string;
+  description?: string;
   items: RelatedMedia[];
 }) {
   if (!items.length) return null;
   return (
     <section>
-      <h2 className="mb-3 font-display text-xl font-bold">{title}</h2>
+      {title || description ? (
+        <div className="mb-3">
+          {title ? <h2 className="font-display text-xl font-bold">{title}</h2> : null}
+          {description ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+      ) : null}
       <ul className="flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
         {items.map((it) => (
           <li key={it.key} className="w-32 shrink-0 snap-start">
@@ -33,6 +42,11 @@ export function RelatedScroller({
                 <span className="absolute left-1.5 top-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.65rem] font-semibold backdrop-blur">
                   {it.relation}
                 </span>
+                {it.format ? (
+                  <span className="absolute bottom-1.5 right-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.6rem] font-medium text-muted-foreground backdrop-blur">
+                    {it.format}
+                  </span>
+                ) : null}
               </div>
               <p className="mt-1.5 line-clamp-2 text-xs font-semibold leading-tight group-hover:text-primary">
                 {it.title}

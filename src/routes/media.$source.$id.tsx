@@ -20,7 +20,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
-import { RelatedScroller } from "@/components/media/RelatedScroller";
+import { RelatedContent } from "@/components/media/RelatedContent";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";
@@ -302,18 +302,9 @@ function MediaDetailPage() {
             </FicheSection>
           ) : null}
 
-          {item.collectionName ? (
-            <div className="flex items-center gap-2 rounded-xl border border-border bg-card/60 p-4">
-              <Layers className="h-5 w-5 text-primary" />
-              <span className="text-sm">
-                Fait partie de la saga <strong className="font-semibold">{item.collectionName}</strong>
-              </span>
-            </div>
-          ) : null}
-
           <CreditScroller title={item.castLabel} people={item.cast} />
           <CreditScroller title={item.crewLabel} people={item.crew} />
-          <RelatedScroller title="À découvrir aussi" items={item.related} />
+          <RelatedContent related={item.related} collectionName={item.collectionName} />
         </div>
       </div>
     </AppShell>

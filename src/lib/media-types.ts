@@ -81,14 +81,29 @@ export interface CreditPerson {
   photoUrl: string | null;
 }
 
+/**
+ * Coarse relation buckets used to group linked content on fiches and, later,
+ * to power dedicated franchise/group pages. Keep these stable — UI and the
+ * franchise helper both key off them.
+ */
+export type RelationCategory =
+  | "franchise" // suites, préquelles, spin-offs, histoires liées (même univers)
+  | "adaptation" // source / adaptation entre médias
+  | "recommendation" // suggestions "dans le même esprit"
+  | "other";
+
 export interface RelatedMedia {
   key: string;
   source: MediaSource;
   externalId: string;
   title: string;
   posterUrl: string | null;
+  /** Human label, e.g. "Suite", "Préquelle", "Recommandé". */
   relation: string;
+  relationCategory: RelationCategory;
   mediaType: MediaType;
+  /** Optional format hint (Film, OVA, Série TV…) for richer display. */
+  format?: string | null;
 }
 
 export interface MediaVideo {

@@ -359,7 +359,9 @@ function augmentTmdb(
       title: m.title,
       posterUrl: m.posterUrl,
       relation: "Recommandé",
+      relationCategory: "recommendation" as const,
       mediaType: m.mediaType,
+      format: null,
     }));
   const videos: MediaVideo[] = (data.videos?.results ?? [])
     .filter((v) => v.site === "YouTube")

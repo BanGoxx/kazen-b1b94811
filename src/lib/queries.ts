@@ -294,12 +294,12 @@ export const animePageQO = (kind: string) =>
     },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
-    // Server SSR may only have the curated fallback when the production Worker
-    // is blocked by AniList. On the client, mark it stale so the browser CORS
-    // path immediately replaces page 1 with real AniList data, then page 2+
-    // keeps progressive loading alive.
-    staleTime: typeof window === "undefined" ? HOUR : 0,
-    refetchOnMount: true,
+    // SSR may only hold the curated fallback when the Worker is AniList-blocked.
+    // Rather than refetch every loaded page on every mount (old staleTime:0 +
+    // refetchOnMount:true — which lost scroll/pages on back-navigation), the
+    // catalog upgrades page 1 to real browser-direct data ONCE post-hydration
+    // via upgradeCatalogOnce(); HOUR staleTime then serves back-nav from cache.
+    staleTime: HOUR,
     retry: 3,
   });
 

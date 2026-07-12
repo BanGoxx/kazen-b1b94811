@@ -338,7 +338,8 @@ export const seasonalAnimePageQO = (season?: string, year?: number) =>
     },
     initialPageParam: 1,
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
-    staleTime: typeof window === "undefined" ? HOUR : 0,
-    refetchOnMount: true,
+    // Upgraded once post-hydration via upgradeCatalogOnce(); back-navigation
+    // then reuses the cached season pages instantly (no full refetch loop).
+    staleTime: HOUR,
     retry: 3,
   });

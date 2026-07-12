@@ -129,6 +129,8 @@ function PlaylistPage() {
   const router = useRouter();
   const { data, isLoading, isError } = usePlaylist(id);
   const { user } = useAuth();
+  const ownerIsFounder = useIsFounder(data?.meta.ownerId);
+  const { data: ownerBadges } = useUserBadges(data?.meta.ownerId);
 
   return (
     <AppShell>

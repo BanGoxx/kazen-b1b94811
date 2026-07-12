@@ -18,7 +18,6 @@ import {
   EyeOff,
   ExternalLink,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -159,7 +158,7 @@ function FounderConsole() {
           </TabsContent>
 
           <TabsContent value="roles" className="pt-6">
-            <RolesSection ownerId={user?.id ?? null} />
+            <RolesSection />
           </TabsContent>
 
           <TabsContent value="demandes" className="pt-6">
@@ -240,7 +239,7 @@ function SoonPill() {
   );
 }
 
-function RolesSection({ ownerId }: { ownerId: string | null }) {
+function RolesSection() {
   const qc = useQueryClient();
   const { data: badges } = useBadgeCatalog(true);
   const assignFn = useServerFn(assignBadgeByEmail);

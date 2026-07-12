@@ -134,7 +134,11 @@ function ProfilePage() {
                 <h1 className="font-display text-2xl font-extrabold">
                   {displayName || "Mon profil"}
                 </h1>
+                {isOwner ? <FounderBadge size="sm" /> : null}
                 {isSupporter ? <SupporterBadge size="sm" /> : null}
+                {myBadges && myBadges.length > 0 ? (
+                  <PublicBadgeList badges={myBadges} max={3} />
+                ) : null}
               </div>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>

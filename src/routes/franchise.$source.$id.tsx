@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { mediaDetailQO } from "@/lib/queries";
+import { anilistPublicDetail } from "@/lib/anilist-public";
 import {
   buildFranchiseGroup,
   decadeOf,

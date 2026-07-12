@@ -61,13 +61,14 @@
 
 :root {
   --radius: 0.9rem;
-  /* Deep tinted near-black — cinematic, never pure black. Distinct surface
-     levels: background < sidebar < card < popover for clear depth. */
-  --background: oklch(0.145 0.006 264);
+  /* Deep obsidian with a whisper of night-plum/indigo undertone — cinematic,
+     never pure black. Distinct surface levels: background < sidebar < card <
+     popover for clear depth. */
+  --background: oklch(0.144 0.008 286);
   --foreground: oklch(0.972 0.004 90);
-  --card: oklch(0.196 0.008 264);
+  --card: oklch(0.197 0.009 286);
   --card-foreground: oklch(0.972 0.004 90);
-  --popover: oklch(0.21 0.009 264);
+  --popover: oklch(0.213 0.01 286);
   --popover-foreground: oklch(0.972 0.004 90);
   /* Ember/coral primary — warmed toward coral, chroma dialed back so red reads
      premium rather than aggressive. */

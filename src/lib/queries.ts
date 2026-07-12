@@ -249,3 +249,25 @@ export const seriesPageQO = (kind: string) =>
     getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
     staleTime: HOUR,
   });
+
+export const seasonalAnimePageQO = (season?: string, year?: number) =>
+  infiniteQueryOptions({
+    queryKey: ["anime", "seasonal", "page", season ?? "current", year ?? "current"],
+    queryFn: async ({ pageParam }) => {
+      const page = Number(pageParam) || 1;
+      if (typeof window !== "undefined") {
+        try {
+          const res = await anilistPublicSeasonalPage(season, year, page);
+          if (res.items.length || page > 1) return res;
+        } catch (error) {
+          console.error("anilistPublicSeasonalPage", error);
+        }
+      }
+      return getSeasonalAnimePage({ data: { season, year, page } });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (last: PagedMedia) => (last.hasMore ? last.page + 1 : undefined),
+    staleTime: typeof window === "undefined" ? HOUR : 0,
+    refetchOnMount: true,
+    retry: 3,
+  });

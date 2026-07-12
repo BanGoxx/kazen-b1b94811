@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PROVIDERS, toDbProvider, type ProviderDef, type ProviderId } from "@/lib/import/providers";
 import { ImportParseError, type ImportEntry } from "@/lib/import/import-schema";
+import { fetchAniListImport, AniListImportError } from "@/lib/import/anilist-list";
 import {
   createImportBatch,
   getImportBatches,

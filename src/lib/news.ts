@@ -393,6 +393,7 @@ export function toFicheArticle(
     source: a.source,
     category: a.category ?? null,
     publishedAt: a.publishedAt,
+    evergreen: a.evergreen,
     excerpt: a.excerpt,
     url: a.externalUrl ?? null,
     slug: a.externalUrl ? null : a.slug,

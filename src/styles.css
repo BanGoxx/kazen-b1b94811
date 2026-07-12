@@ -272,6 +272,37 @@ p {
   50% { opacity: 0.55; }
 }
 
+/* Premium loading shimmer — a soft light sweep across skeleton surfaces. */
+@keyframes shimmer {
+  0% { background-position: -160% 0; }
+  100% { background-position: 260% 0; }
+}
+
+/* Subtle sheen sweep used for the Founder badge micro-interaction. */
+@keyframes badge-sheen {
+  0% { transform: translateX(-140%); }
+  60%, 100% { transform: translateX(260%); }
+}
+
+/* Refined skeleton: base tone + animated diagonal sheen. Respects reduced
+   motion (global rule disables the animation). */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--color-muted) 70%, transparent);
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--color-foreground) 7%, transparent) 42%,
+    color-mix(in oklab, var(--color-foreground) 10%, transparent) 50%,
+    color-mix(in oklab, var(--color-foreground) 7%, transparent) 58%,
+    transparent 80%
+  );
+  background-size: 240% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s var(--ease-soft) infinite;
+}
+
 
 @utility aurora-text {
   background: var(--gradient-aurora);

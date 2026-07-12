@@ -389,15 +389,58 @@ function UpcomingPage() {
             <MediaGrid items={flat} />
           )}
 
-          {/* Finite-state clarity: explain that the upcoming set is intentionally
-              bounded (provider-safe) and refreshes on its own, so users don't
-              read the finite count as a tiny/incomplete catalogue. */}
-          <p className="mt-10 text-center text-xs text-muted-foreground">
-            {visible.length} sortie{visible.length > 1 ? "s" : ""} affichée
-            {visible.length > 1 ? "s" : ""} — les prochaines annonces
-            {counts.anime ? " (dont les nouveaux anime)" : ""} seront ajoutées
-            automatiquement au fil des publications AniList et TMDB.
-          </p>
+          {/* Finite-state clarity: the upcoming set is intentionally bounded
+              (provider-safe). Be honest about the cap and let the user opt in to
+              loading more upcoming anime rather than implying a complete catalogue. */}
+          <div className="mt-12 flex flex-col items-center gap-3">
+            <p className="text-center text-sm font-medium text-foreground">
+              {visible.length} sortie{visible.length > 1 ? "s" : ""} à venir affichée
+              {visible.length > 1 ? "s" : ""}
+            </p>
+            {exhausted ? (
+              <p className="text-center text-xs text-muted-foreground">
+                Toutes les sorties disponibles sont affichées.
+              </p>
+            ) : (
+              <>
+                <p className="text-center text-xs text-muted-foreground">
+                  Sorties affichées jusqu'ici — chargement limité pour préserver la
+                  stabilité. Vous pouvez charger plus de résultats.
+                </p>
+                {loadError ? (
+                  <p className="text-xs text-destructive" role="status">
+                    Le chargement a échoué. Réessayez.
+                  </p>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="min-w-[14rem] rounded-full"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Chargement des sorties…
+                    </>
+                  ) : loadError ? (
+                    <>
+                      <RotateCw className="h-4 w-4" /> Réessayer
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" /> Charger plus de sorties
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+            <p className="max-w-md text-center text-xs text-muted-foreground">
+              Les prochaines annonces{counts.anime ? " (dont les nouveaux anime)" : ""} sont
+              aussi ajoutées automatiquement au fil des publications AniList et TMDB.
+            </p>
+          </div>
         </>
       ) : (
         <EmptyState message="Aucune sortie annoncée avec ces filtres." hint="Modifiez le type ou la plateforme, ou revenez bientôt." />

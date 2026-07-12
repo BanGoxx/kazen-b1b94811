@@ -263,13 +263,14 @@ function SearchPage() {
             <EmptyState message="Saisissez au moins 2 caractères pour lancer une recherche." />
           </div>
         </div>
-      ) : isFetching && !data ? (
+      ) : (browseMode ? browseFetching : isFetching) && !data ? (
         <MediaGridSkeleton />
-      ) : (data && total === 0 && !filtersActive) ? (
+      ) : (data && total === 0 && !browseMode && !filtersActive) ? (
         <EmptyState
           message={`Aucun résultat pour « ${trimmed} ».`}
           hint="Essayez un autre titre ou une autre orthographe."
         />
+
       ) : (
         <>
           {/* Filter & sort toolbar */}

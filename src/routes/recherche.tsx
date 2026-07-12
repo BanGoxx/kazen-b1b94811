@@ -305,13 +305,13 @@ function SearchPage() {
                 <ResultSection title="Films" to="/films" items={filtered.movies} />
               </TabsContent>
               <TabsContent value="anime" className="mt-6">
-                <MediaGrid items={filtered.anime} />
+                <SearchResultGrid items={filtered.anime} />
               </TabsContent>
               <TabsContent value="series" className="mt-6">
-                <MediaGrid items={filtered.series} />
+                <SearchResultGrid items={filtered.series} />
               </TabsContent>
               <TabsContent value="movies" className="mt-6">
-                <MediaGrid items={filtered.movies} />
+                <SearchResultGrid items={filtered.movies} />
               </TabsContent>
             </Tabs>
           )}

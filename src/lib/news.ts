@@ -300,6 +300,22 @@ export function getFeaturedArticles(limit = 4): NewsArticle[] {
     .slice(0, limit);
 }
 
+/**
+ * Recency-first editorial selection for the Découverte page (Step E). Recent
+ * articles surface first so the block feels alive, with a light popularity
+ * tie-break for same-day entries — a curated feel, never a noisy news feed.
+ * Only real, internal (clickable), featured entries are considered.
+ */
+export function getDiscoverArticles(limit = 4): NewsArticle[] {
+  return NEWS_ARTICLES.filter((a) => a.featured && !a.externalUrl)
+    .sort((a, b) => {
+      const recent = byRecent(a, b);
+      if (recent !== 0) return recent;
+      return b.popularity - a.popularity;
+    })
+    .slice(0, limit);
+}
+
 /** Normalize a NewsArticle into the presentational FicheArticle shape. */
 export function toFicheArticle(a: NewsArticle): FicheArticle {
   return {

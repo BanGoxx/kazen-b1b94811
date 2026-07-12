@@ -226,6 +226,33 @@ function ImportPage() {
     }
   };
 
+  const handleExport = async (format: "json" | "csv") => {
+    setExporting(format);
+    try {
+      const payload = await runExport();
+      if (format === "json") {
+        downloadFile(
+          JSON.stringify(payload, null, 2),
+          exportFileName("json"),
+          "application/json",
+        );
+      } else {
+        downloadFile(toCsv(payload), exportFileName("csv"), "text/csv;charset=utf-8");
+      }
+      toast.success(
+        payload.count === 0
+          ? "Export généré (liste vide)."
+          : `${payload.count} entrée(s) exportée(s) en ${format.toUpperCase()}.`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'export.");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+
+
   const confirmableCount = previewData
     ? previewData.items.filter((i) => i.match_status !== "unmatched" && i.match_status !== "duplicate").length
     : 0;

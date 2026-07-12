@@ -11,7 +11,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO } from "@/lib/queries";
+import { upcomingAllQO, upgradeCatalogOnce } from "@/lib/queries";
 import {
   Select,
   SelectContent,

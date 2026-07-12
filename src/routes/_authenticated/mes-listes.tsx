@@ -380,7 +380,7 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
           ) : null}
           {entry.priority === "haute" ? (
             <span
-              className="inline-flex items-center gap-0.5 rounded-full bg-ember-500/90 bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white shadow"
+              className="inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-primary-foreground shadow"
               title={`Priorité ${PRIORITY_LABELS.haute}`}
             >
               <Flame className="h-3 w-3" /> Haute

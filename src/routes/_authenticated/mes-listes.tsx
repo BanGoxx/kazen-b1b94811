@@ -162,6 +162,39 @@ function MyListsPage() {
           </p>
         </header>
 
+        {entries.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+            {STATUS_TABS.filter((s) => s.value !== "tous").map((s) => {
+              const active = tab === s.value;
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setTab(active ? "tous" : s.value)}
+                  aria-pressed={active}
+                  className={cn(
+                    "focus-ring flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
+                    active
+                      ? "border-primary/50 bg-primary/10 shadow-[var(--shadow-glow)]"
+                      : "border-border bg-card/40 hover:border-primary/30 hover:bg-card/70",
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                    {s.value === "favoris" ? (
+                      <Heart className="h-3 w-3 text-rose-400" />
+                    ) : null}
+                    {s.label}
+                  </span>
+                  <span className="font-display text-2xl font-extrabold tabular-nums">
+                    {counts[s.value] ?? 0}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
+
         <div className="space-y-4 rounded-2xl border border-border bg-card/40 p-4 backdrop-blur">
           <div className="flex flex-wrap gap-1.5">
             {STATUS_TABS.map((s) => (

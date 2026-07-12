@@ -51,6 +51,9 @@ export function MediaCard({
           </span>
           <RatingBadge score={item.score} />
         </div>
+        <div className="pointer-events-none absolute inset-x-0 top-11 flex justify-start p-2.5">
+          <NextEpisodePill nextEpisode={item.nextEpisode} />
+        </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/60 to-transparent opacity-95 transition-opacity duration-500 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-2.5">

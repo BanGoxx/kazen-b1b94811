@@ -25,6 +25,7 @@ import { UserListPanel } from "@/components/media/UserListPanel";
 import { AddToPlaylist } from "@/components/media/AddToPlaylist";
 import { FicheSection } from "@/components/media/FicheSection";
 import { FicheReviews } from "@/components/media/FicheReviews";
+import { FicheArticles } from "@/components/media/FicheArticles";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";
@@ -167,6 +168,18 @@ function MediaDetailPage() {
   if (item.countryOfOrigin) infos.push({ icon: Globe, label: "Origine", value: item.countryOfOrigin });
   if (endReleased) infos.push({ icon: CalendarDays, label: "Fin de diffusion", value: endReleased });
 
+  // At-a-glance strip: the few facts a user scans first, kept ultra-compact.
+  const releaseYear = item.releaseDate ? item.releaseDate.slice(0, 4) : null;
+  const heroStats: string[] = [];
+  if (item.format) heroStats.push(item.format);
+  if (releaseYear) heroStats.push(releaseYear);
+  if (item.status) heroStats.push(STATUS_LABELS[item.status]);
+  if (item.episodesCount) heroStats.push(`${item.episodesCount} ép.`);
+  else if (item.seasonsCount) heroStats.push(`${item.seasonsCount} saison${item.seasonsCount > 1 ? "s" : ""}`);
+  if (item.runtime) heroStats.push(`${item.runtime} min`);
+
+
+
   return (
     <AppShell>
       {/* Cinematic backdrop */}
@@ -230,6 +243,16 @@ function MediaDetailPage() {
             </h1>
             {item.titleOriginal && item.titleOriginal !== item.title ? (
               <p className="text-lg text-muted-foreground">{item.titleOriginal}</p>
+            ) : null}
+            {heroStats.length ? (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                {heroStats.map((s, i) => (
+                  <span key={s} className="flex items-center gap-2">
+                    {i > 0 ? <span aria-hidden className="text-muted-foreground/40">·</span> : null}
+                    <span className="font-medium text-foreground/90">{s}</span>
+                  </span>
+                ))}
+              </div>
             ) : null}
             <FicheTrackingBadge mediaKey={item.key} />
             {hasFranchiseLinks(item.related)
@@ -337,6 +360,8 @@ function MediaDetailPage() {
           <CreditScroller title={item.crewLabel} people={item.crew} />
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
+          {/* Editorial context — renders only when a safe article source exists. */}
+          <FicheArticles articles={[]} />
         </div>
       </div>
     </AppShell>

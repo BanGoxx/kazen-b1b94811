@@ -519,18 +519,24 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
     photoUrl: e.node?.image?.medium ?? null,
   }));
   const related: RelatedMedia[] = (m.relations?.edges ?? [])
-    .filter((e) => e.node?.type === "ANIME" && e.node?.id)
-    .map((e) => ({
-      key: `anilist:${e.node!.id}`,
-      source: "anilist" as const,
-      externalId: String(e.node!.id),
-      title: e.node!.title?.english || e.node!.title?.romaji || "Sans titre",
-      posterUrl: e.node!.coverImage?.large ?? null,
-      relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
-      relationCategory: ANILIST_RELATION_CATEGORY[e.relationType ?? "OTHER"] ?? "other",
-      mediaType: "anime" as const,
-      format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
-    }));
+    .filter((e) => (e.node?.type === "ANIME" || e.node?.type === "MANGA") && e.node?.id)
+    .map((e) => {
+      const isAnime = e.node!.type === "ANIME";
+      return {
+        key: `anilist:${e.node!.id}`,
+        source: "anilist" as const,
+        externalId: String(e.node!.id),
+        title: e.node!.title?.english || e.node!.title?.romaji || "Sans titre",
+        posterUrl: e.node!.coverImage?.large ?? null,
+        relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
+        relationCategory: ANILIST_RELATION_CATEGORY[e.relationType ?? "OTHER"] ?? "other",
+        mediaType: "anime" as const,
+        format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
+        formatGroup: anilistFormatGroup(e.node!.type, e.node!.format),
+        year: e.node!.startDate?.year ?? null,
+        hasDetail: isAnime,
+      };
+    });
   const alt = Array.from(
     new Set(
       [m.title?.native, ...(m.synonyms ?? [])]

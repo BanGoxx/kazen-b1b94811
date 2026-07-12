@@ -460,6 +460,9 @@ img {
 
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
@@ -467,6 +470,7 @@ img {
     transition-duration: 0.001ms !important;
   }
 }
+
 
 /* Hide the injected "Made with Lovable" / "Edit with Lovable" badge without
    affecting document flow or layout. Uses display:none so no space is reserved. */

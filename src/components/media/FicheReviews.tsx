@@ -257,16 +257,21 @@ function ReplyItem({
       )}
       <div className="mt-2 flex items-center justify-between">
         <LikeButton small count={count} liked={likedByMe} disabled={toggle.isPending} onToggle={handleLike} />
-        {isOwn && !editing && (
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="mr-1 h-3 w-3" /> Modifier
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
-              <Trash2 className="mr-1 h-3 w-3" /> Supprimer
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {isOwn && !editing && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+                <Pencil className="mr-1 h-3 w-3" /> Modifier
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleDelete}>
+                <Trash2 className="mr-1 h-3 w-3" /> Supprimer
+              </Button>
+            </>
+          )}
+          {!isOwn && currentUserId && (
+            <ReportDialog targetType="reply" targetId={reply.id} label="Signaler" />
+          )}
+        </div>
       </div>
     </div>
   );

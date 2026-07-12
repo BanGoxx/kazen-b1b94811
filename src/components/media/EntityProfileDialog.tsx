@@ -13,15 +13,18 @@ import { Button } from "@/components/ui/button";
 export type EntityKind = "character" | "staff";
 
 /**
- * Derive the AniList public profile URL for a credit entity when its id encodes
- * a real AniList node ("c<id>" for characters, "s<id>" for staff). Fallback ids
- * (random) never produce a link, so we never expose a dead outbound URL.
+ * Extract the raw AniList node id when the credit id encodes a real node
+ * ("c<id>" for characters, "s<id>" for staff). Fallback/random ids return null
+ * so we never link to a dead entity page or outbound profile.
  */
-function anilistUrl(person: CreditPerson, kind: EntityKind): string | null {
+function anilistNodeId(person: CreditPerson): string | null {
   const raw = person.id?.slice(1) ?? "";
-  if (!/^\d+$/.test(raw)) return null;
+  return /^\d+$/.test(raw) ? raw : null;
+}
+
+function anilistUrl(nodeId: string, kind: EntityKind): string {
   const segment = kind === "character" ? "character" : "staff";
-  return `https://anilist.co/${segment}/${raw}`;
+  return `https://anilist.co/${segment}/${nodeId}`;
 }
 
 /**

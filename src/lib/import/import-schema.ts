@@ -65,6 +65,17 @@ export interface ImportEntry {
   completedAt: string | null;
 
   /** When this entry was parsed (import run timestamp). */
+  /**
+   * Optional extra tracking fidelity captured by richer providers (e.g. MAL).
+   * These are kept for the preview/audit trail. `comments` and `userTags` can
+   * be persisted onto list_items (notes/tags); rewatch fields are preview-only
+   * for now (no matching list_items column yet).
+   */
+  comments?: string | null;
+  userTags?: string[];
+  rewatchCount?: number | null;
+  isRewatching?: boolean;
+
   importedAt: string;
 }
 

@@ -25,6 +25,7 @@ import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
+import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authenticated/mes-playlists'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
@@ -111,6 +112,11 @@ const AnimeSaisonRoute = AnimeSaisonRouteImport.update({
   path: '/saison',
   getParentRoute: () => AnimeRoute,
 } as any)
+const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
+  id: '/actualites/$slug',
+  path: '/actualites/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/mes-playlists'
     | '/profil'
+    | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/mes-playlists'
     | '/profil'
+    | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mes-listes'
     | '/_authenticated/mes-playlists'
     | '/_authenticated/profil'
+    | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   SeriesRoute: typeof SeriesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoutienRoute: typeof SoutienRoute
+  ActualitesSlugRoute: typeof ActualitesSlugRoute
   ApiChatRoute: typeof ApiChatRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
@@ -419,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeSaisonRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/actualites/$slug': {
+      id: '/actualites/$slug'
+      path: '/actualites/$slug'
+      fullPath: '/actualites/$slug'
+      preLoaderRoute: typeof ActualitesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/profil': {
       id: '/_authenticated/profil'
       path: '/profil'
@@ -504,6 +524,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeriesRoute: SeriesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoutienRoute: SoutienRoute,
+  ActualitesSlugRoute: ActualitesSlugRoute,
   ApiChatRoute: ApiChatRoute,
   PlaylistIdRoute: PlaylistIdRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,

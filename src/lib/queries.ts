@@ -111,6 +111,14 @@ export const searchMediaQO = (q: string) =>
     enabled: q.trim().length >= 2,
   });
 
+export const entityProfileQO = (kind: string, id: string) =>
+  queryOptions({
+    queryKey: ["entity", kind, id],
+    queryFn: () => getEntityProfile({ data: { kind, id } }),
+    staleTime: HOUR,
+    retry: 2,
+  });
+
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import { getAnimePage, getMoviePage, getSeriesPage, searchMediaPaged } from "./discover.functions";
 import type { PagedMedia } from "./tmdb.server";

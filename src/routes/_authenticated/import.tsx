@@ -299,6 +299,13 @@ function ImportPage() {
         {previewData && (
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">3. Aperçu avant import</h2>
+            <div className="flex items-start gap-3 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
+              <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p>
+                KAZEN compare les titres avec son catalogue actuel. Vérifiez les correspondances
+                avant de confirmer.
+              </p>
+            </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               <SummaryStat label="Total" value={previewData.summary.total} />
               <SummaryStat label="Sûres" value={previewData.summary.exact} tone="emerald" />

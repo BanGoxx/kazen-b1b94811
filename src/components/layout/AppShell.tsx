@@ -42,6 +42,8 @@ interface NavItem {
   to: string;
   label: string;
   icon: typeof Compass;
+  /** Only shown to authenticated members (also enforced server-side + RLS). */
+  memberOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
@@ -57,7 +59,7 @@ const NAV: NavItem[] = [
   { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
   { to: "/listes", label: "Listes partagées", icon: ListMusic },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
-  { to: "/import", label: "Importer", icon: DownloadCloud },
+  { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
 
   { to: "/soutien", label: "Soutien", icon: Heart },
 ];
@@ -138,9 +140,11 @@ function Brand() {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isModerator = useIsModerator();
+  const { user } = useAuth();
+  const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
   const items = isModerator
-    ? [...NAV, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
-    : NAV;
+    ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+    : base;
   return (
     <nav aria-label="Navigation principale">
       <ul className="space-y-1">

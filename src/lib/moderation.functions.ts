@@ -98,7 +98,7 @@ export const moderateContent = createServerFn({ method: "POST" })
       _action: data.action,
       _reason: data.reason ?? "",
       _note: data.note ?? "",
-      _report_id: data.reportId ?? null,
+      _report_id: data.reportId ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { ok: true };

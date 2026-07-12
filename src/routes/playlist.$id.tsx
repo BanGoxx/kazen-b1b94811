@@ -196,6 +196,10 @@ function PlaylistPage() {
                     par <span className="font-medium text-foreground">{data.ownerName}</span> ·{" "}
                     {data.items.length} titre{data.items.length > 1 ? "s" : ""}
                   </span>
+                  {ownerIsFounder ? <FounderBadge size="sm" /> : null}
+                  {ownerBadges && ownerBadges.length > 0 ? (
+                    <PublicBadgeList badges={ownerBadges} max={2} />
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <LikeButton id={id} likeCount={data.likeCount} />

@@ -8,6 +8,7 @@ import { QuickSearch } from "@/components/media/QuickSearch";
 import { PlatformHighlights } from "@/components/media/PlatformHighlights";
 import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
+import { CategoryBand } from "@/components/media/CategoryBand";
 import { SafeSection } from "@/components/media/SafeSection";
 import type { MediaItem } from "@/lib/media-types";
 import {
@@ -214,7 +215,12 @@ function DiscoverPage() {
           <ForYouHomeBlock />
         </SafeSection>
 
-        {/* ----- Anime d'abord ----- */}
+        {/* ----- Univers anime (priorité KAZEN) ----- */}
+        <CategoryBand
+          icon={Sparkles}
+          label="Univers anime"
+          description="Tendances, valeurs sûres et sorties attendues de l'animation"
+        />
         <SafeSection>
           <TrendingAnimeRow />
         </SafeSection>
@@ -230,12 +236,23 @@ function DiscoverPage() {
 
         <MemberCTA />
 
-        {/* ----- Puis séries ----- */}
+        {/* ----- Côté séries ----- */}
+        <CategoryBand
+          icon={Tv}
+          label="Côté séries"
+          description="Drames, thrillers et pépites à ne pas manquer"
+        />
+
         <SafeSection>
           <FeaturedSeriesRow />
         </SafeSection>
 
-        {/* ----- Puis films ----- */}
+        {/* ----- Grand écran ----- */}
+        <CategoryBand
+          icon={Film}
+          label="Grand écran"
+          description="Films tendance et prochaines sorties ciné & streaming"
+        />
         <SafeSection>
           <UpcomingMoviesRow />
         </SafeSection>
@@ -245,6 +262,7 @@ function DiscoverPage() {
 
         <PlatformHighlights />
       </div>
+
     </AppShell>
   );
 }

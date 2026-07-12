@@ -342,6 +342,16 @@ function UpcomingPage() {
           ) : (
             <MediaGrid items={flat} />
           )}
+
+          {/* Finite-state clarity: explain that the upcoming set is intentionally
+              bounded (provider-safe) and refreshes on its own, so users don't
+              read the finite count as a tiny/incomplete catalogue. */}
+          <p className="mt-10 text-center text-xs text-muted-foreground">
+            {visible.length} sortie{visible.length > 1 ? "s" : ""} affichée
+            {visible.length > 1 ? "s" : ""} — les prochaines annonces
+            {counts.anime ? " (dont les nouveaux anime)" : ""} seront ajoutées
+            automatiquement au fil des publications AniList et TMDB.
+          </p>
         </>
       ) : (
         <EmptyState message="Aucune sortie annoncée avec ces filtres." hint="Modifiez le type ou la plateforme, ou revenez bientôt." />

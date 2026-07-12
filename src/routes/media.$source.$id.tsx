@@ -356,8 +356,9 @@ function MediaDetailPage() {
             </FicheSection>
           ) : null}
 
-          <CreditScroller title={item.castLabel} people={item.cast} />
-          <CreditScroller title={item.crewLabel} people={item.crew} />
+          <CreditScroller title={item.castLabel} people={item.cast} kind="character" />
+          <CreditScroller title={item.crewLabel} people={item.crew} kind="staff" />
+
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
           {/* Editorial context — renders only when a safe article source exists. */}

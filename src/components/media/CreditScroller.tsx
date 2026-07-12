@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User } from "lucide-react";
 import type { CreditPerson } from "@/lib/media-types";
+import { EntityProfileDialog, type EntityKind } from "./EntityProfileDialog";
 
 /**
  * Cast/crew avatar with graceful fallback: if there is no photo, or the remote
@@ -17,7 +18,7 @@ function CreditAvatar({ person }: { person: CreditPerson }) {
           src={person.photoUrl as string}
           alt={person.name}
           loading="lazy"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={() => setFailed(true)}
         />
       ) : (
@@ -32,11 +33,22 @@ function CreditAvatar({ person }: { person: CreditPerson }) {
 export function CreditScroller({
   title,
   people,
+  kind = "staff",
 }: {
   title: string;
   people: CreditPerson[];
+  kind?: EntityKind;
 }) {
+  const [selected, setSelected] = useState<CreditPerson | null>(null);
+  const [open, setOpen] = useState(false);
+
   if (!people.length) return null;
+
+  const handleOpen = (person: CreditPerson) => {
+    setSelected(person);
+    setOpen(true);
+  };
+
   return (
     <section>
       <h2 className="mb-3 font-display text-xl font-bold">{title}</h2>
@@ -44,16 +56,32 @@ export function CreditScroller({
         {people.map((p, i) => (
           <li
             key={`${p.id}-${p.role ?? ""}-${i}`}
-            className="w-28 shrink-0 snap-start rounded-xl border border-border bg-card/60 p-2 text-center"
+            className="w-28 shrink-0 snap-start"
           >
-            <CreditAvatar person={p} />
-            <p className="line-clamp-2 text-xs font-semibold leading-tight">{p.name}</p>
-            {p.role ? (
-              <p className="mt-0.5 line-clamp-1 text-[0.7rem] text-muted-foreground">{p.role}</p>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => handleOpen(p)}
+              className="focus-ring group block w-full rounded-xl border border-border bg-card/60 p-2 text-center transition-colors hover:border-primary/40"
+              aria-label={`Voir le profil de ${p.name}`}
+            >
+              <CreditAvatar person={p} />
+              <p className="line-clamp-2 text-xs font-semibold leading-tight group-hover:text-primary">
+                {p.name}
+              </p>
+              {p.role ? (
+                <p className="mt-0.5 line-clamp-1 text-[0.7rem] text-muted-foreground">{p.role}</p>
+              ) : null}
+            </button>
           </li>
         ))}
       </ul>
+
+      <EntityProfileDialog
+        person={selected}
+        kind={kind}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </section>
   );
 }

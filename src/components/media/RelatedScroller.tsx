@@ -1,7 +1,21 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 import type { RelatedMedia } from "@/lib/media-types";
 import { SafeImage } from "./SafeImage";
+
+/**
+ * For linked works with no internal KAZEN fiche (manga, light novels, OST…),
+ * derive a safe outbound AniList reference so the item is still explorable
+ * instead of being a dead card. Returns null for non-AniList sources so we
+ * never expose a fabricated link.
+ */
+function externalRefUrl(it: RelatedMedia): string | null {
+  if (it.source !== "anilist" || !/^\d+$/.test(it.externalId)) return null;
+  const isManga =
+    it.formatGroup === "manga" || it.formatGroup === "novel";
+  return `https://anilist.co/${isManga ? "manga" : "anime"}/${it.externalId}`;
+}
 
 function Poster({ it }: { it: RelatedMedia }) {
   return (

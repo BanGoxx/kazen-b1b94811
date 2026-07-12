@@ -20,7 +20,7 @@ import { SafeImage } from "@/components/media/SafeImage";
 import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
-import { RelatedScroller } from "@/components/media/RelatedScroller";
+import { RelatedContent } from "@/components/media/RelatedContent";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";

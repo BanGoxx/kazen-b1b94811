@@ -360,6 +360,8 @@ function MediaDetailPage() {
           <CreditScroller title={item.crewLabel} people={item.crew} />
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
+          {/* Editorial context — renders only when a safe article source exists. */}
+          <FicheArticles articles={[]} />
         </div>
       </div>
     </AppShell>

@@ -365,7 +365,12 @@ export function usePlaylistMutations() {
   const invalidateMine = () => qc.invalidateQueries({ queryKey: ["my-playlists"] });
 
   const create = useMutation({
-    mutationFn: async (input: { title: string; description?: string; isPublic?: boolean }) => {
+    mutationFn: async (input: {
+      title: string;
+      description?: string;
+      recommendation?: string;
+      isPublic?: boolean;
+    }) => {
       if (!user) throw new Error("not-auth");
       const { data, error } = await supabase
         .from("playlists")
@@ -373,6 +378,7 @@ export function usePlaylistMutations() {
           owner_id: user.id,
           title: input.title.trim(),
           description: input.description?.trim() ?? "",
+          recommendation: input.recommendation?.trim() ?? "",
           is_public: input.isPublic ?? true,
         })
         .select("id")
@@ -388,12 +394,19 @@ export function usePlaylistMutations() {
       id: string;
       title?: string;
       description?: string;
+      recommendation?: string;
       isPublic?: boolean;
     }) => {
       if (!user) throw new Error("not-auth");
-      const patch: { title?: string; description?: string; is_public?: boolean } = {};
+      const patch: {
+        title?: string;
+        description?: string;
+        recommendation?: string;
+        is_public?: boolean;
+      } = {};
       if (input.title !== undefined) patch.title = input.title.trim();
       if (input.description !== undefined) patch.description = input.description.trim();
+      if (input.recommendation !== undefined) patch.recommendation = input.recommendation.trim();
       if (input.isPublic !== undefined) patch.is_public = input.isPublic;
       const { error } = await supabase
         .from("playlists")
@@ -405,6 +418,7 @@ export function usePlaylistMutations() {
     onSuccess: (_d, vars) => {
       invalidateMine();
       qc.invalidateQueries({ queryKey: ["playlist", vars.id] });
+      qc.invalidateQueries({ queryKey: ["public-playlists"] });
     },
   });
 

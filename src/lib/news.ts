@@ -153,6 +153,7 @@ export function normalizeArticle(raw: ArticleInput): NewsArticle | null {
     category: raw.category?.trim() || undefined,
     popularity: Number.isFinite(raw.popularity) ? Number(raw.popularity) : 0,
     featured: !!raw.featured,
+    evergreen: !!raw.evergreen,
     externalUrl: raw.externalUrl ?? null,
   };
 }

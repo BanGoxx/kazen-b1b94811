@@ -301,6 +301,30 @@ export async function anilistPaged(params: {
   };
 }
 
+/** Paginated AniList search for infinite scroll on the search page. */
+export async function anilistSearchPaged(
+  q: string,
+  page: number,
+): Promise<{ items: MediaItem[]; hasMore: boolean }> {
+  const perPage = 24;
+  const gql = `
+    query ($page: Int, $perPage: Int, $search: String) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo { hasNextPage }
+        media(type: ANIME, sort: SEARCH_MATCH, search: $search, isAdult: false) {
+          ${MEDIA_FIELDS}
+        }
+      }
+    }`;
+  const data = await query<PageResult>(gql, { page, perPage, search: q });
+  return {
+    items: (data.Page?.media ?? []).filter((m) => m && m.id != null).map(fromAniList),
+    hasMore: Boolean(data.Page?.pageInfo?.hasNextPage),
+  };
+}
+
+
+
 export async function anilistDetail(id: number): Promise<MediaDetail | null> {
   const gql = `query ($id: Int) {
     Media(id: $id, type: ANIME) {

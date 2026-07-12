@@ -380,6 +380,14 @@ function MediaDetailPage() {
             </FicheSection>
           ) : null}
 
+          {item.mediaType !== "movie" && item.episodes.length ? (
+            <FicheSection title="Épisodes" icon={<Clapperboard className="h-5 w-5" />}>
+              <EpisodeList episodes={item.episodes} />
+            </FicheSection>
+          ) : null}
+
+
+
           <CreditScroller title={item.castLabel} people={item.cast} kind="character" />
           <CreditScroller title={item.crewLabel} people={item.crew} kind="staff" />
 

@@ -370,6 +370,15 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
 }
 
 interface AniListDetailRaw {
+  streamingEpisodes?: {
+    title?: string | null;
+    thumbnail?: string | null;
+    url?: string | null;
+    site?: string | null;
+  }[] | null;
+  airingSchedule?: {
+    nodes?: { episode?: number | null; airingAt?: number | null }[] | null;
+  } | null;
   format?: string | null;
   popularity?: number | null;
   season?: string | null;

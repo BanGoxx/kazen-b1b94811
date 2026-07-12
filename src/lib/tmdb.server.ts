@@ -2,9 +2,11 @@
 // Reads the key inside functions (never at module scope). Language fr-FR, region FR.
 import { fromTmdbMovie, fromTmdbTv, isAsianAnimationTv } from "./normalize";
 import { resolvePlatform, dedupePlatforms } from "./platforms";
+import { orderEpisodes } from "./episodes";
 import type {
   CreditPerson,
   MediaDetail,
+  MediaEpisode,
   MediaVideo,
   MediaItem,
   Platform,

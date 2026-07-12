@@ -377,7 +377,10 @@ function UniversPage() {
 }
 
 function UniversCard({ it, isSelf }: { it: RelatedMedia; isSelf: boolean }) {
-  const clickable = it.hasDetail !== false && !isSelf;
+  // Any real AniList id resolves internally (universal detail + browser-direct
+  // fallback), so manga/LN sources stay navigable instead of dead cards.
+  const anilistReal = it.source === "anilist" && /^\d+$/.test(it.externalId);
+  const clickable = (anilistReal || it.hasDetail !== false) && !isSelf;
   const inner = (
     <>
       <div

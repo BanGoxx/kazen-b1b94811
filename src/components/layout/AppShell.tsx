@@ -268,6 +268,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
           </footer>
         </div>
+        <AssistantChat />
       </div>
     </div>
   );

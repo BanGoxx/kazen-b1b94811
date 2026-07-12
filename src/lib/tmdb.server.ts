@@ -432,6 +432,7 @@ function augmentTmdb(
     countryOfOrigin: extra.countryOfOrigin ?? null,
     endDate: extra.endDate ?? null,
     videos,
+    episodes: extra.episodes ?? [],
   };
 }
 

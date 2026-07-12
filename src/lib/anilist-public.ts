@@ -418,14 +418,14 @@ export async function anilistPublicDetail(id: number): Promise<MediaDetail | nul
       endDate { year month day }
       trailer { id site }
       studios(isMain: true) { nodes { name } }
-      characters(sort: [ROLE, RELEVANCE], perPage: 14) {
+      characters(sort: [ROLE, RELEVANCE], perPage: 24) {
         edges {
           role
           node { id name { full } image { medium } }
           voiceActors(language: JAPANESE) { name { full } }
         }
       }
-      staff(perPage: 10) {
+      staff(perPage: 16) {
         edges { role node { id name { full } image { medium } } }
       }
       relations {

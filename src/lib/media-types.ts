@@ -92,6 +92,30 @@ export type RelationCategory =
   | "recommendation" // suggestions "dans le même esprit"
   | "other";
 
+/**
+ * Coarse format family for group/franchise pages. Lets a universe be split
+ * into readable sections (Anime, Manga, Light novel, Musique…) inspired by
+ * Nautiljon's group pages but far cleaner.
+ */
+export type FormatGroup = "anime" | "manga" | "novel" | "music" | "other";
+
+export const FORMAT_GROUP_LABELS: Record<FormatGroup, string> = {
+  anime: "Animes",
+  manga: "Manga",
+  novel: "Light novel / Roman",
+  music: "Musique / OST",
+  other: "Autres formats",
+};
+
+/** Display order of format sections inside a group page. */
+export const FORMAT_GROUP_ORDER: FormatGroup[] = [
+  "anime",
+  "manga",
+  "novel",
+  "music",
+  "other",
+];
+
 export interface RelatedMedia {
   key: string;
   source: MediaSource;
@@ -104,6 +128,12 @@ export interface RelatedMedia {
   mediaType: MediaType;
   /** Optional format hint (Film, OVA, Série TV…) for richer display. */
   format?: string | null;
+  /** Format family used to bucket the item on a group/franchise page. */
+  formatGroup?: FormatGroup | null;
+  /** Release year when known — powers year ordering & decade filters. */
+  year?: number | null;
+  /** True when the item has a real KAZEN detail page (anime only for now). */
+  hasDetail?: boolean;
 }
 
 export interface MediaVideo {

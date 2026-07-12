@@ -20,6 +20,8 @@ import { getEntityProfile } from "./entity.functions";
 import {
   anilistPublicPage,
   anilistPublicSearchPaged,
+  anilistPublicList,
+  anilistPublicSeasonal,
 } from "./anilist-public";
 
 const HOUR = 1000 * 60 * 60;

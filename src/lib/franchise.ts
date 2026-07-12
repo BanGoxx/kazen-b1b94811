@@ -8,7 +8,15 @@
 // It is deliberately source-agnostic and side-effect free so it can later back
 // dedicated franchise/group pages (e.g. /franchise/$key) without a rewrite.
 
-import type { MediaSource, RelatedMedia, RelationCategory } from "./media-types";
+import {
+  FORMAT_GROUP_LABELS,
+  FORMAT_GROUP_ORDER,
+  type FormatGroup,
+  type MediaDetail,
+  type MediaSource,
+  type RelatedMedia,
+  type RelationCategory,
+} from "./media-types";
 
 export interface RelatedGroup {
   category: RelationCategory;
@@ -109,3 +117,111 @@ export function deriveFranchiseKey(
   const anchor = parent ?? self;
   return `${anchor.source}:${anchor.externalId}`;
 }
+
+/**
+ * Anchor a fiche to the work that best represents its universe. We prefer the
+ * declared "Œuvre parente" so every sibling in the same universe resolves to
+ * the SAME group page; otherwise the fiche itself is the anchor.
+ */
+export function deriveGroupAnchor(
+  self: { source: MediaSource; externalId: string },
+  related: RelatedMedia[],
+): { source: MediaSource; externalId: string } {
+  const parent = related.find((r) => r.relation === "Œuvre parente");
+  if (parent) return { source: parent.source, externalId: parent.externalId };
+  return { source: self.source, externalId: self.externalId };
+}
+
+// ---------- Group / franchise pages ----------
+
+export interface GroupSection {
+  formatGroup: FormatGroup;
+  title: string;
+  items: RelatedMedia[];
+}
+
+export interface FranchiseGroup {
+  /** All universe works (self + linked), de-duplicated and ordered. */
+  items: RelatedMedia[];
+  /** Ordered sections by format family (empty families omitted). */
+  sections: GroupSection[];
+  /** Distinct known years, ascending — powers a decade filter. */
+  years: number[];
+}
+
+function formatGroupOf(item: RelatedMedia): FormatGroup {
+  return (item.formatGroup as FormatGroup) ?? "anime";
+}
+
+function byYearThenTitle(a: RelatedMedia, b: RelatedMedia): number {
+  const ya = a.year ?? 99999;
+  const yb = b.year ?? 99999;
+  if (ya !== yb) return ya - yb;
+  return a.title.localeCompare(b.title, "fr");
+}
+
+/**
+ * Build a higher-level universe view from a fiche's detail. Only universe
+ * links (franchise + adaptation) are aggregated — recommendations stay a
+ * fiche-level concern. The current work is always included so the group page
+ * shows the complete universe. Returns empty sections when there is not
+ * enough linked content to justify a group page.
+ */
+export function buildFranchiseGroup(detail: MediaDetail): FranchiseGroup {
+  const selfAsItem: RelatedMedia = {
+    key: detail.key,
+    source: detail.source,
+    externalId: detail.externalId,
+    title: detail.title,
+    posterUrl: detail.posterUrl,
+    relation: "Cette œuvre",
+    relationCategory: "franchise",
+    mediaType: detail.mediaType,
+    format: detail.format,
+    formatGroup: "anime",
+    year: detail.releaseDate ? Number(detail.releaseDate.slice(0, 4)) || null : null,
+    hasDetail: true,
+  };
+
+  const universe = detail.related.filter(
+    (r) => r.relationCategory === "franchise" || r.relationCategory === "adaptation",
+  );
+
+  const seen = new Set<string>([selfAsItem.key]);
+  const items: RelatedMedia[] = [selfAsItem];
+  for (const item of universe) {
+    if (!item.key || seen.has(item.key)) continue;
+    seen.add(item.key);
+    items.push(item);
+  }
+  items.sort(byYearThenTitle);
+
+  const buckets = new Map<FormatGroup, RelatedMedia[]>();
+  for (const item of items) {
+    const g = formatGroupOf(item);
+    const list = buckets.get(g) ?? [];
+    list.push(item);
+    buckets.set(g, list);
+  }
+
+  const sections: GroupSection[] = FORMAT_GROUP_ORDER.filter((g) => buckets.has(g)).map(
+    (g) => ({ formatGroup: g, title: FORMAT_GROUP_LABELS[g], items: buckets.get(g)! }),
+  );
+
+  const years = Array.from(
+    new Set(items.map((i) => i.year).filter((y): y is number => typeof y === "number")),
+  ).sort((a, b) => a - b);
+
+  return { items, sections, years };
+}
+
+/** A group page is only meaningful when the universe has multiple works. */
+export function isRealGroup(group: FranchiseGroup): boolean {
+  return group.items.length >= 2;
+}
+
+/** Decade bucket label for a year, e.g. 2014 -> "2010s". */
+export function decadeOf(year: number): string {
+  return `${Math.floor(year / 10) * 10}s`;
+}
+

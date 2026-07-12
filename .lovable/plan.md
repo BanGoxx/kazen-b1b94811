@@ -19,16 +19,24 @@ Règle produit : chaque fiche doit être améliorée au maximum (inspiration Nau
 - cohérence preview vs live, providers visibles en live, redirections réelles, images manquantes
 
 ## Ordre conseillé
-1. Fiabiliser totalement l'espace membre
-2. Valider plateformes + redirections sur le live
-3. Corriger images manquantes
-4. Finir scroll infini sur la recherche
-5. Continuer la montée en gamme des fiches
-6. Créer la logique pages franchise / groupe (Lupin, Macross, Gundam, Fate…)
-7. Améliorer calendrier + filtres avancés (année, format, catégorie, chronologique, ordre sortie)
-8. Import/export MAL (puis AniList)
-9. Ajouter catégorie Donghua
-10. Communauté (forum, rangs, listes partagées, profils) — long terme
+1. Fiabiliser totalement l'espace membre ✅
+2. Valider plateformes + redirections sur le live ✅
+3. Corriger images manquantes ✅
+4. Finir scroll infini sur la recherche ✅
+5. Fiches enrichies (en cours) + pages Groupe / Franchise ✅ (nouvelle brique)
+6. Améliorer calendrier + filtres avancés (année, format, catégorie, chronologique, ordre sortie)
+7. Import/export MAL (puis AniList)
+8. Ajouter catégorie Donghua
+9. Communauté (forum, rangs, listes partagées, profils) — long terme
+
+## Pages Groupe / Franchise (fait)
+- Clé de groupe dérivée via `deriveGroupAnchor` (ancre sur l'« Œuvre parente » si présente, sinon l'œuvre elle-même) — clé stable partagée par tout l'univers.
+- Route `/franchise/$source/$id` construite sur `buildFranchiseGroup` (réutilise la logique `franchise.ts`, ne duplique rien).
+- Agrégation multi-formats : Animes, Manga, Light novel / Roman, Musique / OST, Autres (données AniList : nœuds ANIME + MANGA/NOVEL/MUSIC, année incluse).
+- Tri par année puis titre ; filtres par type et par époque (décennie).
+- Sections vides omises ; page affichée seulement si l'univers a ≥ 2 œuvres.
+- Lien « Groupe / Franchise » sur la fiche uniquement quand des liens franchise/adaptation existent (sinon fiche propre, inchangée).
+- Cartes non-anime (manga/LN/OST) non cliquables (pas de fiche dédiée) pour éviter les liens cassés.
 
 ## Rappel
 KAZEN doit aider à découvrir, suivre, retrouver, explorer un univers complet, et rendre chaque fiche vraiment utile.

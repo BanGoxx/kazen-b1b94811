@@ -353,7 +353,7 @@ export async function anilistDetail(id: number): Promise<MediaDetail | null> {
       relations {
         edges {
           relationType(version: 2)
-          node { id type format title { romaji english } coverImage { large } }
+          node { id type format title { romaji english } coverImage { large } startDate { year } }
         }
       }
     }
@@ -398,6 +398,7 @@ interface AniListDetailRaw {
         format?: string | null;
         title?: { romaji?: string | null; english?: string | null } | null;
         coverImage?: { large?: string | null } | null;
+        startDate?: { year?: number | null } | null;
       } | null;
     }[] | null;
   } | null;
@@ -411,7 +412,23 @@ const ANILIST_FORMAT: Record<string, string> = {
   OVA: "OVA",
   ONA: "ONA",
   MUSIC: "Clip",
+  MANGA: "Manga",
+  NOVEL: "Light novel",
+  ONE_SHOT: "One shot",
 };
+
+// Classify an AniList node into a coarse format family for group pages.
+function anilistFormatGroup(
+  type?: string | null,
+  format?: string | null,
+): import("./media-types").FormatGroup {
+  if (format === "MUSIC") return "music";
+  if (format === "NOVEL") return "novel";
+  if (format === "MANGA" || format === "ONE_SHOT") return "manga";
+  if (type === "MANGA") return format === "NOVEL" ? "novel" : "manga";
+  if (type === "ANIME") return "anime";
+  return "other";
+}
 
 const ANILIST_SEASON: Record<string, string> = {
   WINTER: "Hiver",
@@ -502,18 +519,24 @@ function fromAniListDetail(m: AniListDetailRaw & Parameters<typeof fromAniList>[
     photoUrl: e.node?.image?.medium ?? null,
   }));
   const related: RelatedMedia[] = (m.relations?.edges ?? [])
-    .filter((e) => e.node?.type === "ANIME" && e.node?.id)
-    .map((e) => ({
-      key: `anilist:${e.node!.id}`,
-      source: "anilist" as const,
-      externalId: String(e.node!.id),
-      title: e.node!.title?.english || e.node!.title?.romaji || "Sans titre",
-      posterUrl: e.node!.coverImage?.large ?? null,
-      relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
-      relationCategory: ANILIST_RELATION_CATEGORY[e.relationType ?? "OTHER"] ?? "other",
-      mediaType: "anime" as const,
-      format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
-    }));
+    .filter((e) => (e.node?.type === "ANIME" || e.node?.type === "MANGA") && e.node?.id)
+    .map((e) => {
+      const isAnime = e.node!.type === "ANIME";
+      return {
+        key: `anilist:${e.node!.id}`,
+        source: "anilist" as const,
+        externalId: String(e.node!.id),
+        title: e.node!.title?.english || e.node!.title?.romaji || "Sans titre",
+        posterUrl: e.node!.coverImage?.large ?? null,
+        relation: ANILIST_RELATION[e.relationType ?? "OTHER"] ?? "Lié",
+        relationCategory: ANILIST_RELATION_CATEGORY[e.relationType ?? "OTHER"] ?? "other",
+        mediaType: "anime" as const,
+        format: e.node!.format ? ANILIST_FORMAT[e.node!.format] ?? e.node!.format : null,
+        formatGroup: anilistFormatGroup(e.node!.type, e.node!.format),
+        year: e.node!.startDate?.year ?? null,
+        hasDetail: isAnime,
+      };
+    });
   const alt = Array.from(
     new Set(
       [m.title?.native, ...(m.synonyms ?? [])]

@@ -7,6 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ReportDialog } from "@/components/moderation/ReportDialog";
 import { useAuth } from "@/lib/auth";
+import { useIsFounder, useUserBadges } from "@/lib/founder";
+import { FounderBadge } from "@/components/founder/FounderBadge";
+import { PublicBadgeList } from "@/components/founder/PublicBadge";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import type { PlaylistItem } from "@/lib/playlists";
 import { cn } from "@/lib/utils";
@@ -126,6 +129,8 @@ function PlaylistPage() {
   const router = useRouter();
   const { data, isLoading, isError } = usePlaylist(id);
   const { user } = useAuth();
+  const ownerIsFounder = useIsFounder(data?.meta.ownerId);
+  const { data: ownerBadges } = useUserBadges(data?.meta.ownerId);
 
   return (
     <AppShell>
@@ -191,6 +196,10 @@ function PlaylistPage() {
                     par <span className="font-medium text-foreground">{data.ownerName}</span> ·{" "}
                     {data.items.length} titre{data.items.length > 1 ? "s" : ""}
                   </span>
+                  {ownerIsFounder ? <FounderBadge size="sm" /> : null}
+                  {ownerBadges && ownerBadges.length > 0 ? (
+                    <PublicBadgeList badges={ownerBadges} max={2} />
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <LikeButton id={id} likeCount={data.likeCount} />

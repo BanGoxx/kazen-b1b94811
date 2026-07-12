@@ -637,6 +637,42 @@ export type Database = {
         }
         Relationships: []
       }
+      public_badges: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          icon_key: string | null
+          id: string
+          is_active: boolean
+          label: string
+          updated_at: string
+          visual_variant: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          icon_key?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          updated_at?: string
+          visual_variant?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          icon_key?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          visual_variant?: string
+        }
+        Relationships: []
+      }
       reply_likes: {
         Row: {
           created_at: string
@@ -742,6 +778,41 @@ export type Database = {
           },
         ]
       }
+      user_public_badges: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          badge_id: string
+          id: string
+          is_visible: boolean
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          badge_id: string
+          id?: string
+          is_visible?: boolean
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          badge_id?: string
+          id?: string
+          is_visible?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_public_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "public_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -783,6 +854,7 @@ export type Database = {
         Returns: undefined
       }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
+      founder_user_ids: { Args: never; Returns: string[] }
       grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

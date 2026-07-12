@@ -10,6 +10,9 @@ import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
 import { usePremium } from "@/lib/premium";
 import { SupporterBadge } from "@/components/premium/SupporterBadge";
+import { FounderBadge } from "@/components/founder/FounderBadge";
+import { PublicBadgeList } from "@/components/founder/PublicBadge";
+import { useIsOwner, useUserBadges } from "@/lib/founder";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +57,8 @@ export const Route = createFileRoute("/_authenticated/profil")({
 function ProfilePage() {
   const { user } = useAuth();
   const { isSupporter } = usePremium();
+  const isOwner = useIsOwner();
+  const { data: myBadges } = useUserBadges(user?.id);
   const navigate = useNavigate();
   const updateFn = useServerFn(updateMyProfile);
   const { entries } = useMyList();
@@ -129,7 +134,11 @@ function ProfilePage() {
                 <h1 className="font-display text-2xl font-extrabold">
                   {displayName || "Mon profil"}
                 </h1>
+                {isOwner ? <FounderBadge size="sm" /> : null}
                 {isSupporter ? <SupporterBadge size="sm" /> : null}
+                {myBadges && myBadges.length > 0 ? (
+                  <PublicBadgeList badges={myBadges} max={3} />
+                ) : null}
               </div>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>

@@ -18,7 +18,9 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Crown,
   DownloadCloud,
+
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,7 @@ import { RecommendationAssistant } from "@/components/media/RecommendationAssist
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
+import { useIsOwner } from "@/lib/founder";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -140,11 +143,16 @@ function Brand() {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isModerator = useIsModerator();
+  const isOwner = useIsOwner();
   const { user } = useAuth();
   const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
-  const items = isModerator
-    ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
-    : base;
+  // Owner gets the unified "Espace fondateur" (which embeds Modération).
+  // Non-owner moderators (future, post-beta) keep the direct Modération link.
+  const items = isOwner
+    ? [...base, { to: "/fondateur", label: "Espace fondateur", icon: Crown }]
+    : isModerator
+      ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+      : base;
   return (
     <nav aria-label="Navigation principale">
       <ul className="space-y-1">

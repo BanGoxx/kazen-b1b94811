@@ -55,7 +55,7 @@ export const Route = createFileRoute("/actualites/$slug")({
 
 function ArticlePage() {
   const { article } = Route.useLoaderData();
-  const when = formatFr(article.publishedAt);
+  const when = article.evergreen ? null : formatFr(article.publishedAt);
   const primary = article.titles[0] ?? null;
 
   return (

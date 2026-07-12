@@ -172,15 +172,41 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, .font-display {
+h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.022em;
   text-wrap: balance;
+}
+
+/* Stately page titles get a touch more optical tightening and weight. */
+h1, .font-display-xl {
+  letter-spacing: -0.032em;
+  line-height: 1.04;
 }
 
 /* Comfortable measure + tidy wrapping for body paragraphs. */
 p {
   text-wrap: pretty;
+}
+
+/* Uppercase eyebrow/label treatment for metadata rows and section kickers. */
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+/* Distinct surface elevation levels for a clear depth system. */
+@utility surface-1 {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+}
+@utility surface-2 {
+  background: color-mix(in oklab, var(--color-card) 88%, var(--color-foreground) 4%);
+  border: 1px solid color-mix(in oklab, var(--color-border) 100%, var(--color-foreground) 8%);
 }
 
 /* Brand wordmark: KAZEN set with confident, cinematic tracking. */

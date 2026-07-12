@@ -221,6 +221,42 @@ export const searchMedia = createServerFn({ method: "GET" })
     };
   });
 
+export const searchMediaPaged = createServerFn({ method: "GET" })
+  .inputValidator((d: { q: string; page: number }) => d)
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      anime: MediaItem[];
+      series: MediaItem[];
+      movies: MediaItem[];
+      page: number;
+      hasMore: boolean;
+    }> => {
+      const q = data.q.trim();
+      const page = data.page && data.page > 0 ? data.page : 1;
+      if (q.length < 2) return { anime: [], series: [], movies: [], page, hasMore: false };
+      const [al, tm] = await Promise.all([
+        anilistSearchPaged(q, page).catch((e) => {
+          console.error("searchMediaPaged anilist", e);
+          return { items: [] as MediaItem[], hasMore: false };
+        }),
+        tmdbSearchPaged(q, page).catch((e) => {
+          console.error("searchMediaPaged tmdb", e);
+          return { items: [] as MediaItem[], hasMore: false };
+        }),
+      ]);
+      return {
+        anime: al.items,
+        series: tm.items.filter((m) => m.mediaType === "series"),
+        movies: tm.items.filter((m) => m.mediaType === "movie"),
+        page,
+        hasMore: al.hasMore || tm.hasMore,
+      };
+    },
+  );
+
+
 // ---------- Upcoming (aggregated) ----------
 //
 // Correctness rules:

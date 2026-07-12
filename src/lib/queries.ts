@@ -16,6 +16,7 @@ import {
   getAnimatedMovies,
   getAsianAnimationMovies,
 } from "./discover.functions";
+import { getEntityProfile } from "./entity.functions";
 
 const HOUR = 1000 * 60 * 60;
 

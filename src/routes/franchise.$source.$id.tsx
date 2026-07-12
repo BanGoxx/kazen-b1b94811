@@ -190,7 +190,7 @@ function GroupPage() {
       </div>
 
       {total === 0 ? (
-        <EmptyState title="Aucun contenu pour ce filtre" description="Essayez un autre type ou une autre époque." />
+        <EmptyState message="Aucun contenu pour ce filtre" hint="Essayez un autre type ou une autre époque." />
       ) : (
         <div className="space-y-10">
           {sections.map((s) => (

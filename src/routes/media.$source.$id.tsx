@@ -206,6 +206,8 @@ function MediaDetailPage() {
           <WhereToWatch platforms={item.platforms} />
 
           <UserListPanel item={item} />
+
+          <AddToPlaylist item={item} />
         </div>
 
         {/* Right column: content */}

@@ -23,32 +23,69 @@ import {
 } from "./anilist-public";
 
 const HOUR = 1000 * 60 * 60;
+const IS_BROWSER = typeof window !== "undefined";
+
+// Homepage anime rails: on the server, use the cached server handlers (which
+// fall back to a curated list when the Worker is 403-blocked by AniList). On
+// the client, prefer the browser-direct AniList CORS path so production shows
+// the real, complete lists even when the Worker stays blocked — then fall back
+// to the SSR value on any client error. staleTime 0 on the client lets the
+// browser immediately replace any curated SSR fallback with real data.
+async function isoAnimeList(
+  kind: "trending" | "popular" | "upcoming",
+  serverFn: () => Promise<import("./media-types").MediaItem[]>,
+) {
+  if (IS_BROWSER) {
+    try {
+      const items = await anilistPublicList(kind);
+      if (items.length) return items;
+    } catch (error) {
+      console.error("anilistPublicList", kind, error);
+    }
+  }
+  return serverFn();
+}
 
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],
-  queryFn: () => getTrendingAnime(),
-  staleTime: HOUR,
+  queryFn: () => isoAnimeList("trending", getTrendingAnime),
+  staleTime: IS_BROWSER ? 0 : HOUR,
+  refetchOnMount: true,
   retry: 3,
 });
 export const popularAnimeQO = queryOptions({
   queryKey: ["anime", "popular"],
-  queryFn: () => getPopularAnime(),
-  staleTime: HOUR,
+  queryFn: () => isoAnimeList("popular", getPopularAnime),
+  staleTime: IS_BROWSER ? 0 : HOUR,
+  refetchOnMount: true,
   retry: 3,
 });
 export const upcomingAnimeQO = queryOptions({
   queryKey: ["anime", "upcoming"],
-  queryFn: () => getUpcomingAnime(),
-  staleTime: HOUR,
+  queryFn: () => isoAnimeList("upcoming", getUpcomingAnime),
+  staleTime: IS_BROWSER ? 0 : HOUR,
+  refetchOnMount: true,
   retry: 3,
 });
 export const seasonalAnimeQO = (season?: string, year?: number) =>
   queryOptions({
     queryKey: ["anime", "seasonal", season ?? "current", year ?? "current"],
-    queryFn: () => getSeasonalAnime({ data: { season, year } }),
-    staleTime: HOUR,
+    queryFn: async () => {
+      if (IS_BROWSER) {
+        try {
+          const result = await anilistPublicSeasonal(season, year);
+          if (result.items.length) return result;
+        } catch (error) {
+          console.error("anilistPublicSeasonal", error);
+        }
+      }
+      return getSeasonalAnime({ data: { season, year } });
+    },
+    staleTime: IS_BROWSER ? 0 : HOUR,
+    refetchOnMount: true,
     retry: 3,
   });
+
 
 export const trendingMoviesQO = queryOptions({
   queryKey: ["movies", "trending"],

@@ -344,6 +344,36 @@ const ANIME_SORTS: Record<string, { sort: string; status?: string }> = {
   upcoming: { sort: "POPULARITY_DESC", status: "NOT_YET_RELEASED" },
 };
 
+export const getSeasonalAnimePage = createServerFn({ method: "GET" })
+  .inputValidator((d: { season?: string; year?: number; page: number }) => d)
+  .handler(async ({ data }): Promise<PagedMedia> => {
+    const fallback = currentAnimeSeason();
+    const season = data.season ?? fallback.season;
+    const year = data.year ?? fallback.year;
+    try {
+      const { anilistPaged } = await import("./anilist.server");
+      const res = await anilistPaged({
+        sort: "POPULARITY_DESC",
+        season,
+        seasonYear: year,
+        page: data.page,
+        perPage: 30,
+      });
+      if (!res.items.length && data.page === 1) {
+        const fb = fallbackSeasonalAnime(50);
+        return { items: fb.items, page: 1, hasMore: false };
+      }
+      return res;
+    } catch (e) {
+      console.error("getSeasonalAnimePage", e);
+      if (data.page === 1) {
+        const fb = fallbackSeasonalAnime(50);
+        return { items: fb.items, page: 1, hasMore: false };
+      }
+      return { items: [], page: data.page, hasMore: false };
+    }
+  });
+
 export const getAnimePage = createServerFn({ method: "GET" })
   .inputValidator((d: { kind: string; page: number }) => d)
   .handler(async ({ data }): Promise<PagedMedia> => {

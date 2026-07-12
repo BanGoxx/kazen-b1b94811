@@ -94,6 +94,8 @@ export interface NewsArticle {
   category?: string;
   popularity: number;
   featured: boolean;
+  /** Evergreen analysis — UI hides any specific publication date. */
+  evergreen: boolean;
   externalUrl?: string | null;
 }
 

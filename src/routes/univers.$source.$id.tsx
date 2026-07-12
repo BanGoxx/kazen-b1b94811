@@ -153,8 +153,15 @@ function UniversPage() {
     );
   }
 
-  const activeItems = buckets[type] ?? [];
+  const categoryItems = buckets[type] ?? [];
+  // Available years come from the full category (before the year filter) so the
+  // year selector never hides the option the user is currently viewing.
+  const years = distinctYears(categoryItems);
+  // Reset a stale year when it no longer exists in the active category.
+  const activeYear = year !== null && years.includes(year) ? year : null;
+  const activeItems = sortUniversItems(filterByYear(categoryItems, activeYear), sort);
   const heroImage = item.backdropUrl || item.posterUrl;
+
 
   return (
     <AppShell>

@@ -127,7 +127,19 @@ function UniversPage() {
   const { source, id } = Route.useParams();
   const { type, sort, year } = Route.useSearch() as UniversSearch;
 
-  const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
+  const { data: serverItem } = useSuspenseQuery(mediaDetailQO(source, id));
+  // Recover rich universe data via browser-direct AniList when the server item
+  // is missing or its relations are empty (production Worker 403).
+  const needsBrowserDetail =
+    source === "anilist" && (!serverItem || !serverItem.related.length);
+  const browserDetail = useQuery({
+    queryKey: ["media", "anilist-public-detail", id],
+    queryFn: () => anilistPublicDetail(Number(id)),
+    enabled: needsBrowserDetail && typeof window !== "undefined" && Number.isFinite(Number(id)),
+    staleTime: 1000 * 60 * 60,
+    retry: 1,
+  });
+  const item = source === "anilist" ? (browserDetail.data ?? serverItem) : serverItem;
 
   const group = useMemo<FranchiseGroup | null>(
     () => (item ? buildFranchiseGroup(item) : null),
@@ -137,6 +149,19 @@ function UniversPage() {
     () => (group ? itemsByUniversCategory(group) : null),
     [group],
   );
+
+  if (source === "anilist" && !serverItem && browserDetail.isPending) {
+    return (
+      <AppShell>
+        <div className="py-24 text-center">
+          <h1 className="font-display text-2xl font-bold">Chargement de l'univers…</h1>
+          <p className="mt-2 text-muted-foreground">Récupération des données liées depuis AniList.</p>
+          <div className="mx-auto mt-6 h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+        </div>
+      </AppShell>
+    );
+  }
+
 
   if (!item || !group || !buckets || !isRealGroup(group)) {
     return (

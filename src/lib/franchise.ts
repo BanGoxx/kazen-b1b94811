@@ -225,3 +225,85 @@ export function decadeOf(year: number): string {
   return `${Math.floor(year / 10) * 10}s`;
 }
 
+
+// ---------- KAZEN Universe categories (Nautiljon-style tabs) ----------
+
+/**
+ * Deep-linkable universe categories. Each maps a RelatedMedia to a Nautiljon-
+ * style tab. Some categories are structural placeholders (disc/doujinshi) that
+ * stay empty until richer data lands — they are shown so the taxonomy is
+ * stable and future-ready, with elegant empty states.
+ */
+export type UniversCategory =
+  | "anime"
+  | "manga"
+  | "novel"
+  | "oav"
+  | "movie"
+  | "music"
+  | "goodies"
+  | "disc"
+  | "doujinshi";
+
+export const UNIVERS_CATEGORY_LABELS: Record<UniversCategory, string> = {
+  anime: "Animes",
+  manga: "Mangas",
+  novel: "Light novels",
+  oav: "OAV / Spéciaux",
+  movie: "Films",
+  music: "OST / CD",
+  goodies: "Goodies",
+  disc: "DVD / Blu-ray",
+  doujinshi: "Doujinshi",
+};
+
+export const UNIVERS_CATEGORY_ORDER: UniversCategory[] = [
+  "anime",
+  "movie",
+  "oav",
+  "manga",
+  "novel",
+  "music",
+  "goodies",
+  "disc",
+  "doujinshi",
+];
+
+export const DEFAULT_UNIVERS_CATEGORY: UniversCategory = "anime";
+
+export function isUniversCategory(value: unknown): value is UniversCategory {
+  return (
+    typeof value === "string" &&
+    (UNIVERS_CATEGORY_ORDER as string[]).includes(value)
+  );
+}
+
+const MOVIE_RE = /movie|film/i;
+const OAV_RE = /ova|oav|ona|special|spécial|specials/i;
+
+/** Classify a related item into a single, primary universe category. */
+export function categorizeUniversItem(item: RelatedMedia): UniversCategory {
+  const group = (item.formatGroup as FormatGroup) ?? "anime";
+  const fmt = item.format ?? "";
+  if (group === "manga") return "manga";
+  if (group === "novel") return "novel";
+  if (group === "music") return "music";
+  if (group === "other") return "goodies";
+  // anime family — split into film / oav / series
+  if (MOVIE_RE.test(fmt)) return "movie";
+  if (OAV_RE.test(fmt)) return "oav";
+  return "anime";
+}
+
+/** Bucket a franchise group's items by universe category. */
+export function itemsByUniversCategory(
+  group: FranchiseGroup,
+): Record<UniversCategory, RelatedMedia[]> {
+  const buckets = Object.fromEntries(
+    UNIVERS_CATEGORY_ORDER.map((c) => [c, [] as RelatedMedia[]]),
+  ) as Record<UniversCategory, RelatedMedia[]>;
+  for (const item of group.items) {
+    buckets[categorizeUniversItem(item)].push(item);
+  }
+  return buckets;
+}

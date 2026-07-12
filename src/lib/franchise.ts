@@ -81,12 +81,19 @@ export function groupRelated(related: RelatedMedia[]): RelatedGroup[] {
   const groups: RelatedGroup[] = [];
   for (const [category, items] of buckets) {
     if (category === "franchise") {
+      // Canonical franchise order: narrative relation first (préquelle →
+      // suite → spin-off…), then release chronology, then title as a stable
+      // final fallback so items never shuffle unpredictably.
       items.sort((a, b) => {
         const wa = FRANCHISE_RELATION_ORDER[a.relation] ?? 99;
         const wb = FRANCHISE_RELATION_ORDER[b.relation] ?? 99;
         if (wa !== wb) return wa - wb;
-        return a.title.localeCompare(b.title, "fr");
+        return compareCanon(a, b);
       });
+    } else {
+      // Adaptations / recommendations / other: earliest-first chronology with
+      // a title fallback so the visible order feels coherent, not random.
+      items.sort(compareDateAsc);
     }
     const meta = CATEGORY_META[category];
     groups.push({ category, title: meta.title, description: meta.description, items });
@@ -307,3 +314,128 @@ export function itemsByUniversCategory(
   }
   return buckets;
 }
+
+// ---------- Chronological ordering & filtering (Step B) ----------
+
+/**
+ * Sort modes exposed on /univers and reused by fiche related sections.
+ * - canon: franchise-readable order (chronology + season/part signals).
+ * - date_asc / date_desc: pure release chronology.
+ */
+export type UniversSort = "canon" | "date_asc" | "date_desc";
+
+export const UNIVERS_SORT_ORDER: UniversSort[] = ["canon", "date_asc", "date_desc"];
+
+export const UNIVERS_SORT_LABELS: Record<UniversSort, string> = {
+  canon: "Ordre franchise",
+  date_asc: "Plus ancien",
+  date_desc: "Plus récent",
+};
+
+export const DEFAULT_UNIVERS_SORT: UniversSort = "canon";
+
+export function isUniversSort(value: unknown): value is UniversSort {
+  return typeof value === "string" && (UNIVERS_SORT_ORDER as string[]).includes(value);
+}
+
+// Title signals used to infer canonical order when release years tie or are
+// missing (e.g. "Saison 2", "Part 2", "2nd Season"). Kept intentionally
+// conservative so we never invent an order from ambiguous titles.
+const SEASON_RES = [
+  /\b(?:season|saison)\s*(\d{1,2})\b/i,
+  /\b(\d{1,2})(?:st|nd|rd|th)\s*(?:season|saison)\b/i,
+  /\bs(\d{1,2})\b/i,
+];
+const PART_RES = [/\b(?:part|partie|cour|cours)\s*(\d{1,2})\b/i];
+
+function firstMatchNumber(title: string, res: RegExp[]): number | null {
+  for (const re of res) {
+    const m = title.match(re);
+    if (m) {
+      const n = Number(m[1]);
+      if (Number.isFinite(n)) return n;
+    }
+  }
+  return null;
+}
+
+/** Parsed season number from a title, or null when no clear signal. */
+export function seasonNumber(title: string): number | null {
+  return firstMatchNumber(title, SEASON_RES);
+}
+
+/** Parsed part/cour number from a title, or null when no clear signal. */
+export function partNumber(title: string): number | null {
+  return firstMatchNumber(title, PART_RES);
+}
+
+function yearOf(item: RelatedMedia): number | null {
+  return typeof item.year === "number" ? item.year : null;
+}
+
+// Compare by year, pushing items with missing years to the end so incomplete
+// metadata never breaks or hides an item — it just sorts last.
+function compareYear(a: RelatedMedia, b: RelatedMedia, dir: 1 | -1): number {
+  const ya = yearOf(a);
+  const yb = yearOf(b);
+  if (ya === null && yb === null) return 0;
+  if (ya === null) return 1;
+  if (yb === null) return -1;
+  return (ya - yb) * dir;
+}
+
+/** Canonical/franchise-readable comparator: chronology + season/part signals. */
+export function compareCanon(a: RelatedMedia, b: RelatedMedia): number {
+  const byYear = compareYear(a, b, 1);
+  if (byYear !== 0) return byYear;
+  const sa = seasonNumber(a.title);
+  const sb = seasonNumber(b.title);
+  if (sa !== null && sb !== null && sa !== sb) return sa - sb;
+  const pa = partNumber(a.title);
+  const pb = partNumber(b.title);
+  if (pa !== null && pb !== null && pa !== pb) return pa - pb;
+  return a.title.localeCompare(b.title, "fr");
+}
+
+/** Earliest-release-first comparator with a stable title fallback. */
+export function compareDateAsc(a: RelatedMedia, b: RelatedMedia): number {
+  const byYear = compareYear(a, b, 1);
+  if (byYear !== 0) return byYear;
+  return a.title.localeCompare(b.title, "fr");
+}
+
+/** Most-recent-first comparator with a stable title fallback. */
+export function compareDateDesc(a: RelatedMedia, b: RelatedMedia): number {
+  const byYear = compareYear(a, b, -1);
+  if (byYear !== 0) return byYear;
+  return a.title.localeCompare(b.title, "fr");
+}
+
+/** Apply a sort mode to a list of related items (returns a new array). */
+export function sortUniversItems(
+  items: RelatedMedia[],
+  sort: UniversSort,
+): RelatedMedia[] {
+  const copy = [...items];
+  if (sort === "date_asc") copy.sort(compareDateAsc);
+  else if (sort === "date_desc") copy.sort(compareDateDesc);
+  else copy.sort(compareCanon);
+  return copy;
+}
+
+/** Distinct known years in a set, ascending — powers a year filter. */
+export function distinctYears(items: RelatedMedia[]): number[] {
+  return Array.from(
+    new Set(items.map(yearOf).filter((y): y is number => typeof y === "number")),
+  ).sort((a, b) => a - b);
+}
+
+/** Filter items to a single year; null year keeps everything. */
+export function filterByYear(
+  items: RelatedMedia[],
+  year: number | null,
+): RelatedMedia[] {
+  if (year === null) return items;
+  return items.filter((i) => yearOf(i) === year);
+}
+

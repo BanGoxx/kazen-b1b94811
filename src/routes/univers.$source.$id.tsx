@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Layers, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowDownWideNarrow, Layers, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
 import { EmptyState } from "@/components/media/EmptyState";
@@ -14,16 +14,26 @@ import {
   isRealGroup,
   itemsByUniversCategory,
   isUniversCategory,
+  isUniversSort,
+  sortUniversItems,
+  distinctYears,
+  filterByYear,
   UNIVERS_CATEGORY_LABELS,
   UNIVERS_CATEGORY_ORDER,
+  UNIVERS_SORT_ORDER,
+  UNIVERS_SORT_LABELS,
   DEFAULT_UNIVERS_CATEGORY,
+  DEFAULT_UNIVERS_SORT,
   type FranchiseGroup,
   type UniversCategory,
+  type UniversSort,
 } from "@/lib/franchise";
 import type { RelatedMedia } from "@/lib/media-types";
 
 interface UniversSearch {
   type: UniversCategory;
+  sort: UniversSort;
+  year: number | null;
 }
 
 const EMPTY_COPY: Record<UniversCategory, string> = {
@@ -39,9 +49,15 @@ const EMPTY_COPY: Record<UniversCategory, string> = {
 };
 
 export const Route = createFileRoute("/univers/$source/$id")({
-  validateSearch: (search: Record<string, unknown>): UniversSearch => ({
-    type: isUniversCategory(search.type) ? search.type : DEFAULT_UNIVERS_CATEGORY,
-  }),
+  validateSearch: (search: Record<string, unknown>): UniversSearch => {
+    const rawYear = Number(search.year);
+    return {
+      type: isUniversCategory(search.type) ? search.type : DEFAULT_UNIVERS_CATEGORY,
+      sort: isUniversSort(search.sort) ? search.sort : DEFAULT_UNIVERS_SORT,
+      year: Number.isFinite(rawYear) && rawYear > 0 ? Math.trunc(rawYear) : null,
+    };
+  },
+
   loader: async ({ context, params }) => {
     const item = await context.queryClient.ensureQueryData(
       mediaDetailQO(params.source, params.id),
@@ -106,7 +122,8 @@ export const Route = createFileRoute("/univers/$source/$id")({
 
 function UniversPage() {
   const { source, id } = Route.useParams();
-  const { type } = Route.useSearch() as UniversSearch;
+  const { type, sort, year } = Route.useSearch() as UniversSearch;
+
   const { data: item } = useSuspenseQuery(mediaDetailQO(source, id));
 
   const group = useMemo<FranchiseGroup | null>(
@@ -136,8 +153,15 @@ function UniversPage() {
     );
   }
 
-  const activeItems = buckets[type] ?? [];
+  const categoryItems = buckets[type] ?? [];
+  // Available years come from the full category (before the year filter) so the
+  // year selector never hides the option the user is currently viewing.
+  const years = distinctYears(categoryItems);
+  // Reset a stale year when it no longer exists in the active category.
+  const activeYear = year !== null && years.includes(year) ? year : null;
+  const activeItems = sortUniversItems(filterByYear(categoryItems, activeYear), sort);
   const heroImage = item.backdropUrl || item.posterUrl;
+
 
   return (
     <AppShell>
@@ -195,7 +219,8 @@ function UniversPage() {
                 key={cat}
                 to="/univers/$source/$id"
                 params={{ source, id }}
-                search={{ type: cat }}
+                search={{ type: cat, sort, year: null }}
+
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "focus-ring flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
@@ -221,7 +246,78 @@ function UniversPage() {
         </div>
       </nav>
 
+      {/* Sort + year filters (operate within the active tab) */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div
+          className="flex items-center gap-1 rounded-full border border-border bg-card/60 p-1"
+          role="group"
+          aria-label="Trier"
+        >
+          <ArrowDownWideNarrow className="ml-1.5 h-4 w-4 text-muted-foreground" />
+          {UNIVERS_SORT_ORDER.map((mode) => {
+            const active = mode === sort;
+            return (
+              <Link
+                key={mode}
+                to="/univers/$source/$id"
+                params={{ source, id }}
+                search={{ type, sort: mode, year: activeYear }}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors sm:text-sm",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {UNIVERS_SORT_LABELS[mode]}
+              </Link>
+            );
+          })}
+        </div>
+
+        {years.length > 1 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Link
+              to="/univers/$source/$id"
+              params={{ source, id }}
+              search={{ type, sort, year: null }}
+              aria-current={activeYear === null ? "true" : undefined}
+              className={cn(
+                "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                activeYear === null
+                  ? "border-transparent aurora-bg text-white"
+                  : "border-border bg-card/60 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Toutes années
+            </Link>
+            {years.map((y) => {
+              const active = y === activeYear;
+              return (
+                <Link
+                  key={y}
+                  to="/univers/$source/$id"
+                  params={{ source, id }}
+                  search={{ type, sort, year: y }}
+                  aria-current={active ? "true" : undefined}
+                  className={cn(
+                    "focus-ring rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    active
+                      ? "border-transparent aurora-bg text-white"
+                      : "border-border bg-card/60 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {y}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+
       {/* Listing */}
+
       <section aria-live="polite">
         <div className="mb-4 flex items-center gap-2">
           <Layers className="h-5 w-5 text-primary" />
@@ -232,7 +328,14 @@ function UniversPage() {
         </div>
 
         {activeItems.length === 0 ? (
-          <EmptyState message={EMPTY_COPY[type]} hint="Essayez une autre catégorie ci-dessus." />
+          activeYear !== null ? (
+            <EmptyState
+              message={`Aucun titre pour l'année ${activeYear} dans cette catégorie.`}
+              hint="Choisissez « Toutes années » ou une autre année."
+            />
+          ) : (
+            <EmptyState message={EMPTY_COPY[type]} hint="Essayez une autre catégorie ci-dessus." />
+          )
         ) : (
           <div className="cv-auto grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
             {activeItems.map((it) => (

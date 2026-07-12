@@ -63,6 +63,10 @@ export const createImportBatch = createServerFn({ method: "POST" })
       progress: e.progress,
       started_at: e.startedAt,
       completed_at: e.completedAt,
+      notes: e.comments ?? null,
+      user_tags: e.userTags ?? [],
+      rewatch_count: e.rewatchCount ?? null,
+      is_rewatching: e.isRewatching ?? false,
     }));
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);
@@ -217,12 +221,6 @@ export const confirmImport = createServerFn({ method: "POST" })
         continue;
       }
 
-      const patch: Record<string, unknown> = {};
-      const st = toKazenStatus(it.user_status as never);
-      if (st) patch.status = st;
-      const rating = toKazenRating(it.user_score);
-      if (rating != null) patch.rating = rating;
-
       // Snapshot any existing row for rollback.
       const { data: existing } = await context.supabase
         .from("list_items")
@@ -231,10 +229,25 @@ export const confirmImport = createServerFn({ method: "POST" })
         .eq("media_key", it.matched_media_key)
         .maybeSingle();
 
+      const patch: Record<string, unknown> = {};
+      const st = toKazenStatus(it.user_status as never);
+      if (st) patch.status = st;
+      const rating = toKazenRating(it.user_score);
+      if (rating != null) patch.rating = rating;
+
+      // Only seed notes/tags on CREATE so we never clobber the user's own
+      // existing notes/tags on an update. Progress, dates and rewatch data have
+      // no list_items column yet and stay in the import preview (future work).
+      if (!existing) {
+        if (it.notes) patch.notes = it.notes;
+        if (Array.isArray(it.user_tags) && it.user_tags.length > 0) patch.tags = it.user_tags;
+      }
+
       const { error: upErr } = await context.supabase.from("list_items").upsert(
         { user_id: context.userId, media_key: it.matched_media_key, ...patch },
         { onConflict: "user_id,media_key" },
       );
+
       if (upErr) {
         await context.supabase
           .from("import_items")

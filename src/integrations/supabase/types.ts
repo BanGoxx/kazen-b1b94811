@@ -189,6 +189,7 @@ export type Database = {
           created_at: string
           id: string
           import_action: string
+          is_rewatching: boolean
           match_confidence: number | null
           match_status: string
           matched_media_key: string | null
@@ -201,12 +202,14 @@ export type Database = {
           provider_ref: string | null
           raw_title: string
           release_year: number | null
+          rewatch_count: number | null
           started_at: string | null
           total_episodes: number | null
           updated_at: string
           user_id: string
           user_score: number | null
           user_status: string | null
+          user_tags: string[]
         }
         Insert: {
           alt_titles?: string[]
@@ -217,6 +220,7 @@ export type Database = {
           created_at?: string
           id?: string
           import_action?: string
+          is_rewatching?: boolean
           match_confidence?: number | null
           match_status?: string
           matched_media_key?: string | null
@@ -229,12 +233,14 @@ export type Database = {
           provider_ref?: string | null
           raw_title: string
           release_year?: number | null
+          rewatch_count?: number | null
           started_at?: string | null
           total_episodes?: number | null
           updated_at?: string
           user_id: string
           user_score?: number | null
           user_status?: string | null
+          user_tags?: string[]
         }
         Update: {
           alt_titles?: string[]
@@ -245,6 +251,7 @@ export type Database = {
           created_at?: string
           id?: string
           import_action?: string
+          is_rewatching?: boolean
           match_confidence?: number | null
           match_status?: string
           matched_media_key?: string | null
@@ -257,12 +264,14 @@ export type Database = {
           provider_ref?: string | null
           raw_title?: string
           release_year?: number | null
+          rewatch_count?: number | null
           started_at?: string | null
           total_episodes?: number | null
           updated_at?: string
           user_id?: string
           user_score?: number | null
           user_status?: string | null
+          user_tags?: string[]
         }
         Relationships: [
           {

@@ -23,6 +23,7 @@ import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { FicheSection } from "@/components/media/FicheSection";
+import { FicheReviews } from "@/components/media/FicheReviews";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";

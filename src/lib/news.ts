@@ -164,6 +164,23 @@ export function getArticleBySlug(slug: string): NewsArticle | null {
   return NEWS_ARTICLES.find((a) => a.slug === slug && !a.externalUrl) ?? null;
 }
 
+/**
+ * Featured articles for Découverte. Only real, internal (clickable) entries
+ * flagged `featured` are returned, ordered by popularity then recency. Callers
+ * hide the block when this returns an empty array.
+ */
+export function getFeaturedArticles(limit = 4): NewsArticle[] {
+  return NEWS_ARTICLES.filter((a) => a.featured && !a.externalUrl)
+    .sort((a, b) => {
+      const pa = a.popularity ?? 0;
+      const pb = b.popularity ?? 0;
+      if (pa !== pb) return pb - pa;
+      return byRecent(a, b);
+    })
+    .slice(0, limit);
+}
+
+
 /** Normalize a NewsArticle into the presentational FicheArticle shape. */
 export function toFicheArticle(a: NewsArticle): FicheArticle {
   return {

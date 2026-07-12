@@ -5,6 +5,7 @@ import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
+import { NextEpisodePill } from "./NextEpisodePill";
 import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {
@@ -49,6 +50,9 @@ export function MediaCard({
             {MEDIA_TYPE_LABELS[item.mediaType]}
           </span>
           <RatingBadge score={item.score} />
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 top-11 flex justify-start p-2.5">
+          <NextEpisodePill nextEpisode={item.nextEpisode} />
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/60 to-transparent opacity-95 transition-opacity duration-500 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />

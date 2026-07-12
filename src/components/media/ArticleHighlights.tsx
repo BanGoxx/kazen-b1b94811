@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Newspaper, ArrowUpRight } from "lucide-react";
-import { getFeaturedArticles } from "@/lib/news";
+import { getDiscoverArticles } from "@/lib/news";
 
 /**
  * Découverte "Actualités KAZEN" block.
@@ -10,7 +10,7 @@ import { getFeaturedArticles } from "@/lib/news";
  * a dead-end card. Every card links to a real /actualites/$slug page.
  */
 export function ArticleHighlights() {
-  const articles = getFeaturedArticles(4);
+  const articles = getDiscoverArticles(4);
   if (!articles.length) return null;
 
   const dateFmt = new Intl.DateTimeFormat("fr-FR", {

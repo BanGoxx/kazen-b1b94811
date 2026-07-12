@@ -30,6 +30,7 @@ import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
 import { WhereToWatch } from "@/components/media/WhereToWatch";
 import { NextEpisodeCard } from "@/components/media/NextEpisodeCard";
+import { NextEpisodePill } from "@/components/media/NextEpisodePill";
 import { EpisodeList } from "@/components/media/EpisodeList";
 import { FicheTrackingBadge } from "@/components/media/FicheTrackingBadge";
 import { Badge } from "@/components/ui/badge";
@@ -245,6 +246,7 @@ function MediaDetailPage() {
                 {MEDIA_TYPE_LABELS[item.mediaType]}
               </span>
               <RatingBadge score={item.score} />
+              <NextEpisodePill nextEpisode={item.nextEpisode} className="text-xs" />
               {item.studios.length ? (
                 <span className="text-sm text-muted-foreground">
                   {item.studios.slice(0, 2).join(" · ")}

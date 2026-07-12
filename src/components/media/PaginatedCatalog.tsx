@@ -77,7 +77,10 @@ function CatalogInner({
 
   // Auto-load on scroll until the cap, one sequential page at a time.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const canAutoLoad = query.hasNextPage && items.length < AUTO_LOAD_CAP;
+  // Pause auto-load after a failed next-page fetch so a persistently erroring
+  // provider can't trigger a rapid retry loop — the user retries explicitly.
+  const canAutoLoad =
+    query.hasNextPage && items.length < AUTO_LOAD_CAP && !query.isFetchNextPageError;
   useEffect(() => {
     if (!canAutoLoad) return;
     const el = sentinelRef.current;

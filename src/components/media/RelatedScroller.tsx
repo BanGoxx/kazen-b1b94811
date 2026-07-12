@@ -14,12 +14,14 @@ export function RelatedScroller({
   if (!items.length) return null;
   return (
     <section>
-      <div className="mb-3">
-        <h2 className="font-display text-xl font-bold">{title}</h2>
-        {description ? (
-          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
+      {title || description ? (
+        <div className="mb-3">
+          {title ? <h2 className="font-display text-xl font-bold">{title}</h2> : null}
+          {description ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+      ) : null}
       <ul className="flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
         {items.map((it) => (
           <li key={it.key} className="w-32 shrink-0 snap-start">

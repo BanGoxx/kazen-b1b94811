@@ -88,7 +88,7 @@ export const moderateContent = createServerFn({ method: "POST" })
       action: ModerationActionType;
       reason?: string;
       note?: string;
-      reportId?: string | null;
+      reportId?: string;
     }) => data,
   )
   .handler(async ({ data, context }) => {

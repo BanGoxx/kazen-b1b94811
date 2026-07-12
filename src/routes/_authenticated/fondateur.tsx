@@ -44,6 +44,13 @@ import {
   removeBadgeAssignment,
   setAssignmentVisibility,
 } from "@/lib/founder.functions";
+import {
+  listEnrichments,
+  getEnrichment,
+  upsertEnrichment,
+  deleteEnrichment,
+} from "@/lib/enrichment.functions";
+import { DATA_QUALITY_LABELS, type DataQualityStatus } from "@/lib/enrichment";
 
 export const Route = createFileRoute("/_authenticated/fondateur")({
   ssr: false,

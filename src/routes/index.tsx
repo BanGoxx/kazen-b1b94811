@@ -12,6 +12,7 @@ import { MemberCTA } from "@/components/media/MemberCTA";
 import { ForYouHomeBlock } from "@/components/media/ForYouHomeBlock";
 import { CategoryBand } from "@/components/media/CategoryBand";
 import { ArticleHighlights } from "@/components/media/ArticleHighlights";
+import { RecentArticles } from "@/components/media/RecentArticles";
 import { CommunityListsBand } from "@/components/media/CommunityListsBand";
 import { SafeSection } from "@/components/media/SafeSection";
 import type { MediaItem } from "@/lib/media-types";
@@ -231,7 +232,8 @@ function DiscoverPage() {
         </div>
       </div>
 
-      <div className="space-y-14">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start lg:gap-10">
+        <div className="space-y-14 min-w-0">
         <SafeSection>
           <ForYouHomeBlock />
         </SafeSection>
@@ -295,6 +297,13 @@ function DiscoverPage() {
         <SafeSection>
           <CommunityListsBand />
         </SafeSection>
+        </div>
+
+        <aside className="mt-14 lg:mt-0">
+          <SafeSection minHeight="0">
+            <RecentArticles />
+          </SafeSection>
+        </aside>
       </div>
 
 

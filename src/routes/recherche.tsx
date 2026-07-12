@@ -394,7 +394,7 @@ function SearchPage() {
             <div ref={sentinelRef} className="mt-10 flex justify-center">
               {isFetchingNextPage ? (
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+                  <Loader2 className="h-4 w-4 animate-spin" /> Chargement des résultats…
                 </span>
               ) : (
                 <button

@@ -47,23 +47,25 @@ function MoviesPage() {
           <TabsTrigger value="asian">Animation asiatique</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <PaginatedCatalog queryOptions={moviePageQO("trending")} />
+          <PaginatedCatalog queryOptions={moviePageQO("trending")} loadingLabel="Chargement des films…" />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <PaginatedCatalog queryOptions={moviePageQO("popular")} />
+          <PaginatedCatalog queryOptions={moviePageQO("popular")} loadingLabel="Chargement des films…" />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
-          <PaginatedCatalog queryOptions={moviePageQO("upcoming")} />
+          <PaginatedCatalog queryOptions={moviePageQO("upcoming")} loadingLabel="Chargement des films…" />
         </TabsContent>
         <TabsContent value="animated" className="mt-6">
           <PaginatedCatalog
             queryOptions={moviePageQO("animated")}
+            loadingLabel="Chargement des films…"
             emptyLabel="Films d'animation indisponibles pour le moment."
           />
         </TabsContent>
         <TabsContent value="asian" className="mt-6">
           <PaginatedCatalog
             queryOptions={moviePageQO("asian")}
+            loadingLabel="Chargement des films…"
             emptyLabel="Animation asiatique indisponible pour le moment."
           />
         </TabsContent>

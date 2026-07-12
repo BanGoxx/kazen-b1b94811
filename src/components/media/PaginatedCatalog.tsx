@@ -38,6 +38,10 @@ export function PaginatedCatalog(props: {
   // "complete catalogue" phrasing; pass a season/upcoming-specific note when
   // the total is a genuine complete set rather than an open-ended catalogue.
   completionLabel?: string;
+  // Contextual loading copy (e.g. "Chargement des films…"). Passed down to the
+  // pending skeleton, the slow-load hint and the "Voir plus" button so a Films
+  // or Séries catalogue never shows anime-specific wording.
+  loadingLabel?: string;
   // When true, upgrade the SSR/curated first page to real browser-direct data
   // once after hydration (anime/seasonal catalogs that can be Worker-blocked).
   upgradeOnMount?: boolean;
@@ -46,20 +50,21 @@ export function PaginatedCatalog(props: {
   stateKey?: string;
 }) {
   return (
-    <SafeSection minHeight="20rem" pending={<CatalogPending />}>
+    <SafeSection minHeight="20rem" pending={<CatalogPending label={props.loadingLabel} />}>
       <CatalogInner {...props} />
     </SafeSection>
   );
 }
 
-function CatalogPending() {
-  return <CatalogLoading count={10} />;
+function CatalogPending({ label }: { label?: string }) {
+  return <CatalogLoading count={10} label={label} />;
 }
 
 function CatalogInner({
   queryOptions,
   emptyLabel,
   completionLabel,
+  loadingLabel = "Chargement des titres…",
   upgradeOnMount,
   stateKey,
 }: {
@@ -67,6 +72,7 @@ function CatalogInner({
   queryOptions: UseSuspenseInfiniteQueryOptions<PagedMedia, Error, any, any, any>;
   emptyLabel?: string;
   completionLabel?: string;
+  loadingLabel?: string;
   upgradeOnMount?: boolean;
   stateKey?: string;
 }) {
@@ -111,6 +117,11 @@ function CatalogInner({
   }, [items, state]);
 
   const sourceEmpty = items.length === 0;
+  // True when the user has narrowed the loaded set (genre or status). Used to
+  // phrase the finite-state footer around the *selection* rather than implying
+  // the whole catalogue is exhausted.
+  const filtersActive = state.genres.length > 0 || state.status !== "all";
+
 
   // Auto-load on scroll until the cap, one sequential page at a time.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -169,7 +180,7 @@ function CatalogInner({
           >
             {query.isFetchingNextPage ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Chargement des anime…
+                <Loader2 className="h-4 w-4 animate-spin" /> {loadingLabel}
               </>
             ) : query.isFetchNextPageError ? (
               <>
@@ -182,7 +193,7 @@ function CatalogInner({
             )}
           </Button>
           {query.isFetchingNextPage ? (
-            <SlowLoadHint />
+            <SlowLoadHint label={loadingLabel} />
           ) : query.isFetchNextPageError ? (
             <p className="text-xs text-muted-foreground">Connexion à la source de données…</p>
           ) : (
@@ -190,9 +201,20 @@ function CatalogInner({
           )}
         </div>
       ) : items.length > 0 ? (
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
-        </p>
+        // Finite state. When a filter is active we make it explicit that these
+        // are ALL available titles for the current selection (e.g. a genre with
+        // few results for a season) so the user never thinks scroll is broken.
+        filtersActive ? (
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            {visible.length} titre{visible.length > 1 ? "s" : ""} trouvé
+            {visible.length > 1 ? "s" : ""} pour cette sélection · tous les titres
+            disponibles sont affichés
+          </p>
+        ) : (
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            {completionLabel ?? "Tous les titres disponibles sont affichés"} · {items.length} titres
+          </p>
+        )
       ) : null}
     </div>
   );

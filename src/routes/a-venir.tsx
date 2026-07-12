@@ -42,7 +42,7 @@ export const Route = createFileRoute("/a-venir")({
     <AppShell>
       <PageHeader title="Sorties à venir" description="Anime, séries et films attendus, du plus proche au plus lointain." />
       <div className="mb-6">
-        <SlowLoadHint />
+        <SlowLoadHint label="Chargement des sorties…" />
       </div>
       <MediaGridSkeleton count={10} />
     </AppShell>

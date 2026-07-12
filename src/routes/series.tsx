@@ -45,13 +45,13 @@ function SeriesPage() {
           <TabsTrigger value="onair">En diffusion</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <PaginatedCatalog queryOptions={seriesPageQO("trending")} />
+          <PaginatedCatalog queryOptions={seriesPageQO("trending")} loadingLabel="Chargement des séries…" />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <PaginatedCatalog queryOptions={seriesPageQO("popular")} />
+          <PaginatedCatalog queryOptions={seriesPageQO("popular")} loadingLabel="Chargement des séries…" />
         </TabsContent>
         <TabsContent value="onair" className="mt-6">
-          <PaginatedCatalog queryOptions={seriesPageQO("onair")} />
+          <PaginatedCatalog queryOptions={seriesPageQO("onair")} loadingLabel="Chargement des séries…" />
         </TabsContent>
       </Tabs>
     </AppShell>

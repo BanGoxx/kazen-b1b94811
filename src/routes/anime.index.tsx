@@ -51,14 +51,15 @@ function AnimePage() {
           <TabsTrigger value="upcoming">À venir</TabsTrigger>
         </TabsList>
         <TabsContent value="trending" className="mt-6">
-          <PaginatedCatalog queryOptions={animePageQO("trending")} upgradeOnMount />
+          <PaginatedCatalog queryOptions={animePageQO("trending")} upgradeOnMount loadingLabel="Chargement des anime…" />
         </TabsContent>
         <TabsContent value="popular" className="mt-6">
-          <PaginatedCatalog queryOptions={animePageQO("popular")} upgradeOnMount />
+          <PaginatedCatalog queryOptions={animePageQO("popular")} upgradeOnMount loadingLabel="Chargement des anime…" />
         </TabsContent>
         <TabsContent value="upcoming" className="mt-6">
           <PaginatedCatalog
             queryOptions={animePageQO("upcoming")}
+            loadingLabel="Chargement des anime…"
             upgradeOnMount
             emptyLabel="Aucun anime à venir listé pour le moment."
           />

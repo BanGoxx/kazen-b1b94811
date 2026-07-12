@@ -46,6 +46,7 @@ function SeasonPage() {
         queryOptions={seasonalAnimePageQO()}
         upgradeOnMount
         emptyLabel="Aucun anime pour cette saison."
+        loadingLabel="Chargement de la saison…"
         completionLabel="Saison complète — tous les anime de la saison sont affichés"
       />
       <p className="mt-6 text-center text-xs text-muted-foreground">

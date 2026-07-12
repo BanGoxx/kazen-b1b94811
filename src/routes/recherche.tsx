@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Search as SearchIcon, Sparkles, Tv, Film, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/media/SectionHeader";
 import { MediaGrid, MediaGridSkeleton } from "@/components/media/MediaGrid";
@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/media/EmptyState";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { searchMediaQO } from "@/lib/queries";
+import { searchMediaInfiniteQO } from "@/lib/queries";
+
 import {
   availableGenres,
   filterAndSort,

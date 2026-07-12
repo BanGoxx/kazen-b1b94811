@@ -112,8 +112,27 @@ export const searchMediaQO = (q: string) =>
   });
 
 import { infiniteQueryOptions } from "@tanstack/react-query";
-import { getAnimePage, getMoviePage, getSeriesPage } from "./discover.functions";
+import { getAnimePage, getMoviePage, getSeriesPage, searchMediaPaged } from "./discover.functions";
 import type { PagedMedia } from "./tmdb.server";
+
+interface SearchPage {
+  anime: import("./media-types").MediaItem[];
+  series: import("./media-types").MediaItem[];
+  movies: import("./media-types").MediaItem[];
+  page: number;
+  hasMore: boolean;
+}
+
+export const searchMediaInfiniteQO = (q: string) =>
+  infiniteQueryOptions({
+    queryKey: ["search", "infinite", q],
+    queryFn: ({ pageParam }) => searchMediaPaged({ data: { q, page: pageParam } }),
+    initialPageParam: 1,
+    getNextPageParam: (last: SearchPage) => (last.hasMore ? last.page + 1 : undefined),
+    staleTime: 1000 * 60 * 5,
+    enabled: q.trim().length >= 2,
+  });
+
 
 const pagedInitial = { pageParams: [1] as number[], pages: [] as PagedMedia[] };
 void pagedInitial;

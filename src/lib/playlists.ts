@@ -22,6 +22,7 @@ export interface PlaylistMeta {
   ownerId: string;
   title: string;
   description: string;
+  recommendation: string;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;

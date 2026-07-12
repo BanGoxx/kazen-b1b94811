@@ -17,7 +17,6 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { RatingBadge } from "@/components/media/RatingBadge";
 import { SafeImage } from "@/components/media/SafeImage";
-import { PlatformBadge } from "@/components/media/PlatformBadge";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
@@ -25,6 +24,9 @@ import { UserListPanel } from "@/components/media/UserListPanel";
 import { FicheSection } from "@/components/media/FicheSection";
 import { ExpandableText } from "@/components/media/ExpandableText";
 import { VideoGallery } from "@/components/media/VideoGallery";
+import { WhereToWatch } from "@/components/media/WhereToWatch";
+import { NextEpisodeCard } from "@/components/media/NextEpisodeCard";
+import { FicheTrackingBadge } from "@/components/media/FicheTrackingBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

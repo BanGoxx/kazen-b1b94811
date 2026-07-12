@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSuspenseInfiniteQuery, type UseSuspenseInfiniteQueryOptions } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useQueryClient,
+  type UseSuspenseInfiniteQueryOptions,
+} from "@tanstack/react-query";
 import { Loader2, Plus, RotateCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import type { PagedMedia } from "@/lib/tmdb.server";
 import { collectGenres, filterItems, sortItems } from "@/lib/media-filters";
+import { readCatalogFilters, writeCatalogFilters } from "@/lib/catalog-state";
+import { upgradeCatalogOnce } from "@/lib/queries";
 import { FilterBar, type FilterState } from "./FilterBar";
 import { MediaGrid } from "./MediaGrid";
 import { SafeSection } from "./SafeSection";

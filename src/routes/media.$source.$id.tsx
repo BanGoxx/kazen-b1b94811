@@ -60,6 +60,20 @@ export const Route = createFileRoute("/media/$source/$id")({
     const canonical = `https://kazen.lovable.app/media/${params.source}/${params.id}`;
     const item = loaderData?.item;
     if (!item) {
+      if (params.source === "anilist") {
+        return {
+          meta: [
+            { title: "Fiche anime — KAZEN" },
+            { name: "description", content: "Découvrez cette fiche anime sur KAZEN : synopsis, personnages, équipe, épisodes, plateformes et univers lié." },
+            { property: "og:title", content: "Fiche anime — KAZEN" },
+            { property: "og:description", content: "Fiche anime enrichie sur KAZEN." },
+            { property: "og:type", content: "video.other" },
+            { property: "og:url", content: canonical },
+            { name: "twitter:card", content: "summary" },
+          ],
+          links: [{ rel: "canonical", href: canonical }],
+        };
+      }
       return {
         meta: [
           { title: "Fiche introuvable — KAZEN" },

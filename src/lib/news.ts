@@ -252,7 +252,60 @@ const ARTICLE_SOURCES: ArticleInput[] = [
     category: "Analyse",
     popularity: 85,
     featured: true,
+    evergreen: true,
     titles: [{ source: "anilist", externalId: "21" }],
+  },
+  {
+    slug: "solo-leveling-adaptation-a1-pictures",
+    title: "Solo Leveling : le web-roman coréen qui a conquis l'animation",
+    excerpt:
+      "Du webtoon phénomène à l'anime signé A-1 Pictures, retour sur l'ascension de Sung Jinwoo, du chasseur le plus faible au plus redoutable.",
+    content: [
+      "Adapté du web-roman de Chugong puis du webtoon à succès, « Solo Leveling » (Ore dake Level Up na Ken) est porté à l'écran par le studio A-1 Pictures.",
+      { kind: "heading", text: "La montée en puissance comme moteur" },
+      "L'histoire suit Sung Jinwoo, considéré comme le chasseur le plus faible, qui obtient la capacité rare de « monter de niveau » et gravit peu à peu les rangs.",
+      "La série s'est distinguée par sa mise en scène spectaculaire et son rythme soutenu, confirmant l'appétit du public pour les récits d'ascension issus de la bande dessinée coréenne.",
+    ],
+    publishedAt: "2026-01-15",
+    category: "Analyse",
+    popularity: 92,
+    featured: true,
+    evergreen: true,
+    titles: [{ source: "anilist", externalId: "151807" }],
+  },
+  {
+    slug: "dandadan-ovni-science-fiction-occulte",
+    title: "Dandadan : l'OVNI qui mêle esprits, extraterrestres et énergie brute",
+    excerpt:
+      "Entre paranormal et science-fiction, l'adaptation par Science Saru s'est imposée comme l'une des propositions les plus singulières de l'animation récente.",
+    content: [
+      "Tiré du manga de Yukinobu Tatsu prépublié sur Shonen Jump+, « Dandadan » est animé par le studio Science Saru.",
+      "L'intrigue réunit deux lycéens, Momo et Okarun, l'une convaincue par les extraterrestres, l'autre par les esprits — jusqu'à ce que les deux camps se révèlent bien réels.",
+      "Par son énergie visuelle débridée et son mélange de genres assumé, la série a marqué les esprits comme une œuvre à l'identité forte.",
+    ],
+    publishedAt: "2026-02-10",
+    category: "Analyse",
+    popularity: 87,
+    featured: true,
+    evergreen: true,
+    titles: [{ source: "anilist", externalId: "171018" }],
+  },
+  {
+    slug: "chainsaw-man-mappa-brutalite-melancolie",
+    title: "Chainsaw Man : la brutalité mélancolique d'un shōnen pas comme les autres",
+    excerpt:
+      "Adapté par MAPPA du manga de Tatsuki Fujimoto, « Chainsaw Man » assume un ton cru et désabusé qui tranche avec les codes habituels du genre.",
+    content: [
+      "Issu du manga de Tatsuki Fujimoto, « Chainsaw Man » est porté à l'écran par le studio MAPPA.",
+      "On y suit Denji, un jeune homme criblé de dettes qui fusionne avec son démon-tronçonneuse Pochita et intègre une organisation de chasseurs de démons.",
+      "Entre violence frontale, humour noir et mélancolie, l'œuvre s'est imposée comme l'une des voix les plus singulières du shōnen contemporain.",
+    ],
+    publishedAt: "2026-03-05",
+    category: "Analyse",
+    popularity: 89,
+    featured: true,
+    evergreen: true,
+    titles: [{ source: "anilist", externalId: "127230" }],
   },
 ];
 

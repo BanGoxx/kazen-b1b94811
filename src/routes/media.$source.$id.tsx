@@ -244,6 +244,16 @@ function MediaDetailPage() {
             {item.titleOriginal && item.titleOriginal !== item.title ? (
               <p className="text-lg text-muted-foreground">{item.titleOriginal}</p>
             ) : null}
+            {heroStats.length ? (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                {heroStats.map((s, i) => (
+                  <span key={s} className="flex items-center gap-2">
+                    {i > 0 ? <span aria-hidden className="text-muted-foreground/40">·</span> : null}
+                    <span className="font-medium text-foreground/90">{s}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <FicheTrackingBadge mediaKey={item.key} />
             {hasFranchiseLinks(item.related)
               ? (() => {

@@ -343,6 +343,10 @@ export type Database = {
           author_id: string
           body: string
           category_id: string
+          cover_image_alt: string | null
+          cover_image_path: string | null
+          cover_image_source: string | null
+          cover_updated_at: string | null
           created_at: string
           deleted_at: string | null
           deleted_by: string | null
@@ -360,6 +364,10 @@ export type Database = {
           author_id: string
           body: string
           category_id: string
+          cover_image_alt?: string | null
+          cover_image_path?: string | null
+          cover_image_source?: string | null
+          cover_updated_at?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
@@ -377,6 +385,10 @@ export type Database = {
           author_id?: string
           body?: string
           category_id?: string
+          cover_image_alt?: string | null
+          cover_image_path?: string | null
+          cover_image_source?: string | null
+          cover_updated_at?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by?: string | null
@@ -1657,6 +1669,10 @@ export type Database = {
         }
         Returns: string
       }
+      moderate_clear_forum_cover: {
+        Args: { _note?: string; _topic: string }
+        Returns: string
+      }
       moderate_content: {
         Args: {
           _action: Database["public"]["Enums"]["moderation_action_type"]
@@ -1729,6 +1745,10 @@ export type Database = {
       role_rank: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: number
+      }
+      set_forum_topic_cover: {
+        Args: { _alt?: string; _path: string; _source?: string; _topic: string }
+        Returns: undefined
       }
       submit_content_report: {
         Args: {

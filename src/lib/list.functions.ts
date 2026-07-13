@@ -56,7 +56,7 @@ export const getMyList = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("list_items")
       .select(
-        "media_key,status,favorite,priority,rating,notes,tags,updated_at,media_records(*)",
+        "media_key,status,favorite,priority,rating,notes,tags,progress,started_at,completed_at,rewatch_count,is_rewatching,updated_at,media_records(*)",
       )
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);

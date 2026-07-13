@@ -269,13 +269,17 @@ function MessagesPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      title="Archiver"
-                      aria-label="Archiver"
+                      title={meta.archived ? "Désarchiver" : "Archiver"}
+                      aria-label={meta.archived ? "Désarchiver" : "Archiver"}
                       onClick={() =>
-                        archiveMut.mutate({ id: meta.id, archived: true })
+                        archiveMut.mutate({ id: meta.id, archived: !meta.archived })
                       }
                     >
-                      <Archive className="h-4 w-4" />
+                      {meta.archived ? (
+                        <ArchiveRestore className="h-4 w-4" />
+                      ) : (
+                        <Archive className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>

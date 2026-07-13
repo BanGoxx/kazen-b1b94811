@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
 import { useForumOverview, useRecentTopics } from "@/lib/forum";
 import { timeAgo } from "@/components/community/forum-ui";
+import { useCoverUrls } from "@/lib/forum-cover";
+import { SafeImage } from "@/components/media/SafeImage";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/communaute/")({

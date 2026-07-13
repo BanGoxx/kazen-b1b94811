@@ -67,6 +67,7 @@ import {
 import { DATA_QUALITY_LABELS, type DataQualityStatus } from "@/lib/enrichment";
 import { useGeneralDigest, usePersonalizedDigest } from "@/lib/use-digest";
 import { DigestPreview } from "@/components/digest/DigestPreview";
+import { FounderTestSender } from "@/components/founder/FounderTestSender";
 
 export const Route = createFileRoute("/_authenticated/fondateur")({
   ssr: false,

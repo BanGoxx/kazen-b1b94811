@@ -16,7 +16,11 @@ import { titleSimilarity } from "./import/match";
 
 const EXACT = 0.9;
 const PROBABLE = 0.7;
-const MAX_ITEMS = 500;
+// Safety ceiling on a single import batch. Set high enough to cover even very
+// large AniList collections (the fetcher pages up to ~10k). When a list exceeds
+// this, the batch is truncated and the caller is told honestly (see `truncated`
+// in the return) so a partial import is never reported as complete.
+const MAX_ITEMS = 5000;
 
 type MatchStatus = "exact" | "probable" | "needs_confirmation" | "unmatched" | "duplicate";
 type ImportAction = "create" | "update" | "skip" | "needs_user_choice";

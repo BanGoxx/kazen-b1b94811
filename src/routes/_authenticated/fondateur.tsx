@@ -24,6 +24,9 @@ import {
   Megaphone,
   BarChart3,
   AlertTriangle,
+  Activity,
+  Stethoscope,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";

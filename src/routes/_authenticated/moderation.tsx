@@ -56,6 +56,7 @@ const TARGET_LABELS: Record<string, string> = {
   reply: "Réponse",
   playlist: "Playlist partagée",
   playlist_item: "Élément de liste",
+  playlist_review: "Avis sur une liste",
 };
 
 const ACTION_LABELS: Record<string, string> = {

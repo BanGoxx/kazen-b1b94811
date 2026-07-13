@@ -156,18 +156,30 @@ function MyListsPage() {
   return (
     <AppShell>
       <div className="section-container space-y-8">
-        <header className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ListChecks className="h-4 w-4" /> Espace personnel
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ListChecks className="h-4 w-4" /> Espace personnel
+            </div>
+            <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
+              Ma <span className="aurora-text">liste</span>
+            </h1>
+            <p className="text-muted-foreground">
+              {entries.length} titre{entries.length > 1 ? "s" : ""} suivi
+              {entries.length > 1 ? "s" : ""}.
+            </p>
           </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-            Ma <span className="aurora-text">liste</span>
-          </h1>
-          <p className="text-muted-foreground">
-            {entries.length} titre{entries.length > 1 ? "s" : ""} suivi
-            {entries.length > 1 ? "s" : ""}.
-          </p>
+          <Button variant="aurora" className="gap-1.5" onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Ajouter un titre
+          </Button>
         </header>
+
+        <AddToListDialog
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          entries={entries}
+        />
+
 
         {entries.length > 0 ? (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">

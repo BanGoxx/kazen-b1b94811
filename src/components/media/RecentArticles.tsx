@@ -61,6 +61,13 @@ export function RecentArticles({ limit = 5 }: { limit?: number }) {
           </li>
         ))}
       </ul>
+      <Link
+        to="/actualites"
+        className="focus-ring mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+      >
+        Toutes les actualités
+        <ArrowUpRight className="h-4 w-4" />
+      </Link>
     </section>
   );
 }

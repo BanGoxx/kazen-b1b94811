@@ -84,6 +84,11 @@ export function useMyList() {
       rating: row.rating,
       notes: row.notes,
       tags: row.tags ?? [],
+      progress: row.progress,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      rewatchCount: row.rewatch_count,
+      isRewatching: row.is_rewatching,
       updatedAt: row.updated_at,
       item: row.media_records ? rowToMediaItem(row.media_records) : null,
     }));

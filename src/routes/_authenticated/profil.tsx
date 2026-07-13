@@ -15,6 +15,7 @@ import { PublicBadgeList } from "@/components/founder/PublicBadge";
 import { useIsOwner, useUserBadges } from "@/lib/founder";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
+import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

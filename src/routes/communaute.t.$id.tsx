@@ -53,6 +53,17 @@ import {
   ModerationMenu,
   SignInToParticipate,
 } from "@/components/community/forum-ui";
+import { CoverField } from "@/components/community/CoverField";
+import { SafeImage } from "@/components/media/SafeImage";
+import {
+  useCoverUrls,
+  uploadCover,
+  setTopicCover,
+  deleteCoverFile,
+  moderateClearCover,
+} from "@/lib/forum-cover";
+import { useQueryClient } from "@tanstack/react-query";
+import { ImagePlus } from "lucide-react";
 
 interface TopicSearch {
   page: number;

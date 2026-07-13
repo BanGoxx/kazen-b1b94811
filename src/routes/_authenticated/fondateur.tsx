@@ -97,9 +97,19 @@ export const Route = createFileRoute("/_authenticated/fondateur")({
   component: FounderConsole,
 });
 
-function DiagValue({ value }: { value: number | null }) {
+function DiagValue({
+  value,
+  tone = "default",
+}: {
+  value: number | null;
+  tone?: "default" | "watch";
+}) {
+  // Actionable backlogs turn amber when non-zero so the overview strip signals
+  // where attention is needed. Loading and empty both render "—" (neutral).
+  const toneClass =
+    tone === "watch" && (value ?? 0) > 0 ? "text-amber-500" : "";
   return (
-    <span className="font-display text-2xl font-extrabold">
+    <span className={`font-display text-2xl font-extrabold ${toneClass}`}>
       {value === null ? "—" : value}
     </span>
   );

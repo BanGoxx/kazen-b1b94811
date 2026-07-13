@@ -100,7 +100,7 @@ function UnsubscribePage() {
         )}
         <a
           href="/profil"
-          className="btn-ember mt-6 inline-flex rounded-lg px-5 py-2.5 text-sm font-semibold"
+          className="mt-6 inline-flex rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Gérer mes préférences
         </a>

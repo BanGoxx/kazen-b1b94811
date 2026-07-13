@@ -33,7 +33,8 @@ export const createImportBatch = createServerFn({ method: "POST" })
       data,
   )
   .handler(async ({ data, context }) => {
-    const entries = (data.entries ?? []).slice(0, MAX_ITEMS);
+    const allEntries = data.entries ?? [];
+    const entries = allEntries.slice(0, MAX_ITEMS);
     if (entries.length === 0) throw new Error("Aucune entrée à importer.");
 
     const { data: batch, error: bErr } = await context.supabase

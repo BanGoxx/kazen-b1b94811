@@ -101,6 +101,60 @@ export type Database = {
         }
         Relationships: []
       }
+      email_delivery_logs: {
+        Row: {
+          content_version: string | null
+          created_at: string
+          digest_type: string
+          failure_code: string | null
+          failure_message_safe: string | null
+          id: string
+          metadata: Json
+          provider: string | null
+          provider_message_id: string | null
+          recipient_hash: string | null
+          recipient_masked: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content_version?: string | null
+          created_at?: string
+          digest_type: string
+          failure_code?: string | null
+          failure_message_safe?: string | null
+          id?: string
+          metadata?: Json
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_hash?: string | null
+          recipient_masked?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content_version?: string | null
+          created_at?: string
+          digest_type?: string
+          failure_code?: string | null
+          failure_message_safe?: string | null
+          id?: string
+          metadata?: Json
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_hash?: string | null
+          recipient_masked?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       fiche_reviews: {
         Row: {
           body: string

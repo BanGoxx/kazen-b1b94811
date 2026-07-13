@@ -61,7 +61,15 @@ export interface ChatMessage {
   deleted_at: string | null;
 }
 
-const REFRESH_MS = 10_000;
+// Phase 13.1 — polling hardening. Realtime stays OFF; these bounded fallbacks
+// only run on authenticated surfaces and React Query pauses them when the tab
+// is hidden (refetchIntervalInBackground stays false). The inbox/unread bell is
+// mounted globally in the shell, so it polls slowly; the active thread polls at
+// a mid interval. Mutations invalidate the ["chat"] tree for immediate refresh,
+// so polling is a true fallback, not the primary update path.
+const INBOX_REFRESH_MS = 60_000;
+const CONVERSATION_REFRESH_MS = 25_000;
+const MESSAGES_REFRESH_MS = 25_000;
 
 export function useChatInbox() {
   const { user } = useAuth();
@@ -70,7 +78,10 @@ export function useChatInbox() {
   return useQuery({
     queryKey: ["chat", "inbox", uid],
     enabled: !!uid,
-    refetchInterval: REFRESH_MS,
+    refetchInterval: INBOX_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    retry: 1,
     queryFn: async (): Promise<InboxConversation[]> => {
       if (!uid) return [];
       const { data: convs, error } = await supabase

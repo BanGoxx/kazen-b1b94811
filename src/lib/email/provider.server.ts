@@ -127,13 +127,18 @@ export interface OutboundEmail {
 export async function sendEmail(msg: OutboundEmail): Promise<SendResult> {
   const attemptedAt = new Date().toISOString();
   const cfg = getEmailConfig();
-  if (!cfg.configured) {
+  // Hard safety gate: no provider request may leave KAZEN until real sending is
+  // explicitly enabled (verified domain + enable flag). This is checked before
+  // any network call and cannot be bypassed by callers.
+  if (!cfg.realSendEnabled) {
     return {
       ok: false,
       status: "skipped",
       id: null,
-      errorCode: "provider_not_configured",
-      errorMessage: "Fournisseur d'email non configuré.",
+      errorCode: cfg.configured ? "real_send_disabled" : "provider_not_configured",
+      errorMessage: cfg.configured
+        ? "Envoi réel désactivé : domaine d'envoi KAZEN non vérifié."
+        : "Fournisseur d'email non configuré.",
       attemptedAt,
     };
   }

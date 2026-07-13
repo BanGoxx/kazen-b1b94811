@@ -10,7 +10,8 @@ export type ModerationTargetType =
   | "review"
   | "reply"
   | "playlist"
-  | "playlist_item";
+  | "playlist_item"
+  | "playlist_review";
 
 export type ModerationActionType =
   | "hide"

@@ -18,7 +18,7 @@ export const upsertPlaylistReview = createServerFn({ method: "POST" })
       {
         _playlist: data.playlistId,
         _body: data.body,
-        _rating: data.rating,
+        _rating: data.rating ?? undefined,
       },
     );
     if (error) throw new Error(error.message);

@@ -193,7 +193,10 @@ export function useConversation(id: string | undefined) {
   return useQuery({
     queryKey: ["chat", "conversation", id, uid],
     enabled: !!id && !!uid,
-    refetchInterval: REFRESH_MS,
+    refetchInterval: CONVERSATION_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    retry: 1,
     queryFn: async () => {
       if (!id || !uid) return null;
       const { data: conv, error } = await supabase

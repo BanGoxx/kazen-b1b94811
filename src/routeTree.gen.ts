@@ -23,6 +23,7 @@ import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunauteIndexRouteImport } from './routes/communaute.index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
@@ -109,6 +110,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunauteIndexRoute = CommunauteIndexRouteImport.update({
+  id: '/communaute/',
+  path: '/communaute/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnimeIndexRoute = AnimeIndexRouteImport.update({
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
+  '/communaute/': typeof CommunauteIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
+  '/communaute': typeof CommunauteIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
+  '/communaute/': typeof CommunauteIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
+    | '/communaute/'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/playlist/$id'
     | '/actualites'
     | '/anime'
+    | '/communaute'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
+    | '/communaute/'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -425,6 +437,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
+  CommunauteIndexRoute: typeof CommunauteIndexRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
@@ -529,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communaute/': {
+      id: '/communaute/'
+      path: '/communaute'
+      fullPath: '/communaute/'
+      preLoaderRoute: typeof CommunauteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/anime/': {
@@ -716,6 +736,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   PlaylistIdRoute: PlaylistIdRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
+  CommunauteIndexRoute: CommunauteIndexRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,

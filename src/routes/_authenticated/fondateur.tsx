@@ -141,14 +141,6 @@ function FounderConsole() {
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div className="card-elevated rounded-xl p-4">
             <p className="text-xs text-muted-foreground">Signalements en attente</p>
-            <DiagValue value={diag?.pendingReports ?? null} />
-          </div>
-          <div className="card-elevated rounded-xl p-4">
-            <p className="text-xs text-muted-foreground">Actions (7 j)</p>
-            <DiagValue value={diag?.recentActions ?? null} />
-          </div>
-          <div className="card-elevated rounded-xl p-4">
-            <p className="text-xs text-muted-foreground">Signalements en attente</p>
             <DiagValue value={diag?.pendingReports ?? null} tone="watch" />
           </div>
           <div className="card-elevated rounded-xl p-4">
@@ -158,6 +150,7 @@ function FounderConsole() {
           <div className="card-elevated rounded-xl p-4">
             <p className="text-xs text-muted-foreground">Demandes en attente</p>
             <DiagValue value={diag?.pendingRequests ?? null} tone="watch" />
+          </div>
           <div className="card-elevated rounded-xl p-4">
             <p className="text-xs text-muted-foreground">Badges</p>
             <DiagValue value={diag?.badges ?? null} />

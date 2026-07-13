@@ -94,6 +94,8 @@ export const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = 
   shared_list_request_accepted: "shared_list",
   shared_list_request_declined: "shared_list",
   chat_message: "shared_list",
+  chat_request: "shared_list",
+  chat_request_accepted: "shared_list",
   system_notice: "system_notice",
 };
 

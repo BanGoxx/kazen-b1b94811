@@ -1,5 +1,10 @@
 // KAZEN Internal Notification Center — client data hooks.
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "@/lib/auth";

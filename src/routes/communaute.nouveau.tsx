@@ -17,6 +17,8 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useForumCategories, useCreateTopic } from "@/lib/forum";
 import { SignInToParticipate } from "@/components/community/forum-ui";
+import { CoverField } from "@/components/community/CoverField";
+import { uploadCover, setTopicCover, deleteCoverFile } from "@/lib/forum-cover";
 
 interface NewTopicSearch {
   category?: string;

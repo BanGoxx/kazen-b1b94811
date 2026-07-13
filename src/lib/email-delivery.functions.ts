@@ -67,9 +67,16 @@ export const getEmailDeliveryStatus = createServerFn({ method: "GET" })
       senderLabel: cfg.senderLabel,
       hasAppUrl: cfg.hasAppUrl,
       missing: cfg.missing,
+      // Phase 2.1 readiness (safe booleans only — never any value)
+      providerKeyConfigured: cfg.providerKeyConfigured,
+      senderConfigured: cfg.senderConfigured,
+      verifiedSender: cfg.verifiedSender,
+      publicUrlConfigured: cfg.publicUrlConfigured,
+      unsubSecretConfigured: cfg.unsubSecretConfigured,
+      realSendEnabled: cfg.realSendEnabled,
       ownerEmailMasked,
       ownerEmailConfirmed,
-      canSendTest: cfg.configured && Boolean(ownerEmailMasked) && ownerEmailConfirmed,
+      canSendTest: cfg.realSendEnabled && Boolean(ownerEmailMasked) && ownerEmailConfirmed,
     };
   });
 
@@ -131,8 +138,9 @@ export const sendFounderTestEmail = createServerFn({ method: "POST" })
       .gte("created_at", cutoff);
     if ((recent ?? 0) > 0) return { ok: false as const, reason: "cooldown" as const };
 
-    if (!cfg.configured) {
-      // Record the skipped attempt so history reflects the config gap.
+    if (!cfg.realSendEnabled) {
+      // Record the skipped attempt so history reflects the readiness gap.
+      const notConfigured = !cfg.configured;
       await supabaseAdmin.from("email_delivery_logs").insert({
         user_id: context.userId,
         digest_type: digestType,
@@ -141,12 +149,20 @@ export const sendFounderTestEmail = createServerFn({ method: "POST" })
         recipient_hash: hashEmail(email),
         subject: model.subject,
         status: "skipped",
-        failure_code: "provider_not_configured",
-        failure_message_safe: "Fournisseur d'email non configuré.",
+        failure_code: notConfigured ? "provider_not_configured" : "real_send_disabled",
+        failure_message_safe: notConfigured
+          ? "Fournisseur d'email non configuré."
+          : "Envoi réel désactivé : domaine d'envoi KAZEN non vérifié.",
         content_version: CONTENT_VERSION,
         metadata: { variant, founder_test: true },
       });
-      return { ok: false as const, reason: "not_configured" as const, missing: cfg.missing };
+      return {
+        ok: false as const,
+        reason: (notConfigured ? "not_configured" : "real_send_disabled") as
+          | "not_configured"
+          | "real_send_disabled",
+        missing: cfg.missing,
+      };
     }
 
     // Build secure links (encrypted unsubscribe token, no raw ids in URL).

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -80,6 +81,8 @@ export function FounderTestSender({
         const map: Record<string, string> = {
           cooldown: "Patientez quelques secondes avant un nouvel essai.",
           not_configured: "Fournisseur d'email non configuré.",
+          real_send_disabled:
+            "Envoi réel désactivé : domaine d'envoi KAZEN non vérifié.",
           no_email: "Aucune adresse email sur votre compte.",
           email_unconfirmed: "Votre adresse email n'est pas confirmée.",
           invalid: "Requête invalide.",
@@ -102,33 +105,49 @@ export function FounderTestSender({
 
   return (
     <div className="space-y-6">
-      {/* Provider status */}
+      {/* Readiness status */}
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-sm font-semibold">Fournisseur d'email</p>
+            <p className="text-sm font-semibold">État d'envoi</p>
             <p className="text-xs text-muted-foreground">
               {status.isLoading
                 ? "Vérification…"
-                : s?.configured
+                : s?.realSendEnabled
                   ? `${s.provider} — ${s.senderLabel ?? "expéditeur configuré"}`
-                  : "Non configuré (mode aperçu sécurisé)"}
+                  : "Prévisualisation uniquement — aucun email réel n'est envoyé"}
             </p>
           </div>
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              s?.configured
+              s?.realSendEnabled
                 ? "bg-emerald-500/15 text-emerald-400"
                 : "bg-muted text-muted-foreground"
             }`}
           >
-            {s?.configured ? "Configuré" : "Non configuré"}
+            {s?.realSendEnabled ? "Envoi réel actif" : "Envoi réel désactivé"}
           </span>
         </div>
 
-        {s && !s.configured && s.missing.length > 0 && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Manquant : {s.missing.join(", ")}.
+        {/* Readiness checklist */}
+        {s && (
+          <ul className="mt-3 space-y-1.5 text-xs">
+            <ReadyRow ok={s.providerKeyConfigured} label="Clé API du fournisseur" />
+            <ReadyRow ok={s.senderConfigured} label="Adresse d'expéditeur" />
+            <ReadyRow
+              ok={s.verifiedSender}
+              label="Domaine d'envoi vérifié"
+              hint="lovable.app sert uniquement à l'hébergement — il ne peut pas envoyer d'emails. Un domaine dédié doit être vérifié."
+            />
+            <ReadyRow ok={s.publicUrlConfigured} label="URL publique KAZEN" />
+            <ReadyRow ok={s.unsubSecretConfigured} label="Secret de désabonnement" />
+          </ul>
+        )}
+
+        {s && !s.realSendEnabled && s.missing.length > 0 && (
+          <p className="mt-3 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+            Pour activer l'envoi réel : {s.missing.join(", ")}. Aucun email ne
+            partira tant que ces éléments ne sont pas configurés et activés.
           </p>
         )}
         {s && (
@@ -140,6 +159,7 @@ export function FounderTestSender({
           </p>
         )}
       </div>
+
 
       {/* Send buttons */}
       <div className="flex flex-wrap gap-3">
@@ -168,11 +188,12 @@ export function FounderTestSender({
       </div>
       {!canSend && !status.isLoading && (
         <p className="text-xs text-muted-foreground">
-          {s?.configured
-            ? "L'envoi de test nécessite une adresse email confirmée sur votre compte."
-            : "Configurez un fournisseur d'email pour activer les envois de test."}
+          {!s?.realSendEnabled
+            ? "Envoi réel désactivé : les digests restent en prévisualisation tant qu'un domaine d'envoi KAZEN vérifié n'est pas configuré et activé."
+            : "L'envoi de test nécessite une adresse email confirmée sur votre compte."}
         </p>
       )}
+
 
       {/* Delivery history */}
       <div>
@@ -262,5 +283,31 @@ function SendButton({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function ReadyRow({
+  ok,
+  label,
+  hint,
+}: {
+  ok: boolean;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <li className="flex items-start gap-2">
+      {ok ? (
+        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+      ) : (
+        <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      )}
+      <span className={ok ? "text-foreground" : "text-muted-foreground"}>
+        {label}
+        {!ok && hint && (
+          <span className="block text-[11px] text-muted-foreground">{hint}</span>
+        )}
+      </span>
+    </li>
   );
 }

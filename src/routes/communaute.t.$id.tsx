@@ -478,6 +478,34 @@ function TopicPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Cover management dialog (author) */}
+      <Dialog open={coverOpen} onOpenChange={(o) => !coverBusy && setCoverOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Couverture du sujet</DialogTitle>
+          </DialogHeader>
+          <CoverField
+            file={coverFile}
+            onFile={setCoverFile}
+            alt={coverAlt}
+            onAlt={setCoverAlt}
+            existingUrl={coverUrl ?? null}
+            hasExisting={Boolean(topic?.coverPath)}
+            onRemoveExisting={removeCover}
+            busy={coverBusy}
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCoverOpen(false)} disabled={coverBusy}>
+              Annuler
+            </Button>
+            <Button variant="aurora" onClick={saveCover} disabled={coverBusy}>
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       {/* Edit post dialog */}
       <Dialog open={Boolean(editingPost)} onOpenChange={(o) => !o && setEditingPost(null)}>
         <DialogContent>

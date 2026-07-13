@@ -146,26 +146,50 @@ export const updateMyNotificationPreferences = createServerFn({ method: "POST" }
 
 export const listMyNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AppNotification[]> => {
-    const nowIso = new Date().toISOString();
-    const { data, error } = await context.supabase
-      .from("member_notifications")
-      .select(
-        "id,notification_type,event_key,title,message,destination_url,media_source,media_external_id,article_slug,occurred_at,created_at,read_at,dismissed_at",
-      )
-      .eq("user_id", context.userId)
-      .is("dismissed_at", null)
-      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-      .order("occurred_at", { ascending: false })
-      .limit(LIST_LIMIT);
-    if (error) return [];
-    return (data as DbNotificationRow[]).map(mapRow);
-  });
+  .inputValidator((data?: { offset?: number; limit?: number }) => data ?? {})
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ items: AppNotification[]; hasMore: boolean }> => {
+      const offset = Math.max(0, Math.floor(data.offset ?? 0));
+      const limit = Math.min(
+        LIST_LIMIT,
+        Math.max(1, Math.floor(data.limit ?? PAGE_SIZE)),
+      );
+      const nowIso = new Date().toISOString();
+      // Fetch one extra row to determine hasMore deterministically.
+      const { data: rows, error } = await context.supabase
+        .from("member_notifications")
+        .select(
+          "id,notification_type,event_key,title,message,destination_url,media_source,media_external_id,article_slug,occurred_at,created_at,read_at,dismissed_at",
+        )
+        .eq("user_id", context.userId)
+        .is("dismissed_at", null)
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .order("occurred_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(offset, offset + limit);
+      if (error) return { items: [], hasMore: false };
+      const list = (rows as DbNotificationRow[]) ?? [];
+      const hasMore = list.length > limit;
+      return { items: list.slice(0, limit).map(mapRow), hasMore };
+    },
+  );
 
 export const getMyUnreadCount = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ count: number }> => {
+  .handler(async ({ context }): Promise<{ count: number; snoozed: boolean }> => {
     const nowIso = new Date().toISOString();
+    // A5 — while snoozed, suppress the unread badge (notifications stay visible).
+    const { data: prefRow } = await context.supabase
+      .from("member_notification_preferences")
+      .select("snooze_until")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (prefRow && isSnoozed({ snooze_until: prefRow.snooze_until ?? null })) {
+      return { count: 0, snoozed: true };
+    }
     const { count, error } = await context.supabase
       .from("member_notifications")
       .select("id", { count: "exact", head: true })
@@ -173,8 +197,8 @@ export const getMyUnreadCount = createServerFn({ method: "GET" })
       .is("read_at", null)
       .is("dismissed_at", null)
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
-    if (error) return { count: 0 };
-    return { count: count ?? 0 };
+    if (error) return { count: 0, snoozed: false };
+    return { count: count ?? 0, snoozed: false };
   });
 
 // ---------------------------------------------------------------------------

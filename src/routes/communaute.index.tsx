@@ -58,6 +58,7 @@ function CommunautePage() {
   const { user } = useAuth();
   const { data: categories, isLoading } = useForumOverview();
   const { data: recent } = useRecentTopics(6);
+  const { data: coverUrls } = useCoverUrls((recent ?? []).map((t) => t.coverPath));
 
   return (
     <AppShell>

@@ -40,6 +40,11 @@ export interface ListEntry {
   rating: number | null;
   notes: string;
   tags: string[];
+  progress: number | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  rewatchCount: number;
+  isRewatching: boolean;
   updatedAt: string;
   item: MediaItem | null;
 }

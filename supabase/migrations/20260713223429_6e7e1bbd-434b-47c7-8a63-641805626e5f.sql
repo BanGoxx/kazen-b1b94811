@@ -1,0 +1,13 @@
+REVOKE EXECUTE ON FUNCTION public.request_conversation(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.accept_conversation(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.decline_conversation(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.send_chat_message(uuid, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.edit_chat_message(uuid, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.delete_chat_message(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.mark_conversation_read(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.archive_conversation(uuid, boolean) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.block_chat_member(uuid, boolean) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.report_chat_message(uuid, text, text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.moderation_chat_context(uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.is_chat_participant(uuid, uuid) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.chat_pair_key(uuid, uuid) FROM anon;

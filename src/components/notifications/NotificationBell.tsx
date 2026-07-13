@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CheckCheck,
   Megaphone,
+  MessageCircle,
   Newspaper,
   Play,
   Sparkles,
@@ -34,6 +35,9 @@ const TYPE_ICON: Record<NotificationType, typeof Bell> = {
   shared_list_request: Users,
   shared_list_request_accepted: Users,
   shared_list_request_declined: Users,
+  chat_message: MessageCircle,
+  chat_request: MessageCircle,
+  chat_request_accepted: MessageCircle,
   system_notice: Megaphone,
 };
 

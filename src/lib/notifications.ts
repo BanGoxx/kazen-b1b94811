@@ -9,6 +9,9 @@ export type NotificationType =
   | "shared_list_request"
   | "shared_list_request_accepted"
   | "shared_list_request_declined"
+  | "chat_message"
+  | "chat_request"
+  | "chat_request_accepted"
   | "system_notice";
 
 /** Preference categories exposed to members (one toggle each). */
@@ -90,6 +93,9 @@ export const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = 
   shared_list_request: "shared_list",
   shared_list_request_accepted: "shared_list",
   shared_list_request_declined: "shared_list",
+  chat_message: "shared_list",
+  chat_request: "shared_list",
+  chat_request_accepted: "shared_list",
   system_notice: "system_notice",
 };
 

@@ -38,6 +38,7 @@ import { SearchAutocomplete } from "@/components/media/SearchAutocomplete";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { ChatBell } from "@/components/chat/ChatBell";
 import { BackToTop } from "./BackToTop";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
@@ -106,6 +107,11 @@ function AuthMenu() {
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
             <ListChecks className="h-4 w-4" /> Ma liste
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/messages" search={{ c: undefined }} className="gap-2">
+            <MessagesSquare className="h-4 w-4" /> Messages
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -282,6 +288,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </Button>
                 }
               />
+              <ChatBell />
               <NotificationBell />
               <ThemeToggle />
               <AuthMenu />

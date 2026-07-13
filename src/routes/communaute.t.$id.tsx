@@ -54,6 +54,7 @@ import {
   SignInToParticipate,
 } from "@/components/community/forum-ui";
 import { CoverField } from "@/components/community/CoverField";
+import { StartChatButton } from "@/components/chat/StartChatButton";
 import { SafeImage } from "@/components/media/SafeImage";
 import {
   useCoverUrls,
@@ -297,7 +298,12 @@ function TopicPage() {
                   />
                 </div>
               </div>
-              <AuthorByline author={topic.author} when={topic.createdAt} edited={topic.updatedAt !== topic.createdAt} size="md" />
+              <div className="flex flex-wrap items-center gap-3">
+                <AuthorByline author={topic.author} when={topic.createdAt} edited={topic.updatedAt !== topic.createdAt} size="md" />
+                {!isTopicAuthor && (
+                  <StartChatButton targetUserId={topic.author.id} targetName={topic.author.displayName} />
+                )}
+              </div>
               {(isTopicAuthor || (canModerate && topic.coverPath)) && (
                 <div className="flex flex-wrap gap-2">
                   {isTopicAuthor && (

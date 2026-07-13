@@ -11,7 +11,8 @@ export type ModerationTargetType =
   | "reply"
   | "playlist"
   | "playlist_item"
-  | "playlist_review";
+  | "playlist_review"
+  | "chat_message";
 
 export type ModerationActionType =
   | "hide"

@@ -2,7 +2,21 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 import type { RelatedMedia } from "@/lib/media-types";
+import { seasonNumber, partNumber } from "@/lib/franchise";
 import { SafeImage } from "./SafeImage";
+
+/**
+ * Compact season/installment marker derived from the title (e.g. "Saison 2",
+ * "Part 2"). Returns null when no confident signal exists so we never invent
+ * an order or mislabel a one-off entry.
+ */
+function seasonMarker(it: RelatedMedia): string | null {
+  const s = seasonNumber(it.title);
+  if (s != null) return `S${s}`;
+  const p = partNumber(it.title);
+  if (p != null) return `P${p}`;
+  return null;
+}
 
 /**
  * For linked works with no internal KAZEN fiche (manga, light novels, OST…),

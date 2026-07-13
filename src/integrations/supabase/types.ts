@@ -1061,6 +1061,30 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_feedback: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          media_key: string
+          user_id: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          id?: string
+          media_key: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          media_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reply_likes: {
         Row: {
           created_at: string
@@ -1353,6 +1377,14 @@ export type Database = {
           _user: string
         }
         Returns: undefined
+      }
+      reco_feedback_stats: {
+        Args: never
+        Returns: {
+          action: string
+          distinct_media: number
+          total: number
+        }[]
       }
       request_playlist_join: {
         Args: { _message?: string; _playlist: string }

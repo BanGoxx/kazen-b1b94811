@@ -31,7 +31,8 @@ function externalRefUrl(it: RelatedMedia): string | null {
   return `https://anilist.co/${isManga ? "manga" : "anime"}/${it.externalId}`;
 }
 
-function Poster({ it }: { it: RelatedMedia }) {
+function Poster({ it, showSeasonBadge }: { it: RelatedMedia; showSeasonBadge?: boolean }) {
+  const marker = showSeasonBadge ? seasonMarker(it) : null;
   return (
     <>
       <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border bg-muted">
@@ -46,6 +47,11 @@ function Poster({ it }: { it: RelatedMedia }) {
         <span className="absolute left-1.5 top-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.65rem] font-semibold backdrop-blur">
           {it.relation}
         </span>
+        {marker ? (
+          <span className="absolute right-1.5 top-1.5 rounded-full bg-primary/90 px-2 py-0.5 text-[0.6rem] font-bold text-primary-foreground shadow-sm backdrop-blur">
+            {marker}
+          </span>
+        ) : null}
         {it.format ? (
           <span className="absolute bottom-1.5 right-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[0.6rem] font-medium text-muted-foreground backdrop-blur">
             {it.format}
@@ -63,12 +69,15 @@ export function RelatedScroller({
   title,
   description,
   items,
+  showSeasonBadges,
 }: {
   title: string;
   description?: string;
   items: RelatedMedia[];
+  showSeasonBadges?: boolean;
 }) {
   if (!items.length) return null;
+
   return (
     <section>
       {title || description ? (

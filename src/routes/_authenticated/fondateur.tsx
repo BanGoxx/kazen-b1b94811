@@ -240,6 +240,12 @@ function FounderConsole() {
             <FounderDigestSection />
           </TabsContent>
 
+          <TabsContent value="annonces" className="pt-6">
+            <FounderSystemNotice />
+          </TabsContent>
+
+
+
 
           <TabsContent value="reglages" className="pt-6">
             <SectionCard title="Réglages" desc="Configuration de l'Espace fondateur.">

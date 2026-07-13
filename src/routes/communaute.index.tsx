@@ -58,7 +58,7 @@ function CommunautePage() {
   const { user } = useAuth();
   const { data: categories, isLoading } = useForumOverview();
   const { data: recent } = useRecentTopics(6);
-  const { data: coverUrls } = useCoverUrls((recent ?? []).map((t) => t.coverPath));
+  const { data: coverUrls } = useCoverUrls(recent ?? []);
 
   return (
     <AppShell>
@@ -149,10 +149,10 @@ function CommunautePage() {
                         "flex gap-3 rounded-xl border border-border/60 bg-card/40 p-3 transition-colors hover:border-primary/40 hover:bg-card/60",
                       )}
                     >
-                      {t.coverPath && coverUrls?.get(t.coverPath) && (
+                      {t.coverPath && coverUrls?.get(t.id) && (
                         <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted/40">
                           <SafeImage
-                            src={coverUrls.get(t.coverPath)!}
+                            src={coverUrls.get(t.id)!}
                             variant="backdrop"
                             alt={t.coverAlt || t.title}
                             className="h-full w-full object-cover"

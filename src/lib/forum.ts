@@ -477,6 +477,7 @@ export function useModerateForum() {
       qc.invalidateQueries({ queryKey: ["forum-topic-posts"] });
       qc.invalidateQueries({ queryKey: ["forum-category-topics"] });
       qc.invalidateQueries({ queryKey: ["forum-reports"] });
+      qc.invalidateQueries({ queryKey: ["forum-cover-urls"] });
     },
   });
 }

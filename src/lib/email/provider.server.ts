@@ -7,6 +7,11 @@
 // throwing, so the rest of KAZEN never breaks.
 
 export interface EmailConfig {
+  /**
+   * All base credentials present (key + sender + public URL). NOTE: this is NOT
+   * sufficient to send — see `realSendEnabled`, which additionally requires an
+   * explicitly verified sender domain and an explicit enable flag.
+   */
   configured: boolean;
   /** Provider name, safe to display (e.g. "Resend"). Null when unconfigured. */
   provider: string | null;
@@ -15,6 +20,21 @@ export interface EmailConfig {
   hasAppUrl: boolean;
   /** Friendly French names of missing configuration pieces. */
   missing: string[];
+
+  // --- Phase 2.1 readiness booleans (safe statuses only, never any value) ---
+  providerKeyConfigured: boolean;
+  senderConfigured: boolean;
+  /** True only when EMAIL_SENDER_VERIFIED is explicitly "true". */
+  verifiedSender: boolean;
+  publicUrlConfigured: boolean;
+  unsubSecretConfigured: boolean;
+  /**
+   * The ONLY gate that permits a real provider request. False unless every
+   * credential is present, the sender domain is explicitly verified, and real
+   * sending is explicitly enabled. Presence of credentials alone is never
+   * enough.
+   */
+  realSendEnabled: boolean;
 }
 
 const PROVIDER_LABEL = "Resend";
@@ -24,26 +44,49 @@ export function getEmailConfig(): EmailConfig {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM_ADDRESS;
   const displayName = process.env.EMAIL_FROM_NAME || "KAZEN";
-  const appUrl = process.env.APP_PUBLIC_URL;
+  const appUrl = process.env.KAZEN_PUBLIC_URL || process.env.APP_PUBLIC_URL;
+  const unsubSecret = process.env.EMAIL_UNSUB_SECRET;
+  const verifiedSender = process.env.EMAIL_SENDER_VERIFIED === "true";
+  const enableFlag = process.env.EMAIL_REAL_SEND_ENABLED === "true";
+
+  const providerKeyConfigured = Boolean(apiKey);
+  const senderConfigured = Boolean(from);
+  const publicUrlConfigured = Boolean(appUrl);
+  const unsubSecretConfigured = Boolean(unsubSecret);
 
   const missing: string[] = [];
-  if (!apiKey) missing.push("clé API du fournisseur");
-  if (!from) missing.push("adresse d'expéditeur vérifiée");
-  if (!appUrl) missing.push("URL publique de l'application");
+  if (!providerKeyConfigured) missing.push("clé API du fournisseur");
+  if (!senderConfigured) missing.push("adresse d'expéditeur");
+  if (!verifiedSender) missing.push("domaine d'envoi vérifié");
+  if (!publicUrlConfigured) missing.push("URL publique KAZEN");
+  if (!unsubSecretConfigured) missing.push("secret de désabonnement");
 
-  const configured = Boolean(apiKey && from && appUrl);
+  const configured = providerKeyConfigured && senderConfigured && publicUrlConfigured;
+  const realSendEnabled =
+    configured && verifiedSender && unsubSecretConfigured && enableFlag;
+
   return {
     configured,
-    provider: apiKey ? PROVIDER_LABEL : null,
+    provider: providerKeyConfigured ? PROVIDER_LABEL : null,
     senderLabel: from ? `${displayName} <${from}>` : null,
-    hasAppUrl: Boolean(appUrl),
+    hasAppUrl: publicUrlConfigured,
     missing,
+    providerKeyConfigured,
+    senderConfigured,
+    verifiedSender,
+    publicUrlConfigured,
+    unsubSecretConfigured,
+    realSendEnabled,
   };
 }
 
 /** The public app URL, always with a safe fallback. */
 export function appPublicUrl(): string {
-  return (process.env.APP_PUBLIC_URL || "https://kazen.lovable.app").replace(/\/$/, "");
+  return (
+    process.env.KAZEN_PUBLIC_URL ||
+    process.env.APP_PUBLIC_URL ||
+    "https://kazen.lovable.app"
+  ).replace(/\/$/, "");
 }
 
 export interface SendResult {

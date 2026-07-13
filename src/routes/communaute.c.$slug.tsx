@@ -77,16 +77,20 @@ function CategoryPage() {
                 </h1>
                 <p className="max-w-2xl text-sm text-muted-foreground">{category.description}</p>
               </div>
-              {!category.isLocked && (
-                <Button asChild variant="aurora" size="sm" className="gap-1">
-                  <Link
-                    to={user ? "/communaute/nouveau" : "/auth"}
-                    search={user ? { category: slug } : { redirect: "/communaute/nouveau" }}
-                  >
-                    <Plus className="h-4 w-4" /> Nouveau sujet
-                  </Link>
-                </Button>
-              )}
+              {!category.isLocked &&
+                (user ? (
+                  <Button asChild variant="aurora" size="sm" className="gap-1">
+                    <Link to="/communaute/nouveau" search={{ category: slug }}>
+                      <Plus className="h-4 w-4" /> Nouveau sujet
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="aurora" size="sm" className="gap-1">
+                    <Link to="/auth" search={{ redirect: "/communaute/nouveau" }}>
+                      <Plus className="h-4 w-4" /> Nouveau sujet
+                    </Link>
+                  </Button>
+                ))}
             </header>
 
             {topics.length === 0 ? (

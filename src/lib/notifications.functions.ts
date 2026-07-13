@@ -302,6 +302,7 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           .limit(MAX_CANDIDATE_ITEMS);
 
         const now = new Date();
+        const scanned = (items ?? []).length;
         const rows: Record<string, unknown>[] = [];
 
         for (const item of (items ?? []) as Array<{

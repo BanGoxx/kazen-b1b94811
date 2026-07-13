@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight, Quote } from "lucide-react";
+import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight, Quote, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
 import { usePlaylist, usePlaylistLike } from "@/lib/playlists";

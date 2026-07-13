@@ -132,7 +132,7 @@ function CalendarPage() {
 
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [weeks, setWeeks] = useState<1 | 2>(2);
+  const [weeks, setWeeks] = useState<1 | 2 | 4>(2);
   const [type, setType] = useState<StatusFilter>("all");
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");

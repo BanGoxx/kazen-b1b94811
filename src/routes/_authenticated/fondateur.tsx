@@ -21,6 +21,7 @@ import {
   Wand2,
   Search,
   Mail,
+  Megaphone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -68,6 +69,7 @@ import { DATA_QUALITY_LABELS, type DataQualityStatus } from "@/lib/enrichment";
 import { useGeneralDigest, usePersonalizedDigest } from "@/lib/use-digest";
 import { DigestPreview } from "@/components/digest/DigestPreview";
 import { FounderTestSender } from "@/components/founder/FounderTestSender";
+import { FounderSystemNotice } from "@/components/founder/FounderSystemNotice";
 
 export const Route = createFileRoute("/_authenticated/fondateur")({
   ssr: false,
@@ -167,6 +169,9 @@ function FounderConsole() {
             <TabsTrigger value="digests" className="gap-1.5">
               <Mail className="h-4 w-4" /> Digests
             </TabsTrigger>
+            <TabsTrigger value="annonces" className="gap-1.5">
+              <Megaphone className="h-4 w-4" /> Annonces
+            </TabsTrigger>
             <TabsTrigger value="reglages" className="gap-1.5">
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>
@@ -235,6 +240,12 @@ function FounderConsole() {
           <TabsContent value="digests" className="pt-6">
             <FounderDigestSection />
           </TabsContent>
+
+          <TabsContent value="annonces" className="pt-6">
+            <FounderSystemNotice />
+          </TabsContent>
+
+
 
 
           <TabsContent value="reglages" className="pt-6">

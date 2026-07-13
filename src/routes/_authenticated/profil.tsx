@@ -15,6 +15,7 @@ import { PublicBadgeList } from "@/components/founder/PublicBadge";
 import { useIsOwner, useUserBadges } from "@/lib/founder";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
+import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -321,8 +322,17 @@ function ProfilePage() {
           </div>
         </section>
 
+        {/* Préférences des notifications in-app (Phase 1) */}
+        <section
+          id="notifications"
+          className="scroll-mt-24 space-y-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur"
+        >
+          <NotificationPreferences />
+        </section>
+
         {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
         <EmailPreferences />
+
 
         <div className="flex justify-end">
 

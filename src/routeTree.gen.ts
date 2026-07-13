@@ -29,6 +29,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
 import { Route as AuthenticatedMesPlaylistsRouteImport } from './routes/_authenticated/mes-playlists'
 import { Route as AuthenticatedMesListesRouteImport } from './routes/_authenticated/mes-listes'
@@ -138,6 +139,12 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   id: '/moderation',
   path: '/moderation',
@@ -204,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -233,6 +241,7 @@ export interface FileRoutesByTo {
   '/mes-listes': typeof AuthenticatedMesListesRoute
   '/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -265,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/mes-listes': typeof AuthenticatedMesListesRoute
   '/_authenticated/mes-playlists': typeof AuthenticatedMesPlaylistsRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/mes-playlists'
     | '/moderation'
+    | '/notifications'
     | '/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/mes-listes'
     | '/mes-playlists'
     | '/moderation'
+    | '/notifications'
     | '/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -357,6 +369,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mes-listes'
     | '/_authenticated/mes-playlists'
     | '/_authenticated/moderation'
+    | '/_authenticated/notifications'
     | '/_authenticated/profil'
     | '/actualites/$slug'
     | '/anime/saison'
@@ -535,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/moderation': {
       id: '/_authenticated/moderation'
       path: '/moderation'
@@ -607,6 +627,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMesListesRoute: typeof AuthenticatedMesListesRoute
   AuthenticatedMesPlaylistsRoute: typeof AuthenticatedMesPlaylistsRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
@@ -616,6 +637,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMesListesRoute: AuthenticatedMesListesRoute,
   AuthenticatedMesPlaylistsRoute: AuthenticatedMesPlaylistsRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 

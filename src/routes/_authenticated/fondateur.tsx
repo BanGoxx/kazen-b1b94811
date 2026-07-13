@@ -37,6 +37,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ForumModerationSection } from "@/components/community/ForumModerationSection";
+import { MessagesSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -166,6 +168,9 @@ function FounderConsole() {
             <TabsTrigger value="moderation" className="gap-1.5">
               <ShieldCheck className="h-4 w-4" /> Modération
             </TabsTrigger>
+            <TabsTrigger value="communaute" className="gap-1.5">
+              <MessagesSquare className="h-4 w-4" /> Communauté
+            </TabsTrigger>
             <TabsTrigger value="roles" className="gap-1.5">
               <Users className="h-4 w-4" /> Rôles
             </TabsTrigger>
@@ -215,6 +220,17 @@ function FounderConsole() {
               </Button>
             </SectionCard>
           </TabsContent>
+
+          <TabsContent value="communaute" className="pt-6">
+            <SectionCard
+              title="Forum communautaire"
+              desc="Signalements et modération des sujets et réponses du forum. Accès réservé au Fondateur pendant la bêta."
+            >
+              <ForumModerationSection />
+            </SectionCard>
+          </TabsContent>
+
+
 
           <TabsContent value="roles" className="pt-6">
             <RolesSection />

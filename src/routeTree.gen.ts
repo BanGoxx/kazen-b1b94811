@@ -23,9 +23,11 @@ import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunauteIndexRouteImport } from './routes/communaute.index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
+import { Route as CommunauteNouveauRouteImport } from './routes/communaute.nouveau'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
@@ -41,6 +43,8 @@ import { Route as UniversSourceIdRouteImport } from './routes/univers.$source.$i
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
 import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
+import { Route as CommunauteTIdRouteImport } from './routes/communaute.t.$id'
+import { Route as CommunauteCSlugRouteImport } from './routes/communaute.c.$slug'
 
 const SoutienRoute = SoutienRouteImport.update({
   id: '/soutien',
@@ -111,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunauteIndexRoute = CommunauteIndexRouteImport.update({
+  id: '/communaute/',
+  path: '/communaute/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnimeIndexRoute = AnimeIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -124,6 +133,11 @@ const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
 const PlaylistIdRoute = PlaylistIdRouteImport.update({
   id: '/playlist/$id',
   path: '/playlist/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunauteNouveauRoute = CommunauteNouveauRouteImport.update({
+  id: '/communaute/nouveau',
+  path: '/communaute/nouveau',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -203,6 +217,16 @@ const EntiteKindIdRoute = EntiteKindIdRouteImport.update({
   path: '/entite/$kind/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunauteTIdRoute = CommunauteTIdRouteImport.update({
+  id: '/communaute/t/$id',
+  path: '/communaute/t/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunauteCSlugRoute = CommunauteCSlugRouteImport.update({
+  id: '/communaute/c/$slug',
+  path: '/communaute/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,9 +253,13 @@ export interface FileRoutesByFullPath {
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
+  '/communaute/nouveau': typeof CommunauteNouveauRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
+  '/communaute/': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -261,9 +289,13 @@ export interface FileRoutesByTo {
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
+  '/communaute/nouveau': typeof CommunauteNouveauRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
+  '/communaute': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -296,9 +328,13 @@ export interface FileRoutesById {
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
+  '/communaute/nouveau': typeof CommunauteNouveauRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
+  '/communaute/': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -331,9 +367,13 @@ export interface FileRouteTypes {
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
+    | '/communaute/nouveau'
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
+    | '/communaute/'
+    | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -363,9 +403,13 @@ export interface FileRouteTypes {
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
+    | '/communaute/nouveau'
     | '/playlist/$id'
     | '/actualites'
     | '/anime'
+    | '/communaute'
+    | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -397,9 +441,13 @@ export interface FileRouteTypes {
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
+    | '/communaute/nouveau'
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
+    | '/communaute/'
+    | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -423,8 +471,12 @@ export interface RootRouteChildren {
   SoutienRoute: typeof SoutienRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   ApiChatRoute: typeof ApiChatRoute
+  CommunauteNouveauRoute: typeof CommunauteNouveauRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
+  CommunauteIndexRoute: typeof CommunauteIndexRoute
+  CommunauteCSlugRoute: typeof CommunauteCSlugRoute
+  CommunauteTIdRoute: typeof CommunauteTIdRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
@@ -531,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communaute/': {
+      id: '/communaute/'
+      path: '/communaute'
+      fullPath: '/communaute/'
+      preLoaderRoute: typeof CommunauteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/anime/': {
       id: '/anime/'
       path: '/'
@@ -550,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/playlist/$id'
       fullPath: '/playlist/$id'
       preLoaderRoute: typeof PlaylistIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communaute/nouveau': {
+      id: '/communaute/nouveau'
+      path: '/communaute/nouveau'
+      fullPath: '/communaute/nouveau'
+      preLoaderRoute: typeof CommunauteNouveauRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -657,6 +723,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntiteKindIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communaute/t/$id': {
+      id: '/communaute/t/$id'
+      path: '/communaute/t/$id'
+      fullPath: '/communaute/t/$id'
+      preLoaderRoute: typeof CommunauteTIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communaute/c/$slug': {
+      id: '/communaute/c/$slug'
+      path: '/communaute/c/$slug'
+      fullPath: '/communaute/c/$slug'
+      preLoaderRoute: typeof CommunauteCSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -714,8 +794,12 @@ const rootRouteChildren: RootRouteChildren = {
   SoutienRoute: SoutienRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   ApiChatRoute: ApiChatRoute,
+  CommunauteNouveauRoute: CommunauteNouveauRoute,
   PlaylistIdRoute: PlaylistIdRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
+  CommunauteIndexRoute: CommunauteIndexRoute,
+  CommunauteCSlugRoute: CommunauteCSlugRoute,
+  CommunauteTIdRoute: CommunauteTIdRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,

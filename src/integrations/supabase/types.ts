@@ -200,6 +200,206 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_categories: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_locked: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_locked?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_locked?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      forum_posts: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          reply_to_id: string | null
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          reply_to_id?: string | null
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          reply_to_id?: string | null
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_posts_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_posts_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_note: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      forum_topics: {
+        Row: {
+          author_id: string
+          body: string
+          category_id: string
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          is_locked: boolean
+          is_pinned: boolean
+          last_activity_at: string
+          reply_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          category_id: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          last_activity_at?: string
+          reply_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          category_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          is_locked?: boolean
+          is_pinned?: boolean
+          last_activity_at?: string
+          reply_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_topics_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           completed_at: string | null
@@ -642,6 +842,9 @@ export type Database = {
       member_notification_preferences: {
         Row: {
           created_at: string
+          forum_mention_enabled: boolean
+          forum_moderation_enabled: boolean
+          forum_reply_enabled: boolean
           new_episode_enabled: boolean
           quiet_mode: boolean
           recommendation_enabled: boolean
@@ -655,6 +858,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          forum_mention_enabled?: boolean
+          forum_moderation_enabled?: boolean
+          forum_reply_enabled?: boolean
           new_episode_enabled?: boolean
           quiet_mode?: boolean
           recommendation_enabled?: boolean
@@ -668,6 +874,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          forum_mention_enabled?: boolean
+          forum_moderation_enabled?: boolean
+          forum_reply_enabled?: boolean
           new_episode_enabled?: boolean
           quiet_mode?: boolean
           recommendation_enabled?: boolean
@@ -1290,6 +1499,14 @@ export type Database = {
         Returns: undefined
       }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
+      create_forum_post: {
+        Args: { _body: string; _reply_to?: string; _topic: string }
+        Returns: string
+      }
+      create_forum_topic: {
+        Args: { _body: string; _category: string; _title: string }
+        Returns: string
+      }
       create_system_notice: {
         Args: {
           _destination_url?: string
@@ -1302,6 +1519,27 @@ export type Database = {
       }
       decide_playlist_request: {
         Args: { _accept: boolean; _request: string }
+        Returns: undefined
+      }
+      delete_forum_post: { Args: { _id: string }; Returns: undefined }
+      delete_forum_topic: { Args: { _id: string }; Returns: undefined }
+      edit_forum_post: {
+        Args: { _body: string; _id: string }
+        Returns: undefined
+      }
+      edit_forum_topic: {
+        Args: { _body: string; _id: string; _title: string }
+        Returns: undefined
+      }
+      forum_notify: {
+        Args: {
+          _event_key: string
+          _message: string
+          _title: string
+          _type: string
+          _url: string
+          _user: string
+        }
         Returns: undefined
       }
       founder_user_ids: { Args: never; Returns: string[] }
@@ -1349,6 +1587,18 @@ export type Database = {
         Args: { _playlist: string; _user: string }
         Returns: boolean
       }
+      manage_forum_category: {
+        Args: {
+          _description: string
+          _icon: string
+          _id: string
+          _is_locked: boolean
+          _name: string
+          _slug: string
+          _sort_order: number
+        }
+        Returns: string
+      }
       moderate_content: {
         Args: {
           _action: Database["public"]["Enums"]["moderation_action_type"]
@@ -1357,6 +1607,15 @@ export type Database = {
           _report_id?: string
           _target_id: string
           _target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Returns: undefined
+      }
+      moderate_forum: {
+        Args: {
+          _action: string
+          _note?: string
+          _target_id: string
+          _target_type: string
         }
         Returns: undefined
       }
@@ -1390,6 +1649,10 @@ export type Database = {
         Args: { _message?: string; _playlist: string }
         Returns: string
       }
+      resolve_forum_report: {
+        Args: { _id: string; _note?: string; _status: string }
+        Returns: undefined
+      }
       resolve_report: {
         Args: {
           _note?: string
@@ -1415,6 +1678,15 @@ export type Database = {
           _reason: string
           _target_id: string
           _target_type: Database["public"]["Enums"]["moderation_target_type"]
+        }
+        Returns: string
+      }
+      submit_forum_report: {
+        Args: {
+          _details?: string
+          _reason: string
+          _target_id: string
+          _target_type: string
         }
         Returns: string
       }

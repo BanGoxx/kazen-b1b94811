@@ -3,7 +3,6 @@ import { MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useChatMutations } from "@/lib/chat";
 import { setAcceptsChat } from "@/lib/chat.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Switch } from "@/components/ui/switch";

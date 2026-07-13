@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { GitBranch, Layers, Link2, Sparkles } from "lucide-react";
 import type { RelatedMedia, RelationCategory } from "@/lib/media-types";
 import { groupRelated } from "@/lib/franchise";
+import { cn } from "@/lib/utils";
 import { FicheSection } from "./FicheSection";
 import { RelatedScroller } from "./RelatedScroller";
 
@@ -13,7 +15,9 @@ const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
 
 /**
  * Renders linked content as clean, ordered franchise/adaptation/reco groups.
- * Falls back to nothing when there's no related content.
+ * When several groups exist, a lightweight filter lets the reader focus one
+ * group at a time (default "Tout"). Falls back to nothing when there's no
+ * related content.
  */
 export function RelatedContent({
   related,
@@ -23,7 +27,12 @@ export function RelatedContent({
   collectionName?: string | null;
 }) {
   const groups = groupRelated(related);
+  const [active, setActive] = useState<RelationCategory | "all">("all");
   if (!groups.length && !collectionName) return null;
+
+  const showFilter = groups.length > 1;
+  const visible =
+    active === "all" ? groups : groups.filter((g) => g.category === active);
 
   return (
     <div className="space-y-8">
@@ -37,7 +46,52 @@ export function RelatedContent({
         </div>
       ) : null}
 
-      {groups.map((group) => {
+      {showFilter ? (
+        <div
+          role="tablist"
+          aria-label="Filtrer les contenus liés"
+          className="flex flex-wrap gap-2"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={active === "all"}
+            onClick={() => setActive("all")}
+            className={cn(
+              "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+              active === "all"
+                ? "aurora-bg text-white"
+                : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Tout
+          </button>
+          {groups.map((group) => {
+            const Icon = CATEGORY_ICON[group.category];
+            const selected = active === group.category;
+            return (
+              <button
+                key={group.category}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActive(group.category)}
+                className={cn(
+                  "focus-ring inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  selected
+                    ? "aurora-bg text-white"
+                    : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {group.title}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {visible.map((group) => {
         const Icon = CATEGORY_ICON[group.category];
         return (
           <FicheSection
@@ -49,6 +103,7 @@ export function RelatedContent({
               title=""
               description={group.description}
               items={group.items}
+              showSeasonBadges={group.category === "franchise"}
             />
           </FicheSection>
         );

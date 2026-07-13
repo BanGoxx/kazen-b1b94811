@@ -1276,6 +1276,10 @@ export type Database = {
         }
         Returns: string
       }
+      decide_playlist_request: {
+        Args: { _accept: boolean; _request: string }
+        Returns: undefined
+      }
       founder_user_ids: { Args: never; Returns: string[] }
       get_public_enrichment: {
         Args: { _external_id: string; _source: string }
@@ -1338,6 +1342,21 @@ export type Database = {
           can_moderate: boolean
           is_owner: boolean
         }[]
+      }
+      notify_member: {
+        Args: {
+          _event_key: string
+          _message: string
+          _title: string
+          _type: string
+          _url: string
+          _user: string
+        }
+        Returns: undefined
+      }
+      request_playlist_join: {
+        Args: { _message?: string; _playlist: string }
+        Returns: string
       }
       resolve_report: {
         Args: {

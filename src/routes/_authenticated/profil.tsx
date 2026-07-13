@@ -320,7 +320,11 @@ function ProfilePage() {
           </div>
         </section>
 
+        {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
+        <EmailPreferences />
+
         <div className="flex justify-end">
+
           <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
           </Button>

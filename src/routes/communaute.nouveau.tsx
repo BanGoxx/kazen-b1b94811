@@ -174,6 +174,7 @@ function NewTopicPage() {
               <Button
                 variant="aurora"
                 disabled={
+                  submitting ||
                   createTopic.isPending ||
                   !categoryId ||
                   title.trim().length < 3 ||
@@ -183,6 +184,7 @@ function NewTopicPage() {
               >
                 Publier le sujet
               </Button>
+
             </div>
           </div>
         )}

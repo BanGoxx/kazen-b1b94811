@@ -124,8 +124,8 @@ function TopicPage() {
   const [coverAlt, setCoverAlt] = useState("");
   const [coverBusy, setCoverBusy] = useState(false);
   const qc = useQueryClient();
-  const { data: coverUrls } = useCoverUrls([topic?.coverPath]);
-  const coverUrl = topic?.coverPath ? coverUrls?.get(topic.coverPath) : undefined;
+  const { data: coverUrls } = useCoverUrls(topic ? [topic] : []);
+  const coverUrl = topic?.coverPath ? coverUrls?.get(topic.id) : undefined;
 
   function refreshTopic() {
     qc.invalidateQueries({ queryKey: ["forum-topic", id] });

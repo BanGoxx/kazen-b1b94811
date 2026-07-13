@@ -39,7 +39,7 @@ function CategoryPage() {
   const category = data?.category ?? null;
   const topics = data?.topics ?? [];
   const pageCount = data?.pageCount ?? 1;
-  const { data: coverUrls } = useCoverUrls(topics.map((t) => t.coverPath));
+  const { data: coverUrls } = useCoverUrls(topics);
 
   function goPage(p: number) {
     navigate({ to: "/communaute/c/$slug", params: { slug }, search: { page: p } });
@@ -117,10 +117,10 @@ function CategoryPage() {
                       params={{ id: t.id }}
                       className="group hover-lift flex items-start justify-between gap-4 rounded-2xl border border-border bg-card/50 p-4 backdrop-blur transition-colors hover:border-primary/50 hover:bg-card/70"
                     >
-                      {t.coverPath && coverUrls?.get(t.coverPath) && (
+                      {t.coverPath && coverUrls?.get(t.id) && (
                         <div className="hidden h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-muted/40 sm:block">
                           <SafeImage
-                            src={coverUrls.get(t.coverPath)!}
+                            src={coverUrls.get(t.id)!}
                             variant="backdrop"
                             alt={t.coverAlt || t.title}
                             className="h-full w-full object-cover"

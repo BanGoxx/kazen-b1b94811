@@ -167,6 +167,9 @@ function FounderConsole() {
             <TabsTrigger value="digests" className="gap-1.5">
               <Mail className="h-4 w-4" /> Digests
             </TabsTrigger>
+            <TabsTrigger value="annonces" className="gap-1.5">
+              <Megaphone className="h-4 w-4" /> Annonces
+            </TabsTrigger>
             <TabsTrigger value="reglages" className="gap-1.5">
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>

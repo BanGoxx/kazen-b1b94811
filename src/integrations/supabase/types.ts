@@ -534,6 +534,57 @@ export type Database = {
         }
         Relationships: []
       }
+      member_email_preferences: {
+        Row: {
+          consent_updated_at: string
+          created_at: string
+          digest_frequency: string
+          include_articles: boolean
+          include_recommendations: boolean
+          include_upcoming: boolean
+          last_digest_preview_at: string | null
+          preferred_content_types: string[]
+          preferred_genres: string[] | null
+          preferred_platforms: string[] | null
+          receive_general_digest: boolean
+          receive_personalized_digest: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consent_updated_at?: string
+          created_at?: string
+          digest_frequency?: string
+          include_articles?: boolean
+          include_recommendations?: boolean
+          include_upcoming?: boolean
+          last_digest_preview_at?: string | null
+          preferred_content_types?: string[]
+          preferred_genres?: string[] | null
+          preferred_platforms?: string[] | null
+          receive_general_digest?: boolean
+          receive_personalized_digest?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consent_updated_at?: string
+          created_at?: string
+          digest_frequency?: string
+          include_articles?: boolean
+          include_recommendations?: boolean
+          include_upcoming?: boolean
+          last_digest_preview_at?: string | null
+          preferred_content_types?: string[]
+          preferred_genres?: string[] | null
+          preferred_platforms?: string[] | null
+          receive_general_digest?: boolean
+          receive_personalized_digest?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       moderation_actions: {
         Row: {
           action: Database["public"]["Enums"]["moderation_action_type"]

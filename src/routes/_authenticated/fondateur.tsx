@@ -169,6 +169,9 @@ function FounderConsole() {
             <TabsTrigger value="enrichissement" className="gap-1.5">
               <Wand2 className="h-4 w-4" /> Enrichissement
             </TabsTrigger>
+            <TabsTrigger value="qualite" className="gap-1.5">
+              <BarChart3 className="h-4 w-4" /> Qualité
+            </TabsTrigger>
             <TabsTrigger value="digests" className="gap-1.5">
               <Mail className="h-4 w-4" /> Digests
             </TabsTrigger>

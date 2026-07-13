@@ -229,7 +229,7 @@ function CalendarPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center rounded-full border border-border bg-background/40 p-0.5">
-            {([1, 2] as const).map((w) => (
+            {([1, 2, 4] as const).map((w) => (
               <button
                 key={w}
                 type="button"
@@ -240,7 +240,7 @@ function CalendarPage() {
                   weeks === w ? "aurora-bg text-white" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {w === 1 ? "1 sem." : "2 sem."}
+                {w} sem.
               </button>
             ))}
           </div>

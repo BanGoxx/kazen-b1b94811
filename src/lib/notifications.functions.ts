@@ -67,6 +67,28 @@ function mapRow(r: DbNotificationRow): AppNotification {
 // Preferences
 // ---------------------------------------------------------------------------
 
+function mapPrefsRow(data: {
+  new_episode_enabled: boolean;
+  upcoming_release_enabled: boolean;
+  related_article_enabled: boolean;
+  recommendation_enabled: boolean;
+  shared_list_enabled: boolean;
+  system_notice_enabled: boolean;
+  quiet_mode?: boolean | null;
+  snooze_until?: string | null;
+}): NotificationPreferences {
+  return {
+    new_episode_enabled: data.new_episode_enabled,
+    upcoming_release_enabled: data.upcoming_release_enabled,
+    related_article_enabled: data.related_article_enabled,
+    recommendation_enabled: data.recommendation_enabled,
+    shared_list_enabled: data.shared_list_enabled,
+    system_notice_enabled: data.system_notice_enabled,
+    quiet_mode: data.quiet_mode ?? false,
+    snooze_until: data.snooze_until ?? null,
+  };
+}
+
 export const getMyNotificationPreferences = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<NotificationPreferences> => {
@@ -76,31 +98,35 @@ export const getMyNotificationPreferences = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!data) return { ...DEFAULT_NOTIFICATION_PREFERENCES };
-    return {
-      new_episode_enabled: data.new_episode_enabled,
-      upcoming_release_enabled: data.upcoming_release_enabled,
-      related_article_enabled: data.related_article_enabled,
-      recommendation_enabled: data.recommendation_enabled,
-      shared_list_enabled: data.shared_list_enabled,
-      system_notice_enabled: data.system_notice_enabled,
-    };
+    return mapPrefsRow(data);
   });
 
 export const updateMyNotificationPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: Partial<NotificationPreferences>) => data)
   .handler(async ({ data, context }): Promise<NotificationPreferences> => {
-    const allowed: (keyof NotificationPreferences)[] = [
+    const boolKeys: (keyof NotificationPreferences)[] = [
       "new_episode_enabled",
       "upcoming_release_enabled",
       "related_article_enabled",
       "recommendation_enabled",
       "shared_list_enabled",
       "system_notice_enabled",
+      "quiet_mode",
     ];
-    const patch: Record<string, boolean> = {};
-    for (const k of allowed) {
+    const patch: Record<string, boolean | string | null> = {};
+    for (const k of boolKeys) {
       if (typeof data[k] === "boolean") patch[k] = data[k] as boolean;
+    }
+    // snooze_until: accept a future ISO string, or null to clear.
+    if ("snooze_until" in data) {
+      const raw = data.snooze_until;
+      if (raw === null) {
+        patch.snooze_until = null;
+      } else if (typeof raw === "string") {
+        const t = new Date(raw).getTime();
+        patch.snooze_until = Number.isNaN(t) ? null : new Date(t).toISOString();
+      }
     }
     const { data: row, error } = await context.supabase
       .from("member_notification_preferences")
@@ -111,14 +137,7 @@ export const updateMyNotificationPreferences = createServerFn({ method: "POST" }
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return {
-      new_episode_enabled: row.new_episode_enabled,
-      upcoming_release_enabled: row.upcoming_release_enabled,
-      related_article_enabled: row.related_article_enabled,
-      recommendation_enabled: row.recommendation_enabled,
-      shared_list_enabled: row.shared_list_enabled,
-      system_notice_enabled: row.system_notice_enabled,
-    };
+    return mapPrefsRow(row);
   });
 
 // ---------------------------------------------------------------------------

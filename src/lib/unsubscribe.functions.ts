@@ -21,16 +21,16 @@ export const processUnsubscribe = createServerFn({ method: "POST" })
     if (!payload) return { ok: false as const, reason: "invalid" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch = {
       user_id: payload.uid,
       consent_updated_at: new Date().toISOString(),
+      ...(payload.scope === "general" || payload.scope === "all"
+        ? { receive_general_digest: false }
+        : {}),
+      ...(payload.scope === "personalized" || payload.scope === "all"
+        ? { receive_personalized_digest: false }
+        : {}),
     };
-    if (payload.scope === "general" || payload.scope === "all") {
-      patch.receive_general_digest = false;
-    }
-    if (payload.scope === "personalized" || payload.scope === "all") {
-      patch.receive_personalized_digest = false;
-    }
 
     const { error } = await supabaseAdmin
       .from("member_email_preferences")

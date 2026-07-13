@@ -78,12 +78,13 @@ export function FounderTestSender({
         toast.success("Email de test envoyé à votre adresse.");
       } else if ("status" in res && res.status === "skipped") {
         toast.error("Fournisseur non configuré — envoi ignoré.");
-      } else if ("reason" in res) {
+      } else if ("reason" in res && res.reason) {
         const map: Record<string, string> = {
           cooldown: "Patientez quelques secondes avant un nouvel essai.",
           not_configured: "Fournisseur d'email non configuré.",
           no_email: "Aucune adresse email sur votre compte.",
           email_unconfirmed: "Votre adresse email n'est pas confirmée.",
+          invalid: "Requête invalide.",
         };
         toast.error(map[res.reason] ?? "Envoi impossible.");
       } else {

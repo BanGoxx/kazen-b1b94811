@@ -15,8 +15,6 @@ export function ChatPreference() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const save = useServerFn(setAcceptsChat);
-  // touch mutations import so tree-shaking keeps the hook consistent
-  useChatMutations;
 
   useEffect(() => {
     let active = true;

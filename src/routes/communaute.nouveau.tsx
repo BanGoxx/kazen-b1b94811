@@ -158,6 +158,15 @@ function NewTopicPage() {
               <p className="text-right text-[11px] text-muted-foreground">{body.length}/20000</p>
             </div>
 
+            <CoverField
+              file={coverFile}
+              onFile={setCoverFile}
+              alt={coverAlt}
+              onAlt={setCoverAlt}
+              busy={submitting}
+            />
+
+
             <div className="flex items-center justify-end gap-2">
               <Button asChild variant="ghost">
                 <Link to="/communaute">Annuler</Link>

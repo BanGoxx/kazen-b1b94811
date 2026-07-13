@@ -19,13 +19,16 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   isCategoryEnabled,
+  isSnoozed,
   type AppNotification,
   type NotificationPreferences,
+  type ReconcileResult,
 } from "@/lib/notifications";
 import { getRelevantArticlesForTitle } from "@/lib/news";
 import { MEDIA_TYPE_LABELS, type MediaSource, type MediaType } from "@/lib/media-types";
 
 const LIST_LIMIT = 60;
+const PAGE_SIZE = 20;
 const RELEASE_WINDOW_DAYS = 14;
 const MAX_CANDIDATE_ITEMS = 120;
 

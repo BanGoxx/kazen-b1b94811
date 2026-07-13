@@ -103,6 +103,7 @@ export function ForYouRails() {
         }
         items={forYou}
         isLoading={isLoading && !forYou.length}
+        onHideItem={onHideItem}
       />
 
       {resume.length > 0 && (
@@ -121,6 +122,7 @@ export function ForYouRails() {
           subtitle="Dans un genre que vous suivez souvent"
           items={becauseYouLike}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -129,6 +131,7 @@ export function ForYouRails() {
           title={`Parce que vous aimez ${anchorGenre2}`}
           items={becauseYouLike2}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -139,6 +142,7 @@ export function ForYouRails() {
           action={{ label: "À venir", to: "/a-venir" }}
           items={freshForYou}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -148,8 +152,27 @@ export function ForYouRails() {
           subtitle="Des pépites moins évidentes, choisies selon vos affinités"
           items={discovery}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
+
+      {canHide && hiddenEntries.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/40 p-4">
+          <p className="text-sm text-muted-foreground">
+            {hiddenEntries.length} titre{hiddenEntries.length > 1 ? "s" : ""} masqué
+            {hiddenEntries.length > 1 ? "s" : ""} de vos recommandations.
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground"
+            onClick={() => hiddenEntries.forEach((f) => restore(f.mediaKey))}
+          >
+            <Undo2 className="h-4 w-4" /> Tout réafficher
+          </Button>
+        </div>
+      )}
+
 
       <div className="card-elevated flex flex-col items-start gap-3 rounded-2xl border border-primary/20 bg-card/60 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>

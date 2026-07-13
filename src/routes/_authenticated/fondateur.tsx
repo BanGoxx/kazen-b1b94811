@@ -520,6 +520,9 @@ function EnrichmentSection() {
           <Label className="cursor-pointer">Publier (visible sur la fiche publique)</Label>
         </div>
 
+        <EnrichmentPreview form={form} />
+
+
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button
             variant="aurora"

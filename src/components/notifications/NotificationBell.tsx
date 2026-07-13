@@ -34,6 +34,7 @@ const TYPE_ICON: Record<NotificationType, typeof Bell> = {
   shared_list_request: Users,
   shared_list_request_accepted: Users,
   shared_list_request_declined: Users,
+  chat_message: MessageCircle,
   system_notice: Megaphone,
 };
 

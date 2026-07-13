@@ -41,6 +41,9 @@ export interface ForumTopic {
   updatedAt: string;
   hidden: boolean;
   deleted: boolean;
+  coverPath: string | null;
+  coverAlt: string | null;
+  coverSource: string | null;
 }
 
 export interface ForumPost {

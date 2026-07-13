@@ -316,7 +316,7 @@ function CalendarPage() {
           ))}
         </div>
         <span className="text-xs font-medium text-muted-foreground">
-          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks === 1 ? "1 semaine" : "2 semaines"}
+          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks} semaine{weeks > 1 ? "s" : ""}
         </span>
       </div>
 

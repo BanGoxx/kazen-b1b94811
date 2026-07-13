@@ -133,7 +133,7 @@ function ImportPage() {
     sourceMetadata: Record<string, unknown>,
   ) => {
     if (entries.length === 0) throw new Error("Aucune entrée détectée.");
-    const { batchId: id } = await create({
+    const { batchId: id, count, truncated, total } = await create({
       data: {
         provider: toDbProvider(provider.id),
         sourceMetadata,
@@ -148,7 +148,12 @@ function ImportPage() {
       new Set((pv.items as PreviewItem[]).filter((i) => i.match_status === "exact").map((i) => i.id)),
     );
     await refreshBatches();
-    toast.success(`${entries.length} entrées analysées.`);
+    if (truncated) {
+      toast.warning(
+        `Liste très longue : seules les ${count} premières entrées sur ${total} ont été importées.`,
+      );
+    }
+    toast.success(`${count} entrées analysées.`);
   };
 
   const handleFile = async (provider: ProviderDef, file: File) => {

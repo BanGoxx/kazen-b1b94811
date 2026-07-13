@@ -16,7 +16,11 @@ import { titleSimilarity } from "./import/match";
 
 const EXACT = 0.9;
 const PROBABLE = 0.7;
-const MAX_ITEMS = 500;
+// Safety ceiling on a single import batch. Set high enough to cover even very
+// large AniList collections (the fetcher pages up to ~10k). When a list exceeds
+// this, the batch is truncated and the caller is told honestly (see `truncated`
+// in the return) so a partial import is never reported as complete.
+const MAX_ITEMS = 5000;
 
 type MatchStatus = "exact" | "probable" | "needs_confirmation" | "unmatched" | "duplicate";
 type ImportAction = "create" | "update" | "skip" | "needs_user_choice";
@@ -29,7 +33,8 @@ export const createImportBatch = createServerFn({ method: "POST" })
       data,
   )
   .handler(async ({ data, context }) => {
-    const entries = (data.entries ?? []).slice(0, MAX_ITEMS);
+    const allEntries = data.entries ?? [];
+    const entries = allEntries.slice(0, MAX_ITEMS);
     if (entries.length === 0) throw new Error("Aucune entrée à importer.");
 
     const { data: batch, error: bErr } = await context.supabase
@@ -74,7 +79,12 @@ export const createImportBatch = createServerFn({ method: "POST" })
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);
 
-    return { batchId: batch.id, count: entries.length };
+    return {
+      batchId: batch.id,
+      count: entries.length,
+      total: allEntries.length,
+      truncated: allEntries.length > entries.length,
+    };
   });
 
 // ---------- list batches ----------

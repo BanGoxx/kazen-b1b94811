@@ -67,9 +67,16 @@ export const getEmailDeliveryStatus = createServerFn({ method: "GET" })
       senderLabel: cfg.senderLabel,
       hasAppUrl: cfg.hasAppUrl,
       missing: cfg.missing,
+      // Phase 2.1 readiness (safe booleans only — never any value)
+      providerKeyConfigured: cfg.providerKeyConfigured,
+      senderConfigured: cfg.senderConfigured,
+      verifiedSender: cfg.verifiedSender,
+      publicUrlConfigured: cfg.publicUrlConfigured,
+      unsubSecretConfigured: cfg.unsubSecretConfigured,
+      realSendEnabled: cfg.realSendEnabled,
       ownerEmailMasked,
       ownerEmailConfirmed,
-      canSendTest: cfg.configured && Boolean(ownerEmailMasked) && ownerEmailConfirmed,
+      canSendTest: cfg.realSendEnabled && Boolean(ownerEmailMasked) && ownerEmailConfirmed,
     };
   });
 

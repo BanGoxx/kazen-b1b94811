@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { ReportDialog } from "@/components/moderation/ReportDialog";
 import { useAuth } from "@/lib/auth";
-import { useModerator } from "@/lib/use-moderator";
+import { useIsModerator } from "@/lib/use-moderator";
 import {
   usePlaylistReviews,
   useMyPlaylistReview,

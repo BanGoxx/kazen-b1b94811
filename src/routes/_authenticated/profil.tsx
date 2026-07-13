@@ -16,6 +16,7 @@ import { useIsOwner, useUserBadges } from "@/lib/founder";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
+import { ChatPreference } from "@/components/settings/ChatPreference";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

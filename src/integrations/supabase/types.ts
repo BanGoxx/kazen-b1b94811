@@ -1313,6 +1313,14 @@ export type Database = {
         Returns: boolean
       }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
+      is_playlist_collaborator: {
+        Args: { _playlist: string; _user: string }
+        Returns: boolean
+      }
+      is_playlist_editor: {
+        Args: { _playlist: string; _user: string }
+        Returns: boolean
+      }
       moderate_content: {
         Args: {
           _action: Database["public"]["Enums"]["moderation_action_type"]

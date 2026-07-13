@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
 import { useCategoryTopics } from "@/lib/forum";
 import { AuthorByline } from "@/components/community/forum-ui";
+import { useCoverUrls } from "@/lib/forum-cover";
+import { SafeImage } from "@/components/media/SafeImage";
 
 interface CategorySearch {
   page: number;

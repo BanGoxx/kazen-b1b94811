@@ -62,7 +62,7 @@ export function useGeneralDigest(prefs?: EmailPreferences): DigestState {
     const m = buildGeneralDigest({
       upcomingAnime: ua.data ?? [],
       upcomingMovies: um.data ?? [],
-      upcomingSeries: os.data ?? [],
+      onAirSeries: os.data ?? [],
       trending,
       articles,
       prefs,

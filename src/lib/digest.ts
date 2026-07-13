@@ -123,6 +123,13 @@ function typeAllowed(item: MediaItem, prefs?: EmailPreferences): boolean {
   return types.includes(map[item.mediaType]);
 }
 
+/** Whether the "articles" content-type is selected (empty selection = all). */
+function articlesAllowed(prefs?: EmailPreferences): boolean {
+  const types = prefs?.preferred_content_types;
+  if (!types || types.length === 0) return true;
+  return types.includes("articles");
+}
+
 // ---------------------------------------------------------------------------
 // General digest
 // ---------------------------------------------------------------------------
@@ -130,7 +137,8 @@ function typeAllowed(item: MediaItem, prefs?: EmailPreferences): boolean {
 export interface GeneralDigestInput {
   upcomingAnime: MediaItem[];
   upcomingMovies: MediaItem[];
-  upcomingSeries: MediaItem[];
+  /** Currently-airing series (on-air pool), not an upcoming feed. */
+  onAirSeries: MediaItem[];
   trending: MediaItem[];
   articles: NewsArticle[];
   prefs?: EmailPreferences;
@@ -161,16 +169,19 @@ export function buildGeneralDigest(input: GeneralDigestInput): DigestModel {
       "Films à venir",
       boundMedia([...input.upcomingMovies].sort(byReleaseDate), GENERAL_LIMITS.movies, seen),
     );
+    // NOTE: the series source is the "on-air" pool (currently airing), NOT an
+    // upcoming/announced feed. Keep the label honest and preserve the source's
+    // popularity ordering rather than sorting by release date.
     pushMedia(
-      "upcoming-series",
-      "Séries à venir",
-      boundMedia([...input.upcomingSeries].sort(byReleaseDate), GENERAL_LIMITS.series, seen),
+      "onair-series",
+      "Séries en diffusion",
+      boundMedia(input.onAirSeries, GENERAL_LIMITS.series, seen),
     );
   }
 
   pushMedia("trending", "Tendances du moment", boundMedia(input.trending, GENERAL_LIMITS.trending, seen));
 
-  if (includeArticles && input.articles.length) {
+  if (includeArticles && articlesAllowed(prefs) && input.articles.length) {
     const articles = input.articles.slice(0, GENERAL_LIMITS.articles).map(articleRef);
     if (articles.length)
       sections.push({ id: "articles", title: "Actualités récentes", kind: "article", articles });
@@ -258,7 +269,7 @@ export function buildPersonalizedDigest(input: PersonalizedDigestInput): DigestM
   if (planned.length)
     sections.push({ id: "planned", title: "À suivre prochainement", kind: "media", media: planned });
 
-  if (includeArticles && input.relatedArticles.length) {
+  if (includeArticles && articlesAllowed(prefs) && input.relatedArticles.length) {
     const articles = input.relatedArticles.slice(0, PERSONAL_LIMITS.articles).map(articleRef);
     if (articles.length)
       sections.push({ id: "related-articles", title: "Articles liés à vos anime", kind: "article", articles });

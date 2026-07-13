@@ -232,6 +232,8 @@ function PlaylistPage() {
                 ))}
               </div>
             )}
+
+            <PlaylistReviews playlistId={id} isPublic={data.meta.isPublic} />
           </>
         )}
       </div>

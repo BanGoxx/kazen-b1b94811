@@ -168,6 +168,9 @@ function FounderConsole() {
             <TabsTrigger value="moderation" className="gap-1.5">
               <ShieldCheck className="h-4 w-4" /> Modération
             </TabsTrigger>
+            <TabsTrigger value="communaute" className="gap-1.5">
+              <MessagesSquare className="h-4 w-4" /> Communauté
+            </TabsTrigger>
             <TabsTrigger value="roles" className="gap-1.5">
               <Users className="h-4 w-4" /> Rôles
             </TabsTrigger>

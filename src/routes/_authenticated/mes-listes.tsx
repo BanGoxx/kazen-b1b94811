@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
   Flame,
   Heart,
   ListChecks,
   Loader2,
   Pencil,
+  Plus,
   RotateCcw,
   StickyNote,
   Star,
@@ -14,12 +16,15 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";
+import { MediaSearchPicker } from "@/components/media/MediaSearchPicker";
 import { PremiumHint } from "@/components/premium/PremiumHint";
-import { useMyList, type ListEntry } from "@/lib/use-list";
+import { useMyList, useListMutations, type ListEntry } from "@/lib/use-list";
+import { applyTrackingRules, effectiveMax, toTrackingState } from "@/lib/tracking";
 import {
   MEDIA_TYPE_LABELS,
   PRIORITY_LABELS,
   WATCH_STATUS_LABELS,
+  type MediaItem,
   type MediaType,
   type WatchStatus,
 } from "@/lib/media-types";
@@ -27,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -69,6 +75,7 @@ const PRIORITY_ORDER: Record<string, number> = { haute: 0, normale: 1, basse: 2 
 
 function MyListsPage() {
   const { entries, isLoading } = useMyList();
+  const [addOpen, setAddOpen] = useState(false);
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["value"]>("tous");
   const [type, setType] = useState<MediaType | "tous">("tous");
   const [platform, setPlatform] = useState<string>("tous");
@@ -149,18 +156,30 @@ function MyListsPage() {
   return (
     <AppShell>
       <div className="section-container space-y-8">
-        <header className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <ListChecks className="h-4 w-4" /> Espace personnel
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ListChecks className="h-4 w-4" /> Espace personnel
+            </div>
+            <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
+              Ma <span className="aurora-text">liste</span>
+            </h1>
+            <p className="text-muted-foreground">
+              {entries.length} titre{entries.length > 1 ? "s" : ""} suivi
+              {entries.length > 1 ? "s" : ""}.
+            </p>
           </div>
-          <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-            Ma <span className="aurora-text">liste</span>
-          </h1>
-          <p className="text-muted-foreground">
-            {entries.length} titre{entries.length > 1 ? "s" : ""} suivi
-            {entries.length > 1 ? "s" : ""}.
-          </p>
+          <Button variant="aurora" className="gap-1.5" onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Ajouter un titre
+          </Button>
         </header>
+
+        <AddToListDialog
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          entries={entries}
+        />
+
 
         {entries.length > 0 ? (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
@@ -337,13 +356,19 @@ function MyListsPage() {
             <div className="rounded-2xl border border-dashed border-border bg-card/40 px-6 py-20 text-center">
               <p className="font-display text-lg font-bold">Votre liste est encore vide</p>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Ajoutez un titre depuis n'importe quelle fiche pour le suivre, le noter et
-                l'organiser avec vos tags.
+                Recherchez un titre à ajouter, ou ajoutez-le depuis n'importe quelle fiche pour le
+                suivre, le noter et l'organiser avec vos tags.
               </p>
-              <Button asChild variant="aurora" className="mt-5">
-                <Link to="/">Découvrir des titres</Link>
-              </Button>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                <Button variant="aurora" className="gap-1.5" onClick={() => setAddOpen(true)}>
+                  <Plus className="h-4 w-4" /> Ajouter un titre
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link to="/">Découvrir des titres</Link>
+                </Button>
+              </div>
             </div>
+
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card/40 py-20 text-center">
               <p className="text-muted-foreground">Aucun titre ne correspond à ces filtres.</p>
@@ -360,6 +385,59 @@ function MyListsPage() {
     </AppShell>
   );
 }
+
+/**
+ * Search the KAZEN catalogue and add titles to the personal list. New titles
+ * are added as "À voir" (planned) — a safe default that, per the shared
+ * tracking rules, never sets a start date. Titles already tracked show an
+ * "Ajouté" state and can't be added twice.
+ */
+function AddToListDialog({
+  open,
+  onOpenChange,
+  entries,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  entries: ListEntry[];
+}) {
+  const { upsert } = useListMutations();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const addedKeys = useMemo(() => new Set(entries.map((e) => e.mediaKey)), [entries]);
+
+  const handleAdd = async (item: MediaItem) => {
+    if (addedKeys.has(item.key)) return;
+    setBusyKey(item.key);
+    try {
+      // Route through the shared tracking rules so a freshly-added title
+      // respects Phase 5 defaults (adding as "À voir" sets no start date).
+      const max = effectiveMax(item.mediaType, item.episodesCount);
+      const patch = applyTrackingRules(toTrackingState(null), max, { status: "a_voir" });
+      await upsert.mutateAsync({ item, patch });
+      toast.success(`« ${item.title} » ajouté à votre liste.`);
+    } catch {
+      toast.error("Impossible d'ajouter ce titre.");
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Ajouter un titre</DialogTitle>
+          <DialogDescription>
+            Recherchez dans le catalogue KAZEN et suivez vos anime, séries et films.
+          </DialogDescription>
+        </DialogHeader>
+        <MediaSearchPicker onAdd={handleAdd} addedKeys={addedKeys} busyKey={busyKey} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 
 function ListEntryCard({ entry }: { entry: ListEntry }) {
   const [open, setOpen] = useState(false);

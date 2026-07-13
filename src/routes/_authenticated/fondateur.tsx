@@ -833,3 +833,42 @@ function RolesSection() {
     </div>
   );
 }
+
+function FounderDigestSection() {
+  const general = useGeneralDigest();
+  // Sample personalized digest built from the Owner's OWN account signals only.
+  // No other member's private data is ever accessed.
+  const personalized = usePersonalizedDigest();
+
+  return (
+    <SectionCard
+      title="Prévisualisation des digests"
+      desc="Aperçu uniquement — aucun email n'est envoyé, planifié ou connecté à un fournisseur en Phase 1. Le digest personnalisé utilise exclusivement votre propre compte."
+    >
+      <div className="space-y-8">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+            Digest général
+          </p>
+          <DigestPreview
+            model={general.model}
+            isLoading={general.isLoading}
+            providerFailed={general.providerFailed}
+            contextLabel="Aperçu fondateur"
+          />
+        </div>
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+            Digest personnalisé (votre compte)
+          </p>
+          <DigestPreview
+            model={personalized.model}
+            isLoading={personalized.isLoading}
+            providerFailed={personalized.providerFailed}
+            contextLabel="Aperçu fondateur"
+          />
+        </div>
+      </div>
+    </SectionCard>
+  );
+}

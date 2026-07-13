@@ -93,9 +93,18 @@ export const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = 
   system_notice: "system_notice",
 };
 
+/** Boolean per-category toggle keys (excludes quiet_mode / snooze controls). */
+export type NotificationToggleKey =
+  | "new_episode_enabled"
+  | "upcoming_release_enabled"
+  | "related_article_enabled"
+  | "recommendation_enabled"
+  | "shared_list_enabled"
+  | "system_notice_enabled";
+
 export const CATEGORY_PREF_KEY: Record<
   NotificationCategory,
-  keyof NotificationPreferences
+  NotificationToggleKey
 > = {
   new_episode: "new_episode_enabled",
   upcoming_release: "upcoming_release_enabled",

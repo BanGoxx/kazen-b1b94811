@@ -639,6 +639,99 @@ export type Database = {
         }
         Relationships: []
       }
+      member_notification_preferences: {
+        Row: {
+          created_at: string
+          new_episode_enabled: boolean
+          recommendation_enabled: boolean
+          related_article_enabled: boolean
+          shared_list_enabled: boolean
+          system_notice_enabled: boolean
+          upcoming_release_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          new_episode_enabled?: boolean
+          recommendation_enabled?: boolean
+          related_article_enabled?: boolean
+          shared_list_enabled?: boolean
+          system_notice_enabled?: boolean
+          upcoming_release_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          new_episode_enabled?: boolean
+          recommendation_enabled?: boolean
+          related_article_enabled?: boolean
+          shared_list_enabled?: boolean
+          system_notice_enabled?: boolean
+          upcoming_release_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      member_notifications: {
+        Row: {
+          article_slug: string | null
+          created_at: string
+          destination_url: string
+          dismissed_at: string | null
+          event_key: string
+          expires_at: string | null
+          id: string
+          media_external_id: string | null
+          media_source: string | null
+          message: string
+          metadata: Json
+          notification_type: string
+          occurred_at: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          article_slug?: string | null
+          created_at?: string
+          destination_url: string
+          dismissed_at?: string | null
+          event_key: string
+          expires_at?: string | null
+          id?: string
+          media_external_id?: string | null
+          media_source?: string | null
+          message: string
+          metadata?: Json
+          notification_type: string
+          occurred_at?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          article_slug?: string | null
+          created_at?: string
+          destination_url?: string
+          dismissed_at?: string | null
+          event_key?: string
+          expires_at?: string | null
+          id?: string
+          media_external_id?: string | null
+          media_source?: string | null
+          message?: string
+          metadata?: Json
+          notification_type?: string
+          occurred_at?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       moderation_actions: {
         Row: {
           action: Database["public"]["Enums"]["moderation_action_type"]
@@ -1064,6 +1157,16 @@ export type Database = {
         Returns: undefined
       }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
+      create_system_notice: {
+        Args: {
+          _destination_url?: string
+          _expires_at?: string
+          _message: string
+          _target?: string
+          _title: string
+        }
+        Returns: string
+      }
       founder_user_ids: { Args: never; Returns: string[] }
       get_public_enrichment: {
         Args: { _external_id: string; _source: string }

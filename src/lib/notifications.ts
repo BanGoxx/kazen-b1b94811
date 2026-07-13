@@ -10,6 +10,8 @@ export type NotificationType =
   | "shared_list_request_accepted"
   | "shared_list_request_declined"
   | "chat_message"
+  | "chat_request"
+  | "chat_request_accepted"
   | "system_notice";
 
 /** Preference categories exposed to members (one toggle each). */

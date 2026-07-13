@@ -1300,6 +1300,7 @@ export type Database = {
         | "timeout"
         | "dismiss_report"
       moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
+      playlist_collab_role: "viewer" | "editor"
       priority_level: "basse" | "normale" | "haute"
       report_status: "pending" | "reviewing" | "dismissed" | "action_taken"
       watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
@@ -1450,6 +1451,7 @@ export const Constants = {
         "dismiss_report",
       ],
       moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
+      playlist_collab_role: ["viewer", "editor"],
       priority_level: ["basse", "normale", "haute"],
       report_status: ["pending", "reviewing", "dismissed", "action_taken"],
       watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],

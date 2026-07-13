@@ -782,6 +782,41 @@ export type Database = {
           },
         ]
       }
+      playlist_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          playlist_id: string
+          role: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          playlist_id: string
+          role?: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          playlist_id?: string
+          role?: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_collaborators_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlist_items: {
         Row: {
           created_at: string
@@ -1301,6 +1336,7 @@ export type Database = {
         | "dismiss_report"
       moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
       playlist_collab_role: "viewer" | "editor"
+      playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
       report_status: "pending" | "reviewing" | "dismissed" | "action_taken"
       watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
@@ -1452,6 +1488,7 @@ export const Constants = {
       ],
       moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
       playlist_collab_role: ["viewer", "editor"],
+      playlist_request_status: ["pending", "accepted", "declined", "cancelled"],
       priority_level: ["basse", "normale", "haute"],
       report_status: ["pending", "reviewing", "dismissed", "action_taken"],
       watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],

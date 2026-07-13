@@ -26,6 +26,11 @@ export interface ListPatch {
   rating?: number | null;
   notes?: string;
   tags?: string[];
+  progress?: number | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  rewatch_count?: number;
+  is_rewatching?: boolean;
 }
 
 export function snapshotFromItem(item: MediaItem): MediaSnapshot {

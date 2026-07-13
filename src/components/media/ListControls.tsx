@@ -80,11 +80,18 @@ export function ListControls({ item }: { item: MediaItem }) {
   }
 
   const inList = Boolean(entry);
+  const trackState = toTrackingState(entry);
+  const max = effectiveMax(item.mediaType, item.episodesCount);
+  const showReconcile = needsReconciliation(entry?.progress ?? null, max);
+  const canComplete = atFinalEpisode(trackState, max);
+
+  // All tracking-relevant mutations flow through the shared rules helper so the
+  // fiche panel and the "Ma liste" editor apply identical business logic.
   const patch = (
     p: Parameters<typeof upsert.mutate>[0]["patch"],
     confirm?: string,
   ) => {
-    upsert.mutate({ item, patch: p });
+    upsert.mutate({ item, patch: applyTrackingRules(trackState, max, p) });
     if (confirm) toast.success(confirm);
   };
 

@@ -82,7 +82,7 @@ function InboxRow({
         <span className="mt-0.5 block truncate text-xs text-muted-foreground">
           {conv.iBlocked
             ? "Membre bloqué"
-            : conv.status === "pending" && conv.amRequesterFallback
+            : conv.status === "pending" && conv.amRequester
               ? "Demande envoyée"
               : conv.preview ?? "Aucun message"}
         </span>

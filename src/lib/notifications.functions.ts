@@ -370,7 +370,7 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           }
         }
 
-        if (rows.length === 0) return { ok: true, generated: 0 };
+        if (rows.length === 0) return { ok: true, generated: 0, scanned };
 
         // 3) Insert idempotently: never overwrite existing read/dismiss state.
         const { supabaseAdmin } = await import(
@@ -382,11 +382,11 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
             onConflict: "user_id,event_key",
             ignoreDuplicates: true,
           });
-        if (error) return { ok: false, generated: 0 };
-        return { ok: true, generated: rows.length };
+        if (error) return { ok: false, generated: 0, skipped: "error", scanned };
+        return { ok: true, generated: rows.length, scanned };
       } catch {
         // Resilient by design: a reconciliation failure must never break the UI.
-        return { ok: false, generated: 0 };
+        return { ok: false, generated: 0, skipped: "error" };
       }
     },
   );

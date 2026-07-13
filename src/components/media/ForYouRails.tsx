@@ -1,10 +1,14 @@
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Undo2 } from "lucide-react";
 import { MediaCarousel } from "./MediaCarousel";
 import { RecommendationAssistant } from "./RecommendationAssistant";
 import { Button } from "@/components/ui/button";
-import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
+import {
+  useCandidatePool,
+  useTasteProfile,
+  useRecoFeedback,
+} from "@/lib/use-recommendations";
 import { useMyList } from "@/lib/use-list";
 import { useAuth } from "@/lib/auth";
 import {
@@ -16,10 +20,19 @@ import {
 import type { MediaItem } from "@/lib/media-types";
 
 export function ForYouRails() {
-  const { pool, isLoading } = useCandidatePool();
+  const { pool: rawPool, isLoading } = useCandidatePool();
   const profile = useTasteProfile();
   const { entries } = useMyList();
   const { user, ready } = useAuth();
+  const { hiddenKeys, canHide, hideItem, restore, entries: hiddenEntries } = useRecoFeedback();
+
+  // Drop dismissed titles from the ranking pool so they never resurface.
+  const pool = useMemo<MediaItem[]>(
+    () => (hiddenKeys.size ? rawPool.filter((m) => !hiddenKeys.has(m.key)) : rawPool),
+    [rawPool, hiddenKeys],
+  );
+
+  const onHideItem = canHide ? (item: MediaItem) => hideItem(item.key) : undefined;
 
   const forYou = useMemo<MediaItem[]>(
     () => rankForYouAnimeFirst(pool, profile, { limit: 24 }).map((s) => s.item),
@@ -48,6 +61,7 @@ export function ForYouRails() {
   );
   const freshForYou = useMemo(() => rankFreshForYou(pool, profile, 20), [pool, profile]);
   const discovery = useMemo(() => rankDiscovery(pool, profile, 20), [pool, profile]);
+
 
   const isCold = profile.signalCount === 0;
   const showSignIn = ready && !user;

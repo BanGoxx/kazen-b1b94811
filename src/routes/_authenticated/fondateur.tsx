@@ -229,6 +229,11 @@ function FounderConsole() {
             <EnrichmentSection />
           </TabsContent>
 
+          <TabsContent value="digests" className="pt-6">
+            <FounderDigestSection />
+          </TabsContent>
+
+
           <TabsContent value="reglages" className="pt-6">
             <SectionCard title="Réglages" desc="Configuration de l'Espace fondateur.">
               <SoonPill />

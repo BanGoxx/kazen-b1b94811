@@ -54,6 +54,7 @@ import {
   SignInToParticipate,
 } from "@/components/community/forum-ui";
 import { CoverField } from "@/components/community/CoverField";
+import { StartChatButton } from "@/components/chat/StartChatButton";
 import { SafeImage } from "@/components/media/SafeImage";
 import {
   useCoverUrls,

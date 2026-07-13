@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bookmark, BookmarkCheck, Heart, Plus, RotateCcw, Star, Tag, X } from "lucide-react";
+import { AlertTriangle, Bookmark, BookmarkCheck, CheckCircle2, Heart, Plus, RotateCcw, Star, Tag, X } from "lucide-react";
 import type { MediaItem, PriorityLevel, WatchStatus } from "@/lib/media-types";
 import { PRIORITY_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { useAuth } from "@/lib/auth";
 import { useListMutations, useUserEntry } from "@/lib/use-list";
+import {
+  applyTrackingRules,
+  atFinalEpisode,
+  completePatch,
+  effectiveMax,
+  needsReconciliation,
+  rewatchPatch,
+  toTrackingState,
+} from "@/lib/tracking";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";

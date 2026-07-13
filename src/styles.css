@@ -61,27 +61,31 @@
 
 :root {
   --radius: 0.9rem;
-  /* Deep obsidian with a whisper of night-plum/indigo undertone — cinematic,
-     never pure black. Distinct surface levels: background < sidebar < card <
-     popover for clear depth. */
-  --background: oklch(0.144 0.008 286);
-  --foreground: oklch(0.972 0.004 90);
-  --card: oklch(0.197 0.009 286);
-  --card-foreground: oklch(0.972 0.004 90);
-  --popover: oklch(0.213 0.01 286);
-  --popover-foreground: oklch(0.972 0.004 90);
-  /* Ember/coral primary — warmed toward coral, chroma dialed back so red reads
-     premium rather than aggressive. */
-  --primary: oklch(0.63 0.168 32);
-  --primary-foreground: oklch(0.99 0.01 60);
-  --secondary: oklch(0.239 0.01 286);
-  --secondary-foreground: oklch(0.96 0.005 90);
-  --muted: oklch(0.219 0.009 286);
-  --muted-foreground: oklch(0.738 0.012 286);
-  --accent: oklch(0.855 0.05 85);
-  --accent-foreground: oklch(0.2 0.02 60);
-  --destructive: oklch(0.62 0.21 22);
-  --destructive-foreground: oklch(0.98 0.005 20);
+  /* Near-black graphite with a whisper of warm undertone — cinematic, never
+     pure black. Distinct surface levels: background < sidebar < card < popover
+     for clear depth. */
+  --background: oklch(0.152 0.004 40);
+  --foreground: oklch(0.965 0.006 70);
+  --card: oklch(0.205 0.005 40);
+  --card-foreground: oklch(0.965 0.006 70);
+  --popover: oklch(0.225 0.006 40);
+  --popover-foreground: oklch(0.965 0.006 70);
+  /* Metallic crimson primary — restrained, premium red-burgundy rather than
+     bright scarlet or gaming neon. */
+  --primary: oklch(0.55 0.155 20);
+  --primary-foreground: oklch(0.99 0.008 45);
+  --secondary: oklch(0.245 0.005 40);
+  --secondary-foreground: oklch(0.96 0.005 70);
+  --muted: oklch(0.225 0.005 40);
+  --muted-foreground: oklch(0.745 0.01 45);
+  /* Neutral elevated surface for hover/selected states — keeps interactions
+     calm; brand red is reserved for primary emphasis. */
+  --accent: oklch(0.27 0.008 30);
+  --accent-foreground: oklch(0.96 0.005 70);
+  /* Destructive kept hotter/brighter than the deep brand crimson so danger
+     never reads as a normal KAZEN action. */
+  --destructive: oklch(0.62 0.215 29);
+  --destructive-foreground: oklch(0.99 0.005 30);
   /* Clear, restrained status colors (used for pills / states). */
   --success: oklch(0.72 0.13 158);
   --success-foreground: oklch(0.16 0.02 158);
@@ -89,25 +93,25 @@
   --warning-foreground: oklch(0.2 0.03 78);
   --info: oklch(0.7 0.1 235);
   --info-foreground: oklch(0.16 0.02 235);
-  --border: oklch(0.72 0.012 286 / 15%);
-  --input: oklch(0.72 0.012 286 / 18%);
-  --ring: oklch(0.63 0.168 32);
-  --chart-1: oklch(0.63 0.168 32);
-  --chart-2: oklch(0.855 0.05 85);
-  --chart-3: oklch(0.62 0.15 44);
-  --chart-4: oklch(0.72 0.08 90);
+  --border: oklch(0.9 0.008 40 / 10%);
+  --input: oklch(0.9 0.008 40 / 14%);
+  --ring: oklch(0.6 0.16 20);
+  --chart-1: oklch(0.58 0.16 20);
+  --chart-2: oklch(0.7 0.09 40);
+  --chart-3: oklch(0.62 0.14 34);
+  --chart-4: oklch(0.72 0.07 60);
   --chart-5: oklch(0.6 0.08 235);
-  --sidebar: oklch(0.163 0.008 286);
-  --sidebar-foreground: oklch(0.95 0.006 90);
-  --sidebar-primary: oklch(0.63 0.168 32);
-  --sidebar-primary-foreground: oklch(0.99 0.01 60);
-  --sidebar-accent: oklch(0.225 0.01 286);
-  --sidebar-accent-foreground: oklch(0.96 0.005 90);
-  --sidebar-border: oklch(0.66 0.012 286 / 16%);
-  --sidebar-ring: oklch(0.63 0.168 32);
+  --sidebar: oklch(0.172 0.004 40);
+  --sidebar-foreground: oklch(0.95 0.006 70);
+  --sidebar-primary: oklch(0.55 0.155 20);
+  --sidebar-primary-foreground: oklch(0.99 0.008 45);
+  --sidebar-accent: oklch(0.235 0.006 40);
+  --sidebar-accent-foreground: oklch(0.96 0.005 70);
+  --sidebar-border: oklch(0.85 0.008 40 / 11%);
+  --sidebar-ring: oklch(0.6 0.16 20);
   /* Theme-aware glass surface (header, sidebar, drawers). */
-  --glass-bg: oklch(0.183 0.009 286 / 0.82);
-  --glass-border: oklch(0.85 0.04 80 / 0.08);
+  --glass-bg: oklch(0.19 0.005 40 / 0.82);
+  --glass-border: oklch(0.8 0.05 25 / 0.09);
 }
 
 

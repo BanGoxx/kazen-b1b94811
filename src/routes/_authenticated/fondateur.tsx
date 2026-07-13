@@ -155,8 +155,14 @@ function FounderConsole() {
           </div>
         </section>
 
-        <Tabs defaultValue="moderation">
+        <Tabs defaultValue="sante">
           <TabsList className="flex flex-wrap">
+            <TabsTrigger value="sante" className="gap-1.5">
+              <Activity className="h-4 w-4" /> Santé
+            </TabsTrigger>
+            <TabsTrigger value="diagnostics" className="gap-1.5">
+              <Stethoscope className="h-4 w-4" /> Diagnostics
+            </TabsTrigger>
             <TabsTrigger value="moderation" className="gap-1.5">
               <ShieldCheck className="h-4 w-4" /> Modération
             </TabsTrigger>

@@ -42,6 +42,7 @@ import { Route as UniversSourceIdRouteImport } from './routes/univers.$source.$i
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
 import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
+import { Route as CommunauteTIdRouteImport } from './routes/communaute.t.$id'
 import { Route as CommunauteCSlugRouteImport } from './routes/communaute.c.$slug'
 
 const SoutienRoute = SoutienRouteImport.update({
@@ -210,6 +211,11 @@ const EntiteKindIdRoute = EntiteKindIdRouteImport.update({
   path: '/entite/$kind/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunauteTIdRoute = CommunauteTIdRouteImport.update({
+  id: '/communaute/t/$id',
+  path: '/communaute/t/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunauteCSlugRoute = CommunauteCSlugRouteImport.update({
   id: '/communaute/c/$slug',
   path: '/communaute/c/$slug',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/anime': typeof AnimeIndexRoute
   '/communaute': typeof CommunauteIndexRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
+  '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -354,6 +363,7 @@ export interface FileRouteTypes {
     | '/anime/'
     | '/communaute/'
     | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
     | '/anime'
     | '/communaute'
     | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -424,6 +435,7 @@ export interface FileRouteTypes {
     | '/anime/'
     | '/communaute/'
     | '/communaute/c/$slug'
+    | '/communaute/t/$id'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -451,6 +463,7 @@ export interface RootRouteChildren {
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   CommunauteIndexRoute: typeof CommunauteIndexRoute
   CommunauteCSlugRoute: typeof CommunauteCSlugRoute
+  CommunauteTIdRoute: typeof CommunauteTIdRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
@@ -690,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntiteKindIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communaute/t/$id': {
+      id: '/communaute/t/$id'
+      path: '/communaute/t/$id'
+      fullPath: '/communaute/t/$id'
+      preLoaderRoute: typeof CommunauteTIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/communaute/c/$slug': {
       id: '/communaute/c/$slug'
       path: '/communaute/c/$slug'
@@ -758,6 +778,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActualitesIndexRoute: ActualitesIndexRoute,
   CommunauteIndexRoute: CommunauteIndexRoute,
   CommunauteCSlugRoute: CommunauteCSlugRoute,
+  CommunauteTIdRoute: CommunauteTIdRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,

@@ -42,6 +42,7 @@ import { Route as UniversSourceIdRouteImport } from './routes/univers.$source.$i
 import { Route as MediaSourceIdRouteImport } from './routes/media.$source.$id'
 import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$source.$id'
 import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
+import { Route as CommunauteCSlugRouteImport } from './routes/communaute.c.$slug'
 
 const SoutienRoute = SoutienRouteImport.update({
   id: '/soutien',
@@ -209,6 +210,11 @@ const EntiteKindIdRoute = EntiteKindIdRouteImport.update({
   path: '/entite/$kind/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunauteCSlugRoute = CommunauteCSlugRouteImport.update({
+  id: '/communaute/c/$slug',
+  path: '/communaute/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
   '/communaute': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
+  '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
   '/media/$source/$id': typeof MediaSourceIdRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/actualites/'
     | '/anime/'
     | '/communaute/'
+    | '/communaute/c/$slug'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -377,6 +387,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/anime'
     | '/communaute'
+    | '/communaute/c/$slug'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -412,6 +423,7 @@ export interface FileRouteTypes {
     | '/actualites/'
     | '/anime/'
     | '/communaute/'
+    | '/communaute/c/$slug'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
     | '/media/$source/$id'
@@ -438,6 +450,7 @@ export interface RootRouteChildren {
   PlaylistIdRoute: typeof PlaylistIdRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   CommunauteIndexRoute: typeof CommunauteIndexRoute
+  CommunauteCSlugRoute: typeof CommunauteCSlugRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntiteKindIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communaute/c/$slug': {
+      id: '/communaute/c/$slug'
+      path: '/communaute/c/$slug'
+      fullPath: '/communaute/c/$slug'
+      preLoaderRoute: typeof CommunauteCSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -737,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlaylistIdRoute: PlaylistIdRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
   CommunauteIndexRoute: CommunauteIndexRoute,
+  CommunauteCSlugRoute: CommunauteCSlugRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,

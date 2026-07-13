@@ -98,7 +98,7 @@ export function RelatedScroller({
           const anilistReal = it.source === "anilist" && /^\d+$/.test(it.externalId);
           const clickable = anilistReal || it.hasDetail !== false;
           const external = clickable ? null : externalRefUrl(it);
-          const inner: ReactNode = <Poster it={it} />;
+          const inner: ReactNode = <Poster it={it} showSeasonBadge={showSeasonBadges} />;
           return (
             <li key={it.key} className="w-32 shrink-0 snap-start">
               {clickable ? (

@@ -123,6 +123,13 @@ function typeAllowed(item: MediaItem, prefs?: EmailPreferences): boolean {
   return types.includes(map[item.mediaType]);
 }
 
+/** Whether the "articles" content-type is selected (empty selection = all). */
+function articlesAllowed(prefs?: EmailPreferences): boolean {
+  const types = prefs?.preferred_content_types;
+  if (!types || types.length === 0) return true;
+  return types.includes("articles");
+}
+
 // ---------------------------------------------------------------------------
 // General digest
 // ---------------------------------------------------------------------------

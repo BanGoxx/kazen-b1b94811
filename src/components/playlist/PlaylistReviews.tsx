@@ -56,7 +56,7 @@ export function PlaylistReviews({
   isPublic: boolean;
 }) {
   const { user } = useAuth();
-  const { isModerator } = useModerator();
+  const isModerator = useIsModerator();
   const { data, isLoading } = usePlaylistReviews(playlistId);
   const mine = useMyPlaylistReview(playlistId);
   const { upsert, remove } = usePlaylistReviewMutations(playlistId);

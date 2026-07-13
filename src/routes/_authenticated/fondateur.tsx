@@ -37,6 +37,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ForumModerationSection } from "@/components/community/ForumModerationSection";
+import { MessagesSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,

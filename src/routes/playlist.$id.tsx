@@ -6,6 +6,7 @@ import { usePlaylist, usePlaylistLike } from "@/lib/playlists";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ReportDialog } from "@/components/moderation/ReportDialog";
+import { CollabPanel } from "@/components/playlist/CollabPanel";
 import { useAuth } from "@/lib/auth";
 import { useIsFounder, useUserBadges } from "@/lib/founder";
 import { FounderBadge } from "@/components/founder/FounderBadge";

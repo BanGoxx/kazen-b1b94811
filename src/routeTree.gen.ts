@@ -24,10 +24,12 @@ import { Route as AVenirRouteImport } from './routes/a-venir'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
+import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
+import { Route as AuthenticatedRecapRouteImport } from './routes/_authenticated/recap'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
@@ -114,6 +116,11 @@ const AnimeIndexRoute = AnimeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AnimeRoute,
 } as any)
+const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
+  id: '/actualites/',
+  path: '/actualites/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaylistIdRoute = PlaylistIdRouteImport.update({
   id: '/playlist/$id',
   path: '/playlist/$id',
@@ -133,6 +140,11 @@ const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
   id: '/actualites/$slug',
   path: '/actualites/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRecapRoute = AuthenticatedRecapRouteImport.update({
+  id: '/recap',
+  path: '/recap',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   id: '/profil',
@@ -213,10 +225,12 @@ export interface FileRoutesByFullPath {
   '/moderation': typeof AuthenticatedModerationRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/recap': typeof AuthenticatedRecapRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
@@ -243,10 +257,12 @@ export interface FileRoutesByTo {
   '/moderation': typeof AuthenticatedModerationRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/recap': typeof AuthenticatedRecapRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
+  '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
@@ -276,10 +292,12 @@ export interface FileRoutesById {
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/recap': typeof AuthenticatedRecapRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/playlist/$id': typeof PlaylistIdRoute
+  '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
   '/franchise/$source/$id': typeof FranchiseSourceIdRoute
@@ -309,10 +327,12 @@ export interface FileRouteTypes {
     | '/moderation'
     | '/notifications'
     | '/profil'
+    | '/recap'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
+    | '/actualites/'
     | '/anime/'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
@@ -339,10 +359,12 @@ export interface FileRouteTypes {
     | '/moderation'
     | '/notifications'
     | '/profil'
+    | '/recap'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
+    | '/actualites'
     | '/anime'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
@@ -371,10 +393,12 @@ export interface FileRouteTypes {
     | '/_authenticated/moderation'
     | '/_authenticated/notifications'
     | '/_authenticated/profil'
+    | '/_authenticated/recap'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
     | '/playlist/$id'
+    | '/actualites/'
     | '/anime/'
     | '/entite/$kind/$id'
     | '/franchise/$source/$id'
@@ -400,6 +424,7 @@ export interface RootRouteChildren {
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   ApiChatRoute: typeof ApiChatRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
+  ActualitesIndexRoute: typeof ActualitesIndexRoute
   EntiteKindIdRoute: typeof EntiteKindIdRoute
   FranchiseSourceIdRoute: typeof FranchiseSourceIdRoute
   MediaSourceIdRoute: typeof MediaSourceIdRoute
@@ -513,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeIndexRouteImport
       parentRoute: typeof AnimeRoute
     }
+    '/actualites/': {
+      id: '/actualites/'
+      path: '/actualites'
+      fullPath: '/actualites/'
+      preLoaderRoute: typeof ActualitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playlist/$id': {
       id: '/playlist/$id'
       path: '/playlist/$id'
@@ -540,6 +572,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/actualites/$slug'
       preLoaderRoute: typeof ActualitesSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/recap': {
+      id: '/_authenticated/recap'
+      path: '/recap'
+      fullPath: '/recap'
+      preLoaderRoute: typeof AuthenticatedRecapRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profil': {
       id: '/_authenticated/profil'
@@ -629,6 +668,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedRecapRoute: typeof AuthenticatedRecapRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -639,6 +679,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedRecapRoute: AuthenticatedRecapRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -674,6 +715,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActualitesSlugRoute: ActualitesSlugRoute,
   ApiChatRoute: ApiChatRoute,
   PlaylistIdRoute: PlaylistIdRoute,
+  ActualitesIndexRoute: ActualitesIndexRoute,
   EntiteKindIdRoute: EntiteKindIdRoute,
   FranchiseSourceIdRoute: FranchiseSourceIdRoute,
   MediaSourceIdRoute: MediaSourceIdRoute,

@@ -148,9 +148,16 @@ function FounderConsole() {
             <DiagValue value={diag?.recentActions ?? null} />
           </div>
           <div className="card-elevated rounded-xl p-4">
-            <p className="text-xs text-muted-foreground">Demandes en attente</p>
-            <DiagValue value={diag?.pendingRequests ?? null} />
+            <p className="text-xs text-muted-foreground">Signalements en attente</p>
+            <DiagValue value={diag?.pendingReports ?? null} tone="watch" />
           </div>
+          <div className="card-elevated rounded-xl p-4">
+            <p className="text-xs text-muted-foreground">Actions (7 j)</p>
+            <DiagValue value={diag?.recentActions ?? null} />
+          </div>
+          <div className="card-elevated rounded-xl p-4">
+            <p className="text-xs text-muted-foreground">Demandes en attente</p>
+            <DiagValue value={diag?.pendingRequests ?? null} tone="watch" />
           <div className="card-elevated rounded-xl p-4">
             <p className="text-xs text-muted-foreground">Badges</p>
             <DiagValue value={diag?.badges ?? null} />

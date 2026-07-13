@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   trendingAnimeQO,
   popularAnimeQO,
@@ -17,7 +18,14 @@ import { useMyList } from "./use-list";
 import { getMyProfile } from "./list.functions";
 import { useAuth } from "./auth";
 import { buildTasteProfile, normalizePool, type TasteProfile } from "./recommend";
+import {
+  getMyRecoFeedback,
+  addRecoFeedback,
+  removeRecoFeedback,
+  type RecoFeedbackEntry,
+} from "./recommend.functions";
 import type { MediaItem } from "./media-types";
+
 
 
 /**
@@ -83,4 +91,76 @@ export function useTasteProfile(): TasteProfile {
     [entries, profile?.preferred_genres, profile?.preferred_types],
   );
 }
+
+const RECO_FEEDBACK_KEY = ["reco-feedback"] as const;
+
+/**
+ * Manages the member's dismissed recommendations. Exposes a Set of hidden
+ * media keys (to filter rails) plus hide/restore mutations. Guests get an
+ * empty, no-op surface so the rails degrade gracefully.
+ */
+export function useRecoFeedback() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const getFn = useServerFn(getMyRecoFeedback);
+  const addFn = useServerFn(addRecoFeedback);
+  const removeFn = useServerFn(removeRecoFeedback);
+
+  const query = useQuery<RecoFeedbackEntry[]>({
+    queryKey: [...RECO_FEEDBACK_KEY, user?.id],
+    queryFn: () => getFn(),
+    enabled: !!user,
+    staleTime: 300_000,
+  });
+
+  const hiddenKeys = useMemo(
+    () => new Set((query.data ?? []).map((f) => f.mediaKey)),
+    [query.data],
+  );
+
+  const hide = useMutation({
+    mutationFn: (mediaKey: string) => addFn({ data: { mediaKey, action: "not_interested" } }),
+    onMutate: async (mediaKey) => {
+      const key = [...RECO_FEEDBACK_KEY, user?.id];
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<RecoFeedbackEntry[]>(key) ?? [];
+      qc.setQueryData<RecoFeedbackEntry[]>(key, [
+        ...prev.filter((f) => f.mediaKey !== mediaKey),
+        { mediaKey, action: "not_interested" },
+      ]);
+      return { prev, key };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx) qc.setQueryData(ctx.key, ctx.prev);
+    },
+  });
+
+  const restore = useMutation({
+    mutationFn: (mediaKey: string) => removeFn({ data: { mediaKey } }),
+    onMutate: async (mediaKey) => {
+      const key = [...RECO_FEEDBACK_KEY, user?.id];
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<RecoFeedbackEntry[]>(key) ?? [];
+      qc.setQueryData<RecoFeedbackEntry[]>(
+        key,
+        prev.filter((f) => f.mediaKey !== mediaKey),
+      );
+      return { prev, key };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx) qc.setQueryData(ctx.key, ctx.prev);
+    },
+  });
+
+  const hideItem = useCallback((mediaKey: string) => hide.mutate(mediaKey), [hide]);
+
+  return {
+    hiddenKeys,
+    canHide: !!user,
+    hideItem,
+    restore: (mediaKey: string) => restore.mutate(mediaKey),
+    entries: query.data ?? [],
+  };
+}
+
 

@@ -14,6 +14,7 @@ export function MediaCarousel({
   items,
   isLoading,
   hideWhenEmpty,
+  onHideItem,
 }: {
   title: string;
   subtitle?: string;
@@ -21,6 +22,8 @@ export function MediaCarousel({
   items: MediaItem[];
   isLoading?: boolean;
   hideWhenEmpty?: boolean;
+  /** When provided, each card shows a "pas intéressé" dismiss control. */
+  onHideItem?: (item: MediaItem) => void;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
@@ -105,6 +108,7 @@ export function MediaCarousel({
                 key={item.key}
                 item={item}
                 className="w-[150px] shrink-0 snap-start sm:w-[180px]"
+                onHide={onHideItem ? () => onHideItem(item) : undefined}
               />
             ))}
           </div>

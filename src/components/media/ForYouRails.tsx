@@ -1,10 +1,14 @@
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Undo2 } from "lucide-react";
 import { MediaCarousel } from "./MediaCarousel";
 import { RecommendationAssistant } from "./RecommendationAssistant";
 import { Button } from "@/components/ui/button";
-import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
+import {
+  useCandidatePool,
+  useTasteProfile,
+  useRecoFeedback,
+} from "@/lib/use-recommendations";
 import { useMyList } from "@/lib/use-list";
 import { useAuth } from "@/lib/auth";
 import {
@@ -16,10 +20,19 @@ import {
 import type { MediaItem } from "@/lib/media-types";
 
 export function ForYouRails() {
-  const { pool, isLoading } = useCandidatePool();
+  const { pool: rawPool, isLoading } = useCandidatePool();
   const profile = useTasteProfile();
   const { entries } = useMyList();
   const { user, ready } = useAuth();
+  const { hiddenKeys, canHide, hideItem, restore, entries: hiddenEntries } = useRecoFeedback();
+
+  // Drop dismissed titles from the ranking pool so they never resurface.
+  const pool = useMemo<MediaItem[]>(
+    () => (hiddenKeys.size ? rawPool.filter((m) => !hiddenKeys.has(m.key)) : rawPool),
+    [rawPool, hiddenKeys],
+  );
+
+  const onHideItem = canHide ? (item: MediaItem) => hideItem(item.key) : undefined;
 
   const forYou = useMemo<MediaItem[]>(
     () => rankForYouAnimeFirst(pool, profile, { limit: 24 }).map((s) => s.item),
@@ -48,6 +61,7 @@ export function ForYouRails() {
   );
   const freshForYou = useMemo(() => rankFreshForYou(pool, profile, 20), [pool, profile]);
   const discovery = useMemo(() => rankDiscovery(pool, profile, 20), [pool, profile]);
+
 
   const isCold = profile.signalCount === 0;
   const showSignIn = ready && !user;
@@ -89,6 +103,7 @@ export function ForYouRails() {
         }
         items={forYou}
         isLoading={isLoading && !forYou.length}
+        onHideItem={onHideItem}
       />
 
       {resume.length > 0 && (
@@ -107,6 +122,7 @@ export function ForYouRails() {
           subtitle="Dans un genre que vous suivez souvent"
           items={becauseYouLike}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -115,6 +131,7 @@ export function ForYouRails() {
           title={`Parce que vous aimez ${anchorGenre2}`}
           items={becauseYouLike2}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -125,6 +142,7 @@ export function ForYouRails() {
           action={{ label: "À venir", to: "/a-venir" }}
           items={freshForYou}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
 
@@ -134,8 +152,27 @@ export function ForYouRails() {
           subtitle="Des pépites moins évidentes, choisies selon vos affinités"
           items={discovery}
           hideWhenEmpty
+          onHideItem={onHideItem}
         />
       )}
+
+      {canHide && hiddenEntries.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/40 p-4">
+          <p className="text-sm text-muted-foreground">
+            {hiddenEntries.length} titre{hiddenEntries.length > 1 ? "s" : ""} masqué
+            {hiddenEntries.length > 1 ? "s" : ""} de vos recommandations.
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground"
+            onClick={() => hiddenEntries.forEach((f) => restore(f.mediaKey))}
+          >
+            <Undo2 className="h-4 w-4" /> Tout réafficher
+          </Button>
+        </div>
+      )}
+
 
       <div className="card-elevated flex flex-col items-start gap-3 rounded-2xl border border-primary/20 bg-card/60 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>

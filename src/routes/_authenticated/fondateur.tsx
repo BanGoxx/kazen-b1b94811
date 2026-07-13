@@ -22,6 +22,8 @@ import {
   Search,
   Mail,
   Megaphone,
+  BarChart3,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";

@@ -413,9 +413,17 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
               {WATCH_STATUS_LABELS[entry.status]}
             </span>
           ) : null}
-          {entry.rating ? (
-            <span className="inline-flex items-center gap-0.5 font-medium text-amber-400">
-              <Star className="h-3 w-3 fill-current" /> {entry.rating}
+          {entry.progress ? (
+            <span className="rounded-full bg-muted px-2 py-0.5 font-medium tabular-nums">
+              {entry.item?.mediaType === "movie" ? "Vu" : `${entry.progress} ép.`}
+            </span>
+          ) : null}
+          {entry.isRewatching ? (
+            <span
+              className="inline-flex items-center gap-0.5 font-medium text-primary"
+              title="Revisionnage en cours"
+            >
+              <RotateCcw className="h-3 w-3" />
             </span>
           ) : null}
           {entry.notes?.trim() ? (

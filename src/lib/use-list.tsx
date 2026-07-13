@@ -139,6 +139,11 @@ function applyPatch(prev: ListRow | undefined, vars: UpsertVars): ListRow {
       rating: null,
       notes: "",
       tags: [],
+      progress: null,
+      started_at: null,
+      completed_at: null,
+      rewatch_count: 0,
+      is_rewatching: false,
       updated_at: new Date().toISOString(),
       media_records: optimisticMediaRecord(item),
     } as unknown as ListRow);
@@ -150,6 +155,11 @@ function applyPatch(prev: ListRow | undefined, vars: UpsertVars): ListRow {
     rating: "rating" in patch ? patch.rating ?? null : base.rating,
     notes: "notes" in patch ? patch.notes ?? "" : base.notes,
     tags: "tags" in patch ? patch.tags ?? [] : base.tags,
+    progress: "progress" in patch ? patch.progress ?? null : base.progress,
+    started_at: "started_at" in patch ? patch.started_at ?? null : base.started_at,
+    completed_at: "completed_at" in patch ? patch.completed_at ?? null : base.completed_at,
+    rewatch_count: "rewatch_count" in patch ? patch.rewatch_count ?? 0 : base.rewatch_count,
+    is_rewatching: "is_rewatching" in patch ? patch.is_rewatching ?? false : base.is_rewatching,
     updated_at: new Date().toISOString(),
     media_records: base.media_records ?? optimisticMediaRecord(item),
   };

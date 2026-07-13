@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bookmark, BookmarkCheck, Heart, Plus, RotateCcw, Star, Tag, X } from "lucide-react";
+import { AlertTriangle, Bookmark, BookmarkCheck, CheckCircle2, Heart, Plus, RotateCcw, Star, Tag, X } from "lucide-react";
 import type { MediaItem, PriorityLevel, WatchStatus } from "@/lib/media-types";
 import { PRIORITY_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { useAuth } from "@/lib/auth";
 import { useListMutations, useUserEntry } from "@/lib/use-list";
+import {
+  applyTrackingRules,
+  atFinalEpisode,
+  completePatch,
+  effectiveMax,
+  needsReconciliation,
+  rewatchPatch,
+  toTrackingState,
+} from "@/lib/tracking";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -71,11 +80,18 @@ export function ListControls({ item }: { item: MediaItem }) {
   }
 
   const inList = Boolean(entry);
+  const trackState = toTrackingState(entry);
+  const max = effectiveMax(item.mediaType, item.episodesCount);
+  const showReconcile = needsReconciliation(entry?.progress ?? null, max);
+  const canComplete = atFinalEpisode(trackState, max);
+
+  // All tracking-relevant mutations flow through the shared rules helper so the
+  // fiche panel and the "Ma liste" editor apply identical business logic.
   const patch = (
     p: Parameters<typeof upsert.mutate>[0]["patch"],
     confirm?: string,
   ) => {
-    upsert.mutate({ item, patch: p });
+    upsert.mutate({ item, patch: applyTrackingRules(trackState, max, p) });
     if (confirm) toast.success(confirm);
   };
 
@@ -155,6 +171,7 @@ export function ListControls({ item }: { item: MediaItem }) {
             id="progress"
             type="number"
             min={0}
+            max={max ?? undefined}
             inputMode="numeric"
             value={entry?.progress ?? ""}
             onChange={(e) => {
@@ -164,7 +181,48 @@ export function ListControls({ item }: { item: MediaItem }) {
             className="h-8 w-20"
             aria-label="Progression"
           />
+          {item.mediaType !== "movie" && max != null ? (
+            <span className="text-xs font-medium text-muted-foreground tabular-nums">
+              / {max} ép.
+            </span>
+          ) : null}
         </div>
+
+        {showReconcile ? (
+          <div className="flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-300">
+            <p className="flex items-start gap-1.5">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>
+                Votre progression enregistrée ({entry?.progress}) dépasse le total connu
+                ({max} ép.). Aucune valeur n'a été modifiée.
+              </span>
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="h-7 self-start text-xs"
+              disabled={upsert.isPending}
+              onClick={() => patch({ progress: max }, "Progression ajustée")}
+            >
+              Ajuster à {max} ép.
+            </Button>
+          </div>
+        ) : null}
+
+        {canComplete ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="aurora"
+            className="h-8 w-full gap-1.5 text-xs"
+            disabled={upsert.isPending}
+            onClick={() => patch(completePatch(), "Marqué comme terminé")}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" /> Marquer comme terminé
+          </Button>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <label htmlFor="started" className="text-xs font-medium text-muted-foreground">
@@ -191,6 +249,26 @@ export function ListControls({ item }: { item: MediaItem }) {
             />
           </div>
         </div>
+        {inList ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="h-8 w-full gap-1.5 text-xs"
+            disabled={upsert.isPending}
+            onClick={() => {
+              // Explicit rewatch: increments the count exactly once and resets
+              // progress, preserving historical completion/start dates. Disabled
+              // while pending guards against duplicate submissions.
+              upsert.mutate(
+                { item, patch: rewatchPatch(trackState) },
+                { onSuccess: () => toast.success("Nouveau visionnage lancé") },
+              );
+            }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Recommencer
+          </Button>
+        ) : null}
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"

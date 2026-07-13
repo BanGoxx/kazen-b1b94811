@@ -75,6 +75,7 @@ const PRIORITY_ORDER: Record<string, number> = { haute: 0, normale: 1, basse: 2 
 
 function MyListsPage() {
   const { entries, isLoading } = useMyList();
+  const [addOpen, setAddOpen] = useState(false);
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]["value"]>("tous");
   const [type, setType] = useState<MediaType | "tous">("tous");
   const [platform, setPlatform] = useState<string>("tous");

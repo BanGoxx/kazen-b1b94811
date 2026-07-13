@@ -1797,6 +1797,7 @@ export type Database = {
         | "playlist"
         | "playlist_item"
         | "playlist_review"
+        | "chat_message"
       playlist_collab_role: "viewer" | "editor"
       playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
@@ -1954,6 +1955,7 @@ export const Constants = {
         "playlist",
         "playlist_item",
         "playlist_review",
+        "chat_message",
       ],
       playlist_collab_role: ["viewer", "editor"],
       playlist_request_status: ["pending", "accepted", "declined", "cancelled"],

@@ -74,7 +74,7 @@ function NewTopicPage() {
       if (coverFile) {
         let uploadedPath: string | null = null;
         try {
-          uploadedPath = await uploadCover(user.id, id, coverFile);
+          uploadedPath = await uploadCover(coverFile, id, user.id);
           await setTopicCover(id, uploadedPath, coverAlt.trim() || null, "upload");
         } catch (err) {
           if (uploadedPath) await deleteCoverFile(uploadedPath).catch(() => {});

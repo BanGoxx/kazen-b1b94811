@@ -395,6 +395,29 @@ export function getRecentArticles(limit = 5): NewsArticle[] {
     .slice(0, limit);
 }
 
+/**
+ * All real, internal (clickable) KAZEN articles for the /actualites index,
+ * ordered popularity-then-recency for an editorial (non-noisy) feel. External
+ * link-only entries are excluded because they have no internal page.
+ */
+export function getAllArticles(): NewsArticle[] {
+  return NEWS_ARTICLES.filter((a) => !a.externalUrl).sort(byPopularityThenRecent);
+}
+
+/** Distinct categories present across internal articles (stable order). */
+export function getArticleCategories(): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const a of getAllArticles()) {
+    const c = a.category ?? "Analyse";
+    if (!seen.has(c)) {
+      seen.add(c);
+      out.push(c);
+    }
+  }
+  return out;
+}
+
 /** Normalize a NewsArticle into the presentational FicheArticle shape. */
 export function toFicheArticle(
   a: NewsArticle,

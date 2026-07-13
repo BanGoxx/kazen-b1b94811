@@ -112,29 +112,50 @@ export async function moderateClearCover(topicId: string, note = ""): Promise<st
   return (data as string | null) ?? null;
 }
 
-/** Batch-resolve signed URLs for a set of cover paths in a single request. */
-export async function resolveCoverUrls(paths: string[]): Promise<Map<string, string>> {
-  const unique = Array.from(new Set(paths.filter(Boolean)));
+/**
+ * Server-authorized batch signing. The client sends bounded topic IDs; the
+ * server verifies visibility per requester and returns a map keyed by topic ID.
+ * A known/guessed storage path is never accepted from the client, and the
+ * private bucket can no longer be listed or signed directly.
+ */
+export async function resolveCoverUrls(topicIds: string[]): Promise<Map<string, string>> {
+  const unique = Array.from(new Set(topicIds.filter(Boolean)));
   const map = new Map<string, string>();
   if (unique.length === 0) return map;
-  const { data } = await supabase.storage.from(COVER_BUCKET).createSignedUrls(unique, SIGNED_URL_TTL);
-  for (const row of data ?? []) {
-    if (row.signedUrl && row.path) map.set(row.path, row.signedUrl);
+  try {
+    const record = await signTopicCovers({ data: { topicIds: unique } });
+    for (const [id, url] of Object.entries(record)) map.set(id, url);
+  } catch {
+    /* signing failure must never crash the page — fall back to placeholders */
   }
   return map;
 }
 
+/** A topic reference for cover resolution (id is the trusted lookup key). */
+export interface CoverTopicRef {
+  id: string;
+  coverPath?: string | null;
+}
+
 /**
- * Resolve signed URLs for a list of cover paths (one batched request, cached).
- * Returns a Map keyed by storage path. Missing objects simply resolve to
+ * Resolve signed cover URLs for a list of topics (one batched, server-authorized
+ * request, cached). Returns a Map keyed by TOPIC ID. Only topics that actually
+ * carry a cover are requested; inaccessible/hidden/deleted topics resolve to
  * undefined and callers fall back to the SafeImage placeholder.
  */
-export function useCoverUrls(paths: (string | null | undefined)[]) {
-  const clean = Array.from(new Set(paths.filter((p): p is string => Boolean(p)))).sort();
+export function useCoverUrls(topics: (CoverTopicRef | null | undefined)[]) {
+  const ids = Array.from(
+    new Set(
+      topics
+        .filter((t): t is CoverTopicRef => Boolean(t && t.id && t.coverPath))
+        .map((t) => t.id),
+    ),
+  ).sort();
   return useQuery({
-    queryKey: ["forum-cover-urls", clean],
-    enabled: clean.length > 0,
+    queryKey: ["forum-cover-urls", ids],
+    enabled: ids.length > 0,
     staleTime: 30 * 60 * 1000, // < signed TTL, so URLs never expire mid-cache
-    queryFn: () => resolveCoverUrls(clean),
+    queryFn: () => resolveCoverUrls(ids),
   });
 }
+

@@ -60,6 +60,76 @@ export const listEnrichments = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+// --- Owner reads aggregate data-quality stats (read-only, no member data) -----
+// C2 data-quality dashboard: bounded aggregation over the Owner's own
+// enrichment records. Never touches member content — only KAZEN's editorial
+// overrides. Read-only: computes counts, mutates nothing.
+export const getEnrichmentQualityStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertOwner(context);
+    const { data: rows, error } = await context.supabase
+      .from("media_enrichments")
+      .select(
+        "source, external_id, title_override, synopsis_override, poster_url_override, data_quality_status, is_published, updated_at",
+      )
+      .order("updated_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+
+    const list = rows ?? [];
+    const byStatus: Record<string, number> = {
+      complete: 0,
+      partial: 0,
+      provider_limited: 0,
+      needs_review: 0,
+    };
+    let published = 0;
+    let drafts = 0;
+    // "Attention" = published rows that still miss a core field, so a public
+    // fiche could look thin even though it is live.
+    const attention: Array<{
+      source: string;
+      externalId: string;
+      title: string;
+      reasons: string[];
+    }> = [];
+
+    for (const r of list) {
+      const status = (r.data_quality_status as string) ?? "needs_review";
+      if (status in byStatus) byStatus[status] += 1;
+      if (r.is_published) published += 1;
+      else drafts += 1;
+
+      const reasons: string[] = [];
+      if (r.is_published) {
+        if (!r.synopsis_override) reasons.push("synopsis manquant");
+        if (!r.poster_url_override) reasons.push("affiche manquante");
+        if (status === "needs_review") reasons.push("statut à revoir");
+      }
+      if (reasons.length) {
+        attention.push({
+          source: r.source as string,
+          externalId: r.external_id as string,
+          title:
+            (r.title_override as string) ||
+            `${r.source}:${r.external_id}`,
+          reasons,
+        });
+      }
+    }
+
+    return {
+      total: list.length,
+      capped: list.length >= 1000,
+      byStatus,
+      published,
+      drafts,
+      attention: attention.slice(0, 25),
+      attentionTotal: attention.length,
+    };
+  });
+
 interface EnrichmentInput {
   source: string;
   externalId: string;

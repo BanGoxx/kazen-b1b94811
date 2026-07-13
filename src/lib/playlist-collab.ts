@@ -219,12 +219,11 @@ export function useCollabMutations(playlistId: string) {
   const requestToJoin = useMutation({
     mutationFn: async (message: string) => {
       if (!user) throw new Error("not-auth");
-      const { error } = await supabase.from("playlist_requests").insert({
-        playlist_id: playlistId,
-        requester_id: user.id,
-        message: message.trim().slice(0, 500),
+      const { error } = await supabase.rpc("request_playlist_join", {
+        _playlist: playlistId,
+        _message: message.trim().slice(0, 500),
       });
-      if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+      if (error) throw new Error(error.message);
     },
     onSuccess: refresh,
   });

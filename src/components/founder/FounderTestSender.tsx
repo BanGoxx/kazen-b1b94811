@@ -97,7 +97,8 @@ export function FounderTestSender({
   });
 
   const s = status.data;
-  const canSend = Boolean(s?.canSendTest) && modelsReady;
+  const canSend =
+    Boolean(s?.canSendTest) && modelsReady && Boolean(generalModel && personalizedModel);
 
   return (
     <div className="space-y-6">

@@ -1709,7 +1709,12 @@ export type Database = {
         | "warn"
         | "timeout"
         | "dismiss_report"
-      moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
+      moderation_target_type:
+        | "review"
+        | "reply"
+        | "playlist"
+        | "playlist_item"
+        | "playlist_review"
       playlist_collab_role: "viewer" | "editor"
       playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
@@ -1861,7 +1866,13 @@ export const Constants = {
         "timeout",
         "dismiss_report",
       ],
-      moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
+      moderation_target_type: [
+        "review",
+        "reply",
+        "playlist",
+        "playlist_item",
+        "playlist_review",
+      ],
       playlist_collab_role: ["viewer", "editor"],
       playlist_request_status: ["pending", "accepted", "declined", "cancelled"],
       priority_level: ["basse", "normale", "haute"],

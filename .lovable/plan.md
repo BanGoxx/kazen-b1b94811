@@ -1,62 +1,177 @@
-# Phase 9 — Search and Add KAZEN Titles
+# Phase 10 — Member Reviews on Shared Playlists
 
-## Goal
-Let members search the full KAZEN catalogue (anime, films, séries) directly from list/playlist editing flows and add titles, with jacket, media type, year, existing-list state, and a direct fiche link — without leaving the list.
+**Verdict: READY FOR APPROVAL** (frontend + one additive migration). Nothing has been applied. Explicit approval **is required** before the migration runs; schema-dependent UI will only be built after approval.
 
-## Current state (audit)
-- Add-to-playlist today is **reverse**: you must be on a title fiche and use `AddToPlaylist.tsx`. There is no way to sit inside a playlist and search the catalogue to add titles.
-- Playlist add mutation already exists: `usePlaylistMutations().n` (`addItem`) in `src/lib/playlists.ts` (snapshots media into `media_records`, inserts into `playlist_items`, dedupes on duplicate). `removeItem` also exists.
-- Personal list add already exists via `ListControls` / `use-list.tsx`.
-- Search is already server-backed and reusable: `searchMedia` and `searchMediaPaged` (`src/lib/discover.functions.ts`), wired through `searchMediaQO` / `searchMediaInfiniteQO` (`src/lib/queries.ts`). AniList + TMDB, already deduped and normalized to `MediaItem`.
-- Playlist edit surface: `src/routes/_authenticated/mes-playlists.tsx` (owner). Playlist detail: `src/routes/playlist.$id.tsx`.
+## 1. Audit findings (existing foundations to reuse)
 
-No new capability is missing — this is a UI composition over existing search + add mutations. **No migration, no schema change, no new secret, no external provider.**
+- **Shared playlists** (`playlists`): visibility = `is_public`, plus `hidden_at`/`deleted_at` soft-state. RLS `Visible public playlists are readable` = `(is_public OR owner) AND not hidden/deleted OR owner OR moderator`. Collaborators via `playlist_collaborators` (viewer/editor). Detail read by `usePlaylist` (browser client, RLS-gated) exposing `meta.isPublic`, `meta.ownerId`.
+- **Media reviews** (`fiche_reviews`): keyed by `media_source`+`media_external_id`, `body` 1–4000, `rating` smallint 0–10, soft-delete via `hidden_at`/`deleted_at`, one-per-user upsert. Written directly through the browser client under RLS. Profiles are batch-joined (`.in('id', ids)`) — no N+1.
+- **Reporting**: `content_reports` + `submit_content_report` RPC (dedup via partial unique on open reports, reporter derived from `auth.uid()`), enum `moderation_target_type = {review, reply, playlist, playlist_item}`. UI `ReportDialog` already reused on playlists.
+- **Moderation spine**: `moderate_content` RPC (hide/unhide/soft_delete/restore + audit into `moderation_actions`), `moderationQueue` server fn with `loadTargetSnapshot`, `/moderation` console with `TARGET_LABELS`. `can_moderate_now` currently = owner only.
+- **Notifications**: `notify_member` RPC (respects `shared_list_enabled`/`quiet_mode`, deduped by `event_key`).
 
-## What will be built
+**Conclusion:** `fiche_reviews` cannot be safely reused — it is hard-bound to media source/external id and its RLS/CHECK constraints. A **dedicated `shared_playlist_reviews` table** is safer and avoids mixing media and playlist reviews. The report + moderation + notification spines **are reused** by adding one enum value and extending the existing RPCs/snapshot.
 
-### 1. New component: `src/components/media/CatalogSearchPicker.tsx`
-A compact, reusable, premium picker (matching graphite/crimson DA):
-- Debounced search input (~300 ms) driving `searchMediaInfiniteQO(q)` (bounded pagination, "Charger plus", no full-catalogue download).
-- Result rows: jacket (via `SafeImage`, safe missing-poster fallback), title + alt title, media-type badge (Anime/Série/Film from normalized `mediaType`, never inferred from text), year when available.
-- Each row: an "Ajouter" action + a fiche link (`/media/$source/$id`) opening in the same internal routing. No raw IDs shown.
-- "Existing-list state": rows already present show a checked/"Ajouté" state instead of the add button.
-- Props keep it surface-agnostic: `onAdd(item)`, `isAdded(item) => boolean`, `pending` set. So it drives either playlist `addItem` or personal-list add.
+## 2. Schema recommendation
 
-### 2. Wire into playlist editing — `mes-playlists.tsx` (and/or `playlist.$id.tsx` owner view)
-- Add an "Ajouter des titres" trigger (Dialog/inline panel) inside the owner edit flow, using the existing `usePlaylistMutations().n` mutation.
-- `isAdded` derived from the loaded playlist items (`media_key`); prevents duplicate title in the same list (existing dedupe already enforces this server-side).
-- Preserve all current manual add/remove/reorder/edit capabilities untouched.
+Dedicated table `shared_playlist_reviews`. **Deviation from the brief:** use `hidden_at/hidden_by/deleted_at/deleted_by` (as in `fiche_reviews`) instead of a `moderation_status text` column, so `moderate_content` works unchanged — a safer reuse of the existing spine than inventing a parallel status vocabulary.
 
-### 3. Wire into personal list ("Ma liste") — optional same picker
-- Reuse `CatalogSearchPicker` with `onAdd` calling the existing list upsert (through `use-list` mutations + `applyTrackingRules` from Phase 5, so a freshly-added title still respects tracking defaults).
-- Only if the current "Ma liste" surface has a natural add entry point; otherwise limit Phase 9 to playlists and note it.
+## 3. One-review-per-user decision
 
-## Constraints honored
-- Debounced + bounded pagination; no client-side full catalogue.
-- Media type from normalized `MediaItem.mediaType` only.
-- List privacy / ownership RLS unchanged — reuses existing owner-scoped mutations.
-- No DA change, no card-proportion change, no route/table/API rename.
-- No duplicate titles unless product already allows it (it does not).
+**Recommended: one review per author per playlist** (`UNIQUE (playlist_id, author_id)`), edited via upsert. Matches `fiche_reviews` "avis" semantics and keeps the list clean, countable and paginable. **Tradeoff:** members cannot post multiple takes over time; re-reviewing overwrites and stamps `edited_at`. This mirrors existing product behaviour and is the least surprising. (Multiple reviews would need spam controls and threading we do not want in Phase 10.)
 
-## Technical notes
-- Reuse `searchMediaInfiniteQO`, `SafeImage`, `MediaCard`/badge tokens, `usePlaylistMutations`, `useListMutations`.
-- New file only: `CatalogSearchPicker.tsx`; edits: `mes-playlists.tsx` (and possibly `playlist.$id.tsx`, `mes-listes.tsx`).
-- No `createServerFn` changes needed; search fns already exist and are SSR-safe with the browser-fallback pattern in `queries.ts`.
+## 4. Eligibility rules
 
-## QA matrix
-- Empty query / short query (no fetch) / no results state.
-- Anime, film, série each returned with correct badge + year + jacket + fallback poster.
-- Add a title → appears in playlist; row flips to "Ajouté"; re-adding blocked (dedupe).
-- Fiche link navigates correctly and back.
-- Load-more pagination; rapid typing debounce; no infinite spinner.
-- Ownership/RLS: non-owner cannot add; private playlist stays private.
-- Personal-list add (if in scope) applies Phase 5 tracking defaults.
-- Mobile/desktop; dark/light; keyboard/focus/ARIA on input, rows, add buttons.
-- Regression: existing `AddToPlaylist` fiche flow, remove, reorder, scroll restoration, cache all intact.
-- Full project typecheck.
+Create/edit allowed only when: authenticated; playlist `is_public`; not `hidden_at`/`deleted_at`; caller may view it. Owner **may** review their own public playlist (allowed, low-risk; can be forbidden on request). Private personal "Ma liste" is never affected (different feature). **Playlist goes private → reviews are preserved but hidden from public** automatically, because the SELECT policy is derived from live playlist visibility (no delete, no data loss). If it becomes public again they reappear.
 
-## Out of scope / stop conditions
-- No new table, migration, secret, provider, or email/delivery activation.
-- No automatic publish. Manual publication required after PASS.
+## 5. Content model
 
-Approve this and I'll implement Phase 9, run the QA matrix + typecheck, and return a PASS/PARTIAL/BLOCKED verdict without publishing.
+Written `body` required, plain text only, 1–4000 chars (trimmed, control chars stripped, **no raw HTML** — rendered as text, never `dangerouslySetInnerHTML`). Optional `rating` smallint 0–10 (matches fiche convention). Links shown as plain text, not auto-linked in Phase 10. Only `edited_at` timestamp (no full edit history). **Soft delete** (`deleted_at`), never hard delete, to preserve moderation audit.
+
+## 6. Exact proposed migration (additive, non-destructive — NOT applied)
+
+```sql
+-- Enum: reuse the moderation spine for a new target type
+ALTER TYPE public.moderation_target_type ADD VALUE IF NOT EXISTS 'playlist_review';
+
+CREATE TABLE public.shared_playlist_reviews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  playlist_id uuid NOT NULL REFERENCES public.playlists(id) ON DELETE CASCADE,
+  author_id  uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  body text NOT NULL,
+  rating smallint,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  edited_at  timestamptz,
+  hidden_at  timestamptz, hidden_by uuid,
+  deleted_at timestamptz, deleted_by uuid,
+  CONSTRAINT spr_body_len CHECK (char_length(body) BETWEEN 1 AND 4000),
+  CONSTRAINT spr_rating_range CHECK (rating IS NULL OR (rating BETWEEN 0 AND 10)),
+  CONSTRAINT spr_one_per_author UNIQUE (playlist_id, author_id)
+);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.shared_playlist_reviews TO authenticated;
+GRANT SELECT ON public.shared_playlist_reviews TO anon;   -- public playlists are anon-readable
+GRANT ALL ON public.shared_playlist_reviews TO service_role;
+
+CREATE INDEX idx_spr_playlist_created ON public.shared_playlist_reviews (playlist_id, created_at DESC);
+CREATE INDEX idx_spr_author ON public.shared_playlist_reviews (author_id);
+CREATE INDEX idx_spr_moderation ON public.shared_playlist_reviews (hidden_at, deleted_at);
+
+CREATE TRIGGER trg_spr_updated_at BEFORE UPDATE ON public.shared_playlist_reviews
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+ALTER TABLE public.shared_playlist_reviews ENABLE ROW LEVEL SECURITY;
+
+-- Visibility helper (security definer avoids recursion / cross-table RLS cost)
+CREATE OR REPLACE FUNCTION public.can_view_playlist(_playlist uuid, _user uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.playlists p
+    WHERE p.id = _playlist AND p.hidden_at IS NULL AND p.deleted_at IS NULL
+      AND (p.is_public OR p.owner_id = _user))
+  OR public.is_moderator(_user);
+$$;
+
+-- Read policy only; ALL writes go through SECURITY DEFINER RPCs (no user write policies)
+CREATE POLICY "Read reviews on viewable playlists"
+ON public.shared_playlist_reviews FOR SELECT TO public
+USING (
+  (hidden_at IS NULL AND deleted_at IS NULL AND public.can_view_playlist(playlist_id, auth.uid()))
+  OR auth.uid() = author_id
+  OR public.is_moderator(auth.uid())
+);
+
+-- Create/edit (upsert, self only, eligibility enforced server-side, rate-limited)
+CREATE OR REPLACE FUNCTION public.upsert_playlist_review(_playlist uuid, _body text, _rating smallint DEFAULT NULL)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE caller uuid := auth.uid(); is_pub boolean; ownr uuid; b text := trim(coalesce(_body,'')); rid uuid; recent int;
+BEGIN
+  IF caller IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+  SELECT is_public, owner_id INTO is_pub, ownr FROM public.playlists
+    WHERE id=_playlist AND hidden_at IS NULL AND deleted_at IS NULL;
+  IF ownr IS NULL THEN RAISE EXCEPTION 'Playlist introuvable.'; END IF;
+  IF NOT is_pub THEN RAISE EXCEPTION 'Cette liste n''accepte pas d''avis.'; END IF;
+  IF char_length(b) < 1 OR char_length(b) > 4000 THEN RAISE EXCEPTION 'Avis invalide.'; END IF;
+  IF _rating IS NOT NULL AND (_rating < 0 OR _rating > 10) THEN RAISE EXCEPTION 'Note invalide.'; END IF;
+  SELECT count(*) INTO recent FROM public.shared_playlist_reviews
+    WHERE author_id=caller AND updated_at > now() - interval '2 minutes';
+  IF recent >= 10 THEN RAISE EXCEPTION 'Trop d''avis récemment. Réessaie plus tard.'; END IF;
+  INSERT INTO public.shared_playlist_reviews (playlist_id, author_id, body, rating)
+  VALUES (_playlist, caller, b, _rating)
+  ON CONFLICT (playlist_id, author_id) DO UPDATE
+    SET body=excluded.body, rating=excluded.rating, edited_at=now(), updated_at=now(),
+        deleted_at=NULL, deleted_by=NULL
+  RETURNING id INTO rid;
+  IF ownr <> caller THEN
+    PERFORM public.notify_member(ownr, 'playlist_review',
+      'plrev:'||_playlist::text||':'||caller::text,
+      'Nouvel avis sur ta liste', left(b,140), '/playlist/'||_playlist::text);
+  END IF;
+  RETURN rid;
+END; $$;
+
+-- Soft delete (author or moderator)
+CREATE OR REPLACE FUNCTION public.delete_playlist_review(_id uuid)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE caller uuid := auth.uid(); a uuid;
+BEGIN
+  IF caller IS NULL THEN RAISE EXCEPTION 'Authentication required.'; END IF;
+  SELECT author_id INTO a FROM public.shared_playlist_reviews WHERE id=_id AND deleted_at IS NULL;
+  IF a IS NULL THEN RETURN; END IF;
+  IF a <> caller AND NOT public.can_moderate_now(caller) THEN RAISE EXCEPTION 'Action non autorisée.'; END IF;
+  UPDATE public.shared_playlist_reviews SET deleted_at=now(), deleted_by=caller, updated_at=now() WHERE id=_id;
+END; $$;
+
+GRANT EXECUTE ON FUNCTION public.upsert_playlist_review(uuid,text,smallint) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.delete_playlist_review(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_view_playlist(uuid,uuid) TO authenticated, anon;
+```
+
+Plus a small `ALTER FUNCTION public.moderate_content` / `submit_content_report` patch (same migration): add a `'playlist_review'` branch to each `target_exists` CASE, and a `hide/unhide/soft_delete/restore` UPDATE branch on `shared_playlist_reviews` inside `moderate_content` — mirroring the existing `review` branch exactly.
+
+## 7. RLS + server-enforcement plan
+
+Read: single SELECT policy above (anon + authenticated). **No user INSERT/UPDATE/DELETE policies** — every write is a SECURITY DEFINER RPC that derives the author from `auth.uid()`, so arbitrary `author_id`, cross-user edits, private-playlist writes and hidden-row enumeration are structurally impossible. Moderation stays owner-gated via `can_moderate_now`.
+
+## 8. RPC / server-function plan
+
+- DB RPCs: `upsert_playlist_review`, `delete_playlist_review` (above); moderation via existing `moderate_content`; reporting via existing `submit_content_report`.
+- New `src/lib/playlist-reviews.functions.ts`: `upsertPlaylistReview`, `deletePlaylistReview` (`requireSupabaseAuth`, thin RPC wrappers — same shape as `moderation.functions.ts`).
+- New `src/lib/playlist-reviews.ts`: `usePlaylistReviews(playlistId)` (browser client read, RLS-gated, batch profile join, page size 10 with load-more), `usePlaylistReviewCount`, `useMyPlaylistReview`, mutation hooks via `useServerFn`.
+
+## 9. Moderation / reporting integration
+
+Reuse `ReportDialog` with `targetType="playlist_review"`; add `'playlist_review'` to the `ModerationTargetType` union, to `loadTargetSnapshot` (preview from `body`, link `/playlist/{playlist_id}`, author public identity only), and to `TARGET_LABELS` ("Avis sur liste"). Queue, audit trail and safe actions come for free.
+
+## 10. Notification decision
+
+**Include one, minimal:** owner notified once per (playlist, author) on a new review via `notify_member` (respects prefs, deduped). No per-edit, no like, no public feed. Author moderation-result notifications are **deferred** as optional follow-up.
+
+## 11. UI plan
+
+New `src/components/playlist/PlaylistReviews.tsx`, mounted at the bottom of `playlist.$id.tsx` **only when `data.meta.isPublic`**: section title + count, compact form for eligible authenticated members (textarea + optional 0–10 rating), empty state, load-more paginated list (author avatar/name via existing `Avatar`, created date, "modifié" indicator, body as plain text, optional rating), edit/delete own, `ReportDialog` on others, moderator-state chip when hidden. Uses existing tokens only — **no DA change** (black + metallic-crimson preserved). Jacket grid, favorite/rating metadata, mobile and CollabPanel untouched.
+
+## 12. Performance plan
+
+Page size 10 + load-more; ordered by `(playlist_id, created_at DESC)` index; count via `head:true` count query; single batched profile fetch (no N+1); moderation index on `(hidden_at, deleted_at)`; no full-history load.
+
+## 13. Rollback
+
+`DROP TABLE public.shared_playlist_reviews CASCADE;` + `DROP FUNCTION upsert_playlist_review, delete_playlist_review, can_view_playlist;` + revert the `moderate_content`/`submit_content_report` branches. The added enum label `'playlist_review'` cannot be removed cleanly in Postgres but is inert once unreferenced — documented, harmless. Everything is additive; no existing table/policy/data is modified.
+
+## 14. QA matrix (post-approval)
+
+Anon views public playlist (reviews visible, no form) · anon review attempt (blocked) · member creates/edits/deletes own · owner reviews own public list · duplicate → upsert overwrite · edit another's (blocked) · private list (no section, no writes) · public→private (reviews hidden, preserved) → back to public (reappear) · report review → queue → moderator hide/remove/restore · pagination + empty state + 100+ reviews · mobile + dark · cross-user isolation · `tsgo` typecheck · regression on playlists, lists, forum, notifications, Founder Console, moderation queue.
+
+## 15. Files expected to change (after approval)
+
+New: migration; `src/lib/playlist-reviews.ts`; `src/lib/playlist-reviews.functions.ts`; `src/components/playlist/PlaylistReviews.tsx`.
+Edited (minimal): `src/routes/playlist.$id.tsx` (mount section); `src/lib/moderation.functions.ts` (union + snapshot branch); `src/routes/_authenticated/moderation.tsx` (`TARGET_LABELS`). `ReportDialog` needs no change beyond the widened union type it imports.
+
+## 16. Risks
+
+Enum-value add is irreversible (mitigated: inert). Owner-review allowance is a product choice (easy to forbid). Visibility-derived read policy means private-toggle instantly hides reviews (intended). `ADD VALUE` to an enum must be committed before use in the same migration — will be split so the enum commit precedes the RPC patch.
+
+## 17. Confirmation
+
+Nothing was applied. No migration executed, no schema-dependent UI built. Awaiting explicit approval to proceed.

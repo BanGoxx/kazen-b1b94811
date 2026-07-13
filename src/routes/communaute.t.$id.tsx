@@ -297,6 +297,35 @@ function TopicPage() {
                 </div>
               </div>
               <AuthorByline author={topic.author} when={topic.createdAt} edited={topic.updatedAt !== topic.createdAt} size="md" />
+              {(isTopicAuthor || (canModerate && topic.coverPath)) && (
+                <div className="flex flex-wrap gap-2">
+                  {isTopicAuthor && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => {
+                        setCoverFile(null);
+                        setCoverAlt(topic.coverAlt ?? "");
+                        setCoverOpen(true);
+                      }}
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      {topic.coverPath ? "Modifier la couverture" : "Ajouter une couverture"}
+                    </Button>
+                  )}
+                  {canModerate && !isTopicAuthor && topic.coverPath && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-muted-foreground hover:text-destructive"
+                      onClick={modClearCover}
+                    >
+                      <EyeOff className="h-4 w-4" /> Retirer la couverture
+                    </Button>
+                  )}
+                </div>
+              )}
               <PostBody text={topic.body} />
             </article>
 

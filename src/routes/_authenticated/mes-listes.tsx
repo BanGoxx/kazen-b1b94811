@@ -356,13 +356,19 @@ function MyListsPage() {
             <div className="rounded-2xl border border-dashed border-border bg-card/40 px-6 py-20 text-center">
               <p className="font-display text-lg font-bold">Votre liste est encore vide</p>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Ajoutez un titre depuis n'importe quelle fiche pour le suivre, le noter et
-                l'organiser avec vos tags.
+                Recherchez un titre à ajouter, ou ajoutez-le depuis n'importe quelle fiche pour le
+                suivre, le noter et l'organiser avec vos tags.
               </p>
-              <Button asChild variant="aurora" className="mt-5">
-                <Link to="/">Découvrir des titres</Link>
-              </Button>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                <Button variant="aurora" className="gap-1.5" onClick={() => setAddOpen(true)}>
+                  <Plus className="h-4 w-4" /> Ajouter un titre
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link to="/">Découvrir des titres</Link>
+                </Button>
+              </div>
             </div>
+
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card/40 py-20 text-center">
               <p className="text-muted-foreground">Aucun titre ne correspond à ces filtres.</p>

@@ -1,5 +1,10 @@
 // KAZEN Internal Notification Center — client data hooks.
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
@@ -30,10 +35,16 @@ export function useNotifications() {
   const markAllFn = useServerFn(markAllNotificationsRead);
   const dismissFn = useServerFn(dismissNotification);
 
-  const listQuery = useQuery({
+  const listQuery = useInfiniteQuery({
     queryKey: [...KEY, "list", user?.id],
-    queryFn: () => listFn(),
+    queryFn: ({ pageParam }) =>
+      listFn({ data: { offset: pageParam as number } }),
     enabled,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.hasMore
+        ? allPages.reduce((acc, p) => acc + p.items.length, 0)
+        : undefined,
     staleTime: 60_000,
   });
 
@@ -78,10 +89,20 @@ export function useNotifications() {
     onSuccess: invalidate,
   });
 
+  const notifications = (listQuery.data?.pages ?? []).flatMap((p) => p.items);
+
   return {
-    notifications: listQuery.data ?? [],
+    notifications,
     isLoading: listQuery.isLoading,
     unreadCount: countQuery.data?.count ?? 0,
+    snoozed: countQuery.data?.snoozed ?? false,
+    hasMore: !!listQuery.hasNextPage,
+    isLoadingMore: listQuery.isFetchingNextPage,
+    loadMore: () => {
+      if (listQuery.hasNextPage && !listQuery.isFetchingNextPage) {
+        listQuery.fetchNextPage();
+      }
+    },
     markRead: (id: string) => markRead.mutate(id),
     markAll: () => markAll.mutate(),
     dismiss: (id: string) => dismiss.mutate(id),

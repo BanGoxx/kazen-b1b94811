@@ -19,13 +19,16 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   isCategoryEnabled,
+  isSnoozed,
   type AppNotification,
   type NotificationPreferences,
+  type ReconcileResult,
 } from "@/lib/notifications";
 import { getRelevantArticlesForTitle } from "@/lib/news";
 import { MEDIA_TYPE_LABELS, type MediaSource, type MediaType } from "@/lib/media-types";
 
 const LIST_LIMIT = 60;
+const PAGE_SIZE = 20;
 const RELEASE_WINDOW_DAYS = 14;
 const MAX_CANDIDATE_ITEMS = 120;
 
@@ -67,6 +70,28 @@ function mapRow(r: DbNotificationRow): AppNotification {
 // Preferences
 // ---------------------------------------------------------------------------
 
+function mapPrefsRow(data: {
+  new_episode_enabled: boolean;
+  upcoming_release_enabled: boolean;
+  related_article_enabled: boolean;
+  recommendation_enabled: boolean;
+  shared_list_enabled: boolean;
+  system_notice_enabled: boolean;
+  quiet_mode?: boolean | null;
+  snooze_until?: string | null;
+}): NotificationPreferences {
+  return {
+    new_episode_enabled: data.new_episode_enabled,
+    upcoming_release_enabled: data.upcoming_release_enabled,
+    related_article_enabled: data.related_article_enabled,
+    recommendation_enabled: data.recommendation_enabled,
+    shared_list_enabled: data.shared_list_enabled,
+    system_notice_enabled: data.system_notice_enabled,
+    quiet_mode: data.quiet_mode ?? false,
+    snooze_until: data.snooze_until ?? null,
+  };
+}
+
 export const getMyNotificationPreferences = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<NotificationPreferences> => {
@@ -76,31 +101,35 @@ export const getMyNotificationPreferences = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!data) return { ...DEFAULT_NOTIFICATION_PREFERENCES };
-    return {
-      new_episode_enabled: data.new_episode_enabled,
-      upcoming_release_enabled: data.upcoming_release_enabled,
-      related_article_enabled: data.related_article_enabled,
-      recommendation_enabled: data.recommendation_enabled,
-      shared_list_enabled: data.shared_list_enabled,
-      system_notice_enabled: data.system_notice_enabled,
-    };
+    return mapPrefsRow(data);
   });
 
 export const updateMyNotificationPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: Partial<NotificationPreferences>) => data)
   .handler(async ({ data, context }): Promise<NotificationPreferences> => {
-    const allowed: (keyof NotificationPreferences)[] = [
+    const boolKeys: (keyof NotificationPreferences)[] = [
       "new_episode_enabled",
       "upcoming_release_enabled",
       "related_article_enabled",
       "recommendation_enabled",
       "shared_list_enabled",
       "system_notice_enabled",
+      "quiet_mode",
     ];
-    const patch: Record<string, boolean> = {};
-    for (const k of allowed) {
+    const patch: Record<string, boolean | string | null> = {};
+    for (const k of boolKeys) {
       if (typeof data[k] === "boolean") patch[k] = data[k] as boolean;
+    }
+    // snooze_until: accept a future ISO string, or null to clear.
+    if ("snooze_until" in data) {
+      const raw = data.snooze_until;
+      if (raw === null) {
+        patch.snooze_until = null;
+      } else if (typeof raw === "string") {
+        const t = new Date(raw).getTime();
+        patch.snooze_until = Number.isNaN(t) ? null : new Date(t).toISOString();
+      }
     }
     const { data: row, error } = await context.supabase
       .from("member_notification_preferences")
@@ -111,14 +140,7 @@ export const updateMyNotificationPreferences = createServerFn({ method: "POST" }
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return {
-      new_episode_enabled: row.new_episode_enabled,
-      upcoming_release_enabled: row.upcoming_release_enabled,
-      related_article_enabled: row.related_article_enabled,
-      recommendation_enabled: row.recommendation_enabled,
-      shared_list_enabled: row.shared_list_enabled,
-      system_notice_enabled: row.system_notice_enabled,
-    };
+    return mapPrefsRow(row);
   });
 
 // ---------------------------------------------------------------------------
@@ -127,26 +149,50 @@ export const updateMyNotificationPreferences = createServerFn({ method: "POST" }
 
 export const listMyNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AppNotification[]> => {
-    const nowIso = new Date().toISOString();
-    const { data, error } = await context.supabase
-      .from("member_notifications")
-      .select(
-        "id,notification_type,event_key,title,message,destination_url,media_source,media_external_id,article_slug,occurred_at,created_at,read_at,dismissed_at",
-      )
-      .eq("user_id", context.userId)
-      .is("dismissed_at", null)
-      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-      .order("occurred_at", { ascending: false })
-      .limit(LIST_LIMIT);
-    if (error) return [];
-    return (data as DbNotificationRow[]).map(mapRow);
-  });
+  .inputValidator((data?: { offset?: number; limit?: number }) => data ?? {})
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ items: AppNotification[]; hasMore: boolean }> => {
+      const offset = Math.max(0, Math.floor(data.offset ?? 0));
+      const limit = Math.min(
+        LIST_LIMIT,
+        Math.max(1, Math.floor(data.limit ?? PAGE_SIZE)),
+      );
+      const nowIso = new Date().toISOString();
+      // Fetch one extra row to determine hasMore deterministically.
+      const { data: rows, error } = await context.supabase
+        .from("member_notifications")
+        .select(
+          "id,notification_type,event_key,title,message,destination_url,media_source,media_external_id,article_slug,occurred_at,created_at,read_at,dismissed_at",
+        )
+        .eq("user_id", context.userId)
+        .is("dismissed_at", null)
+        .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+        .order("occurred_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(offset, offset + limit);
+      if (error) return { items: [], hasMore: false };
+      const list = (rows as DbNotificationRow[]) ?? [];
+      const hasMore = list.length > limit;
+      return { items: list.slice(0, limit).map(mapRow), hasMore };
+    },
+  );
 
 export const getMyUnreadCount = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ count: number }> => {
+  .handler(async ({ context }): Promise<{ count: number; snoozed: boolean }> => {
     const nowIso = new Date().toISOString();
+    // A5 — while snoozed, suppress the unread badge (notifications stay visible).
+    const { data: prefRow } = await context.supabase
+      .from("member_notification_preferences")
+      .select("snooze_until")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (prefRow && isSnoozed({ snooze_until: prefRow.snooze_until ?? null })) {
+      return { count: 0, snoozed: true };
+    }
     const { count, error } = await context.supabase
       .from("member_notifications")
       .select("id", { count: "exact", head: true })
@@ -154,8 +200,8 @@ export const getMyUnreadCount = createServerFn({ method: "GET" })
       .is("read_at", null)
       .is("dismissed_at", null)
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
-    if (error) return { count: 0 };
-    return { count: count ?? 0 };
+    if (error) return { count: 0, snoozed: false };
+    return { count: count ?? 0, snoozed: false };
   });
 
 // ---------------------------------------------------------------------------
@@ -228,7 +274,7 @@ function releaseWording(mediaType: MediaType, days: number): { title: string; me
 export const reconcileMyNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(
-    async ({ context }): Promise<{ ok: boolean; generated: number }> => {
+    async ({ context }): Promise<ReconcileResult> => {
       try {
         // 1) Preferences gate which categories may be generated.
         const { data: prefRow } = await context.supabase
@@ -237,15 +283,16 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           .eq("user_id", context.userId)
           .maybeSingle();
         const prefs: NotificationPreferences = prefRow
-          ? {
-              new_episode_enabled: prefRow.new_episode_enabled,
-              upcoming_release_enabled: prefRow.upcoming_release_enabled,
-              related_article_enabled: prefRow.related_article_enabled,
-              recommendation_enabled: prefRow.recommendation_enabled,
-              shared_list_enabled: prefRow.shared_list_enabled,
-              system_notice_enabled: prefRow.system_notice_enabled,
-            }
+          ? mapPrefsRow(prefRow)
           : { ...DEFAULT_NOTIFICATION_PREFERENCES };
+
+        // A5 — quiet mode / snooze fully pause new generation (calm by design).
+        if (prefs.quiet_mode) {
+          return { ok: true, generated: 0, skipped: "quiet_mode", scanned: 0 };
+        }
+        if (isSnoozed(prefs)) {
+          return { ok: true, generated: 0, skipped: "snoozed", scanned: 0 };
+        }
 
         // 2) The member's list joined to media metadata (RLS-scoped).
         const { data: items } = await context.supabase
@@ -255,6 +302,7 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           .limit(MAX_CANDIDATE_ITEMS);
 
         const now = new Date();
+        const scanned = (items ?? []).length;
         const rows: Record<string, unknown>[] = [];
 
         for (const item of (items ?? []) as Array<{
@@ -322,7 +370,7 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           }
         }
 
-        if (rows.length === 0) return { ok: true, generated: 0 };
+        if (rows.length === 0) return { ok: true, generated: 0, scanned };
 
         // 3) Insert idempotently: never overwrite existing read/dismiss state.
         const { supabaseAdmin } = await import(
@@ -334,11 +382,11 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
             onConflict: "user_id,event_key",
             ignoreDuplicates: true,
           });
-        if (error) return { ok: false, generated: 0 };
-        return { ok: true, generated: rows.length };
+        if (error) return { ok: false, generated: 0, skipped: "error", scanned };
+        return { ok: true, generated: rows.length, scanned };
       } catch {
         // Resilient by design: a reconciliation failure must never break the UI.
-        return { ok: false, generated: 0 };
+        return { ok: false, generated: 0, skipped: "error" };
       }
     },
   );

@@ -643,9 +643,11 @@ export type Database = {
         Row: {
           created_at: string
           new_episode_enabled: boolean
+          quiet_mode: boolean
           recommendation_enabled: boolean
           related_article_enabled: boolean
           shared_list_enabled: boolean
+          snooze_until: string | null
           system_notice_enabled: boolean
           upcoming_release_enabled: boolean
           updated_at: string
@@ -654,9 +656,11 @@ export type Database = {
         Insert: {
           created_at?: string
           new_episode_enabled?: boolean
+          quiet_mode?: boolean
           recommendation_enabled?: boolean
           related_article_enabled?: boolean
           shared_list_enabled?: boolean
+          snooze_until?: string | null
           system_notice_enabled?: boolean
           upcoming_release_enabled?: boolean
           updated_at?: string
@@ -665,9 +669,11 @@ export type Database = {
         Update: {
           created_at?: string
           new_episode_enabled?: boolean
+          quiet_mode?: boolean
           recommendation_enabled?: boolean
           related_article_enabled?: boolean
           shared_list_enabled?: boolean
+          snooze_until?: string | null
           system_notice_enabled?: boolean
           upcoming_release_enabled?: boolean
           updated_at?: string

@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Bell,
   CalendarClock,
@@ -111,9 +111,18 @@ function Row({
 }
 
 function NotificationsPage() {
-  const router = useRouter();
-  const { notifications, unreadCount, isLoading, markRead, markAll, dismiss } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    snoozed,
+    isLoading,
+    hasMore,
+    isLoadingMore,
+    loadMore,
+    markRead,
+    markAll,
+    dismiss,
+  } = useNotifications();
 
   return (
     <AppShell>
@@ -125,9 +134,11 @@ function NotificationsPage() {
               Notifications
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {unreadCount > 0
-                ? `${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}.`
-                : "Vous êtes à jour."}
+              {snoozed
+                ? "Mise en veille active — le badge est masqué."
+                : unreadCount > 0
+                  ? `${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}.`
+                  : "Vous êtes à jour."}
             </p>
           </div>
           <Button asChild variant="ghost" size="sm">
@@ -164,11 +175,25 @@ function NotificationsPage() {
             </Button>
           </div>
         ) : (
-          <ul className="space-y-2.5">
-            {notifications.map((n) => (
-              <Row key={n.id} n={n} onDismiss={dismiss} onRead={markRead} />
-            ))}
-          </ul>
+          <>
+            <ul className="space-y-2.5">
+              {notifications.map((n) => (
+                <Row key={n.id} n={n} onDismiss={dismiss} onRead={markRead} />
+              ))}
+            </ul>
+            {hasMore && (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadMore()}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore ? "Chargement…" : "Charger plus"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </AppShell>

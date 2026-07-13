@@ -27,6 +27,11 @@ export interface NotificationPreferences {
   recommendation_enabled: boolean;
   shared_list_enabled: boolean;
   system_notice_enabled: boolean;
+  // A5 — granular delivery controls (kept fully separate from email consent).
+  /** When true, no new notifications are generated (existing ones stay visible). */
+  quiet_mode: boolean;
+  /** ISO timestamp until which the unread badge is suppressed; null = off. */
+  snooze_until: string | null;
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
@@ -36,7 +41,29 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   recommendation_enabled: true,
   shared_list_enabled: true,
   system_notice_enabled: true,
+  quiet_mode: false,
+  snooze_until: null,
 };
+
+/** True when the member has an active snooze window (badge suppressed). */
+export function isSnoozed(
+  prefs: Pick<NotificationPreferences, "snooze_until">,
+  now = new Date(),
+): boolean {
+  if (!prefs.snooze_until) return false;
+  const t = new Date(prefs.snooze_until).getTime();
+  return !Number.isNaN(t) && t > now.getTime();
+}
+
+/** Diagnostics returned by reconciliation (A2 — observability, no PII). */
+export interface ReconcileResult {
+  ok: boolean;
+  generated: number;
+  /** Reason generation was skipped, when applicable. */
+  skipped?: "quiet_mode" | "snoozed" | "error";
+  /** Count of candidate list items scanned. */
+  scanned?: number;
+}
 
 export interface AppNotification {
   id: string;
@@ -66,9 +93,18 @@ export const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = 
   system_notice: "system_notice",
 };
 
+/** Boolean per-category toggle keys (excludes quiet_mode / snooze controls). */
+export type NotificationToggleKey =
+  | "new_episode_enabled"
+  | "upcoming_release_enabled"
+  | "related_article_enabled"
+  | "recommendation_enabled"
+  | "shared_list_enabled"
+  | "system_notice_enabled";
+
 export const CATEGORY_PREF_KEY: Record<
   NotificationCategory,
-  keyof NotificationPreferences
+  NotificationToggleKey
 > = {
   new_episode: "new_episode_enabled",
   upcoming_release: "upcoming_release_enabled",

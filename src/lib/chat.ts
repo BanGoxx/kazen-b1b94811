@@ -159,6 +159,7 @@ export function useChatInbox() {
             : null,
           unread,
           isRequestToMe: c.status === "pending" && c.requested_by !== uid,
+          amRequester: c.requested_by === uid,
         };
       });
     },

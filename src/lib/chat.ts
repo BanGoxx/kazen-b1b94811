@@ -245,7 +245,10 @@ export function useMessages(id: string | undefined, limit: number) {
   return useQuery({
     queryKey: ["chat", "messages", id, limit, uid],
     enabled: !!id && !!uid,
-    refetchInterval: REFRESH_MS,
+    refetchInterval: MESSAGES_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    retry: 1,
     queryFn: async (): Promise<{ messages: ChatMessage[]; hasMore: boolean }> => {
       if (!id) return { messages: [], hasMore: false };
       const { data, error } = await supabase

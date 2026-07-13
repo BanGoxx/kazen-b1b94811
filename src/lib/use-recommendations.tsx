@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   trendingAnimeQO,
   popularAnimeQO,
@@ -17,7 +18,14 @@ import { useMyList } from "./use-list";
 import { getMyProfile } from "./list.functions";
 import { useAuth } from "./auth";
 import { buildTasteProfile, normalizePool, type TasteProfile } from "./recommend";
+import {
+  getMyRecoFeedback,
+  addRecoFeedback,
+  removeRecoFeedback,
+  type RecoFeedbackEntry,
+} from "./recommend.functions";
 import type { MediaItem } from "./media-types";
+
 
 
 /**

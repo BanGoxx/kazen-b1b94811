@@ -1,0 +1,1 @@
+CREATE TYPE public.playlist_collab_role AS ENUM ('viewer','editor');

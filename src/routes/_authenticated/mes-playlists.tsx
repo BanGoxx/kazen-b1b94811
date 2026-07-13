@@ -22,6 +22,7 @@ import {
   usePlaylistMutations,
   type PlaylistMeta,
 } from "@/lib/playlists";
+import { useSharedWithMe } from "@/lib/playlist-collab";
 import { MediaSearchPicker } from "@/components/media/MediaSearchPicker";
 import { SafeImage } from "@/components/media/SafeImage";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";
@@ -51,6 +52,46 @@ export const Route = createFileRoute("/_authenticated/mes-playlists")({
   }),
   component: MyPlaylistsPage,
 });
+
+function SharedWithMeSection() {
+  const { data: shared = [], isLoading } = useSharedWithMe();
+  if (isLoading || shared.length === 0) return null;
+  return (
+    <section className="space-y-3">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <ListMusic className="h-4 w-4 text-primary" /> Partagées avec moi
+      </h2>
+      <div className="space-y-3">
+        {shared.map((s) => (
+          <Link
+            key={s.id}
+            to="/playlist/$id"
+            params={{ id: s.id }}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/40 p-4 transition-colors hover:border-primary/50"
+          >
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-foreground">{s.title}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                par {s.ownerName} · {s.count} titre{s.count > 1 ? "s" : ""}
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase text-primary">
+              {s.role === "editor" ? (
+                <>
+                  <Pencil className="h-3 w-3" /> Éditeur
+                </>
+              ) : (
+                <>Lecteur</>
+              )}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
 
 const TITLE_MAX = 120;
 const INTRO_MAX = 400;
@@ -209,6 +250,8 @@ function MyPlaylistsPage() {
             )}
           </div>
         </section>
+
+        <SharedWithMeSection />
 
         {/* List */}
         {isLoading ? (

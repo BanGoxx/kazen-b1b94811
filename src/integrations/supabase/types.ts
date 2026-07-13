@@ -782,6 +782,41 @@ export type Database = {
           },
         ]
       }
+      playlist_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          playlist_id: string
+          role: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          playlist_id: string
+          role?: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          playlist_id?: string
+          role?: Database["public"]["Enums"]["playlist_collab_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_collaborators_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlist_items: {
         Row: {
           created_at: string
@@ -858,6 +893,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "playlist_likes_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlist_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          message: string
+          playlist_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string
+          playlist_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string
+          playlist_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_requests_playlist_id_fkey"
             columns: ["playlist_id"]
             isOneToOne: false
             referencedRelation: "playlists"
@@ -1197,6 +1276,10 @@ export type Database = {
         }
         Returns: string
       }
+      decide_playlist_request: {
+        Args: { _accept: boolean; _request: string }
+        Returns: undefined
+      }
       founder_user_ids: { Args: never; Returns: string[] }
       get_public_enrichment: {
         Args: { _external_id: string; _source: string }
@@ -1234,6 +1317,14 @@ export type Database = {
         Returns: boolean
       }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
+      is_playlist_collaborator: {
+        Args: { _playlist: string; _user: string }
+        Returns: boolean
+      }
+      is_playlist_editor: {
+        Args: { _playlist: string; _user: string }
+        Returns: boolean
+      }
       moderate_content: {
         Args: {
           _action: Database["public"]["Enums"]["moderation_action_type"]
@@ -1251,6 +1342,21 @@ export type Database = {
           can_moderate: boolean
           is_owner: boolean
         }[]
+      }
+      notify_member: {
+        Args: {
+          _event_key: string
+          _message: string
+          _title: string
+          _type: string
+          _url: string
+          _user: string
+        }
+        Returns: undefined
+      }
+      request_playlist_join: {
+        Args: { _message?: string; _playlist: string }
+        Returns: string
       }
       resolve_report: {
         Args: {
@@ -1300,6 +1406,8 @@ export type Database = {
         | "timeout"
         | "dismiss_report"
       moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
+      playlist_collab_role: "viewer" | "editor"
+      playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
       report_status: "pending" | "reviewing" | "dismissed" | "action_taken"
       watch_status: "a_voir" | "en_cours" | "termine" | "en_pause" | "abandonne"
@@ -1450,6 +1558,8 @@ export const Constants = {
         "dismiss_report",
       ],
       moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
+      playlist_collab_role: ["viewer", "editor"],
+      playlist_request_status: ["pending", "accepted", "declined", "cancelled"],
       priority_level: ["basse", "normale", "haute"],
       report_status: ["pending", "reviewing", "dismissed", "action_taken"],
       watch_status: ["a_voir", "en_cours", "termine", "en_pause", "abandonne"],

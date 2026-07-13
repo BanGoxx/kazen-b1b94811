@@ -102,7 +102,7 @@ Email must remain **READY BUT UNCONFIGURED** until a human completes G1/G2.
 - **Batch 2 — Internal digest**: A4. Outcome: in-app weekly recap, no email. Checkpoint: no-send + no-dupe QA. Continue if PASS.
 - **Batch 3 — Editorial**: B1, B2 (B3 only if articles moved to DB). Outcome: premium `/actualites` + precise relevance. Checkpoint: no-fabrication + slug-route QA.
 - **Batch 4 — Enrichment/data quality**: C1, C2. Outcome: curation editor + quality dashboard. Checkpoint: private-field-leak + read-only QA.
-- **Batch 5 — Lists & requests**: D1, then D2, then A3 emission. Outcome: safe collaboration + requests + notifications. Checkpoint: cross-user RLS proof (hard gate).
+- **Batch 5 — Lists & requests** ✅ DONE: D1 (playlist_collaborators + playlist_requests tables, is_playlist_collaborator/is_playlist_editor definer helpers, additive collaborator RLS on playlists/playlist_items), D2 (playlist-collab.ts hooks + CollabPanel + "Partagées avec moi" section), A3 emission (request_playlist_join / decide_playlist_request / notify_member definer RPCs, prefs + quiet_mode respected). Typecheck PASS. Cross-user isolation enforced via RLS + definer RPCs (owner-only decisions, private lists reject requests).
 - **Batch 6 — Tracking & profile**: D3, D4. Outcome: better tracking + clearer profile. Checkpoint: import/export round-trip QA.
 - **Batch 7 — Recommendations**: E1, E2, E3. Outcome: better "Pour vous" + feedback + diagnostics. Checkpoint: no completed-spam + owner-isolation QA.
 - **Batch 8 — Founder console v2**: F1, F2, F3. Outcome: operational + moderation + diagnostics. Checkpoint: no-secret/no-surveillance QA.

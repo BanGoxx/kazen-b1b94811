@@ -171,6 +171,7 @@ export function ListControls({ item }: { item: MediaItem }) {
             id="progress"
             type="number"
             min={0}
+            max={max ?? undefined}
             inputMode="numeric"
             value={entry?.progress ?? ""}
             onChange={(e) => {
@@ -180,7 +181,48 @@ export function ListControls({ item }: { item: MediaItem }) {
             className="h-8 w-20"
             aria-label="Progression"
           />
+          {item.mediaType !== "movie" && max != null ? (
+            <span className="text-xs font-medium text-muted-foreground tabular-nums">
+              / {max} ép.
+            </span>
+          ) : null}
         </div>
+
+        {showReconcile ? (
+          <div className="flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-300">
+            <p className="flex items-start gap-1.5">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>
+                Votre progression enregistrée ({entry?.progress}) dépasse le total connu
+                ({max} ép.). Aucune valeur n'a été modifiée.
+              </span>
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="h-7 self-start text-xs"
+              disabled={upsert.isPending}
+              onClick={() => patch({ progress: max }, "Progression ajustée")}
+            >
+              Ajuster à {max} ép.
+            </Button>
+          </div>
+        ) : null}
+
+        {canComplete ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="aurora"
+            className="h-8 w-full gap-1.5 text-xs"
+            disabled={upsert.isPending}
+            onClick={() => patch(completePatch(), "Marqué comme terminé")}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" /> Marquer comme terminé
+          </Button>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <label htmlFor="started" className="text-xs font-medium text-muted-foreground">

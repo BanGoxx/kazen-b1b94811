@@ -36,6 +36,7 @@ import { KazenLogo } from "@/components/brand/KazenLogo";
 import { SearchAutocomplete } from "@/components/media/SearchAutocomplete";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { BackToTop } from "./BackToTop";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";

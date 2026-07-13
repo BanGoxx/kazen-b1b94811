@@ -269,7 +269,7 @@ export function buildPersonalizedDigest(input: PersonalizedDigestInput): DigestM
   if (planned.length)
     sections.push({ id: "planned", title: "À suivre prochainement", kind: "media", media: planned });
 
-  if (includeArticles && input.relatedArticles.length) {
+  if (includeArticles && articlesAllowed(prefs) && input.relatedArticles.length) {
     const articles = input.relatedArticles.slice(0, PERSONAL_LIMITS.articles).map(articleRef);
     if (articles.length)
       sections.push({ id: "related-articles", title: "Articles liés à vos anime", kind: "article", articles });

@@ -92,8 +92,8 @@ export async function setTopicCover(
 ): Promise<void> {
   const { error } = await supabase.rpc("set_forum_topic_cover", {
     _topic: topicId,
-    _path: path,
-    _alt: alt,
+    _path: path ?? undefined,
+    _alt: alt ?? undefined,
     _source: source,
   });
   if (error) throw new Error(error.message);

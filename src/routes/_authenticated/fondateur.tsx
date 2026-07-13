@@ -56,6 +56,8 @@ import {
 import { PublicBadgeChip } from "@/components/founder/PublicBadge";
 import {
   founderDiagnostics,
+  founderOperationalHealth,
+  founderProductDiagnostics,
   assignBadgeByEmail,
   listBadgeAssignments,
   removeBadgeAssignment,

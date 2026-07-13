@@ -257,6 +257,16 @@ function TopicPage() {
           <>
             {/* Topic header + opening post */}
             <article className="space-y-4 rounded-2xl border border-border bg-card/50 p-5 backdrop-blur">
+              {coverUrl && (
+                <div className="-mx-5 -mt-5 mb-1 aspect-[16/6] w-[calc(100%+2.5rem)] overflow-hidden rounded-t-2xl bg-muted/40">
+                  <SafeImage
+                    src={coverUrl}
+                    variant="backdrop"
+                    alt={topic.coverAlt || topic.title}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
               <div className="flex items-start justify-between gap-3">
                 <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold text-foreground">
                   {topic.isPinned && <Pin className="h-4 w-4 text-primary" />}

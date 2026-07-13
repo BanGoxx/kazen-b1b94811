@@ -77,17 +77,30 @@ export const updateMyEmailPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: EmailPreferencesPatch) => data)
   .handler(async ({ data, context }) => {
-    // Any change that touches consent (the two opt-in switches or frequency)
-    // is timestamped so consent history stays auditable.
-    const touchesConsent =
-      data.receive_general_digest !== undefined ||
-      data.receive_personalized_digest !== undefined ||
-      data.digest_frequency !== undefined;
+    // Read the current consent state so the consent timestamp only moves when a
+    // consent-relevant value (the two opt-in switches or frequency) actually
+    // CHANGES — not on every save, and not for content/section-only edits.
+    const { data: existing } = await context.supabase
+      .from("member_email_preferences")
+      .select("receive_general_digest, receive_personalized_digest, digest_frequency")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    const consentChanged =
+      (data.receive_general_digest !== undefined &&
+        data.receive_general_digest !== (existing?.receive_general_digest ?? false)) ||
+      (data.receive_personalized_digest !== undefined &&
+        data.receive_personalized_digest !== (existing?.receive_personalized_digest ?? false)) ||
+      (data.digest_frequency !== undefined &&
+        data.digest_frequency !== (existing?.digest_frequency ?? "weekly"));
+
+    // First-ever row also establishes initial consent state.
+    const stampConsent = consentChanged || !existing;
 
     const patch = {
       ...data,
       user_id: context.userId,
-      ...(touchesConsent ? { consent_updated_at: new Date().toISOString() } : {}),
+      ...(stampConsent ? { consent_updated_at: new Date().toISOString() } : {}),
     };
 
     const { error } = await context.supabase
@@ -96,6 +109,7 @@ export const updateMyEmailPreferences = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 /** Records that the member generated a digest preview (no email is sent). */
 export const markDigestPreviewed = createServerFn({ method: "POST" })

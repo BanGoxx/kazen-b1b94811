@@ -12,7 +12,7 @@ export function RatingBadge({ score, className }: { score: number | null; classN
         className,
       )}
     >
-      <Star className="h-3 w-3 fill-accent text-accent" />
+      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
       {out10}
     </span>
   );

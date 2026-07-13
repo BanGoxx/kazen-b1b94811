@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight, Quote } from "lucide-react";
+import { ListMusic, Globe, Lock, ArrowLeft, Heart, ChevronRight, Quote, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SafeImage } from "@/components/media/SafeImage";
 import { usePlaylist, usePlaylistLike } from "@/lib/playlists";
@@ -104,7 +104,9 @@ function ListItemRow({ pi, index }: { pi: PlaylistItem; index: number }) {
           </span>
           {y && <span className="text-xs text-muted-foreground">{y}</span>}
           {typeof item.score === "number" && (
-            <span className="text-xs text-muted-foreground">★ {item.score.toFixed(1)}</span>
+            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-amber-400">
+              <Star className="h-3 w-3 fill-current" /> {item.score.toFixed(1)}
+            </span>
           )}
         </div>
         <h3 className="line-clamp-1 text-base font-semibold text-foreground group-hover:text-primary">

@@ -284,3 +284,29 @@ function SendButton({
     </AlertDialog>
   );
 }
+
+function ReadyRow({
+  ok,
+  label,
+  hint,
+}: {
+  ok: boolean;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <li className="flex items-start gap-2">
+      {ok ? (
+        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+      ) : (
+        <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      )}
+      <span className={ok ? "text-foreground" : "text-muted-foreground"}>
+        {label}
+        {!ok && hint && (
+          <span className="block text-[11px] text-muted-foreground">{hint}</span>
+        )}
+      </span>
+    </li>
+  );
+}

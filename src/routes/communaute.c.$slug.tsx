@@ -39,6 +39,7 @@ function CategoryPage() {
   const category = data?.category ?? null;
   const topics = data?.topics ?? [];
   const pageCount = data?.pageCount ?? 1;
+  const { data: coverUrls } = useCoverUrls(topics.map((t) => t.coverPath));
 
   function goPage(p: number) {
     navigate({ to: "/communaute/c/$slug", params: { slug }, search: { page: p } });

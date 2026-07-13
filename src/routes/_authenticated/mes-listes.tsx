@@ -380,6 +380,59 @@ function MyListsPage() {
   );
 }
 
+/**
+ * Search the KAZEN catalogue and add titles to the personal list. New titles
+ * are added as "À voir" (planned) — a safe default that, per the shared
+ * tracking rules, never sets a start date. Titles already tracked show an
+ * "Ajouté" state and can't be added twice.
+ */
+function AddToListDialog({
+  open,
+  onOpenChange,
+  entries,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  entries: ListEntry[];
+}) {
+  const { upsert } = useListMutations();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const addedKeys = useMemo(() => new Set(entries.map((e) => e.mediaKey)), [entries]);
+
+  const handleAdd = async (item: MediaItem) => {
+    if (addedKeys.has(item.key)) return;
+    setBusyKey(item.key);
+    try {
+      // Route through the shared tracking rules so a freshly-added title
+      // respects Phase 5 defaults (adding as "À voir" sets no start date).
+      const max = effectiveMax(item.mediaType, item.episodesCount);
+      const patch = applyTrackingRules(toTrackingState(null), max, { status: "a_voir" });
+      await upsert.mutateAsync({ item, patch });
+      toast.success(`« ${item.title} » ajouté à votre liste.`);
+    } catch {
+      toast.error("Impossible d'ajouter ce titre.");
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Ajouter un titre</DialogTitle>
+          <DialogDescription>
+            Recherchez dans le catalogue KAZEN et suivez vos anime, séries et films.
+          </DialogDescription>
+        </DialogHeader>
+        <MediaSearchPicker onAdd={handleAdd} addedKeys={addedKeys} busyKey={busyKey} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+
 function ListEntryCard({ entry }: { entry: ListEntry }) {
   const [open, setOpen] = useState(false);
   if (!entry.item) return null;

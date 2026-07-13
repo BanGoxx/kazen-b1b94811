@@ -21,6 +21,16 @@ import { Link } from "@tanstack/react-router";
 const STATUSES: WatchStatus[] = ["a_voir", "en_cours", "termine", "en_pause", "abandonne"];
 const PRIORITIES: PriorityLevel[] = ["basse", "normale", "haute"];
 
+// timestamptz <-> <input type="date"> (yyyy-mm-dd) helpers.
+function toDateInput(iso: string | null): string {
+  if (!iso) return "";
+  return iso.slice(0, 10);
+}
+function fromDateInput(value: string): string | null {
+  if (!value) return null;
+  return new Date(`${value}T00:00:00.000Z`).toISOString();
+}
+
 export function ListControls({ item }: { item: MediaItem }) {
   const { user, ready } = useAuth();
   const entry = useUserEntry(item.key);

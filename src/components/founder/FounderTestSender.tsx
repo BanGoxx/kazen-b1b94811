@@ -66,13 +66,11 @@ export function FounderTestSender({
   });
 
   const send = useMutation({
-    mutationFn: (variant: Variant) =>
-      sendFn({
-        data: {
-          variant,
-          model: variant === "general" ? generalModel : personalizedModel,
-        },
-      }),
+    mutationFn: (variant: Variant) => {
+      const model = variant === "general" ? generalModel : personalizedModel;
+      if (!model) throw new Error("Modèle indisponible.");
+      return sendFn({ data: { variant, model } });
+    },
     onSuccess: (res) => {
       if (res.ok) {
         toast.success("Email de test envoyé à votre adresse.");

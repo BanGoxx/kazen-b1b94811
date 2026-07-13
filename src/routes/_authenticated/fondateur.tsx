@@ -68,11 +68,7 @@ import {
   deleteEnrichment,
   getEnrichmentQualityStats,
 } from "@/lib/enrichment.functions";
-import {
-  applyEnrichment,
-  DATA_QUALITY_LABELS,
-  type DataQualityStatus,
-} from "@/lib/enrichment";
+import { DATA_QUALITY_LABELS, type DataQualityStatus } from "@/lib/enrichment";
 import { useGeneralDigest, usePersonalizedDigest } from "@/lib/use-digest";
 import { DigestPreview } from "@/components/digest/DigestPreview";
 import { FounderTestSender } from "@/components/founder/FounderTestSender";

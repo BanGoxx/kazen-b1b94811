@@ -195,6 +195,14 @@ function FounderConsole() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="sante" className="pt-6">
+            <OperationalHealthSection />
+          </TabsContent>
+
+          <TabsContent value="diagnostics" className="pt-6">
+            <ProductDiagnosticsSection />
+          </TabsContent>
+
           <TabsContent value="moderation" className="pt-6">
             <SectionCard
               title="Modération de la communauté"

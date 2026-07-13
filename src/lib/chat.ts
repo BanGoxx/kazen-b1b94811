@@ -48,6 +48,7 @@ export interface InboxConversation {
   preview: string | null;
   unread: boolean;
   isRequestToMe: boolean;
+  amRequester: boolean;
 }
 
 export interface ChatMessage {

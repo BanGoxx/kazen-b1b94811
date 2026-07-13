@@ -79,7 +79,12 @@ export const createImportBatch = createServerFn({ method: "POST" })
     const { error: iErr } = await context.supabase.from("import_items").insert(rows);
     if (iErr) throw new Error(iErr.message);
 
-    return { batchId: batch.id, count: entries.length };
+    return {
+      batchId: batch.id,
+      count: entries.length,
+      total: allEntries.length,
+      truncated: allEntries.length > entries.length,
+    };
   });
 
 // ---------- list batches ----------

@@ -243,6 +243,10 @@ function FounderConsole() {
             <EnrichmentSection />
           </TabsContent>
 
+          <TabsContent value="qualite" className="pt-6">
+            <DataQualitySection />
+          </TabsContent>
+
           <TabsContent value="digests" className="pt-6">
             <FounderDigestSection />
           </TabsContent>

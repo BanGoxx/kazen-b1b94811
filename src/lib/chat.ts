@@ -219,6 +219,7 @@ export function useConversation(id: string | undefined) {
         isRequestToMe:
           conv.status === "pending" && conv.requested_by !== uid,
         amRequester: conv.requested_by === uid,
+        archived: !!minePart?.archived_at,
       };
     },
   });

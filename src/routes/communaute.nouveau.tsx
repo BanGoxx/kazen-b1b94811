@@ -64,14 +64,34 @@ function NewTopicPage() {
 
   async function submit() {
     if (!categoryId || title.trim().length < 3 || body.trim().length < 3) return;
+    if (!user) return;
+    setSubmitting(true);
     try {
       const id = await createTopic.mutateAsync({ categoryId, title: title.trim(), body: body.trim() });
+
+      // Cover is optional: never fail thread creation because of it, and never
+      // leave an orphan file if attaching the cover fails.
+      if (coverFile) {
+        let uploadedPath: string | null = null;
+        try {
+          uploadedPath = await uploadCover(user.id, id, coverFile);
+          await setTopicCover(id, uploadedPath, coverAlt.trim() || null, "upload");
+        } catch (err) {
+          if (uploadedPath) await deleteCoverFile(uploadedPath).catch(() => {});
+          toast.warning("Sujet créé, mais l'image n'a pas pu être ajoutée", {
+            description: err instanceof Error ? err.message : undefined,
+          });
+        }
+      }
+
       toast.success("Sujet créé");
       navigate({ to: "/communaute/t/$id", params: { id }, search: { page: 0 } });
     } catch (e) {
       toast.error("Impossible de créer le sujet", {
         description: e instanceof Error ? e.message : undefined,
       });
+    } finally {
+      setSubmitting(false);
     }
   }
 

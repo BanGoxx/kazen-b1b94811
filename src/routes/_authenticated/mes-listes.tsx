@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
   Flame,
   Heart,
   ListChecks,
   Loader2,
   Pencil,
+  Plus,
   RotateCcw,
   StickyNote,
   Star,
@@ -14,12 +16,15 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaCard } from "@/components/media/MediaCard";
 import { ListControls } from "@/components/media/ListControls";
+import { MediaSearchPicker } from "@/components/media/MediaSearchPicker";
 import { PremiumHint } from "@/components/premium/PremiumHint";
-import { useMyList, type ListEntry } from "@/lib/use-list";
+import { useMyList, useListMutations, type ListEntry } from "@/lib/use-list";
+import { applyTrackingRules, effectiveMax, toTrackingState } from "@/lib/tracking";
 import {
   MEDIA_TYPE_LABELS,
   PRIORITY_LABELS,
   WATCH_STATUS_LABELS,
+  type MediaItem,
   type MediaType,
   type WatchStatus,
 } from "@/lib/media-types";
@@ -27,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,

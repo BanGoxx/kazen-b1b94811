@@ -22,6 +22,7 @@ import {
   usePlaylistMutations,
   type PlaylistMeta,
 } from "@/lib/playlists";
+import { useSharedWithMe } from "@/lib/playlist-collab";
 import { MediaSearchPicker } from "@/components/media/MediaSearchPicker";
 import { SafeImage } from "@/components/media/SafeImage";
 import { MEDIA_TYPE_LABELS, type MediaItem } from "@/lib/media-types";

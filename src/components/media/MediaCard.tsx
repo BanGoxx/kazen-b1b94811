@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { X } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { SafeImage } from "./SafeImage";
@@ -18,10 +19,13 @@ export function MediaCard({
   item,
   className,
   style,
+  onHide,
 }: {
   item: MediaItem;
   className?: string;
   style?: React.CSSProperties;
+  /** When provided, shows a "pas intéressé" control that dismisses the card. */
+  onHide?: () => void;
 }) {
   return (
     <Link
@@ -33,6 +37,22 @@ export function MediaCard({
         className,
       )}
     >
+      {onHide ? (
+        <button
+          type="button"
+          aria-label={`Masquer « ${item.title} » des recommandations`}
+          title="Pas intéressé"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onHide();
+          }}
+          className="absolute right-2 top-11 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground opacity-0 shadow-lg backdrop-blur transition-all hover:scale-110 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+
       <div className="relative aspect-[2/3] overflow-hidden bg-muted">
         <SafeImage
           src={item.posterUrl}

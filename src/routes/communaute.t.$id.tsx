@@ -131,6 +131,7 @@ function TopicPage() {
     qc.invalidateQueries({ queryKey: ["forum-topic", id] });
     qc.invalidateQueries({ queryKey: ["forum-recent-topics"] });
     qc.invalidateQueries({ queryKey: ["forum-category-topics"] });
+    qc.invalidateQueries({ queryKey: ["forum-cover-urls"] });
   }
 
   async function saveCover() {

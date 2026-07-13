@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Crown,
   DownloadCloud,
+  MessagesSquare,
 
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -63,6 +64,7 @@ const NAV: NavItem[] = [
   { to: "/recherche", label: "Recherche", icon: Search },
   { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
   { to: "/listes", label: "Listes partagées", icon: ListMusic },
+  { to: "/communaute", label: "Communauté", icon: MessagesSquare },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
   { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
 

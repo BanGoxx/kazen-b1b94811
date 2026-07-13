@@ -243,6 +243,37 @@ async function loadTargetSnapshot(
         link: data.playlist_id ? `/playlist/${data.playlist_id}` : null,
       };
     }
+    if (targetType === "chat_message") {
+      // Report-scoped only: this DEFINER RPC returns bounded context strictly
+      // when an active report exists for the message AND the caller can
+      // moderate. Moderators never gain general private-inbox read access.
+      const { data } = await supabase.rpc("moderation_chat_context", {
+        _message: targetId,
+      });
+      const rows = (data ?? []) as Array<{
+        id: string;
+        sender_id: string;
+        body: string;
+        hidden_at: string | null;
+        deleted_at: string | null;
+        is_target: boolean;
+      }>;
+      const tgt = rows.find((m) => m.is_target);
+      if (!tgt) return empty;
+      const context = rows
+        .map((m) => (m.is_target ? `» ${m.body}` : m.body))
+        .join("\n")
+        .slice(0, 600);
+      return {
+        exists: true,
+        preview: context || (tgt.body ?? "").slice(0, 240),
+        ownerId: tgt.sender_id,
+        ownerName: null,
+        hidden: Boolean(tgt.hidden_at),
+        softDeleted: Boolean(tgt.deleted_at),
+        link: null,
+      };
+    }
   } catch {
     return empty;
   }

@@ -120,8 +120,7 @@ function MessagesPage() {
   const messages = msgs.data?.messages ?? [];
   const canSend =
     meta &&
-    (meta.status === "active" ||
-      (meta.status === "pending" && meta.amRequester)) &&
+    meta.status === "active" &&
     !meta.iBlocked &&
     !meta.otherBlocked;
 

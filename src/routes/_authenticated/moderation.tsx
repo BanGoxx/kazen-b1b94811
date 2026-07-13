@@ -57,6 +57,7 @@ const TARGET_LABELS: Record<string, string> = {
   playlist: "Playlist partagée",
   playlist_item: "Élément de liste",
   playlist_review: "Avis sur une liste",
+  chat_message: "Message privé",
 };
 
 const ACTION_LABELS: Record<string, string> = {

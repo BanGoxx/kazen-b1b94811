@@ -274,7 +274,7 @@ function releaseWording(mediaType: MediaType, days: number): { title: string; me
 export const reconcileMyNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(
-    async ({ context }): Promise<{ ok: boolean; generated: number }> => {
+    async ({ context }): Promise<ReconcileResult> => {
       try {
         // 1) Preferences gate which categories may be generated.
         const { data: prefRow } = await context.supabase
@@ -283,15 +283,16 @@ export const reconcileMyNotifications = createServerFn({ method: "POST" })
           .eq("user_id", context.userId)
           .maybeSingle();
         const prefs: NotificationPreferences = prefRow
-          ? {
-              new_episode_enabled: prefRow.new_episode_enabled,
-              upcoming_release_enabled: prefRow.upcoming_release_enabled,
-              related_article_enabled: prefRow.related_article_enabled,
-              recommendation_enabled: prefRow.recommendation_enabled,
-              shared_list_enabled: prefRow.shared_list_enabled,
-              system_notice_enabled: prefRow.system_notice_enabled,
-            }
+          ? mapPrefsRow(prefRow)
           : { ...DEFAULT_NOTIFICATION_PREFERENCES };
+
+        // A5 — quiet mode / snooze fully pause new generation (calm by design).
+        if (prefs.quiet_mode) {
+          return { ok: true, generated: 0, skipped: "quiet_mode", scanned: 0 };
+        }
+        if (isSnoozed(prefs)) {
+          return { ok: true, generated: 0, skipped: "snoozed", scanned: 0 };
+        }
 
         // 2) The member's list joined to media metadata (RLS-scoped).
         const { data: items } = await context.supabase

@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   Bell,
   CalendarClock,
+  CalendarRange,
   CheckCheck,
   Megaphone,
   Newspaper,

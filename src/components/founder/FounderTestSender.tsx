@@ -43,8 +43,8 @@ export function FounderTestSender({
   personalizedModel,
   modelsReady,
 }: {
-  generalModel: DigestModel;
-  personalizedModel: DigestModel;
+  generalModel: DigestModel | null;
+  personalizedModel: DigestModel | null;
   modelsReady: boolean;
 }) {
   const queryClient = useQueryClient();

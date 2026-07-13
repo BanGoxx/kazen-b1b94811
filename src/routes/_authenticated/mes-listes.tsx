@@ -372,7 +372,7 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
         <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
           {entry.favorite ? (
             <span
-              className="rounded-full bg-rose-500/90 p-1.5 text-white shadow"
+              className="rounded-full bg-primary/90 p-1.5 text-primary-foreground shadow"
               aria-label="Favori"
             >
               <Heart className="h-3.5 w-3.5 fill-current" />

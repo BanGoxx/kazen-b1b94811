@@ -245,17 +245,10 @@ export function useCollabMutations(playlistId: string) {
   const acceptRequest = useMutation({
     mutationFn: async (req: { id: string; requesterId: string }) => {
       if (!user) throw new Error("not-auth");
-      const { error: insErr } = await supabase.from("playlist_collaborators").insert({
-        playlist_id: playlistId,
-        user_id: req.requesterId,
-        role: "editor",
-        invited_by: user.id,
+      const { error } = await supabase.rpc("decide_playlist_request", {
+        _request: req.id,
+        _accept: true,
       });
-      if (insErr && !insErr.message.includes("duplicate")) throw new Error(insErr.message);
-      const { error } = await supabase
-        .from("playlist_requests")
-        .update({ status: "accepted", decided_by: user.id, decided_at: new Date().toISOString() })
-        .eq("id", req.id);
       if (error) throw new Error(error.message);
     },
     onSuccess: refresh,
@@ -264,10 +257,10 @@ export function useCollabMutations(playlistId: string) {
   const declineRequest = useMutation({
     mutationFn: async (requestId: string) => {
       if (!user) throw new Error("not-auth");
-      const { error } = await supabase
-        .from("playlist_requests")
-        .update({ status: "declined", decided_by: user.id, decided_at: new Date().toISOString() })
-        .eq("id", requestId);
+      const { error } = await supabase.rpc("decide_playlist_request", {
+        _request: requestId,
+        _accept: false,
+      });
       if (error) throw new Error(error.message);
     },
     onSuccess: refresh,

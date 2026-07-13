@@ -311,6 +311,191 @@ const EMPTY_FORM = {
   isPublished: false,
 };
 
+type EnrichmentForm = typeof EMPTY_FORM;
+
+function isHttpUrl(v: string): boolean {
+  if (!v.trim()) return true; // empty is fine — never overwrites provider data
+  try {
+    const u = new URL(v.trim());
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+/** C1 live preview + pre-publish validation for the enrichment editor. */
+function EnrichmentPreview({ form }: { form: EnrichmentForm }) {
+  const warnings: string[] = [];
+  if (!isHttpUrl(form.posterUrlOverride))
+    warnings.push("L'URL de l'affiche n'est pas une URL http(s) valide.");
+  if (!isHttpUrl(form.backdropUrlOverride))
+    warnings.push("L'URL de l'image de fond n'est pas une URL http(s) valide.");
+  if (form.isPublished && !form.synopsisOverride.trim())
+    warnings.push("Publié sans synopsis de remplacement — la fiche s'appuiera sur la source.");
+  if (form.isPublished && !form.posterUrlOverride.trim())
+    warnings.push("Publié sans affiche de remplacement — l'affiche de la source sera utilisée.");
+
+  const hasContent =
+    form.titleOverride.trim() ||
+    form.nativeTitleOverride.trim() ||
+    form.synopsisOverride.trim() ||
+    form.posterUrlOverride.trim();
+
+  return (
+    <div className="space-y-3 rounded-lg border border-border bg-background/40 p-4">
+      <p className="flex items-center gap-2 text-sm font-semibold">
+        <Eye className="h-4 w-4 text-primary" /> Aperçu des remplacements
+      </p>
+      {warnings.length > 0 && (
+        <ul className="space-y-1">
+          {warnings.map((w) => (
+            <li
+              key={w}
+              className="flex items-start gap-2 text-xs text-amber-500 dark:text-amber-400"
+            >
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{w}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {hasContent ? (
+        <div className="flex gap-4">
+          {isHttpUrl(form.posterUrlOverride) && form.posterUrlOverride.trim() ? (
+            <img
+              src={form.posterUrlOverride.trim()}
+              alt={form.titleOverride || "Aperçu de l'affiche"}
+              className="h-32 w-22 shrink-0 rounded-md border border-border object-cover"
+              loading="lazy"
+            />
+          ) : null}
+          <div className="min-w-0 space-y-1">
+            {form.titleOverride.trim() ? (
+              <p className="truncate font-semibold">{form.titleOverride}</p>
+            ) : (
+              <p className="text-sm italic text-muted-foreground">
+                Titre inchangé (source)
+              </p>
+            )}
+            {form.nativeTitleOverride.trim() ? (
+              <p className="truncate text-xs text-muted-foreground">
+                {form.nativeTitleOverride}
+              </p>
+            ) : null}
+            {form.synopsisOverride.trim() ? (
+              <p className="line-clamp-4 text-xs text-muted-foreground">
+                {form.synopsisOverride}
+              </p>
+            ) : null}
+            {form.statusNote.trim() ? (
+              <p className="pt-1 text-xs text-primary">{form.statusNote}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Aucun remplacement saisi — la fiche affichera intégralement les données
+          de la source.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** C2 data-quality dashboard: bounded aggregate diagnostics, read-only. */
+function DataQualitySection() {
+  const statsFn = useServerFn(getEnrichmentQualityStats);
+  const { data, isFetching } = useQuery({
+    queryKey: ["enrichment-quality"],
+    queryFn: () => statsFn(),
+  });
+
+  return (
+    <SectionCard
+      title="Qualité des données"
+      desc="Diagnostic des enrichissements KAZEN. Lecture seule — aucune donnée membre."
+    >
+      {isFetching && !data ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+        </p>
+      ) : !data ? (
+        <p className="text-sm text-muted-foreground">Aucune donnée.</p>
+      ) : (
+        <div className="space-y-5">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-border bg-card/60 p-3">
+              <p className="text-2xl font-bold">{data.total}</p>
+              <p className="text-xs text-muted-foreground">
+                Enrichissements{data.capped ? " (1000 récents)" : ""}
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-card/60 p-3">
+              <p className="text-2xl font-bold text-primary">{data.published}</p>
+              <p className="text-xs text-muted-foreground">Publiés</p>
+            </div>
+            <div className="rounded-lg border border-border bg-card/60 p-3">
+              <p className="text-2xl font-bold">{data.drafts}</p>
+              <p className="text-xs text-muted-foreground">Brouillons</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">Répartition par statut</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {QUALITY_OPTIONS.map((s) => (
+                <div
+                  key={s}
+                  className="flex items-center justify-between rounded-md border border-border bg-card/40 px-3 py-2 text-sm"
+                >
+                  <span>{DATA_QUALITY_LABELS[s]}</span>
+                  <span className="font-semibold">{data.byStatus[s] ?? 0}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              À surveiller
+              {data.attentionTotal > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  ({data.attentionTotal})
+                </span>
+              ) : null}
+            </p>
+            {data.attention.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucune fiche publiée incomplète. 🎉
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {data.attention.map((a) => (
+                  <div
+                    key={`${a.source}:${a.externalId}`}
+                    className="rounded-md border border-border bg-card/40 p-3"
+                  >
+                    <p className="truncate text-sm font-medium">{a.title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {a.source}:{a.externalId} — {a.reasons.join(", ")}
+                    </p>
+                  </div>
+                ))}
+                {data.attentionTotal > data.attention.length ? (
+                  <p className="text-xs text-muted-foreground">
+                    +{data.attentionTotal - data.attention.length} autre(s)…
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </SectionCard>
+  );
+}
+
 function EnrichmentSection() {
   const qc = useQueryClient();
   const listFn = useServerFn(listEnrichments);

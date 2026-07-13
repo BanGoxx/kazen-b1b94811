@@ -279,6 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </Button>
                 }
               />
+              <NotificationBell />
               <ThemeToggle />
               <AuthMenu />
             </div>

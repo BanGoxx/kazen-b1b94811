@@ -360,6 +360,9 @@ function ProfilePage() {
           <NotificationPreferences />
         </section>
 
+        {/* Préférence messages privés (Phase 13) */}
+        <ChatPreference />
+
         {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
         <EmailPreferences />
 

@@ -132,6 +132,87 @@ export function ListControls({ item }: { item: MediaItem }) {
         </div>
       </div>
 
+      {/* Progression & suivi */}
+      <div className="space-y-3 rounded-xl border border-border/60 bg-background/30 p-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Progression & suivi
+        </p>
+        <div className="flex items-center gap-2">
+          <label htmlFor="progress" className="text-xs font-medium text-muted-foreground">
+            {item.mediaType === "movie" ? "Vu (0/1)" : "Épisodes vus"}
+          </label>
+          <Input
+            id="progress"
+            type="number"
+            min={0}
+            inputMode="numeric"
+            value={entry?.progress ?? ""}
+            onChange={(e) => {
+              const v = e.target.value.trim();
+              patch({ progress: v === "" ? null : Math.max(0, parseInt(v, 10) || 0) });
+            }}
+            className="h-8 w-20"
+            aria-label="Progression"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <label htmlFor="started" className="text-xs font-medium text-muted-foreground">
+              Commencé le
+            </label>
+            <Input
+              id="started"
+              type="date"
+              value={toDateInput(entry?.startedAt ?? null)}
+              onChange={(e) => patch({ started_at: fromDateInput(e.target.value) })}
+              className="h-8"
+            />
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="completed" className="text-xs font-medium text-muted-foreground">
+              Terminé le
+            </label>
+            <Input
+              id="completed"
+              type="date"
+              value={toDateInput(entry?.completedAt ?? null)}
+              onChange={(e) => patch({ completed_at: fromDateInput(e.target.value) })}
+              className="h-8"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            aria-pressed={entry?.isRewatching ?? false}
+            onClick={() => patch({ is_rewatching: !(entry?.isRewatching ?? false) })}
+            className={cn(
+              "focus-ring inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+              entry?.isRewatching
+                ? "border-transparent bg-primary/15 text-primary"
+                : "border-border bg-background/40 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Revisionnage
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Fois revu</span>
+            <Input
+              type="number"
+              min={0}
+              inputMode="numeric"
+              value={entry?.rewatchCount ?? 0}
+              onChange={(e) =>
+                patch({ rewatch_count: Math.max(0, parseInt(e.target.value, 10) || 0) })
+              }
+              className="h-8 w-16"
+              aria-label="Nombre de revisionnages"
+            />
+          </div>
+        </div>
+      </div>
+
+
       {/* Note perso */}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ma note</p>

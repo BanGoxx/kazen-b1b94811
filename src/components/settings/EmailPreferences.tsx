@@ -285,7 +285,7 @@ export function EmailPreferences() {
               model={general.model}
               isLoading={general.isLoading}
               providerFailed={general.providerFailed}
-              onRetry={() => general.model /* queries retry via cache */}
+              onRetry={() => queryClient.invalidateQueries()}
               contextLabel="Digest général"
             />
           </div>

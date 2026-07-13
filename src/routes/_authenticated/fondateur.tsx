@@ -221,6 +221,17 @@ function FounderConsole() {
             </SectionCard>
           </TabsContent>
 
+          <TabsContent value="communaute" className="pt-6">
+            <SectionCard
+              title="Forum communautaire"
+              desc="Signalements et modération des sujets et réponses du forum. Accès réservé au Fondateur pendant la bêta."
+            >
+              <ForumModerationSection />
+            </SectionCard>
+          </TabsContent>
+
+
+
           <TabsContent value="roles" className="pt-6">
             <RolesSection />
           </TabsContent>

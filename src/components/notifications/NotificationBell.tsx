@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CheckCheck,
   Megaphone,
+  MessageCircle,
   Newspaper,
   Play,
   Sparkles,

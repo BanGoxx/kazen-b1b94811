@@ -130,7 +130,8 @@ function typeAllowed(item: MediaItem, prefs?: EmailPreferences): boolean {
 export interface GeneralDigestInput {
   upcomingAnime: MediaItem[];
   upcomingMovies: MediaItem[];
-  upcomingSeries: MediaItem[];
+  /** Currently-airing series (on-air pool), not an upcoming feed. */
+  onAirSeries: MediaItem[];
   trending: MediaItem[];
   articles: NewsArticle[];
   prefs?: EmailPreferences;

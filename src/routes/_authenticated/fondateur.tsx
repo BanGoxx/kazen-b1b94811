@@ -24,6 +24,9 @@ import {
   Megaphone,
   BarChart3,
   AlertTriangle,
+  Activity,
+  Stethoscope,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -56,6 +59,8 @@ import {
 import { PublicBadgeChip } from "@/components/founder/PublicBadge";
 import {
   founderDiagnostics,
+  founderOperationalHealth,
+  founderProductDiagnostics,
   assignBadgeByEmail,
   listBadgeAssignments,
   removeBadgeAssignment,
@@ -150,8 +155,14 @@ function FounderConsole() {
           </div>
         </section>
 
-        <Tabs defaultValue="moderation">
+        <Tabs defaultValue="sante">
           <TabsList className="flex flex-wrap">
+            <TabsTrigger value="sante" className="gap-1.5">
+              <Activity className="h-4 w-4" /> Santé
+            </TabsTrigger>
+            <TabsTrigger value="diagnostics" className="gap-1.5">
+              <Stethoscope className="h-4 w-4" /> Diagnostics
+            </TabsTrigger>
             <TabsTrigger value="moderation" className="gap-1.5">
               <ShieldCheck className="h-4 w-4" /> Modération
             </TabsTrigger>
@@ -183,6 +194,14 @@ function FounderConsole() {
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="sante" className="pt-6">
+            <OperationalHealthSection />
+          </TabsContent>
+
+          <TabsContent value="diagnostics" className="pt-6">
+            <ProductDiagnosticsSection />
+          </TabsContent>
 
           <TabsContent value="moderation" className="pt-6">
             <SectionCard
@@ -298,6 +317,238 @@ function SoonPill() {
     </span>
   );
 }
+
+function HealthMetric({
+  label,
+  value,
+  hint,
+  tone = "default",
+}: {
+  label: string;
+  value: number | null;
+  hint?: string;
+  tone?: "default" | "watch" | "good";
+}) {
+  const toneClass =
+    tone === "watch"
+      ? "text-amber-500"
+      : tone === "good"
+        ? "text-emerald-500"
+        : "text-foreground";
+  return (
+    <div className="rounded-lg border border-border bg-card/50 p-4">
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className={`font-display text-2xl font-extrabold ${toneClass}`}>
+        {value === null ? "—" : value}
+      </div>
+      {hint ? (
+        <div className="pt-0.5 text-[11px] text-muted-foreground">{hint}</div>
+      ) : null}
+    </div>
+  );
+}
+
+// F1 — Operational health. Aggregate counts only, refreshable, Owner-only.
+function OperationalHealthSection() {
+  const healthFn = useServerFn(founderOperationalHealth);
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: ["founder-operational-health"],
+    queryFn: () => healthFn(),
+    staleTime: 60 * 1000,
+  });
+
+  const providerDegraded = data?.provider.degraded === true;
+
+  return (
+    <div className="space-y-6">
+      <SectionCard
+        title="Santé opérationnelle"
+        desc="Indicateurs agrégés du système — aucun contenu privé de membre n'est affiché."
+      >
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+            />
+            Actualiser
+          </Button>
+          {data?.generatedAt ? (
+            <span className="text-xs text-muted-foreground">
+              Mis à jour à{" "}
+              {new Date(data.generatedAt).toLocaleTimeString("fr-FR")}
+            </span>
+          ) : null}
+        </div>
+
+        {providerDegraded ? (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Fournisseur possiblement dégradé : une majorité du cache est
+              périmée (&gt; 24h). Les rails peuvent recharger côté client.
+            </span>
+          </div>
+        ) : null}
+      </SectionCard>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+          Fournisseur & cache
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <HealthMetric
+            label="Entrées en cache"
+            value={data?.provider.cacheEntries ?? null}
+          />
+          <HealthMetric
+            label="Cache périmé (>24h)"
+            value={data?.provider.cacheStale ?? null}
+            tone={(data?.provider.cacheStale ?? 0) > 0 ? "watch" : "good"}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+          Imports (7 derniers jours)
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <HealthMetric
+            label="Lots récents"
+            value={data?.imports.recent ?? null}
+          />
+          <HealthMetric
+            label="Lots en échec"
+            value={data?.imports.failedRecent ?? null}
+            tone={(data?.imports.failedRecent ?? 0) > 0 ? "watch" : "good"}
+          />
+          <HealthMetric
+            label="Éléments non appariés"
+            value={data?.imports.unmatchedItems ?? null}
+            hint="À revoir dans l'assistant d'import"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+          Notifications & e-mail
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <HealthMetric
+            label="Notifs actives"
+            value={data?.notifications.active ?? null}
+          />
+          <HealthMetric
+            label="Expirent bientôt"
+            value={data?.notifications.expiringSoon ?? null}
+          />
+          <HealthMetric
+            label="E-mails envoyés (7j)"
+            value={data?.email.sentWeek ?? null}
+            hint="Agrégat — aucun destinataire"
+          />
+          <HealthMetric
+            label="E-mails en échec (7j)"
+            value={data?.email.failedWeek ?? null}
+            tone={(data?.email.failedWeek ?? 0) > 0 ? "watch" : "good"}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+          Enrichissement
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <HealthMetric
+            label="Publiées"
+            value={data?.enrichment.published ?? null}
+          />
+          <HealthMetric
+            label="Brouillons"
+            value={data?.enrichment.drafts ?? null}
+          />
+          <HealthMetric
+            label="Signalements QA"
+            value={data?.enrichment.flagged ?? null}
+            tone={(data?.enrichment.flagged ?? 0) > 0 ? "watch" : "good"}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// F3 — Product diagnostics. Read-only derived checks, no secrets, no raw rows.
+function ProductDiagnosticsSection() {
+  const diagFn = useServerFn(founderProductDiagnostics);
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: ["founder-product-diagnostics"],
+    queryFn: () => diagFn(),
+    staleTime: 60 * 1000,
+  });
+
+  const toneClass = (sev: string) =>
+    sev === "watch"
+      ? "text-amber-500"
+      : sev === "info"
+        ? "text-sky-500"
+        : "text-emerald-500";
+
+  return (
+    <SectionCard
+      title="Diagnostics produit"
+      desc="Contrôles dérivés sur la qualité des données et les routes. Lecture seule, aucun secret ni contenu privé."
+    >
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => refetch()}
+          disabled={isFetching}
+        >
+          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+          Actualiser
+        </Button>
+        {data?.publishedEnrichments != null ? (
+          <span className="text-xs text-muted-foreground">
+            {data.publishedEnrichments} fiche(s) enrichie(s) publiée(s)
+          </span>
+        ) : null}
+      </div>
+
+      <ul className="divide-y divide-border rounded-lg border border-border">
+        {(data?.checks ?? []).map((c) => (
+          <li
+            key={c.key}
+            className="flex items-center justify-between gap-3 px-4 py-3"
+          >
+            <span className="text-sm">{c.label}</span>
+            <span
+              className={`font-display text-base font-bold ${toneClass(c.severity)}`}
+            >
+              {c.value === null ? "—" : c.value}
+            </span>
+          </li>
+        ))}
+        {!data && (
+          <li className="px-4 py-6 text-center text-sm text-muted-foreground">
+            {isFetching ? "Analyse en cours…" : "Aucune donnée."}
+          </li>
+        )}
+      </ul>
+    </SectionCard>
+  );
+}
+
 
 const QUALITY_OPTIONS: DataQualityStatus[] = [
   "complete",

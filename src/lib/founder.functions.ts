@@ -176,3 +176,210 @@ export const setAssignmentVisibility = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// =============================================================================
+// Phase F — Founder Console Phase 2
+//   F1 Operational health + F3 Product diagnostics.
+//
+// Both endpoints are Owner-only (assertOwner) and return AGGREGATE COUNTS ONLY.
+// No member content, no recipient identifiers, no secrets, no provider keys.
+// Every read is wrapped so a single missing table/permission degrades to a
+// null metric instead of failing the whole panel.
+// =============================================================================
+
+type Metric = number | null;
+
+function makeSafeCount(supabase: import("@supabase/supabase-js").SupabaseClient) {
+  return async (table: string, apply?: (q: any) => any): Promise<Metric> => {
+    try {
+      let q = (supabase as any)
+        .from(table)
+        .select("*", { count: "exact", head: true });
+      if (apply) q = apply(q);
+      const { count, error } = await q;
+      if (error) return null;
+      return count ?? 0;
+    } catch {
+      return null;
+    }
+  };
+}
+
+// --- F1: operational health (aggregate-only, Owner) --------------------------
+export const founderOperationalHealth = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertOwner(context);
+    const { supabase } = context;
+    const count = makeSafeCount(supabase);
+
+    const nowIso = new Date().toISOString();
+    const dayAgoIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const weekAgoIso = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    // Provider cache freshness (AniList): count + stale (>24h) share.
+    let cacheEntries: Metric = null;
+    let cacheStale: Metric = null;
+    try {
+      const { count: total, error: e1 } = await (supabase as any)
+        .from("anilist_cache")
+        .select("*", { count: "exact", head: true });
+      if (!e1) cacheEntries = total ?? 0;
+      const { count: stale, error: e2 } = await (supabase as any)
+        .from("anilist_cache")
+        .select("*", { count: "exact", head: true })
+        .lt("fetched_at", dayAgoIso);
+      if (!e2) cacheStale = stale ?? 0;
+    } catch {
+      /* leave nulls */
+    }
+
+    const [
+      importBatchesRecent,
+      importFailedRecent,
+      importItemsUnmatched,
+      notifActive,
+      notifExpiringSoon,
+      emailFailedWeek,
+      emailSentWeek,
+      enrichmentPublished,
+      enrichmentDrafts,
+      enrichmentFlagged,
+    ] = await Promise.all([
+      count("import_batches", (q) => q.gte("created_at", weekAgoIso)),
+      count("import_batches", (q) =>
+        q.gte("created_at", weekAgoIso).in("status", ["failed", "error"]),
+      ),
+      count("import_items", (q) =>
+        q.in("match_status", ["unmatched", "ambiguous", "failed"]),
+      ),
+      count("member_notifications", (q) =>
+        q.is("dismissed_at", null).gt("expires_at", nowIso),
+      ),
+      count("member_notifications", (q) =>
+        q
+          .is("dismissed_at", null)
+          .gt("expires_at", nowIso)
+          .lt("expires_at", new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()),
+      ),
+      count("email_delivery_logs", (q) =>
+        q.gte("created_at", weekAgoIso).eq("status", "failed"),
+      ),
+      count("email_delivery_logs", (q) =>
+        q.gte("created_at", weekAgoIso).eq("status", "sent"),
+      ),
+      count("media_enrichments", (q) => q.eq("is_published", true)),
+      count("media_enrichments", (q) => q.eq("is_published", false)),
+      count("media_enrichments", (q) => q.not("qa_flags", "is", null)),
+    ]);
+
+    return {
+      generatedAt: nowIso,
+      provider: {
+        cacheEntries,
+        cacheStale,
+        // Degraded when the majority of cache entries are stale.
+        degraded:
+          cacheEntries != null && cacheStale != null && cacheEntries > 0
+            ? cacheStale / cacheEntries > 0.6
+            : null,
+      },
+      imports: {
+        recent: importBatchesRecent,
+        failedRecent: importFailedRecent,
+        unmatchedItems: importItemsUnmatched,
+      },
+      notifications: {
+        active: notifActive,
+        expiringSoon: notifExpiringSoon,
+      },
+      email: {
+        // Aggregate only — no recipients, no message bodies.
+        sentWeek: emailSentWeek,
+        failedWeek: emailFailedWeek,
+      },
+      enrichment: {
+        published: enrichmentPublished,
+        drafts: enrichmentDrafts,
+        flagged: enrichmentFlagged,
+      },
+    };
+  });
+
+// --- F3: product diagnostics (aggregate-only, no secrets, Owner) -------------
+export const founderProductDiagnostics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertOwner(context);
+    const { supabase } = context;
+    const count = makeSafeCount(supabase);
+
+    const [
+      missingSynopsis,
+      weakImages,
+      missingPlatforms,
+      qualityFlagged,
+      openRequests,
+      publishedEnrichments,
+    ] = await Promise.all([
+      // Published fiches whose enrichment lacks a synopsis override.
+      count("media_enrichments", (q) =>
+        q.eq("is_published", true).is("synopsis_override", null),
+      ),
+      count("media_enrichments", (q) =>
+        q.eq("is_published", true).is("poster_url_override", null),
+      ),
+      count("media_enrichments", (q) =>
+        q.eq("is_published", true).is("external_links", null),
+      ),
+      // Editor-flagged quality issues to review.
+      count("media_enrichments", (q) =>
+        q.in("data_quality_status", ["incomplete", "needs_review", "broken"]),
+      ),
+      count("media_requests", (q) => q.eq("status", "pending")),
+      count("media_enrichments", (q) => q.eq("is_published", true)),
+    ]);
+
+    // Simple derived checks — never expose raw rows or identifiers.
+    const checks: { key: string; label: string; value: Metric; severity: "ok" | "watch" | "info" }[] =
+      [
+        {
+          key: "missing_synopsis",
+          label: "Fiches publiées sans synopsis enrichi",
+          value: missingSynopsis,
+          severity: (missingSynopsis ?? 0) > 0 ? "watch" : "ok",
+        },
+        {
+          key: "weak_images",
+          label: "Fiches publiées sans visuel enrichi",
+          value: weakImages,
+          severity: (weakImages ?? 0) > 0 ? "watch" : "ok",
+        },
+        {
+          key: "missing_platforms",
+          label: "Fiches publiées sans liens plateformes",
+          value: missingPlatforms,
+          severity: (missingPlatforms ?? 0) > 0 ? "info" : "ok",
+        },
+        {
+          key: "quality_flagged",
+          label: "Fiches marquées à surveiller",
+          value: qualityFlagged,
+          severity: (qualityFlagged ?? 0) > 0 ? "watch" : "ok",
+        },
+        {
+          key: "open_requests",
+          label: "Demandes de titres en attente",
+          value: openRequests,
+          severity: (openRequests ?? 0) > 0 ? "info" : "ok",
+        },
+      ];
+
+    return {
+      generatedAt: new Date().toISOString(),
+      publishedEnrichments,
+      checks,
+    };
+  });

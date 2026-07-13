@@ -81,6 +81,8 @@ export function FounderTestSender({
         const map: Record<string, string> = {
           cooldown: "Patientez quelques secondes avant un nouvel essai.",
           not_configured: "Fournisseur d'email non configuré.",
+          real_send_disabled:
+            "Envoi réel désactivé : domaine d'envoi KAZEN non vérifié.",
           no_email: "Aucune adresse email sur votre compte.",
           email_unconfirmed: "Votre adresse email n'est pas confirmée.",
           invalid: "Requête invalide.",

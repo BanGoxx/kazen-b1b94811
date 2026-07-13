@@ -50,6 +50,9 @@ function NewTopicPage() {
   const [categoryId, setCategoryId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverAlt, setCoverAlt] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const openCategories = (categories ?? []).filter((c) => !c.isLocked);
 

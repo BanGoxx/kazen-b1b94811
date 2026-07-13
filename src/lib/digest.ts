@@ -161,10 +161,13 @@ export function buildGeneralDigest(input: GeneralDigestInput): DigestModel {
       "Films à venir",
       boundMedia([...input.upcomingMovies].sort(byReleaseDate), GENERAL_LIMITS.movies, seen),
     );
+    // NOTE: the series source is the "on-air" pool (currently airing), NOT an
+    // upcoming/announced feed. Keep the label honest and preserve the source's
+    // popularity ordering rather than sorting by release date.
     pushMedia(
-      "upcoming-series",
-      "Séries à venir",
-      boundMedia([...input.upcomingSeries].sort(byReleaseDate), GENERAL_LIMITS.series, seen),
+      "onair-series",
+      "Séries en diffusion",
+      boundMedia(input.onAirSeries, GENERAL_LIMITS.series, seen),
     );
   }
 

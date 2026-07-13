@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Wand2,
   Search,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -64,6 +65,8 @@ import {
   deleteEnrichment,
 } from "@/lib/enrichment.functions";
 import { DATA_QUALITY_LABELS, type DataQualityStatus } from "@/lib/enrichment";
+import { useGeneralDigest, usePersonalizedDigest } from "@/lib/use-digest";
+import { DigestPreview } from "@/components/digest/DigestPreview";
 
 export const Route = createFileRoute("/_authenticated/fondateur")({
   ssr: false,
@@ -160,6 +163,9 @@ function FounderConsole() {
             <TabsTrigger value="enrichissement" className="gap-1.5">
               <Wand2 className="h-4 w-4" /> Enrichissement
             </TabsTrigger>
+            <TabsTrigger value="digests" className="gap-1.5">
+              <Mail className="h-4 w-4" /> Digests
+            </TabsTrigger>
             <TabsTrigger value="reglages" className="gap-1.5">
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>
@@ -224,6 +230,11 @@ function FounderConsole() {
           <TabsContent value="enrichissement" className="pt-6">
             <EnrichmentSection />
           </TabsContent>
+
+          <TabsContent value="digests" className="pt-6">
+            <FounderDigestSection />
+          </TabsContent>
+
 
           <TabsContent value="reglages" className="pt-6">
             <SectionCard title="Réglages" desc="Configuration de l'Espace fondateur.">
@@ -820,5 +831,44 @@ function RolesSection() {
         </ul>
       </SectionCard>
     </div>
+  );
+}
+
+function FounderDigestSection() {
+  const general = useGeneralDigest();
+  // Sample personalized digest built from the Owner's OWN account signals only.
+  // No other member's private data is ever accessed.
+  const personalized = usePersonalizedDigest();
+
+  return (
+    <SectionCard
+      title="Prévisualisation des digests"
+      desc="Aperçu uniquement — aucun email n'est envoyé, planifié ou connecté à un fournisseur en Phase 1. Le digest personnalisé utilise exclusivement votre propre compte."
+    >
+      <div className="space-y-8">
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+            Digest général
+          </p>
+          <DigestPreview
+            model={general.model}
+            isLoading={general.isLoading}
+            providerFailed={general.providerFailed}
+            contextLabel="Aperçu fondateur"
+          />
+        </div>
+        <div>
+          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+            Digest personnalisé (votre compte)
+          </p>
+          <DigestPreview
+            model={personalized.model}
+            isLoading={personalized.isLoading}
+            providerFailed={personalized.providerFailed}
+            contextLabel="Aperçu fondateur"
+          />
+        </div>
+      </div>
+    </SectionCard>
   );
 }

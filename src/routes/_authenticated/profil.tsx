@@ -14,6 +14,7 @@ import { FounderBadge } from "@/components/founder/FounderBadge";
 import { PublicBadgeList } from "@/components/founder/PublicBadge";
 import { useIsOwner, useUserBadges } from "@/lib/founder";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
+import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -320,7 +321,11 @@ function ProfilePage() {
           </div>
         </section>
 
+        {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
+        <EmailPreferences />
+
         <div className="flex justify-end">
+
           <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
           </Button>

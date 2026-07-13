@@ -160,6 +160,9 @@ function FounderConsole() {
             <TabsTrigger value="enrichissement" className="gap-1.5">
               <Wand2 className="h-4 w-4" /> Enrichissement
             </TabsTrigger>
+            <TabsTrigger value="digests" className="gap-1.5">
+              <Mail className="h-4 w-4" /> Digests
+            </TabsTrigger>
             <TabsTrigger value="reglages" className="gap-1.5">
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>

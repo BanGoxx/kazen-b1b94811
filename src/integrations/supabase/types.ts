@@ -900,6 +900,50 @@ export type Database = {
           },
         ]
       }
+      playlist_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          message: string
+          playlist_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string
+          playlist_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string
+          playlist_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["playlist_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_requests_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playlists: {
         Row: {
           created_at: string

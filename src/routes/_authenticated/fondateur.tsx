@@ -841,34 +841,48 @@ function FounderDigestSection() {
   const personalized = usePersonalizedDigest();
 
   return (
-    <SectionCard
-      title="Prévisualisation des digests"
-      desc="Aperçu uniquement — aucun email n'est envoyé, planifié ou connecté à un fournisseur en Phase 1. Le digest personnalisé utilise exclusivement votre propre compte."
-    >
-      <div className="space-y-8">
-        <div>
-          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-            Digest général
-          </p>
-          <DigestPreview
-            model={general.model}
-            isLoading={general.isLoading}
-            providerFailed={general.providerFailed}
-            contextLabel="Aperçu fondateur"
-          />
+    <div className="space-y-6">
+      <SectionCard
+        title="Prévisualisation des digests"
+        desc="Aperçu du contenu — le digest personnalisé utilise exclusivement votre propre compte."
+      >
+        <div className="space-y-8">
+          <div>
+            <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+              Digest général
+            </p>
+            <DigestPreview
+              model={general.model}
+              isLoading={general.isLoading}
+              providerFailed={general.providerFailed}
+              contextLabel="Aperçu fondateur"
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+              Digest personnalisé (votre compte)
+            </p>
+            <DigestPreview
+              model={personalized.model}
+              isLoading={personalized.isLoading}
+              providerFailed={personalized.providerFailed}
+              contextLabel="Aperçu fondateur"
+            />
+          </div>
         </div>
-        <div>
-          <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-            Digest personnalisé (votre compte)
-          </p>
-          <DigestPreview
-            model={personalized.model}
-            isLoading={personalized.isLoading}
-            providerFailed={personalized.providerFailed}
-            contextLabel="Aperçu fondateur"
-          />
-        </div>
-      </div>
-    </SectionCard>
+      </SectionCard>
+
+      <SectionCard
+        title="Envoi de test (fondateur)"
+        desc="Envoyez un email de digest réel à votre propre adresse confirmée. Aucun autre membre n'est jamais contacté depuis cette console."
+      >
+        <FounderTestSender
+          generalModel={general.model}
+          personalizedModel={personalized.model}
+          modelsReady={!general.isLoading && !personalized.isLoading}
+        />
+      </SectionCard>
+    </div>
   );
 }
+

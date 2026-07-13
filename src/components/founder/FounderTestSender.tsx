@@ -188,11 +188,12 @@ export function FounderTestSender({
       </div>
       {!canSend && !status.isLoading && (
         <p className="text-xs text-muted-foreground">
-          {s?.configured
-            ? "L'envoi de test nécessite une adresse email confirmée sur votre compte."
-            : "Configurez un fournisseur d'email pour activer les envois de test."}
+          {!s?.realSendEnabled
+            ? "Envoi réel désactivé : les digests restent en prévisualisation tant qu'un domaine d'envoi KAZEN vérifié n'est pas configuré et activé."
+            : "L'envoi de test nécessite une adresse email confirmée sur votre compte."}
         </p>
       )}
+
 
       {/* Delivery history */}
       <div>

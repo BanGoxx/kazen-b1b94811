@@ -214,6 +214,26 @@ function ProfilePage() {
           ))}
         </div>
 
+        {entries.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: "À voir", value: insights.aVoir },
+              { label: "Épisodes suivis", value: insights.episodes },
+              { label: "Revisionnages", value: insights.rewatches },
+              { label: "Note moyenne", value: insights.avgRating ?? "—" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="rounded-2xl border border-border/70 bg-card/40 p-4 text-center backdrop-blur"
+              >
+                <p className="font-display text-2xl font-extrabold text-foreground">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+
         <section className="space-y-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold">
             <UserRound className="h-5 w-5" /> Informations

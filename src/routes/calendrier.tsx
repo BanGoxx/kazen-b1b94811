@@ -381,7 +381,7 @@ function CalendarPage() {
         </div>
       ) : (
 
-        <EmptyState message="Aucune sortie cette semaine avec ces filtres." hint="Changez de semaine ou réinitialisez les filtres." />
+        <EmptyState message="Aucune sortie sur cette période avec ces filtres." hint="Changez de période ou réinitialisez les filtres." />
       )}
     </AppShell>
   );

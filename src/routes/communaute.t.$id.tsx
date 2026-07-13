@@ -119,6 +119,87 @@ function TopicPage() {
   const [editPostBody, setEditPostBody] = useState("");
   const [confirmDeleteTopic, setConfirmDeleteTopic] = useState(false);
   const [confirmDeletePost, setConfirmDeletePost] = useState<ForumPost | null>(null);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverBusy, setCoverBusy] = useState(false);
+  const qc = useQueryClient();
+  const { data: coverUrls } = useCoverUrls([topic?.coverPath]);
+  const coverUrl = topic?.coverPath ? coverUrls?.get(topic.coverPath) : undefined;
+
+  function refreshTopic() {
+    qc.invalidateQueries({ queryKey: ["forum-topic", id] });
+    qc.invalidateQueries({ queryKey: ["forum-recent-topics"] });
+    qc.invalidateQueries({ queryKey: ["forum-category-topics"] });
+  }
+
+  async function saveCover() {
+    if (!topic || !user) return;
+    setCoverBusy(true);
+    try {
+      if (coverFile) {
+        let uploadedPath: string | null = null;
+        try {
+          uploadedPath = await uploadCover(coverFile, topic.id, user.id);
+          await setTopicCover(topic.id, uploadedPath, coverAlt.trim() || null, "upload");
+          // Remove the previous file (best-effort) now that the new one is live.
+          if (topic.coverPath && topic.coverPath !== uploadedPath) {
+            await deleteCoverFile(topic.coverPath);
+          }
+        } catch (err) {
+          if (uploadedPath) await deleteCoverFile(uploadedPath).catch(() => {});
+          throw err;
+        }
+      } else if (topic.coverAlt !== (coverAlt.trim() || null)) {
+        // Alt-only update while keeping the existing image.
+        await setTopicCover(topic.id, topic.coverPath, coverAlt.trim() || null, "upload");
+      }
+      toast.success("Couverture mise à jour");
+      setCoverOpen(false);
+      setCoverFile(null);
+      refreshTopic();
+    } catch (e) {
+      toast.error("Impossible de mettre à jour la couverture", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setCoverBusy(false);
+    }
+  }
+
+  async function removeCover() {
+    if (!topic) return;
+    setCoverBusy(true);
+    try {
+      const old = topic.coverPath;
+      await setTopicCover(topic.id, null, null, "upload");
+      if (old) await deleteCoverFile(old);
+      toast.success("Couverture retirée");
+      setCoverOpen(false);
+      setCoverFile(null);
+      refreshTopic();
+    } catch (e) {
+      toast.error("Impossible de retirer la couverture", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setCoverBusy(false);
+    }
+  }
+
+  async function modClearCover() {
+    if (!topic) return;
+    try {
+      const old = await moderateClearCover(topic.id, "");
+      if (old) await deleteCoverFile(old);
+      toast.success("Couverture modérée");
+      refreshTopic();
+    } catch (e) {
+      toast.error("Action impossible", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    }
+  }
 
   const posts = postsPage?.posts ?? [];
   const pageCount = postsPage?.pageCount ?? 1;

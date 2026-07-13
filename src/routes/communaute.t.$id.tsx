@@ -53,6 +53,17 @@ import {
   ModerationMenu,
   SignInToParticipate,
 } from "@/components/community/forum-ui";
+import { CoverField } from "@/components/community/CoverField";
+import { SafeImage } from "@/components/media/SafeImage";
+import {
+  useCoverUrls,
+  uploadCover,
+  setTopicCover,
+  deleteCoverFile,
+  moderateClearCover,
+} from "@/lib/forum-cover";
+import { useQueryClient } from "@tanstack/react-query";
+import { ImagePlus } from "lucide-react";
 
 interface TopicSearch {
   page: number;
@@ -108,6 +119,87 @@ function TopicPage() {
   const [editPostBody, setEditPostBody] = useState("");
   const [confirmDeleteTopic, setConfirmDeleteTopic] = useState(false);
   const [confirmDeletePost, setConfirmDeletePost] = useState<ForumPost | null>(null);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverBusy, setCoverBusy] = useState(false);
+  const qc = useQueryClient();
+  const { data: coverUrls } = useCoverUrls([topic?.coverPath]);
+  const coverUrl = topic?.coverPath ? coverUrls?.get(topic.coverPath) : undefined;
+
+  function refreshTopic() {
+    qc.invalidateQueries({ queryKey: ["forum-topic", id] });
+    qc.invalidateQueries({ queryKey: ["forum-recent-topics"] });
+    qc.invalidateQueries({ queryKey: ["forum-category-topics"] });
+  }
+
+  async function saveCover() {
+    if (!topic || !user) return;
+    setCoverBusy(true);
+    try {
+      if (coverFile) {
+        let uploadedPath: string | null = null;
+        try {
+          uploadedPath = await uploadCover(coverFile, topic.id, user.id);
+          await setTopicCover(topic.id, uploadedPath, coverAlt.trim() || null, "upload");
+          // Remove the previous file (best-effort) now that the new one is live.
+          if (topic.coverPath && topic.coverPath !== uploadedPath) {
+            await deleteCoverFile(topic.coverPath);
+          }
+        } catch (err) {
+          if (uploadedPath) await deleteCoverFile(uploadedPath).catch(() => {});
+          throw err;
+        }
+      } else if (topic.coverAlt !== (coverAlt.trim() || null)) {
+        // Alt-only update while keeping the existing image.
+        await setTopicCover(topic.id, topic.coverPath, coverAlt.trim() || null, "upload");
+      }
+      toast.success("Couverture mise à jour");
+      setCoverOpen(false);
+      setCoverFile(null);
+      refreshTopic();
+    } catch (e) {
+      toast.error("Impossible de mettre à jour la couverture", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setCoverBusy(false);
+    }
+  }
+
+  async function removeCover() {
+    if (!topic) return;
+    setCoverBusy(true);
+    try {
+      const old = topic.coverPath;
+      await setTopicCover(topic.id, null, null, "upload");
+      if (old) await deleteCoverFile(old);
+      toast.success("Couverture retirée");
+      setCoverOpen(false);
+      setCoverFile(null);
+      refreshTopic();
+    } catch (e) {
+      toast.error("Impossible de retirer la couverture", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    } finally {
+      setCoverBusy(false);
+    }
+  }
+
+  async function modClearCover() {
+    if (!topic) return;
+    try {
+      const old = await moderateClearCover(topic.id, "");
+      if (old) await deleteCoverFile(old);
+      toast.success("Couverture modérée");
+      refreshTopic();
+    } catch (e) {
+      toast.error("Action impossible", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    }
+  }
 
   const posts = postsPage?.posts ?? [];
   const pageCount = postsPage?.pageCount ?? 1;
@@ -165,6 +257,16 @@ function TopicPage() {
           <>
             {/* Topic header + opening post */}
             <article className="space-y-4 rounded-2xl border border-border bg-card/50 p-5 backdrop-blur">
+              {coverUrl && (
+                <div className="-mx-5 -mt-5 mb-1 aspect-[16/6] w-[calc(100%+2.5rem)] overflow-hidden rounded-t-2xl bg-muted/40">
+                  <SafeImage
+                    src={coverUrl}
+                    variant="backdrop"
+                    alt={topic.coverAlt || topic.title}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
               <div className="flex items-start justify-between gap-3">
                 <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold text-foreground">
                   {topic.isPinned && <Pin className="h-4 w-4 text-primary" />}
@@ -195,6 +297,35 @@ function TopicPage() {
                 </div>
               </div>
               <AuthorByline author={topic.author} when={topic.createdAt} edited={topic.updatedAt !== topic.createdAt} size="md" />
+              {(isTopicAuthor || (canModerate && topic.coverPath)) && (
+                <div className="flex flex-wrap gap-2">
+                  {isTopicAuthor && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => {
+                        setCoverFile(null);
+                        setCoverAlt(topic.coverAlt ?? "");
+                        setCoverOpen(true);
+                      }}
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      {topic.coverPath ? "Modifier la couverture" : "Ajouter une couverture"}
+                    </Button>
+                  )}
+                  {canModerate && !isTopicAuthor && topic.coverPath && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-muted-foreground hover:text-destructive"
+                      onClick={modClearCover}
+                    >
+                      <EyeOff className="h-4 w-4" /> Retirer la couverture
+                    </Button>
+                  )}
+                </div>
+              )}
               <PostBody text={topic.body} />
             </article>
 
@@ -346,6 +477,34 @@ function TopicPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Cover management dialog (author) */}
+      <Dialog open={coverOpen} onOpenChange={(o) => !coverBusy && setCoverOpen(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Couverture du sujet</DialogTitle>
+          </DialogHeader>
+          <CoverField
+            file={coverFile}
+            onFile={setCoverFile}
+            alt={coverAlt}
+            onAlt={setCoverAlt}
+            existingUrl={coverUrl ?? null}
+            hasExisting={Boolean(topic?.coverPath)}
+            onRemoveExisting={removeCover}
+            busy={coverBusy}
+          />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCoverOpen(false)} disabled={coverBusy}>
+              Annuler
+            </Button>
+            <Button variant="aurora" onClick={saveCover} disabled={coverBusy}>
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Edit post dialog */}
       <Dialog open={Boolean(editingPost)} onOpenChange={(o) => !o && setEditingPost(null)}>

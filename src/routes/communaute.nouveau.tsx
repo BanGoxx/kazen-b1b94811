@@ -17,6 +17,8 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useForumCategories, useCreateTopic } from "@/lib/forum";
 import { SignInToParticipate } from "@/components/community/forum-ui";
+import { CoverField } from "@/components/community/CoverField";
+import { uploadCover, setTopicCover, deleteCoverFile } from "@/lib/forum-cover";
 
 interface NewTopicSearch {
   category?: string;
@@ -48,6 +50,9 @@ function NewTopicPage() {
   const [categoryId, setCategoryId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverAlt, setCoverAlt] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const openCategories = (categories ?? []).filter((c) => !c.isLocked);
 
@@ -59,14 +64,34 @@ function NewTopicPage() {
 
   async function submit() {
     if (!categoryId || title.trim().length < 3 || body.trim().length < 3) return;
+    if (!user) return;
+    setSubmitting(true);
     try {
       const id = await createTopic.mutateAsync({ categoryId, title: title.trim(), body: body.trim() });
+
+      // Cover is optional: never fail thread creation because of it, and never
+      // leave an orphan file if attaching the cover fails.
+      if (coverFile) {
+        let uploadedPath: string | null = null;
+        try {
+          uploadedPath = await uploadCover(coverFile, id, user.id);
+          await setTopicCover(id, uploadedPath, coverAlt.trim() || null, "upload");
+        } catch (err) {
+          if (uploadedPath) await deleteCoverFile(uploadedPath).catch(() => {});
+          toast.warning("Sujet créé, mais l'image n'a pas pu être ajoutée", {
+            description: err instanceof Error ? err.message : undefined,
+          });
+        }
+      }
+
       toast.success("Sujet créé");
       navigate({ to: "/communaute/t/$id", params: { id }, search: { page: 0 } });
     } catch (e) {
       toast.error("Impossible de créer le sujet", {
         description: e instanceof Error ? e.message : undefined,
       });
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -133,6 +158,15 @@ function NewTopicPage() {
               <p className="text-right text-[11px] text-muted-foreground">{body.length}/20000</p>
             </div>
 
+            <CoverField
+              file={coverFile}
+              onFile={setCoverFile}
+              alt={coverAlt}
+              onAlt={setCoverAlt}
+              busy={submitting}
+            />
+
+
             <div className="flex items-center justify-end gap-2">
               <Button asChild variant="ghost">
                 <Link to="/communaute">Annuler</Link>
@@ -140,6 +174,7 @@ function NewTopicPage() {
               <Button
                 variant="aurora"
                 disabled={
+                  submitting ||
                   createTopic.isPending ||
                   !categoryId ||
                   title.trim().length < 3 ||
@@ -149,6 +184,7 @@ function NewTopicPage() {
               >
                 Publier le sujet
               </Button>
+
             </div>
           </div>
         )}

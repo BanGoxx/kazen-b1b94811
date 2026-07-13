@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
 import { useForumOverview, useRecentTopics } from "@/lib/forum";
 import { timeAgo } from "@/components/community/forum-ui";
+import { useCoverUrls } from "@/lib/forum-cover";
+import { SafeImage } from "@/components/media/SafeImage";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/communaute/")({
@@ -56,6 +58,7 @@ function CommunautePage() {
   const { user } = useAuth();
   const { data: categories, isLoading } = useForumOverview();
   const { data: recent } = useRecentTopics(6);
+  const { data: coverUrls } = useCoverUrls((recent ?? []).map((t) => t.coverPath));
 
   return (
     <AppShell>
@@ -143,14 +146,26 @@ function CommunautePage() {
                       to="/communaute/t/$id"
                       params={{ id: t.id }}
                       className={cn(
-                        "block rounded-xl border border-border/60 bg-card/40 p-3 transition-colors hover:border-primary/40 hover:bg-card/60",
+                        "flex gap-3 rounded-xl border border-border/60 bg-card/40 p-3 transition-colors hover:border-primary/40 hover:bg-card/60",
                       )}
                     >
-                      <p className="line-clamp-2 text-sm font-medium text-foreground">{t.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t.author.displayName} · {timeAgo(t.lastActivityAt)} · {t.replyCount}{" "}
-                        réponse{t.replyCount > 1 ? "s" : ""}
-                      </p>
+                      {t.coverPath && coverUrls?.get(t.coverPath) && (
+                        <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted/40">
+                          <SafeImage
+                            src={coverUrls.get(t.coverPath)!}
+                            variant="backdrop"
+                            alt={t.coverAlt || t.title}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="line-clamp-2 text-sm font-medium text-foreground">{t.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {t.author.displayName} · {timeAgo(t.lastActivityAt)} · {t.replyCount}{" "}
+                          réponse{t.replyCount > 1 ? "s" : ""}
+                        </p>
+                      </div>
                     </Link>
                   </li>
                 ))}

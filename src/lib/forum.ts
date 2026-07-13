@@ -41,6 +41,9 @@ export interface ForumTopic {
   updatedAt: string;
   hidden: boolean;
   deleted: boolean;
+  coverPath: string | null;
+  coverAlt: string | null;
+  coverSource: string | null;
 }
 
 export interface ForumPost {
@@ -107,6 +110,9 @@ function mapTopic(row: Record<string, unknown>, authors: Map<string, AuthorLite>
     updatedAt: row.updated_at as string,
     hidden: Boolean(row.hidden_at),
     deleted: Boolean(row.deleted_at),
+    coverPath: (row.cover_image_path as string) ?? null,
+    coverAlt: (row.cover_image_alt as string) ?? null,
+    coverSource: (row.cover_image_source as string) ?? null,
   };
 }
 

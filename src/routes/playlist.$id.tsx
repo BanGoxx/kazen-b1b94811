@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/playlist/$id")({
   head: () => ({
     meta: [
-      { title: "Liste partagée — KAZEN" },
+      { title: "Playlist partagée — KAZEN" },
       {
         name: "description",
         content: "Découvrez une liste d'anime, séries et films partagée sur KAZEN.",
@@ -160,7 +160,7 @@ function PlaylistPage() {
           <>
             <header className="space-y-3 rounded-3xl border border-border bg-card/50 p-6 backdrop-blur">
               <div className="flex items-center gap-2 text-xs font-medium text-primary">
-                <ListMusic className="h-4 w-4" /> Liste partagée
+                <ListMusic className="h-4 w-4" /> Playlist partagée
                 {data.meta.isPublic ? (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
                     <Globe className="h-3 w-3" /> Publique

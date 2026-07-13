@@ -105,7 +105,7 @@ function AuthMenu() {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
-            <ListChecks className="h-4 w-4" /> Mes listes
+            <ListChecks className="h-4 w-4" /> Ma liste
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

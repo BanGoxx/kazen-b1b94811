@@ -147,7 +147,7 @@ export const NOTIFICATION_CATEGORY_META: Record<
     icon: "sparkles",
   },
   shared_list: {
-    label: "Listes partagées",
+    label: "Playlists partagées",
     description: "Activité autour des listes partagées.",
     icon: "users",
   },

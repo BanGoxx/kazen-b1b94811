@@ -56,6 +56,121 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          pair_key: string
+          requested_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          pair_key: string
+          requested_by: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          pair_key?: string
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          edited_at: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_participants: {
+        Row: {
+          archived_at: string | null
+          blocked_at: string | null
+          conversation_id: string
+          joined_at: string
+          last_read_at: string | null
+          muted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          blocked_at?: string | null
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          blocked_at?: string | null
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_reports: {
         Row: {
           created_at: string
@@ -1212,6 +1327,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accepts_chat: boolean
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -1223,6 +1339,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepts_chat?: boolean
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -1234,6 +1351,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepts_chat?: boolean
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -1552,6 +1670,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_conversation: { Args: { _id: string }; Returns: undefined }
       anilist_cache_get: {
         Args: { p_key: string }
         Returns: {
@@ -1563,11 +1682,20 @@ export type Database = {
         Args: { p_key: string; p_payload: Json; p_token: string }
         Returns: undefined
       }
+      archive_conversation: {
+        Args: { _archived?: boolean; _id: string }
+        Returns: undefined
+      }
+      block_chat_member: {
+        Args: { _blocked?: boolean; _id: string }
+        Returns: undefined
+      }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
       can_view_playlist: {
         Args: { _playlist: string; _user: string }
         Returns: boolean
       }
+      chat_pair_key: { Args: { _a: string; _b: string }; Returns: string }
       create_forum_post: {
         Args: { _body: string; _reply_to?: string; _topic: string }
         Returns: string
@@ -1590,9 +1718,15 @@ export type Database = {
         Args: { _accept: boolean; _request: string }
         Returns: undefined
       }
+      decline_conversation: { Args: { _id: string }; Returns: undefined }
+      delete_chat_message: { Args: { _id: string }; Returns: undefined }
       delete_forum_post: { Args: { _id: string }; Returns: undefined }
       delete_forum_topic: { Args: { _id: string }; Returns: undefined }
       delete_playlist_review: { Args: { _id: string }; Returns: undefined }
+      edit_chat_message: {
+        Args: { _body: string; _id: string }
+        Returns: undefined
+      }
       edit_forum_post: {
         Args: { _body: string; _id: string }
         Returns: undefined
@@ -1648,6 +1782,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_chat_participant: {
+        Args: { _conv: string; _user: string }
+        Returns: boolean
+      }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
       is_playlist_collaborator: {
         Args: { _playlist: string; _user: string }
@@ -1669,6 +1807,7 @@ export type Database = {
         }
         Returns: string
       }
+      mark_conversation_read: { Args: { _id: string }; Returns: undefined }
       moderate_clear_forum_cover: {
         Args: { _note?: string; _topic: string }
         Returns: string
@@ -1692,6 +1831,20 @@ export type Database = {
           _target_type: string
         }
         Returns: undefined
+      }
+      moderation_chat_context: {
+        Args: { _message: string }
+        Returns: {
+          body: string
+          conversation_id: string
+          created_at: string
+          deleted_at: string
+          edited_at: string
+          hidden_at: string
+          id: string
+          is_target: boolean
+          sender_id: string
+        }[]
       }
       my_moderation_access: {
         Args: never
@@ -1719,6 +1872,11 @@ export type Database = {
           total: number
         }[]
       }
+      report_chat_message: {
+        Args: { _details?: string; _id: string; _reason: string }
+        Returns: string
+      }
+      request_conversation: { Args: { _target: string }; Returns: string }
       request_playlist_join: {
         Args: { _message?: string; _playlist: string }
         Returns: string
@@ -1745,6 +1903,10 @@ export type Database = {
       role_rank: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: number
+      }
+      send_chat_message: {
+        Args: { _body: string; _conv: string }
+        Returns: string
       }
       set_forum_topic_cover: {
         Args: { _alt?: string; _path: string; _source?: string; _topic: string }

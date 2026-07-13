@@ -5,6 +5,7 @@ import {
   CalendarRange,
   CheckCheck,
   Megaphone,
+  MessageCircle,
   Newspaper,
   Play,
   Settings2,

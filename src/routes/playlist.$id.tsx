@@ -211,6 +211,13 @@ function PlaylistPage() {
               </div>
             </header>
 
+            <CollabPanel
+              playlistId={id}
+              ownerId={data.meta.ownerId}
+              isPublic={data.meta.isPublic}
+            />
+
+
             {data.items.length === 0 ? (
               <p className="py-10 text-center text-muted-foreground">
                 Cette liste ne contient encore aucun titre.

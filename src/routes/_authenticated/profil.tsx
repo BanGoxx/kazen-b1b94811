@@ -86,11 +86,21 @@ function ProfilePage() {
     }
   }, [data]);
 
+  const rated = entries.filter((e) => typeof e.rating === "number");
   const stats = {
     total: entries.length,
     favoris: entries.filter((e) => e.favorite).length,
     termine: entries.filter((e) => e.status === "termine").length,
     en_cours: entries.filter((e) => e.status === "en_cours").length,
+  };
+  const insights = {
+    avgRating:
+      rated.length > 0
+        ? (rated.reduce((sum, e) => sum + (e.rating ?? 0), 0) / rated.length).toFixed(1)
+        : null,
+    episodes: entries.reduce((sum, e) => sum + (e.progress ?? 0), 0),
+    rewatches: entries.reduce((sum, e) => sum + (e.rewatchCount ?? 0), 0),
+    aVoir: entries.filter((e) => e.status === "a_voir").length,
   };
 
   const save = async () => {

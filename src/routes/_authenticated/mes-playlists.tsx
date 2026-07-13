@@ -210,6 +210,8 @@ function MyPlaylistsPage() {
           </div>
         </section>
 
+        <SharedWithMeSection />
+
         {/* List */}
         {isLoading ? (
           <div className="flex justify-center py-10">

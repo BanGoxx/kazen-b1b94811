@@ -249,6 +249,26 @@ export function ListControls({ item }: { item: MediaItem }) {
             />
           </div>
         </div>
+        {inList ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="h-8 w-full gap-1.5 text-xs"
+            disabled={upsert.isPending}
+            onClick={() => {
+              // Explicit rewatch: increments the count exactly once and resets
+              // progress, preserving historical completion/start dates. Disabled
+              // while pending guards against duplicate submissions.
+              upsert.mutate(
+                { item, patch: rewatchPatch(trackState) },
+                { onSuccess: () => toast.success("Nouveau visionnage lancé") },
+              );
+            }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Recommencer
+          </Button>
+        ) : null}
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"

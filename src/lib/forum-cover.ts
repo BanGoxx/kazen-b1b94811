@@ -92,7 +92,9 @@ export async function setTopicCover(
 ): Promise<void> {
   const { error } = await supabase.rpc("set_forum_topic_cover", {
     _topic: topicId,
-    _path: path ?? undefined,
+    // _path is intentionally nullable at runtime (null clears the cover); the
+    // generated type marks it required, so we cast to satisfy the signature.
+    _path: path as unknown as string,
     _alt: alt ?? undefined,
     _source: source,
   });

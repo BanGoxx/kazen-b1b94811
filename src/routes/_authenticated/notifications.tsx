@@ -141,12 +141,20 @@ function NotificationsPage() {
                   : "Vous êtes à jour."}
             </p>
           </div>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/profil" hash="notifications">
-              <Settings2 className="mr-1.5 h-4 w-4" />
-              Préférences
-            </Link>
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/recap">
+                <CalendarRange className="mr-1.5 h-4 w-4" />
+                Récap
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/profil" hash="notifications">
+                <Settings2 className="mr-1.5 h-4 w-4" />
+                Préférences
+              </Link>
+            </Button>
+          </div>
         </header>
 
         {unreadCount > 0 && (

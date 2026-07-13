@@ -181,7 +181,7 @@ export function buildGeneralDigest(input: GeneralDigestInput): DigestModel {
 
   pushMedia("trending", "Tendances du moment", boundMedia(input.trending, GENERAL_LIMITS.trending, seen));
 
-  if (includeArticles && input.articles.length) {
+  if (includeArticles && articlesAllowed(prefs) && input.articles.length) {
     const articles = input.articles.slice(0, GENERAL_LIMITS.articles).map(articleRef);
     if (articles.length)
       sections.push({ id: "articles", title: "Actualités récentes", kind: "article", articles });

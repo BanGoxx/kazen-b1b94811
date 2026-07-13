@@ -84,8 +84,11 @@ export const updateMyEmailPreferences = createServerFn({ method: "POST" })
       data.receive_personalized_digest !== undefined ||
       data.digest_frequency !== undefined;
 
-    const patch: Record<string, unknown> = { ...data, user_id: context.userId };
-    if (touchesConsent) patch.consent_updated_at = new Date().toISOString();
+    const patch = {
+      ...data,
+      user_id: context.userId,
+      ...(touchesConsent ? { consent_updated_at: new Date().toISOString() } : {}),
+    };
 
     const { error } = await context.supabase
       .from("member_email_preferences")

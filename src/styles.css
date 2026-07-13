@@ -61,27 +61,31 @@
 
 :root {
   --radius: 0.9rem;
-  /* Deep obsidian with a whisper of night-plum/indigo undertone — cinematic,
-     never pure black. Distinct surface levels: background < sidebar < card <
-     popover for clear depth. */
-  --background: oklch(0.144 0.008 286);
-  --foreground: oklch(0.972 0.004 90);
-  --card: oklch(0.197 0.009 286);
-  --card-foreground: oklch(0.972 0.004 90);
-  --popover: oklch(0.213 0.01 286);
-  --popover-foreground: oklch(0.972 0.004 90);
-  /* Ember/coral primary — warmed toward coral, chroma dialed back so red reads
-     premium rather than aggressive. */
-  --primary: oklch(0.63 0.168 32);
-  --primary-foreground: oklch(0.99 0.01 60);
-  --secondary: oklch(0.239 0.01 286);
-  --secondary-foreground: oklch(0.96 0.005 90);
-  --muted: oklch(0.219 0.009 286);
-  --muted-foreground: oklch(0.738 0.012 286);
-  --accent: oklch(0.855 0.05 85);
-  --accent-foreground: oklch(0.2 0.02 60);
-  --destructive: oklch(0.62 0.21 22);
-  --destructive-foreground: oklch(0.98 0.005 20);
+  /* Near-black graphite with a whisper of warm undertone — cinematic, never
+     pure black. Distinct surface levels: background < sidebar < card < popover
+     for clear depth. */
+  --background: oklch(0.152 0.004 40);
+  --foreground: oklch(0.965 0.006 70);
+  --card: oklch(0.205 0.005 40);
+  --card-foreground: oklch(0.965 0.006 70);
+  --popover: oklch(0.225 0.006 40);
+  --popover-foreground: oklch(0.965 0.006 70);
+  /* Metallic crimson primary — restrained, premium red-burgundy rather than
+     bright scarlet or gaming neon. */
+  --primary: oklch(0.55 0.155 20);
+  --primary-foreground: oklch(0.99 0.008 45);
+  --secondary: oklch(0.245 0.005 40);
+  --secondary-foreground: oklch(0.96 0.005 70);
+  --muted: oklch(0.225 0.005 40);
+  --muted-foreground: oklch(0.745 0.01 45);
+  /* Neutral elevated surface for hover/selected states — keeps interactions
+     calm; brand red is reserved for primary emphasis. */
+  --accent: oklch(0.27 0.008 30);
+  --accent-foreground: oklch(0.96 0.005 70);
+  /* Destructive kept hotter/brighter than the deep brand crimson so danger
+     never reads as a normal KAZEN action. */
+  --destructive: oklch(0.62 0.215 29);
+  --destructive-foreground: oklch(0.99 0.005 30);
   /* Clear, restrained status colors (used for pills / states). */
   --success: oklch(0.72 0.13 158);
   --success-foreground: oklch(0.16 0.02 158);
@@ -89,71 +93,73 @@
   --warning-foreground: oklch(0.2 0.03 78);
   --info: oklch(0.7 0.1 235);
   --info-foreground: oklch(0.16 0.02 235);
-  --border: oklch(0.72 0.012 286 / 15%);
-  --input: oklch(0.72 0.012 286 / 18%);
-  --ring: oklch(0.63 0.168 32);
-  --chart-1: oklch(0.63 0.168 32);
-  --chart-2: oklch(0.855 0.05 85);
-  --chart-3: oklch(0.62 0.15 44);
-  --chart-4: oklch(0.72 0.08 90);
+  --border: oklch(0.9 0.008 40 / 10%);
+  --input: oklch(0.9 0.008 40 / 14%);
+  --ring: oklch(0.6 0.16 20);
+  --chart-1: oklch(0.58 0.16 20);
+  --chart-2: oklch(0.7 0.09 40);
+  --chart-3: oklch(0.62 0.14 34);
+  --chart-4: oklch(0.72 0.07 60);
   --chart-5: oklch(0.6 0.08 235);
-  --sidebar: oklch(0.163 0.008 286);
-  --sidebar-foreground: oklch(0.95 0.006 90);
-  --sidebar-primary: oklch(0.63 0.168 32);
-  --sidebar-primary-foreground: oklch(0.99 0.01 60);
-  --sidebar-accent: oklch(0.225 0.01 286);
-  --sidebar-accent-foreground: oklch(0.96 0.005 90);
-  --sidebar-border: oklch(0.66 0.012 286 / 16%);
-  --sidebar-ring: oklch(0.63 0.168 32);
+  --sidebar: oklch(0.172 0.004 40);
+  --sidebar-foreground: oklch(0.95 0.006 70);
+  --sidebar-primary: oklch(0.55 0.155 20);
+  --sidebar-primary-foreground: oklch(0.99 0.008 45);
+  --sidebar-accent: oklch(0.235 0.006 40);
+  --sidebar-accent-foreground: oklch(0.96 0.005 70);
+  --sidebar-border: oklch(0.85 0.008 40 / 11%);
+  --sidebar-ring: oklch(0.6 0.16 20);
   /* Theme-aware glass surface (header, sidebar, drawers). */
-  --glass-bg: oklch(0.183 0.009 286 / 0.82);
-  --glass-border: oklch(0.85 0.04 80 / 0.08);
+  --glass-bg: oklch(0.19 0.005 40 / 0.82);
+  --glass-border: oklch(0.8 0.05 25 / 0.09);
 }
 
 
 .light {
-  /* Warm off-white — comfortable, low-glare editorial base. */
-  --background: oklch(0.981 0.004 85);
-  --foreground: oklch(0.22 0.012 265);
+  /* Warm near-white — comfortable, low-glare editorial base, same KAZEN
+     identity translated into a premium light environment. */
+  --background: oklch(0.98 0.003 60);
+  --foreground: oklch(0.2 0.008 40);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.012 265);
+  --card-foreground: oklch(0.2 0.008 40);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.012 265);
-  --primary: oklch(0.54 0.18 32);
-  --primary-foreground: oklch(0.99 0.01 60);
-  --secondary: oklch(0.945 0.005 85);
-  --secondary-foreground: oklch(0.26 0.012 265);
-  --muted: oklch(0.955 0.004 85);
-  --muted-foreground: oklch(0.48 0.012 265);
-  --accent: oklch(0.64 0.08 80);
-  --accent-foreground: oklch(0.99 0.005 80);
-  --destructive: oklch(0.56 0.22 22);
-  --destructive-foreground: oklch(0.99 0.005 20);
+  --popover-foreground: oklch(0.2 0.008 40);
+  /* Deep metallic red for text/icons/buttons; brighter active state below. */
+  --primary: oklch(0.475 0.16 22);
+  --primary-foreground: oklch(0.99 0.008 45);
+  --secondary: oklch(0.95 0.004 60);
+  --secondary-foreground: oklch(0.26 0.008 40);
+  --muted: oklch(0.958 0.003 60);
+  --muted-foreground: oklch(0.47 0.01 40);
+  --accent: oklch(0.93 0.005 40);
+  --accent-foreground: oklch(0.26 0.008 40);
+  --destructive: oklch(0.55 0.22 29);
+  --destructive-foreground: oklch(0.99 0.005 30);
   --success: oklch(0.56 0.13 158);
   --success-foreground: oklch(0.99 0.01 158);
   --warning: oklch(0.68 0.12 72);
   --warning-foreground: oklch(0.2 0.03 72);
   --info: oklch(0.55 0.11 235);
   --info-foreground: oklch(0.99 0.01 235);
-  --border: oklch(0.5 0.01 265 / 16%);
-  --input: oklch(0.5 0.01 265 / 18%);
-  --ring: oklch(0.54 0.18 32);
-  --chart-1: oklch(0.54 0.18 32);
-  --chart-2: oklch(0.64 0.08 80);
-  --chart-3: oklch(0.56 0.15 44);
-  --chart-4: oklch(0.66 0.08 90);
+  --border: oklch(0.4 0.008 40 / 14%);
+  --input: oklch(0.4 0.008 40 / 16%);
+  --ring: oklch(0.475 0.16 22);
+  --chart-1: oklch(0.475 0.16 22);
+  --chart-2: oklch(0.55 0.09 40);
+  --chart-3: oklch(0.55 0.14 34);
+  --chart-4: oklch(0.6 0.07 60);
   --chart-5: oklch(0.5 0.08 235);
-  --sidebar: oklch(0.965 0.004 85);
-  --sidebar-foreground: oklch(0.26 0.012 265);
-  --sidebar-primary: oklch(0.54 0.18 32);
-  --sidebar-primary-foreground: oklch(0.99 0.01 60);
-  --sidebar-accent: oklch(0.925 0.006 85);
-  --sidebar-accent-foreground: oklch(0.26 0.012 265);
-  --sidebar-border: oklch(0.5 0.01 265 / 15%);
-  --sidebar-ring: oklch(0.54 0.18 32);
-  /* Light glass: warm near-white, subtle ember-tinted border. */
-  --glass-bg: oklch(0.99 0.003 85 / 0.74);
-  --glass-border: oklch(0.55 0.05 40 / 0.1);
+  --sidebar: oklch(0.965 0.003 60);
+  --sidebar-foreground: oklch(0.26 0.008 40);
+  --sidebar-primary: oklch(0.475 0.16 22);
+  --sidebar-primary-foreground: oklch(0.99 0.008 45);
+  --sidebar-accent: oklch(0.925 0.005 60);
+  --sidebar-accent-foreground: oklch(0.26 0.008 40);
+  --sidebar-border: oklch(0.4 0.008 40 / 13%);
+  --sidebar-ring: oklch(0.475 0.16 22);
+  /* Light glass: warm near-white, subtle crimson-tinted border. */
+  --glass-bg: oklch(0.99 0.003 60 / 0.74);
+  --glass-border: oklch(0.5 0.06 25 / 0.1);
 }
 
 
@@ -174,12 +180,12 @@
 :root {
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --gradient-aurora: linear-gradient(115deg, oklch(0.66 0.185 34), oklch(0.58 0.17 26) 46%, oklch(0.82 0.065 84));
-  --gradient-surface: linear-gradient(180deg, oklch(0.2 0.01 286), oklch(0.155 0.008 286));
+  --gradient-aurora: linear-gradient(115deg, oklch(0.62 0.17 26), oklch(0.5 0.15 20) 52%, oklch(0.38 0.11 18));
+  --gradient-surface: linear-gradient(180deg, oklch(0.21 0.006 40), oklch(0.16 0.004 40));
   --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
   --shadow-md: 0 10px 28px -12px oklch(0 0 0 / 0.5);
   --shadow-lg: 0 34px 74px -28px oklch(0 0 0 / 0.7);
-  --shadow-glow: 0 0 34px -12px oklch(0.63 0.168 32 / 0.32);
+  --shadow-glow: 0 0 34px -12px oklch(0.55 0.155 20 / 0.34);
 
 }
 
@@ -333,7 +339,7 @@ p {
   &:hover {
     box-shadow: var(--shadow-lg), var(--shadow-glow), var(--shadow-inset-line);
     transform: translateY(-4px);
-    border-color: oklch(0.63 0.168 32 / 0.4);
+    border-color: oklch(0.55 0.155 20 / 0.4);
   }
 }
 
@@ -347,7 +353,7 @@ p {
   /* Shadow system → shadow-card / shadow-float / shadow-glow / shadow-inset-line */
   --shadow-card: 0 10px 28px -12px oklch(0 0 0 / 0.5);
   --shadow-float: 0 34px 74px -28px oklch(0 0 0 / 0.7);
-  --shadow-glow: 0 0 34px -12px oklch(0.63 0.168 32 / 0.32);
+  --shadow-glow: 0 0 34px -12px oklch(0.55 0.155 20 / 0.34);
   --shadow-inset-line: inset 0 1px 0 0 oklch(1 0 0 / 0.05);
 
   /* Content max-width tokens → max-w-content / max-w-prose-relaxed */
@@ -447,8 +453,8 @@ p {
 /* Soft top+bottom vignette to anchor text over imagery. */
 @utility cinematic-scrim {
   background:
-    linear-gradient(to top, var(--color-background) 6%, oklch(0.145 0.006 265 / 0.55) 42%, transparent 78%),
-    linear-gradient(to right, var(--color-background) 2%, oklch(0.145 0.006 265 / 0.35) 40%, transparent 72%);
+    linear-gradient(to top, var(--color-background) 6%, oklch(0.15 0.004 40 / 0.55) 42%, transparent 78%),
+    linear-gradient(to right, var(--color-background) 2%, oklch(0.15 0.004 40 / 0.35) 40%, transparent 72%);
 }
 
 /* Radial focus glow used behind posters / hero art. */
@@ -456,7 +462,7 @@ p {
   box-shadow:
     0 24px 60px -24px oklch(0 0 0 / 0.82),
     0 0 0 1px oklch(1 0 0 / 0.05),
-    0 0 46px -20px oklch(0.63 0.168 32 / 0.24);
+    0 0 46px -20px oklch(0.55 0.155 20 / 0.26);
 }
 
 /* Animated gradient hairline border on hover for premium cards. */
@@ -507,7 +513,7 @@ html {
 /* Premium, unobtrusive scrollbar that matches the graphite & ember theme. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.42 0.02 265) transparent;
+  scrollbar-color: oklch(0.42 0.012 40) transparent;
 }
 *::-webkit-scrollbar {
   width: 10px;
@@ -517,13 +523,13 @@ html {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: oklch(0.38 0.015 265 / 0.7);
+  background: oklch(0.38 0.01 40 / 0.7);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.52 0.04 32 / 0.8);
+  background: oklch(0.5 0.06 20 / 0.82);
   background-clip: content-box;
 }
 

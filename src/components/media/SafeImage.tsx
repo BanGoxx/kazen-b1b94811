@@ -14,20 +14,20 @@ function fallbackDataUri(variant: "poster" | "backdrop", label?: string): string
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#17161a"/>
-      <stop offset="0.55" stop-color="#201c1d"/>
-      <stop offset="1" stop-color="#2a1c18"/>
+      <stop offset="0" stop-color="#111012"/>
+      <stop offset="0.55" stop-color="#18161a"/>
+      <stop offset="1" stop-color="#211417"/>
     </linearGradient>
     <radialGradient id="e" cx="0.5" cy="0.42" r="0.7">
-      <stop offset="0" stop-color="#e8623a" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#e8623a" stop-opacity="0"/>
+      <stop offset="0" stop-color="#b52a37" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#b52a37" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="${w}" height="${h}" fill="url(#g)"/>
   <rect width="${w}" height="${h}" fill="url(#e)"/>
-  <g fill="#f4ead9" opacity="0.92" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
+  <g fill="#efe9ea" opacity="0.92" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
     <text x="50%" y="46%" font-size="${fontSize}" letter-spacing="6" font-weight="700">KAZEN</text>
-    <text x="50%" y="54%" font-size="${Math.round(fontSize * 0.4)}" fill="#e8623a" letter-spacing="2" font-family="system-ui, sans-serif">${escapeXml(title)}</text>
+    <text x="50%" y="54%" font-size="${Math.round(fontSize * 0.4)}" fill="#c43a46" letter-spacing="2" font-family="system-ui, sans-serif">${escapeXml(title)}</text>
   </g>
 </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

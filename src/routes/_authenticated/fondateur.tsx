@@ -244,8 +244,9 @@ function FounderConsole() {
             <EnrichmentSection />
           </TabsContent>
 
-          <TabsContent value="qualite" className="pt-6">
+          <TabsContent value="qualite" className="pt-6 space-y-6">
             <DataQualitySection />
+            <RecoFeedbackSection />
           </TabsContent>
 
           <TabsContent value="digests" className="pt-6">

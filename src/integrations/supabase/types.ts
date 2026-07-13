@@ -1399,6 +1399,59 @@ export type Database = {
           },
         ]
       }
+      shared_playlist_reviews: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          edited_at: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          playlist_id: string
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          playlist_id: string
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          playlist_id?: string
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_playlist_reviews_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_public_badges: {
         Row: {
           assigned_at: string
@@ -1499,6 +1552,10 @@ export type Database = {
         Returns: undefined
       }
       can_moderate_now: { Args: { _user_id: string }; Returns: boolean }
+      can_view_playlist: {
+        Args: { _playlist: string; _user: string }
+        Returns: boolean
+      }
       create_forum_post: {
         Args: { _body: string; _reply_to?: string; _topic: string }
         Returns: string
@@ -1523,6 +1580,7 @@ export type Database = {
       }
       delete_forum_post: { Args: { _id: string }; Returns: undefined }
       delete_forum_topic: { Args: { _id: string }; Returns: undefined }
+      delete_playlist_review: { Args: { _id: string }; Returns: undefined }
       edit_forum_post: {
         Args: { _body: string; _id: string }
         Returns: undefined
@@ -1690,6 +1748,10 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_playlist_review: {
+        Args: { _body: string; _playlist: string; _rating?: number }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
@@ -1709,7 +1771,12 @@ export type Database = {
         | "warn"
         | "timeout"
         | "dismiss_report"
-      moderation_target_type: "review" | "reply" | "playlist" | "playlist_item"
+      moderation_target_type:
+        | "review"
+        | "reply"
+        | "playlist"
+        | "playlist_item"
+        | "playlist_review"
       playlist_collab_role: "viewer" | "editor"
       playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
@@ -1861,7 +1928,13 @@ export const Constants = {
         "timeout",
         "dismiss_report",
       ],
-      moderation_target_type: ["review", "reply", "playlist", "playlist_item"],
+      moderation_target_type: [
+        "review",
+        "reply",
+        "playlist",
+        "playlist_item",
+        "playlist_review",
+      ],
       playlist_collab_role: ["viewer", "editor"],
       playlist_request_status: ["pending", "accepted", "declined", "cancelled"],
       priority_level: ["basse", "normale", "haute"],

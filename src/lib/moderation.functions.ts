@@ -10,7 +10,8 @@ export type ModerationTargetType =
   | "review"
   | "reply"
   | "playlist"
-  | "playlist_item";
+  | "playlist_item"
+  | "playlist_review";
 
 export type ModerationActionType =
   | "hide"
@@ -218,6 +219,23 @@ async function loadTargetSnapshot(
         exists: true,
         preview: (data.title ?? "(élément de liste)").slice(0, 240),
         ownerId: null,
+        ownerName: null,
+        hidden: Boolean(data.hidden_at),
+        softDeleted: Boolean(data.deleted_at),
+        link: data.playlist_id ? `/playlist/${data.playlist_id}` : null,
+      };
+    }
+    if (targetType === "playlist_review") {
+      const { data } = await supabase
+        .from("shared_playlist_reviews")
+        .select("playlist_id, author_id, body, hidden_at, deleted_at")
+        .eq("id", targetId)
+        .maybeSingle();
+      if (!data) return empty;
+      return {
+        exists: true,
+        preview: (data.body ?? "(avis)").slice(0, 240),
+        ownerId: data.author_id,
         ownerName: null,
         hidden: Boolean(data.hidden_at),
         softDeleted: Boolean(data.deleted_at),

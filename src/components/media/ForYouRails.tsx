@@ -88,7 +88,7 @@ export function ForYouRails() {
             </Button>
           ) : (
             <Button asChild variant="secondary" className="shrink-0">
-              <Link to="/mes-listes">Mes listes</Link>
+              <Link to="/mes-listes">Ma liste</Link>
             </Button>
           )}
         </div>
@@ -110,7 +110,7 @@ export function ForYouRails() {
         <MediaCarousel
           title="Reprendre selon vos goûts"
           subtitle="Vos titres en cours et en pause"
-          action={{ label: "Mes listes", to: "/mes-listes" }}
+          action={{ label: "Ma liste", to: "/mes-listes" }}
           items={resume}
           hideWhenEmpty
         />

@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/listes")({
   head: () => ({
     meta: [
-      { title: "Listes partagées — KAZEN" },
+      { title: "Playlists partagées — KAZEN" },
       {
         name: "description",
         content:
           "Explorez les listes partagées par la communauté KAZEN : sélections d'anime, séries et films à découvrir.",
       },
-      { property: "og:title", content: "Listes partagées — KAZEN" },
+      { property: "og:title", content: "Playlists partagées — KAZEN" },
       {
         property: "og:description",
         content: "Des collections d'anime, séries et films curées par les membres de KAZEN.",
@@ -113,7 +113,7 @@ function ListesPage() {
           <div className="space-y-2">
             <h1 className="flex items-center gap-2 text-3xl font-bold">
               <ListMusic className="h-7 w-7 text-primary" />
-              <span className="aurora-text">Listes partagées</span>
+              <span className="aurora-text">Playlists partagées</span>
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
               Des collections d'anime, séries et films curées par la communauté KAZEN. Parcourez,

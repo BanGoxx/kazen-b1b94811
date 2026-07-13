@@ -54,6 +54,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: "/", label: "Découverte", icon: Compass },
+  { to: "/recherche", label: "Recherche", icon: Search },
   { to: "/pour-vous", label: "Pour vous", icon: Wand2 },
   { to: "/anime", label: "Anime", icon: Sparkles },
   { to: "/series", label: "Séries", icon: Tv },
@@ -61,9 +62,8 @@ const NAV: NavItem[] = [
   { to: "/anime/saison", label: "Saison anime", icon: Leaf },
   { to: "/a-venir", label: "À venir", icon: CalendarClock },
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
-  { to: "/recherche", label: "Recherche", icon: Search },
-  { to: "/mes-listes", label: "Mes listes", icon: ListChecks },
-  { to: "/listes", label: "Listes partagées", icon: ListMusic },
+  { to: "/mes-listes", label: "Ma liste", icon: ListChecks },
+  { to: "/listes", label: "Playlists partagées", icon: ListMusic },
   { to: "/communaute", label: "Communauté", icon: MessagesSquare },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
   { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
@@ -105,7 +105,7 @@ function AuthMenu() {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
-            <ListChecks className="h-4 w-4" /> Mes listes
+            <ListChecks className="h-4 w-4" /> Ma liste
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

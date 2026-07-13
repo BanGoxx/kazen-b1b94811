@@ -54,7 +54,7 @@ export const Route = createFileRoute("/_authenticated/moderation")({
 const TARGET_LABELS: Record<string, string> = {
   review: "Avis",
   reply: "Réponse",
-  playlist: "Liste partagée",
+  playlist: "Playlist partagée",
   playlist_item: "Élément de liste",
 };
 

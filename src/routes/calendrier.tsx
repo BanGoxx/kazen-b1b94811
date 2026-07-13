@@ -132,7 +132,7 @@ function CalendarPage() {
 
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-  const [weeks, setWeeks] = useState<1 | 2>(2);
+  const [weeks, setWeeks] = useState<1 | 2 | 4>(2);
   const [type, setType] = useState<StatusFilter>("all");
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
@@ -229,7 +229,7 @@ function CalendarPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center rounded-full border border-border bg-background/40 p-0.5">
-            {([1, 2] as const).map((w) => (
+            {([1, 2, 4] as const).map((w) => (
               <button
                 key={w}
                 type="button"
@@ -240,7 +240,7 @@ function CalendarPage() {
                   weeks === w ? "aurora-bg text-white" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {w === 1 ? "1 sem." : "2 sem."}
+                {w} sem.
               </button>
             ))}
           </div>
@@ -316,7 +316,7 @@ function CalendarPage() {
           ))}
         </div>
         <span className="text-xs font-medium text-muted-foreground">
-          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks === 1 ? "1 semaine" : "2 semaines"}
+          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks} semaine{weeks > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -381,7 +381,7 @@ function CalendarPage() {
         </div>
       ) : (
 
-        <EmptyState message="Aucune sortie cette semaine avec ces filtres." hint="Changez de semaine ou réinitialisez les filtres." />
+        <EmptyState message="Aucune sortie sur cette période avec ces filtres." hint="Changez de période ou réinitialisez les filtres." />
       )}
     </AppShell>
   );

@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/mes-listes")({
   head: () => ({
     meta: [
-      { title: "Mes listes — KAZEN" },
+      { title: "Ma liste — KAZEN" },
       {
         name: "description",
         content: "Gérez vos anime, séries et films suivis, favoris et notes personnelles.",
@@ -154,7 +154,7 @@ function MyListsPage() {
             <ListChecks className="h-4 w-4" /> Espace personnel
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-            Mes <span className="aurora-text">listes</span>
+            Ma <span className="aurora-text">liste</span>
           </h1>
           <p className="text-muted-foreground">
             {entries.length} titre{entries.length > 1 ? "s" : ""} suivi

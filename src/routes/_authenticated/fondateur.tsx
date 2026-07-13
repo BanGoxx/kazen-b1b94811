@@ -504,6 +504,51 @@ function DataQualitySection() {
   );
 }
 
+const RECO_ACTION_LABELS: Record<string, string> = {
+  not_interested: "Pas intéressé",
+  hidden: "Masqués",
+};
+
+function RecoFeedbackSection() {
+  const statsFn = useServerFn(getRecoFeedbackStats);
+  const { data, isFetching } = useQuery({
+    queryKey: ["reco-feedback-stats"],
+    queryFn: () => statsFn(),
+  });
+
+  const totalDismissals = (data ?? []).reduce((sum, s) => sum + s.total, 0);
+
+  return (
+    <SectionCard
+      title="Retours sur les recommandations"
+      desc="Diagnostic agrégé des titres masqués par les membres. Lecture seule — aucune donnée membre individuelle."
+    >
+      {isFetching && !data ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+        </p>
+      ) : totalDismissals === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Aucun titre masqué pour l'instant.
+        </p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(data ?? []).map((s) => (
+            <div key={s.action} className="rounded-lg border border-border bg-card/60 p-3">
+              <p className="text-2xl font-bold">{s.total}</p>
+              <p className="text-xs text-muted-foreground">
+                {RECO_ACTION_LABELS[s.action] ?? s.action} · {s.distinctMedia} titre
+                {s.distinctMedia > 1 ? "s" : ""} distinct{s.distinctMedia > 1 ? "s" : ""}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </SectionCard>
+  );
+}
+
+
 function EnrichmentSection() {
   const qc = useQueryClient();
   const listFn = useServerFn(listEnrichments);

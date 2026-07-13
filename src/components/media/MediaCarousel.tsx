@@ -108,6 +108,7 @@ export function MediaCarousel({
                 key={item.key}
                 item={item}
                 className="w-[150px] shrink-0 snap-start sm:w-[180px]"
+                onHide={onHideItem ? () => onHideItem(item) : undefined}
               />
             ))}
           </div>

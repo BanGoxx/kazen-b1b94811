@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 import {
   Avatar,
   AvatarFallback,
@@ -38,11 +40,7 @@ const GENRE_OPTIONS = [
   "Sport", "Mecha", "Tranche de vie", "Musique",
 ];
 
-const TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: "anime", label: "Anime" },
-  { value: "series", label: "Séries" },
-  { value: "movie", label: "Films" },
-];
+const TYPE_VALUES: readonly string[] = ["anime", "series", "movie"] as const;
 
 const STYLE_OPTIONS = [
   "Shonen", "Seinen", "Shojo", "Isekai", "Slice of life", "Dark",
@@ -62,6 +60,8 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 
 function ProfilePage() {
+  const { t } = useI18n();
+  const typeLabels = useMediaTypeLabels();
   const { user } = useAuth();
   const { isSupporter } = usePremium();
   const { isBetaPremium } = useBetaPremium();
@@ -122,9 +122,9 @@ function ProfilePage() {
         },
       });
       await refetch();
-      toast.success("Profil mis à jour.");
+      toast.success(t.profile.updated);
     } catch {
-      toast.error("Impossible d'enregistrer le profil.");
+      toast.error(t.profile.updateError);
     } finally {
       setSaving(false);
     }
@@ -150,7 +150,7 @@ function ProfilePage() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-display text-2xl font-extrabold">
-                  {displayName || "Mon profil"}
+                  {displayName || t.profile.myProfile}
                 </h1>
                 {isOwner ? <FounderBadge size="sm" /> : null}
                 {isBetaPremium ? <PremiumBetaBadge size="sm" /> : null}
@@ -163,7 +163,7 @@ function ProfilePage() {
             </div>
           </div>
           <Button variant="premium" onClick={handleSignOut} className="gap-2">
-            <LogOut className="h-4 w-4" /> Déconnexion
+            <LogOut className="h-4 w-4" /> {t.profile.signOut}
           </Button>
         </header>
 
@@ -183,7 +183,7 @@ function ProfilePage() {
             </div>
           </div>
           <Button asChild variant="premium" size="sm">
-            <Link to="/soutien">En savoir plus</Link>
+            <Link to="/soutien">{t.common.learnMore}</Link>
           </Button>
         </section>
 
@@ -195,14 +195,14 @@ function ProfilePage() {
                 <Crown className="h-5 w-5" />
               </span>
               <div>
-                <p className="font-display text-base font-bold">Membre Soutien</p>
+                <p className="font-display text-base font-bold">{t.profile.supporterTitle}</p>
                 <p className="text-sm text-muted-foreground">
-                  Merci de faire vivre KAZEN 💜
+                  {t.profile.supporterSubtitle}
                 </p>
               </div>
             </div>
             <Button asChild variant="premium" size="sm">
-              <Link to="/soutien">Gérer</Link>
+              <Link to="/soutien">{t.profile.supporterManage}</Link>
             </Button>
           </section>
         ) : (
@@ -212,24 +212,24 @@ function ProfilePage() {
                 <Sparkles className="h-5 w-5" />
               </span>
               <div>
-                <p className="font-display text-base font-bold">Passe au Soutien</p>
+                <p className="font-display text-base font-bold">{t.profile.upgradeTitle}</p>
                 <p className="text-sm text-muted-foreground">
-                  Filtres avancés, rappels, stats détaillées et badge exclusif.
+                  {t.profile.upgradeSubtitle}
                 </p>
               </div>
             </div>
             <Button asChild variant="aurora" size="sm">
-              <Link to="/soutien">Découvrir</Link>
+              <Link to="/soutien">{t.profile.upgradeDiscover}</Link>
             </Button>
           </section>
         )}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Suivis", value: stats.total },
-            { label: "En cours", value: stats.en_cours },
-            { label: "Terminés", value: stats.termine },
-            { label: "Favoris", value: stats.favoris },
+            { label: t.profile.statFollowed, value: stats.total },
+            { label: t.profile.statInProgress, value: stats.en_cours },
+            { label: t.profile.statCompleted, value: stats.termine },
+            { label: t.profile.statFavorites, value: stats.favoris },
           ].map((s) => (
             <div
               key={s.label}
@@ -244,10 +244,10 @@ function ProfilePage() {
         {entries.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "À voir", value: insights.aVoir },
-              { label: "Épisodes suivis", value: insights.episodes },
-              { label: "Revisionnages", value: insights.rewatches },
-              { label: "Note moyenne", value: insights.avgRating ?? "—" },
+              { label: t.profile.statToWatch, value: insights.aVoir },
+              { label: t.profile.statEpisodes, value: insights.episodes },
+              { label: t.profile.statRewatches, value: insights.rewatches },
+              { label: t.profile.statAvgRating, value: insights.avgRating ?? "—" },
             ].map((s) => (
               <div
                 key={s.label}
@@ -263,7 +263,7 @@ function ProfilePage() {
 
         <section className="space-y-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-            <UserRound className="h-5 w-5" /> Informations
+            <UserRound className="h-5 w-5" /> {t.profile.information}
           </h2>
           {isLoading ? (
             <div className="flex justify-center py-8 text-muted-foreground">
@@ -272,23 +272,23 @@ function ProfilePage() {
           ) : (
             <>
               <div className="space-y-1.5">
-                <Label htmlFor="displayName">Nom d'affichage</Label>
+                <Label htmlFor="displayName">{t.profile.displayName}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Votre pseudo"
+                  placeholder={t.profile.displayNamePlaceholder}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bio">Bio</Label>
+                <Label htmlFor="bio">{t.profile.bio}</Label>
                 <Textarea
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={4}
                   className="resize-none"
-                  placeholder="Parlez de vos goûts…"
+                  placeholder={t.profile.bioPlaceholder}
                 />
               </div>
             </>
@@ -299,30 +299,30 @@ function ProfilePage() {
         <section className="space-y-6 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
           <div>
             <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-              <Heart className="h-5 w-5 text-primary" /> Mes préférences
+              <Heart className="h-5 w-5 text-primary" /> {t.profile.myPreferences}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sélectionne tes goûts pour affiner tes recommandations personnalisées.
+              {t.profile.tastesHelp}
             </p>
           </div>
 
           <div className="space-y-3">
-            <Label>Types préférés</Label>
+            <Label>{t.profile.preferredTypes}</Label>
             <div className="flex flex-wrap gap-2">
-              {TYPE_OPTIONS.map((t) => (
+              {TYPE_VALUES.map((v) => (
                 <Chip
-                  key={t.value}
-                  active={types.includes(t.value)}
-                  onClick={() => setTypes((prev) => toggle(prev, t.value))}
+                  key={v}
+                  active={types.includes(v)}
+                  onClick={() => setTypes((prev) => toggle(prev, v))}
                 >
-                  {t.label}
+                  {typeLabels[v as keyof typeof typeLabels] ?? v}
                 </Chip>
               ))}
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label>Genres préférés</Label>
+            <Label>{t.profile.preferredGenres}</Label>
             <div className="flex flex-wrap gap-2">
               {GENRE_OPTIONS.map((g) => (
                 <Chip
@@ -337,7 +337,7 @@ function ProfilePage() {
           </div>
 
           <div className="space-y-3">
-            <Label>Styles favoris</Label>
+            <Label>{t.profile.favoriteStyles}</Label>
             <div className="flex flex-wrap gap-2">
               {STYLE_OPTIONS.map((s) => (
                 <Chip
@@ -359,9 +359,9 @@ function ProfilePage() {
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-display text-base font-bold">Pour vous</p>
+              <p className="font-display text-base font-bold">{t.profile.forYouTitle}</p>
               <p className="text-sm text-muted-foreground">
-                Des suggestions adaptées à tes goûts et à ton historique.
+                {t.profile.forYouSubtitle}
               </p>
             </div>
           </div>
@@ -369,12 +369,12 @@ function ProfilePage() {
             <RecommendationAssistant
               trigger={
                 <Button variant="outline" size="sm" className="gap-2">
-                  <Wand2 className="h-4 w-4" /> Assistant
+                  <Wand2 className="h-4 w-4" /> {t.profile.forYouAssistant}
                 </Button>
               }
             />
             <Button asChild variant="aurora" size="sm">
-              <Link to="/pour-vous">Voir</Link>
+              <Link to="/pour-vous">{t.profile.forYouSee}</Link>
             </Button>
           </div>
         </section>
@@ -397,7 +397,7 @@ function ProfilePage() {
           <div className="flex justify-start">
             <Button asChild variant="outline" size="sm" className="gap-2">
               <Link to="/membre/$id" params={{ id: user.id }}>
-                <UserRound className="h-4 w-4" /> Voir mon profil public
+                <UserRound className="h-4 w-4" /> {t.profile.seeMyPublicProfile}
               </Link>
             </Button>
           </div>
@@ -415,7 +415,7 @@ function ProfilePage() {
         <div className="flex justify-end">
 
           <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} {t.common.save}
           </Button>
         </div>
       </div>

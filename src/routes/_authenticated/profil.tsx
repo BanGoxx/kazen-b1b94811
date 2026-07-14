@@ -150,7 +150,7 @@ function ProfilePage() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-display text-2xl font-extrabold">
-                  {displayName || "Mon profil"}
+                  {displayName || t.profile.myProfile}
                 </h1>
                 {isOwner ? <FounderBadge size="sm" /> : null}
                 {isBetaPremium ? <PremiumBetaBadge size="sm" /> : null}
@@ -163,7 +163,7 @@ function ProfilePage() {
             </div>
           </div>
           <Button variant="premium" onClick={handleSignOut} className="gap-2">
-            <LogOut className="h-4 w-4" /> Déconnexion
+            <LogOut className="h-4 w-4" /> {t.profile.signOut}
           </Button>
         </header>
 

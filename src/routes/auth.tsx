@@ -87,6 +87,10 @@ function AuthPage() {
   };
 
   const handleGoogle = async () => {
+    if (mode === "signup" && !ageConfirmed) {
+      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      return;
+    }
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -104,6 +108,7 @@ function AuthPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-4 py-12">

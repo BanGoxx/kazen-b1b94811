@@ -183,7 +183,7 @@ function ProfilePage() {
             </div>
           </div>
           <Button asChild variant="premium" size="sm">
-            <Link to="/soutien">En savoir plus</Link>
+            <Link to="/soutien">{t.common.learnMore}</Link>
           </Button>
         </section>
 
@@ -195,14 +195,14 @@ function ProfilePage() {
                 <Crown className="h-5 w-5" />
               </span>
               <div>
-                <p className="font-display text-base font-bold">Membre Soutien</p>
+                <p className="font-display text-base font-bold">{t.profile.supporterTitle}</p>
                 <p className="text-sm text-muted-foreground">
-                  Merci de faire vivre KAZEN 💜
+                  {t.profile.supporterSubtitle}
                 </p>
               </div>
             </div>
             <Button asChild variant="premium" size="sm">
-              <Link to="/soutien">Gérer</Link>
+              <Link to="/soutien">{t.profile.supporterManage}</Link>
             </Button>
           </section>
         ) : (
@@ -212,14 +212,14 @@ function ProfilePage() {
                 <Sparkles className="h-5 w-5" />
               </span>
               <div>
-                <p className="font-display text-base font-bold">Passe au Soutien</p>
+                <p className="font-display text-base font-bold">{t.profile.upgradeTitle}</p>
                 <p className="text-sm text-muted-foreground">
-                  Filtres avancés, rappels, stats détaillées et badge exclusif.
+                  {t.profile.upgradeSubtitle}
                 </p>
               </div>
             </div>
             <Button asChild variant="aurora" size="sm">
-              <Link to="/soutien">Découvrir</Link>
+              <Link to="/soutien">{t.profile.upgradeDiscover}</Link>
             </Button>
           </section>
         )}

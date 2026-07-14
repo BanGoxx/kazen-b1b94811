@@ -116,6 +116,11 @@ function AuthMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link to="/statistiques" className="gap-2">
+            <BarChart3 className="h-4 w-4" /> Statistiques
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link to="/messages" search={{ c: undefined }} className="gap-2">
             <MessagesSquare className="h-4 w-4" /> Messages
           </Link>

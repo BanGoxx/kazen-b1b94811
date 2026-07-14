@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { cn } from "@/lib/utils";
 import {

@@ -439,24 +439,22 @@ export function usePlaylistMutations() {
     mutationFn: async (input: { playlistId: string; item: MediaItem; note?: string }) => {
       if (!user) throw new Error("not-auth");
       const snap = snapshotFromItem(input.item);
-      // Ensure a media snapshot exists; ignore if already present.
-      await supabase.from("media_records").upsert(
-        {
-          media_key: snap.key,
-          source: snap.source,
-          external_id: snap.externalId,
-          media_type: snap.mediaType,
-          title: snap.title,
-          title_original: snap.titleOriginal,
-          poster_url: snap.posterUrl,
-          backdrop_url: snap.backdropUrl,
-          release_date: snap.releaseDate,
-          genres: snap.genres,
-          platforms: snap.platforms as never,
-          score: snap.score,
-        },
-        { onConflict: "media_key", ignoreDuplicates: true },
-      );
+      // Seed the shared catalog row only if missing (anti-tamper): the
+      // security-definer RPC never overwrites existing catalog data.
+      await supabase.rpc("seed_media_snapshot", {
+        _media_key: snap.key,
+        _source: snap.source,
+        _external_id: snap.externalId,
+        _media_type: snap.mediaType,
+        _title: snap.title,
+        _title_original: snap.titleOriginal ?? undefined,
+        _poster_url: snap.posterUrl ?? undefined,
+        _backdrop_url: snap.backdropUrl ?? undefined,
+        _release_date: snap.releaseDate ?? undefined,
+        _genres: snap.genres,
+        _platforms: snap.platforms as never,
+        _score: snap.score ?? undefined,
+      });
       const { error } = await supabase.from("playlist_items").insert({
         playlist_id: input.playlistId,
         media_key: snap.key,

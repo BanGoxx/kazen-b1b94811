@@ -202,3 +202,98 @@ export const PREMIUM_FEATURES: PremiumFeature[] = [
     status: "ready",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// KAZEN Premium bêta — entitlement de présentation (Phase 24)
+//
+// ⚠️ AUCUN PAIEMENT. Pendant la bêta, chaque membre authentifié bénéficie
+// gratuitement de l'accès « KAZEN Premium ». C'est un état de présentation,
+// PAS un abonnement payant : aucune donnée de facturation, aucun renouvellement,
+// aucune conversion automatique. L'autorité réelle (rôles, RLS, quotas IA,
+// modération) reste 100% côté serveur — ce libellé ne débloque aucune
+// permission de sécurité.
+//
+// FUTURE MIGRATION (non active) : si un modèle d'entitlement payant est un jour
+// approuvé, ajouter une table additive `entitlements(user_id, tier, ...)` et
+// remplacer `useBetaPremium` par une lecture serveur. Tant que ce n'est pas
+// décidé, on garde cet état purement présentationnel (aucune table dédiée).
+// ---------------------------------------------------------------------------
+
+export type Entitlement =
+  | "free"
+  | "beta_premium"
+  | "plus_active"
+  | "plus_grace_period"
+  | "plus_expired";
+
+export interface BetaPremiumState {
+  entitlement: Entitlement;
+  /** Tout membre authentifié pendant la bêta. */
+  isBetaPremium: boolean;
+  ready: boolean;
+}
+
+/**
+ * Entitlement de présentation. Pendant la bêta : tout membre connecté = `beta_premium`.
+ * Ne confère AUCUN privilège serveur — purement cosmétique/communication.
+ */
+export function useBetaPremium(): BetaPremiumState {
+  const { user, ready } = useAuth();
+  const isBetaPremium = Boolean(user);
+  return {
+    entitlement: isBetaPremium ? "beta_premium" : "free",
+    isBetaPremium,
+    ready,
+  };
+}
+
+export const BETA_PREMIUM_COPY = {
+  badge: "Premium bêta",
+  offered: "Accès Premium offert",
+  primary: "Pendant la bêta, tu bénéficies gratuitement de l'accès KAZEN Premium.",
+  secondary:
+    "Certaines fonctionnalités avancées pourront rejoindre KAZEN Plus à l'avenir. Une version gratuite complète restera disponible.",
+  betaNotice:
+    "Pendant la bêta, les membres peuvent tester gratuitement l'ensemble des fonctionnalités actuellement disponibles.",
+} as const;
+
+/** Tarifs UNIQUEMENT indicatifs — aucun paiement actif, aucun checkout. */
+export const FUTURE_PLUS_PRICING = {
+  standard: "1,99 €",
+  founding: "0,99 €",
+  disclaimer: "Tarifs envisagés — aucun paiement n'est actuellement actif.",
+  foundingNote:
+    "À partir de 0,99 € envisagé pour les premiers soutiens. Offre non disponible pendant la bêta.",
+} as const;
+
+/** Base gratuite envisagée (indicatif). */
+export const FREE_BASELINE: string[] = [
+  "Catalogue et fiches détaillées",
+  "Recherche",
+  "Ma liste",
+  "Suivi standard",
+  "Favoris et notes",
+  "Playlists standard",
+  "Forum et messagerie privée",
+  "Sécurité et confidentialité",
+  "Blocage / signalement",
+  "Calendrier standard",
+  "Notifications standard",
+  "Import / export essentiels",
+  "Assistant IA (quota limité)",
+];
+
+/** Bénéfices futurs possibles de KAZEN Plus (hypothèses, non actifs). */
+export const PLUS_FUTURE: string[] = [
+  "Quota IA plus élevé",
+  "Statistiques personnelles avancées",
+  "Récap annuel enrichi",
+  "Calendrier personnel avancé",
+  "Personnalisation du profil",
+  "Badge Premium / soutien",
+  "Exports avancés",
+  "Limites collaboratives étendues",
+  "Filtres enregistrés supplémentaires",
+  "Recommandations avancées",
+  "Accès anticipé à certaines fonctionnalités",
+];

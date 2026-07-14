@@ -52,34 +52,39 @@ import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";
 import { cn } from "@/lib/utils";
 import { useConsent } from "@/lib/consent";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
+import type { Dict } from "@/lib/i18n/locales";
+
+type NavKey = keyof Dict["nav"];
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: NavKey;
   icon: typeof Compass;
   /** Only shown to authenticated members (also enforced server-side + RLS). */
   memberOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { to: "/", label: "Découverte", icon: Compass },
-  { to: "/recherche", label: "Recherche", icon: Search },
-  { to: "/pour-vous", label: "Pour vous", icon: Wand2 },
-  { to: "/anime", label: "Anime", icon: Sparkles },
-  { to: "/series", label: "Séries", icon: Tv },
-  { to: "/films", label: "Films", icon: Film },
-  { to: "/anime/saison", label: "Saison anime", icon: Leaf },
-  { to: "/a-venir", label: "À venir", icon: CalendarClock },
-  { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
-  { to: "/mes-listes", label: "Ma liste", icon: ListChecks },
-  { to: "/statistiques", label: "Statistiques", icon: BarChart3, memberOnly: true },
-  { to: "/listes", label: "Playlists partagées", icon: ListMusic },
-  { to: "/communaute", label: "Communauté", icon: MessagesSquare },
-  { to: "/communaute/direct", label: "Chat en direct", icon: Radio, memberOnly: true },
-  { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
-  { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
+  { to: "/", labelKey: "discover", icon: Compass },
+  { to: "/recherche", labelKey: "search", icon: Search },
+  { to: "/pour-vous", labelKey: "forYou", icon: Wand2 },
+  { to: "/anime", labelKey: "anime", icon: Sparkles },
+  { to: "/series", labelKey: "series", icon: Tv },
+  { to: "/films", labelKey: "movies", icon: Film },
+  { to: "/anime/saison", labelKey: "animeSeason", icon: Leaf },
+  { to: "/a-venir", labelKey: "upcoming", icon: CalendarClock },
+  { to: "/calendrier", labelKey: "calendar", icon: CalendarDays },
+  { to: "/mes-listes", labelKey: "myList", icon: ListChecks },
+  { to: "/statistiques", labelKey: "stats", icon: BarChart3, memberOnly: true },
+  { to: "/listes", labelKey: "sharedPlaylists", icon: ListMusic },
+  { to: "/communaute", labelKey: "community", icon: MessagesSquare },
+  { to: "/communaute/direct", labelKey: "liveChat", icon: Radio, memberOnly: true },
+  { to: "/mes-playlists", labelKey: "myPlaylists", icon: ListMusic },
+  { to: "/import", labelKey: "import", icon: DownloadCloud, memberOnly: true },
 
-  { to: "/soutien", label: "Soutien", icon: Heart },
+  { to: "/soutien", labelKey: "support", icon: Heart },
 ];
 
 function AuthMenu() {

@@ -172,11 +172,21 @@ export function ListControls({ item }: { item: MediaItem }) {
             type="number"
             min={0}
             max={max ?? undefined}
+            step={1}
             inputMode="numeric"
             value={entry?.progress ?? ""}
+            aria-describedby={progressWarn ? "progress-warn" : undefined}
             onChange={(e) => {
               const v = e.target.value.trim();
-              patch({ progress: v === "" ? null : Math.max(0, parseInt(v, 10) || 0) });
+              if (v === "") {
+                setProgressWarn(false);
+                patch({ progress: null });
+                return;
+              }
+              const raw = Math.max(0, parseInt(v, 10) || 0);
+              setProgressWarn(max != null && raw > max);
+              // applyTrackingRules re-clamps server-side; keep the stored value ≤ max.
+              patch({ progress: max != null ? Math.min(raw, max) : raw });
             }}
             className="h-8 w-20"
             aria-label="Progression"
@@ -187,6 +197,13 @@ export function ListControls({ item }: { item: MediaItem }) {
             </span>
           ) : null}
         </div>
+
+        {progressWarn && max != null ? (
+          <p id="progress-warn" role="alert" className="text-xs text-amber-300">
+            Maximum {max}{item.mediaType === "movie" ? "" : " ép."} pour ce titre — la valeur a été ramenée à {max}.
+          </p>
+        ) : null}
+
 
         {showReconcile ? (
           <div className="flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-300">

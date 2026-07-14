@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 import {
   Avatar,
   AvatarFallback,

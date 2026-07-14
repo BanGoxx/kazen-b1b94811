@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { setAcceptsChat } from "@/lib/chat.functions";
+import { getMyProfile } from "@/lib/list.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -15,23 +15,25 @@ export function ChatPreference() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const save = useServerFn(setAcceptsChat);
+  const loadProfile = useServerFn(getMyProfile);
 
   useEffect(() => {
     let active = true;
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("accepts_chat")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
+    // accepts_chat is owner-only; read it via the owner profile RPC.
+    loadProfile()
+      .then((data) => {
         if (active && data) setAccepts(data.accepts_chat ?? true);
+        if (active) setLoading(false);
+      })
+      .catch(() => {
         if (active) setLoading(false);
       });
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, loadProfile]);
+
 
   const onToggle = async (next: boolean) => {
     setAccepts(next);

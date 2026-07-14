@@ -1430,3 +1430,89 @@ function FounderDigestSection() {
   );
 }
 
+
+function AiStat({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div className="rounded-lg border border-border bg-background/50 p-4">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 font-display text-2xl font-bold">
+        {value == null ? "—" : value.toLocaleString("fr-FR")}
+      </p>
+    </div>
+  );
+}
+
+function AiAssistantSection() {
+  const statsFn = useServerFn(getAiAssistantStats);
+  const toggleFn = useServerFn(setAiAssistantEnabled);
+  const qc = useQueryClient();
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["ai-assistant-stats"],
+    queryFn: () => statsFn(),
+    staleTime: 30_000,
+  });
+
+  const toggle = useMutation({
+    mutationFn: (enabled: boolean) => toggleFn({ data: { enabled } }),
+    onSuccess: (data) => {
+      qc.setQueryData(["ai-assistant-stats"], data);
+      toast.success(data.enabled ? "Assistant activé." : "Assistant désactivé.");
+    },
+    onError: (e: Error) => toast.error(e.message || "Action impossible."),
+  });
+
+  return (
+    <SectionCard
+      title="Assistant IA — usage & coûts"
+      desc="Suivi des appels au modèle, quotas et interrupteur global. Réservé au Fondateur."
+    >
+      <div className="flex items-center justify-between rounded-lg border border-border bg-background/50 p-4">
+        <div>
+          <p className="font-semibold">Assistant activé</p>
+          <p className="text-sm text-muted-foreground">
+            Coupe immédiatement tous les appels au modèle si nécessaire.
+          </p>
+        </div>
+        <Switch
+          checked={!!stats?.enabled}
+          disabled={isLoading || toggle.isPending}
+          onCheckedChange={(v) => toggle.mutate(v)}
+          aria-label="Activer ou désactiver l'assistant"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <AiStat label="Questions aujourd'hui" value={stats?.questions_today ?? null} />
+        <AiStat label="Réussies aujourd'hui" value={stats?.success_today ?? null} />
+        <AiStat label="Échecs aujourd'hui" value={stats?.failed_today ?? null} />
+        <AiStat label="Questions ce mois-ci" value={stats?.questions_month ?? null} />
+        <AiStat label="Membres actifs (mois)" value={stats?.active_members_month ?? null} />
+        <AiStat label="Depuis le cache (jour)" value={stats?.cached_today ?? null} />
+        <AiStat label="Tokens entrée (mois)" value={stats?.input_tokens_month ?? null} />
+        <AiStat label="Tokens sortie (mois)" value={stats?.output_tokens_month ?? null} />
+      </div>
+
+      <Separator />
+
+      <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <div>
+          <p className="text-muted-foreground">Limite / membre / jour</p>
+          <p className="font-semibold">{stats?.daily_user_limit ?? "—"}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Limite / membre / mois</p>
+          <p className="font-semibold">{stats?.monthly_user_limit ?? "—"}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Plafond global / jour</p>
+          <p className="font-semibold">{stats?.global_daily_limit ?? "—"}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Plafond global / mois</p>
+          <p className="font-semibold">{stats?.global_monthly_limit ?? "—"}</p>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}

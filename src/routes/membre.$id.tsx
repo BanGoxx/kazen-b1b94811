@@ -314,7 +314,7 @@ function PublicProfilePage() {
                       ) : null}
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground group-hover:text-foreground">
-                      {f.title ?? "Titre"}
+                      {f.title ?? t.common.notAvailable}
                     </p>
                   </Link>
                 ) : null,
@@ -358,7 +358,7 @@ function PublicProfilePage() {
                   className="block rounded-xl border border-border bg-card/60 p-4 transition-colors hover:border-primary/40"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium">{r.title ?? "Fiche"}</p>
+                    <p className="font-medium">{r.title ?? t.common.notAvailable}</p>
                     {typeof r.rating === "number" ? (
                       <span className="flex items-center gap-1 text-sm text-primary">
                         <Star className="h-3.5 w-3.5 fill-current" />

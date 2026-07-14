@@ -2055,6 +2055,66 @@ export type Database = {
         Returns: undefined
       }
       founder_user_ids: { Args: never; Returns: string[] }
+      get_community_contributors: {
+        Args: { p_limit?: number }
+        Returns: {
+          assigned_at: string
+          avatar_url: string
+          badge_label: string
+          display_name: string
+          icon_key: string
+          user_id: string
+          visual_variant: string
+        }[]
+      }
+      get_community_genre_trends: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          genre: string
+          member_count: number
+        }[]
+      }
+      get_community_helpful_reviews: {
+        Args: { p_limit?: number }
+        Returns: {
+          author_display_name: string
+          body: string
+          created_at: string
+          helpful_votes: number
+          id: string
+          media_external_id: string
+          media_poster_url: string
+          media_source: string
+          media_title: string
+          rating: number
+        }[]
+      }
+      get_community_popular_playlists: {
+        Args: { p_limit?: number }
+        Returns: {
+          covers: string[]
+          description: string
+          id: string
+          item_count: number
+          like_count: number
+          owner_display_name: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      get_community_trending_titles: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          external_id: string
+          genres: string[]
+          media_key: string
+          media_type: string
+          member_count: number
+          poster_url: string
+          source: string
+          title: string
+        }[]
+      }
       get_my_profile: {
         Args: never
         Returns: {

@@ -56,7 +56,6 @@ export function getNextEpisodeSignal(
   }
 
   const diffMs = air.getTime() - now;
-  const ep = nextEpisode.number;
   const epLabel = Number.isFinite(ep) && ep > 0 ? `Ép. ${ep}` : "Épisode";
 
   // Already aired (within our lookahead window) — don't advertise as upcoming.

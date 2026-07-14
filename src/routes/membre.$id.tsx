@@ -116,6 +116,7 @@ function usePublicReviews(id: string, enabled: boolean) {
 function PublicProfilePage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const { data: profile, isLoading } = usePublicProfile(id);
   const { data: badges } = useUserBadges(id);
   const blockMut = useMemberBlock(id);
@@ -152,12 +153,12 @@ function PublicProfilePage() {
       <AppShell>
         <div className="section-container max-w-lg space-y-4 py-16 text-center">
           <UserRound className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="font-display text-2xl font-bold">Membre introuvable</h1>
+          <h1 className="font-display text-2xl font-bold">{t.profile.publicNotFoundTitle}</h1>
           <p className="text-sm text-muted-foreground">
-            Ce profil n'existe pas ou n'est plus disponible.
+            {t.profile.publicNotFoundBody}
           </p>
           <Button asChild variant="outline">
-            <Link to="/">Retour à l'accueil</Link>
+            <Link to="/">{t.common.backHome}</Link>
           </Button>
         </div>
       </AppShell>
@@ -169,12 +170,12 @@ function PublicProfilePage() {
       <AppShell>
         <div className="section-container max-w-lg space-y-4 py-16 text-center">
           <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="font-display text-2xl font-bold">Profil privé</h1>
+          <h1 className="font-display text-2xl font-bold">{t.profile.publicPrivateTitle}</h1>
           <p className="text-sm text-muted-foreground">
-            Ce membre a choisi de garder son profil privé.
+            {t.profile.publicPrivateBody}
           </p>
           <Button asChild variant="outline">
-            <Link to="/">Retour à l'accueil</Link>
+            <Link to="/">{t.common.backHome}</Link>
           </Button>
         </div>
       </AppShell>
@@ -182,7 +183,7 @@ function PublicProfilePage() {
   }
 
   const memberSince = profile.member_since
-    ? new Date(profile.member_since).toLocaleDateString("fr-FR", {
+    ? formatDateLocalized(profile.member_since, locale, {
         month: "long",
         year: "numeric",
       })
@@ -192,11 +193,12 @@ function PublicProfilePage() {
     const next = !profile.is_blocked_by_me;
     try {
       await blockMut.mutateAsync(next);
-      toast.success(next ? "Membre bloqué." : "Membre débloqué.");
+      toast.success(next ? t.profile.publicBlocked : t.profile.publicUnblocked);
     } catch {
-      toast.error("Action impossible pour le moment.");
+      toast.error(t.profile.publicBlockError);
     }
   };
+
 
   return (
     <AppShell>

@@ -43,19 +43,19 @@ export async function syncCatalogueEpisodes(input: {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Bounded write: skip when nothing would change.
+    // Bounded write: only touch an EXISTING catalogue row, and only when the
+    // trusted total actually changes. We never create rows for merely-viewed
+    // titles (that stays the job of list/playlist tracking), and we never
+    // re-run a provider call — this uses the count already fetched by the
+    // caller. The row for a tracked title is created by the list mutation, so
+    // its trusted total is applied on the next server fiche load.
     const { data: existing } = await supabaseAdmin
       .from("media_records")
       .select("media_key,episodes_count")
       .eq("media_key", mediaKey)
       .maybeSingle();
 
-    if (!existing) {
-      // The catalogue row does not exist yet (created when a user tracks or
-      // adds the title). Nothing to update; the trusted total will be applied
-      // on the next fiche visit once the row exists.
-      return;
-    }
+    if (!existing) return;
     if (existing.episodes_count === count) return;
 
     await supabaseAdmin

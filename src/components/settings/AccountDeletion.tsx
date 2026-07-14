@@ -83,15 +83,15 @@ export function AccountDeletion() {
     if (error) {
       // 23505 = doublon (index partiel unique sur status='pending')
       if ((error as { code?: string }).code === "23505") {
-        toast.info("Une demande est déjà en cours pour ton compte.");
+        toast.info(t.profile.deletionDuplicate);
       } else {
-        toast.error("Impossible d'enregistrer la demande. Réessaie plus tard.");
+        toast.error(t.profile.deletionSubmitError);
       }
       return;
     }
     setCurrent(data as DeletionRequest);
     setReason("");
-    toast.success("Ta demande a été enregistrée. Nous te recontacterons.");
+    toast.success(t.profile.deletionSubmitSuccess);
   }
 
   async function cancel() {

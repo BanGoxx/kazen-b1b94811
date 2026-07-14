@@ -1,34 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Check, Minus, Sparkles, HeartHandshake, Crown } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Check, Sparkles, HeartHandshake, Crown, Gift, Info } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { SupporterBadge } from "@/components/premium/SupporterBadge";
+import { PremiumBetaBadge } from "@/components/premium/PremiumBetaBadge";
 import { useAuth } from "@/lib/auth";
-import { Link } from "@tanstack/react-router";
 import {
-  PREMIUM_FEATURES,
   SUPPORTER_PITCH,
-  SUPPORTER_PRICE,
-  setSupporterPreview,
-  usePremium,
-  type PremiumFeature,
+  BETA_PREMIUM_COPY,
+  FUTURE_PLUS_PRICING,
+  FREE_BASELINE,
+  PLUS_FUTURE,
+  useBetaPremium,
 } from "@/lib/premium";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/soutien")({
   head: () => ({
     meta: [
-      { title: "Soutien KAZEN — Débloquez les outils premium" },
+      { title: "Soutenir KAZEN — Premium offert pendant la bêta" },
       {
         name: "description",
         content:
-          "Soutenez KAZEN et débloquez des outils avancés : filtres croisés, rappels de sorties, statistiques détaillées et thèmes exclusifs. Le cœur reste gratuit.",
+          "Pendant la bêta, tous les membres profitent gratuitement de l'expérience KAZEN Premium. KAZEN restera accessible gratuitement ; une formule KAZEN Plus facultative pourra arriver plus tard. Aucun paiement n'est actif.",
       },
-      { property: "og:title", content: "Soutien KAZEN — Débloquez les outils premium" },
+      { property: "og:title", content: "Soutenir KAZEN — Premium offert pendant la bêta" },
       {
         property: "og:description",
         content:
-          "Soutenez KAZEN et débloquez des outils avancés : filtres croisés, rappels de sorties, statistiques détaillées et thèmes exclusifs. Le cœur reste gratuit.",
+          "Pendant la bêta, tous les membres profitent gratuitement de l'expérience KAZEN Premium. Aucun paiement n'est actuellement actif.",
       },
       { property: "og:url", content: "https://kazen.lovable.app/soutien" },
     ],
@@ -37,41 +35,9 @@ export const Route = createFileRoute("/soutien")({
   component: SoutienPage,
 });
 
-function Cell({ value }: { value: boolean | string }) {
-  if (value === true) return <Check className="mx-auto h-4 w-4 text-primary" />;
-  if (value === false)
-    return <Minus className="mx-auto h-4 w-4 text-muted-foreground/50" />;
-  return <span className="text-xs text-muted-foreground">{value}</span>;
-}
-
-function FeatureRow({ f }: { f: PremiumFeature }) {
-  const Icon = f.icon;
-  return (
-    <tr className="border-t border-border/60">
-      <td className="py-3 pr-3">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Icon className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-medium">{f.label}</p>
-            <p className="line-clamp-1 text-xs text-muted-foreground">{f.description}</p>
-          </div>
-        </div>
-      </td>
-      <td className="px-2 py-3 text-center">
-        <Cell value={f.free} />
-      </td>
-      <td className="px-2 py-3 text-center">
-        <Cell value={f.supporter} />
-      </td>
-    </tr>
-  );
-}
-
 function SoutienPage() {
   const { user } = useAuth();
-  const { isSupporter } = usePremium();
+  const { isBetaPremium } = useBetaPremium();
 
   return (
     <AppShell>
@@ -84,124 +50,152 @@ function SoutienPage() {
               <Sparkles className="h-3.5 w-3.5" /> {SUPPORTER_PITCH.title}
             </div>
             <h1 className="text-balance font-display text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-              {SUPPORTER_PITCH.tagline}
+              Soutenir KAZEN
             </h1>
             <p className="text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {SUPPORTER_PITCH.description}
+              KAZEN restera toujours gratuit pour l'essentiel. Merci de participer à
+              la bêta et de nous aider à construire la meilleure expérience de
+              découverte et de suivi.
             </p>
-            <p className="mx-auto max-w-md text-balance text-xs leading-relaxed text-primary/90">
-              Pendant la bêta, les outils Soutien sont ouverts gratuitement pour
-              que tu puisses les tester. Aucun paiement n'est requis pour le moment.
-            </p>
-            {isSupporter ? (
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <SupporterBadge />
-                <span className="text-sm text-muted-foreground">Merci pour ton soutien 💜</span>
-              </div>
-            ) : null}
-
           </div>
         </header>
 
-        {/* Tarifs */}
-        <section className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <HeartHandshake className="h-5 w-5" />
-              <span className="font-display text-lg font-bold text-foreground">Gratuit</span>
+        {/* KAZEN Premium — offert pendant la bêta */}
+        <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/5 p-6 shadow-glow backdrop-blur sm:p-8">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+                <Gift className="h-5 w-5" />
+              </span>
+              <h2 className="font-display text-xl font-bold tracking-[-0.02em]">
+                KAZEN Premium — offert pendant la bêta
+              </h2>
+              <PremiumBetaBadge size="sm" />
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Toute la découverte, les listes et le suivi personnel.
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Tous les membres profitent actuellement gratuitement de l'expérience
+              KAZEN Premium pendant la bêta.
             </p>
-            <p className="mt-4 font-display text-3xl font-extrabold">0 €</p>
-            <p className="text-xs text-muted-foreground">Pour toujours</p>
-            <Button asChild variant="premium" className="mt-6">
-              <Link to="/">Continuer gratuitement</Link>
-            </Button>
-          </div>
-
-          <div className="relative flex flex-col rounded-2xl border border-primary/40 bg-card/60 p-6 shadow-glow backdrop-blur">
-            <div className="absolute right-4 top-4">
-              <SupporterBadge size="sm" />
-            </div>
-            <div className="flex items-center gap-2 text-primary">
-              <Crown className="h-5 w-5" />
-              <span className="font-display text-lg font-bold aurora-text">Soutien</span>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Les outils avancés + le badge, pour aller plus loin.
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              {BETA_PREMIUM_COPY.secondary}
             </p>
-            <p className="mt-4 font-display text-3xl font-extrabold">
-              {SUPPORTER_PRICE.monthly}
-              <span className="text-sm font-normal text-muted-foreground"> /mois</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              ou {SUPPORTER_PRICE.yearly} /an
-            </p>
-            {!user ? (
-              <Button asChild variant="aurora" className="mt-6">
-                <Link to="/auth" search={{ redirect: "/soutien" }}>
-                  Se connecter pour soutenir
-                </Link>
-              </Button>
+            {isBetaPremium ? (
+              <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-card/50 px-4 py-3">
+                <Crown className="h-4 w-4 shrink-0 text-primary" />
+                <span className="text-sm">
+                  {BETA_PREMIUM_COPY.primary} <span className="text-muted-foreground">Merci 💜</span>
+                </span>
+              </div>
             ) : (
-              <Button
-                variant="aurora"
-                className="mt-6"
-                onClick={() => setSupporterPreview(!isSupporter)}
-              >
-                {isSupporter ? "Désactiver l'aperçu" : "Activer l'aperçu Soutien"}
-              </Button>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Button asChild variant="aurora">
+                  <Link to="/auth" search={{ redirect: "/soutien" }}>
+                    Se connecter pour en profiter
+                  </Link>
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Aucun paiement, aucun engagement.
+                </span>
+              </div>
             )}
-            <p className="mt-2 text-center text-[0.7rem] text-muted-foreground">
-              Aperçu de démonstration — le paiement arrive bientôt.
-            </p>
           </div>
         </section>
 
-        {/* Comparatif */}
+        {/* Comparatif Gratuit vs futur Plus */}
         <section className="rounded-2xl border border-border bg-card/40 p-4 backdrop-blur sm:p-6">
-          <h2 className="mb-4 font-display text-xl font-bold tracking-[-0.02em]">
-            Comparatif des fonctionnalités
+          <h2 className="font-display text-xl font-bold tracking-[-0.02em]">
+            KAZEN Gratuit &amp; futur KAZEN Plus
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[32rem]">
-              <thead>
-                <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="pb-2 text-left font-semibold">Fonctionnalité</th>
-                  <th className="px-2 pb-2 text-center font-semibold">Gratuit</th>
-                  <th className="px-2 pb-2 text-center font-semibold text-primary">Soutien</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PREMIUM_FEATURES.map((f) => (
-                  <FeatureRow key={f.id} f={f} />
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-2 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{BETA_PREMIUM_COPY.betaNotice}</span>
           </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {/* Gratuit */}
+            <div className="flex flex-col rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <HeartHandshake className="h-5 w-5" />
+                <span className="font-display text-lg font-bold text-foreground">
+                  KAZEN Gratuit
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                La base envisagée, accessible sans paiement.
+              </p>
+              <p className="mt-3 font-display text-2xl font-extrabold">0 €</p>
+              <ul className="mt-4 space-y-2">
+                {FREE_BASELINE.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Futur Plus */}
+            <div className="relative flex flex-col rounded-2xl border border-primary/40 bg-card/60 p-6 backdrop-blur">
+              <div className="flex items-center gap-2 text-primary">
+                <Crown className="h-5 w-5" />
+                <span className="font-display text-lg font-bold aurora-text">
+                  KAZEN Plus
+                </span>
+                <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
+                  Bientôt
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Bénéfices avancés possibles — non disponibles aujourd'hui.
+              </p>
+              <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <p className="font-display text-2xl font-extrabold">
+                  {FUTURE_PLUS_PRICING.founding}
+                  <span className="text-sm font-normal text-muted-foreground"> /mois</span>
+                </p>
+                <span className="text-xs text-muted-foreground">
+                  possible tarif fondateur
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                puis {FUTURE_PLUS_PRICING.standard} /mois envisagé (tarif standard possible)
+              </p>
+              <ul className="mt-4 space-y-2">
+                {PLUS_FUTURE.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm">
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
           <p className="mt-4 text-xs text-muted-foreground">
-            Certaines fonctionnalités Soutien sont en cours de développement et
-            arriveront progressivement.
+            {FUTURE_PLUS_PRICING.disclaimer} {FUTURE_PLUS_PRICING.foundingNote}
           </p>
         </section>
 
-        {/* KAZEN Plus — bientôt */}
+        {/* Engagement / transparence */}
         <section className="rounded-2xl border border-primary/20 bg-primary/5 p-4 backdrop-blur sm:p-6">
           <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-            <Crown className="h-3.5 w-3.5" /> Bientôt
+            <Crown className="h-3.5 w-3.5" /> Notre engagement
           </div>
           <h2 className="font-display text-xl font-bold tracking-[-0.02em]">
-            KAZEN Plus
+            Transparence
           </h2>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Une future formule pour aller plus loin avec KAZEN. Rien n'est encore
-            disponible à l'achat : le cœur de KAZEN reste gratuit, sans engagement
-            ni publicité. Nous préparons ces outils avec soin et vous informerons
-            dès leur arrivée.
-          </p>
+          <ul className="mt-3 max-w-2xl space-y-2 text-sm text-muted-foreground">
+            <li>KAZEN est en bêta et l'accès Premium est actuellement offert.</li>
+            <li>Aucun paiement n'est actif ; aucune carte n'est demandée.</li>
+            <li>KAZEN Plus, s'il arrive, restera facultatif.</li>
+            <li>Une version gratuite utile et complète restera disponible.</li>
+            <li>
+              Certaines fonctionnalités de confort avancées pourront devenir payantes
+              plus tard — les membres seront informés avant tout changement.
+            </li>
+            <li>Personne ne sera facturé automatiquement.</li>
+          </ul>
         </section>
-
       </div>
     </AppShell>
   );

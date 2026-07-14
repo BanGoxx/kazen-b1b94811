@@ -8,8 +8,9 @@ import { AppShell } from "@/components/layout/AppShell";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
 import { useMyList } from "@/lib/use-list";
 import { signOut, useAuth } from "@/lib/auth";
-import { usePremium } from "@/lib/premium";
+import { usePremium, useBetaPremium, BETA_PREMIUM_COPY } from "@/lib/premium";
 import { SupporterBadge } from "@/components/premium/SupporterBadge";
+import { PremiumBetaBadge } from "@/components/premium/PremiumBetaBadge";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import { PublicBadgeList } from "@/components/founder/PublicBadge";
 import { useIsOwner, useUserBadges } from "@/lib/founder";
@@ -61,6 +62,7 @@ export const Route = createFileRoute("/_authenticated/profil")({
 function ProfilePage() {
   const { user } = useAuth();
   const { isSupporter } = usePremium();
+  const { isBetaPremium } = useBetaPremium();
   const isOwner = useIsOwner();
   const { data: myBadges } = useUserBadges(user?.id);
   const navigate = useNavigate();
@@ -149,6 +151,7 @@ function ProfilePage() {
                   {displayName || "Mon profil"}
                 </h1>
                 {isOwner ? <FounderBadge size="sm" /> : null}
+                {isBetaPremium ? <PremiumBetaBadge size="sm" /> : null}
                 {isSupporter ? <SupporterBadge size="sm" /> : null}
                 {myBadges && myBadges.length > 0 ? (
                   <PublicBadgeList badges={myBadges} max={3} />
@@ -161,6 +164,26 @@ function ProfilePage() {
             <LogOut className="h-4 w-4" /> Déconnexion
           </Button>
         </header>
+
+        {/* KAZEN Premium — accès offert pendant la bêta (présentation, aucun paiement) */}
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/25 bg-primary/5 p-5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+              <Crown className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-display text-base font-bold">KAZEN Premium</p>
+                <PremiumBetaBadge size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">{BETA_PREMIUM_COPY.primary}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{BETA_PREMIUM_COPY.secondary}</p>
+            </div>
+          </div>
+          <Button asChild variant="premium" size="sm">
+            <Link to="/soutien">En savoir plus</Link>
+          </Button>
+        </section>
 
         {/* Couche Soutien / Premium */}
         {isSupporter ? (

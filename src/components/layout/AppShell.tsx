@@ -45,6 +45,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ChatBell } from "@/components/chat/ChatBell";
 import { BackToTop } from "./BackToTop";
 import { BetaFeedbackDialog } from "@/components/beta/BetaFeedbackDialog";
+import { PremiumBetaBadge } from "@/components/premium/PremiumBetaBadge";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";
@@ -109,7 +110,12 @@ function AuthMenu() {
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+          <PremiumBetaBadge size="sm" />
+        </div>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
             <ListChecks className="h-4 w-4" /> Ma liste
@@ -323,6 +329,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <BetaFeedbackDialog />
             </div>
+            <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground">
+              Pendant la bêta, l'accès KAZEN Premium est offert à tous les membres.{" "}
+              <Link to="/soutien" className="text-primary underline-offset-2 hover:underline">
+                En savoir plus
+              </Link>
+            </p>
           </footer>
         </div>
         <AssistantChat />

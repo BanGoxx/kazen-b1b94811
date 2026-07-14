@@ -45,6 +45,7 @@ export function ListControls({ item }: { item: MediaItem }) {
   const entry = useUserEntry(item.key);
   const { upsert, remove } = useListMutations();
   const [tagDraft, setTagDraft] = useState("");
+  const [progressWarn, setProgressWarn] = useState(false);
   const [noteDraft, setNoteDraft] = useState(entry?.notes ?? "");
 
   useEffect(() => {

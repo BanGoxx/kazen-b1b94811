@@ -64,7 +64,8 @@ export const Route = createFileRoute("/calendrier")({
   pendingComponent: () => (
     <AppShell>
       <PageHeader title="Calendrier" description="Les sorties de la semaine, jour par jour." />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="min-h-40 rounded-2xl border border-border bg-card/40 p-2">
             <Skeleton className="mb-3 h-4 w-10" />

@@ -53,9 +53,12 @@ export const Route = createFileRoute("/calendrier")({
     void context.queryClient.ensureQueryData(upcomingAllQO);
     void context.queryClient.prefetchQuery(onAirSeriesQO);
     // Currently-airing anime carry `nextEpisode`; prefetch so weekly episodes
-    // (not just premieres) can populate the grid.
+    // (not just premieres) can populate the grid. Seasonal covers the full
+    // airing season (far beyond the ~60 trending/popular titles), which is the
+    // main lever for anime completeness in the calendar.
     void context.queryClient.prefetchQuery(trendingAnimeQO);
     void context.queryClient.prefetchQuery(popularAnimeQO);
+    void context.queryClient.prefetchQuery(seasonalAnimeQO());
   },
   component: CalendarPage,
   pendingComponent: () => (

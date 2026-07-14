@@ -14,8 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_assistant_cache: {
+        Row: {
+          cache_key: string
+          catalogue_version: number
+          created_at: string
+          expires_at: string
+          hit_count: number
+          last_hit_at: string | null
+          lock_expires_at: string | null
+          model_id: string
+          prompt_version: number
+          response_text: string | null
+          status: string
+        }
+        Insert: {
+          cache_key: string
+          catalogue_version: number
+          created_at?: string
+          expires_at: string
+          hit_count?: number
+          last_hit_at?: string | null
+          lock_expires_at?: string | null
+          model_id: string
+          prompt_version: number
+          response_text?: string | null
+          status?: string
+        }
+        Update: {
+          cache_key?: string
+          catalogue_version?: number
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
+          last_hit_at?: string | null
+          lock_expires_at?: string | null
+          model_id?: string
+          prompt_version?: number
+          response_text?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       ai_assistant_settings: {
         Row: {
+          cache_enabled: boolean
+          cache_hit_daily_limit: number
+          cache_ttl_minutes: number
+          catalogue_version: number
           daily_user_limit: number
           enabled: boolean
           global_daily_limit: number
@@ -30,6 +76,10 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          cache_enabled?: boolean
+          cache_hit_daily_limit?: number
+          cache_ttl_minutes?: number
+          catalogue_version?: number
           daily_user_limit?: number
           enabled?: boolean
           global_daily_limit?: number
@@ -44,6 +94,10 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          cache_enabled?: boolean
+          cache_hit_daily_limit?: number
+          cache_ttl_minutes?: number
+          catalogue_version?: number
           daily_user_limit?: number
           enabled?: boolean
           global_daily_limit?: number
@@ -1753,6 +1807,42 @@ export type Database = {
     Functions: {
       accept_conversation: { Args: { _id: string }; Returns: undefined }
       ai_assistant_admin_stats: { Args: never; Returns: Json }
+      ai_assistant_cache_poll: {
+        Args: {
+          _cache_key: string
+          _catalogue_version: number
+          _model_id: string
+          _prompt_version: number
+        }
+        Returns: Json
+      }
+      ai_assistant_cache_release: {
+        Args: { _cache_key: string }
+        Returns: undefined
+      }
+      ai_assistant_cache_reserve: {
+        Args: { _request_key: string; _user_id: string }
+        Returns: Json
+      }
+      ai_assistant_cache_store: {
+        Args: {
+          _cache_key: string
+          _response_text: string
+          _ttl_minutes: number
+        }
+        Returns: undefined
+      }
+      ai_assistant_cache_try: {
+        Args: {
+          _cache_key: string
+          _catalogue_version: number
+          _lock_seconds: number
+          _model_id: string
+          _prompt_version: number
+          _ttl_minutes: number
+        }
+        Returns: Json
+      }
       ai_assistant_finalize: {
         Args: {
           _error_code?: string

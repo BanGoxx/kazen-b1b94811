@@ -1431,12 +1431,20 @@ function FounderDigestSection() {
 }
 
 
-function AiStat({ label, value }: { label: string; value: number | null }) {
+function AiStat({
+  label,
+  value,
+  suffix,
+}: {
+  label: string;
+  value: number | null;
+  suffix?: string;
+}) {
   return (
     <div className="rounded-lg border border-border bg-background/50 p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 font-display text-2xl font-bold">
-        {value == null ? "—" : value.toLocaleString("fr-FR")}
+        {value == null ? "—" : `${value.toLocaleString("fr-FR")}${suffix ?? ""}`}
       </p>
     </div>
   );
@@ -1491,6 +1499,39 @@ function AiAssistantSection() {
         <AiStat label="Depuis le cache (jour)" value={stats?.cached_today ?? null} />
         <AiStat label="Tokens entrée (mois)" value={stats?.input_tokens_month ?? null} />
         <AiStat label="Tokens sortie (mois)" value={stats?.output_tokens_month ?? null} />
+      </div>
+
+      <Separator />
+
+      <div>
+        <p className="mb-2 text-sm font-semibold">
+          Cache des réponses{" "}
+          <span className="text-muted-foreground">
+            ({stats?.cache_enabled ? "actif" : "inactif"} · TTL{" "}
+            {stats?.cache_ttl_minutes ?? "—"} min · v.catalogue {stats?.catalogue_version ?? "—"})
+          </span>
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <AiStat label="Hits cache (jour)" value={stats?.cached_today ?? null} />
+          <AiStat label="Hits cache (mois)" value={stats?.cached_month ?? null} />
+          <AiStat label="Appels modèle évités (mois)" value={stats?.cached_month ?? null} />
+          <AiStat label="Appels modèle payants (mois)" value={stats?.model_calls_month ?? null} />
+          <AiStat label="Entrées actives" value={stats?.active_cache_entries ?? null} />
+          <AiStat label="Entrées expirées" value={stats?.expired_cache_entries ?? null} />
+          <AiStat
+            label="Taux de hit"
+            value={
+              stats
+                ? Math.round(
+                    (stats.cached_month /
+                      Math.max(stats.cached_month + stats.model_calls_month, 1)) *
+                      100,
+                  )
+                : null
+            }
+            suffix="%"
+          />
+        </div>
       </div>
 
       <Separator />

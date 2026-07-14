@@ -1431,12 +1431,20 @@ function FounderDigestSection() {
 }
 
 
-function AiStat({ label, value }: { label: string; value: number | null }) {
+function AiStat({
+  label,
+  value,
+  suffix,
+}: {
+  label: string;
+  value: number | null;
+  suffix?: string;
+}) {
   return (
     <div className="rounded-lg border border-border bg-background/50 p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 font-display text-2xl font-bold">
-        {value == null ? "—" : value.toLocaleString("fr-FR")}
+        {value == null ? "—" : `${value.toLocaleString("fr-FR")}${suffix ?? ""}`}
       </p>
     </div>
   );

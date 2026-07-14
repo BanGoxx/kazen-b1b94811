@@ -23,6 +23,8 @@ import {
   useMemberBlock,
 } from "@/lib/public-profile";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
+import { formatDateLocalized } from "@/lib/i18n/date";
 import {
   Avatar,
   AvatarFallback,

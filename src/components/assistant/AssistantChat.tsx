@@ -241,6 +241,14 @@ export function AssistantChat() {
                 <Loader2 className="h-4 w-4 animate-spin" /> Réflexion…
               </div>
             )}
+            {errorNotice && (
+              <div
+                role="status"
+                className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground"
+              >
+                {errorNotice}
+              </div>
+            )}
           </div>
 
           {/* Composer */}

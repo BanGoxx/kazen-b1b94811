@@ -21,6 +21,9 @@ import {
   Crown,
   DownloadCloud,
   MessagesSquare,
+  BarChart3,
+
+
 
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";

@@ -9,12 +9,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const sendLiveChatMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (data: { roomId: string; body: string; replyTo?: string | null }) => data,
+    (data: { roomId: string; body: string; replyTo?: string }) => data,
   )
   .handler(async ({ data, context }) => {
     const { data: id, error } = await context.supabase.rpc(
       "send_live_chat_message",
-      { _room: data.roomId, _body: data.body, _reply_to: data.replyTo ?? null },
+      { _room: data.roomId, _body: data.body, _reply_to: data.replyTo ?? undefined },
     );
     if (error) throw new Error(error.message);
     return { id: id as string };

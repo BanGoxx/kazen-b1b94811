@@ -28,6 +28,7 @@ import {
   Stethoscope,
   RefreshCw,
   Sparkles,
+  Rocket,
 } from "lucide-react";
 import { getAiAssistantStats, setAiAssistantEnabled } from "@/lib/ai-usage.functions";
 import { toast } from "sonner";

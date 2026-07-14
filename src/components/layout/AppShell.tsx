@@ -69,6 +69,7 @@ const NAV: NavItem[] = [
   { to: "/a-venir", label: "À venir", icon: CalendarClock },
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/mes-listes", label: "Ma liste", icon: ListChecks },
+  { to: "/statistiques", label: "Statistiques", icon: BarChart3, memberOnly: true },
   { to: "/listes", label: "Playlists partagées", icon: ListMusic },
   { to: "/communaute", label: "Communauté", icon: MessagesSquare },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },

@@ -296,6 +296,19 @@ p {
   100% { transform: translateY(-3px) scale(1.01); }
 }
 
+/* Wave: gentle tilt + tiny sway, slow and soft, only during the wave pose. */
+@keyframes kazenMascotWave {
+  0% { transform: translate(0, 0) rotate(-1.5deg); }
+  50% { transform: translate(2px, -2px) rotate(1.5deg); }
+  100% { transform: translate(0, 0) rotate(-1.5deg); }
+}
+
+/* Point: small nudge toward the chat button (button sits below-right). */
+@keyframes kazenMascotPoint {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(3px, 3px); }
+}
+
 /* Discreet metallic-red glow on mascot hover. */
 .mascot-glow {
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
@@ -303,6 +316,22 @@ p {
 }
 .group:hover .mascot-glow {
   filter: drop-shadow(0 6px 20px color-mix(in oklab, var(--color-primary) 55%, transparent));
+}
+
+/* Point-pose directed glow toward the chat button. */
+.mascot-glow-point {
+  filter: drop-shadow(2px 8px 20px color-mix(in oklab, var(--color-primary) 50%, transparent));
+}
+
+/* Cross-fade between mascot poses. */
+.mascot-layer {
+  transition: opacity 0.22s ease-in-out;
+}
+
+/* Discreet pulsing arrow pointing at the chat button during the point pose. */
+@keyframes kazenMascotArrowPulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(3px); }
 }
 
 /* Refined skeleton: base tone + animated diagonal sheen. Respects reduced

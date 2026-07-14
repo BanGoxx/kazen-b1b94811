@@ -202,7 +202,7 @@ export function KazenAssistantMascot() {
   // Discreet mode sits higher (clear of the BackToTop control at ~140px) and
   // is smaller; intro mode hugs the launcher so its arrow points at it.
   const wrapperPos = discreet
-    ? "bottom-[9.75rem] right-5 sm:right-6"
+    ? "bottom-[5.25rem] right-5 sm:bottom-[5.5rem] sm:right-6"
     : "bottom-[5.5rem] right-3 sm:bottom-[6.25rem] sm:right-5";
 
   const boxSize = discreet

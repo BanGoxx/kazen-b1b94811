@@ -33,6 +33,7 @@ interface DeletionRequest {
  */
 export function AccountDeletion() {
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);

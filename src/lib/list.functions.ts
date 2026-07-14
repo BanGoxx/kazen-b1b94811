@@ -95,23 +95,23 @@ export const upsertListItem = createServerFn({ method: "POST" })
     // cap): that column is column-privilege-revoked for the `authenticated`
     // role and is written only by trusted server catalogue paths
     // (see syncCatalogueEpisodes in discover.functions.ts). Never list it here.
-    const { error: mediaError } = await context.supabase.from("media_records").upsert(
-      {
-        media_key: m.key,
-        source: m.source,
-        external_id: m.externalId,
-        media_type: m.mediaType,
-        title: m.title,
-        title_original: m.titleOriginal,
-        poster_url: m.posterUrl,
-        backdrop_url: m.backdropUrl,
-        release_date: m.releaseDate,
-        genres: m.genres,
-        platforms: m.platforms as never,
-        score: m.score,
-      },
-      { onConflict: "media_key" },
-    );
+    // Seed only a MISSING catalog row via the security-definer RPC. Members can
+    // never overwrite existing shared catalog data (anti-tamper); trusted server
+    // paths remain the only writers of existing rows.
+    const { error: mediaError } = await context.supabase.rpc("seed_media_snapshot", {
+      _media_key: m.key,
+      _source: m.source,
+      _external_id: m.externalId,
+      _media_type: m.mediaType,
+      _title: m.title,
+      _title_original: m.titleOriginal,
+      _poster_url: m.posterUrl,
+      _backdrop_url: m.backdropUrl,
+      _release_date: m.releaseDate,
+      _genres: m.genres,
+      _platforms: m.platforms as never,
+      _score: m.score,
+    });
     if (mediaError) throw new Error(mediaError.message);
 
     // Server-side reliable maximum: movies are binary (0/1); episodic titles use

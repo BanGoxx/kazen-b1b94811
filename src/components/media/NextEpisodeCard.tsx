@@ -15,43 +15,51 @@ export function NextEpisodeCard({
   const air = nextEpisode?.airDate ? new Date(nextEpisode.airDate) : null;
   const valid = air && !Number.isNaN(air.getTime());
 
-  // Tick every 30s so the countdown stays fresh without heavy re-renders.
-  const [now, setNow] = useState(() => Date.now());
+  // Start at `null` so SSR and the first client render are identical (no
+  // countdown, which depends on the current time). After mount we compute the
+  // live countdown and tick every 30s without heavy re-renders.
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     if (!valid) return;
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, [valid]);
 
   if (!valid || !nextEpisode) return null;
 
-  const diffMs = air.getTime() - now;
-  let countdown: string;
+  let countdown: string | null = null;
   let imminent = false;
-  if (diffMs <= 0) {
-    countdown = "Diffusé récemment";
-  } else {
-    const totalMin = Math.floor(diffMs / 60_000);
-    const days = Math.floor(totalMin / 1440);
-    const hours = Math.floor((totalMin % 1440) / 60);
-    const mins = totalMin % 60;
-    if (days >= 1) {
-      countdown = `Dans ${days} j ${hours} h`;
-    } else if (hours >= 1) {
-      countdown = `Dans ${hours} h ${mins} min`;
-      imminent = true;
+  if (now !== null) {
+    const diffMs = air.getTime() - now;
+    if (diffMs <= 0) {
+      countdown = "Diffusé récemment";
     } else {
-      countdown = `Dans ${mins} min`;
-      imminent = true;
+      const totalMin = Math.floor(diffMs / 60_000);
+      const days = Math.floor(totalMin / 1440);
+      const hours = Math.floor((totalMin % 1440) / 60);
+      const mins = totalMin % 60;
+      if (days >= 1) {
+        countdown = `Dans ${days} j ${hours} h`;
+      } else if (hours >= 1) {
+        countdown = `Dans ${hours} h ${mins} min`;
+        imminent = true;
+      } else {
+        countdown = `Dans ${mins} min`;
+        imminent = true;
+      }
     }
   }
 
+  // Fixed timezone keeps this label byte-identical on the server (UTC) and the
+  // client, so hydration never mismatches on the date/hour.
   const dateLabel = new Intl.DateTimeFormat("fr-FR", {
     weekday: "long",
     day: "numeric",
     month: "long",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Paris",
   }).format(air);
 
   return (
@@ -70,7 +78,8 @@ export function NextEpisodeCard({
           Prochain épisode
         </p>
         <p className="truncate text-sm font-semibold">
-          Épisode {nextEpisode.number} · {countdown}
+          Épisode {nextEpisode.number}
+          {countdown ? ` · ${countdown}` : ""}
         </p>
         <p className="truncate text-xs capitalize text-muted-foreground">{dateLabel}</p>
       </div>

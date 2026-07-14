@@ -185,6 +185,23 @@ function SoutienPage() {
             arriveront progressivement.
           </p>
         </section>
+
+        {/* KAZEN Plus — bientôt */}
+        <section className="rounded-2xl border border-primary/20 bg-primary/5 p-4 backdrop-blur sm:p-6">
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+            <Crown className="h-3.5 w-3.5" /> Bientôt
+          </div>
+          <h2 className="font-display text-xl font-bold tracking-[-0.02em]">
+            KAZEN Plus
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Une future formule pour aller plus loin avec KAZEN. Rien n'est encore
+            disponible à l'achat : le cœur de KAZEN reste gratuit, sans engagement
+            ni publicité. Nous préparons ces outils avec soin et vous informerons
+            dès leur arrivée.
+          </p>
+        </section>
+
       </div>
     </AppShell>
   );

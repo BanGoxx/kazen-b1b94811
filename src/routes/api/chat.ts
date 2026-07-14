@@ -182,7 +182,7 @@ export const Route = createFileRoute("/api/chat")({
         // ---- Helper: serve a cache hit (rate-limited, no paid call) ------
         async function serveCacheHit(responseText: string): Promise<Response> {
           const { data: res, error } = await supabaseAdmin.rpc("ai_assistant_cache_reserve", {
-            _user_id: userId,
+            _user_id: uid,
             _request_key: rk,
           });
           const decision = (res ?? {}) as { allowed?: boolean; reason?: string };
@@ -192,7 +192,7 @@ export const Route = createFileRoute("/api/chat")({
             return json({ error: DENY_MESSAGES[reason] ?? DENY_MESSAGES.cache_rate, reason }, status);
           }
           // Keep the persisted conversation consistent with the paid path.
-          await persist(supabase, userId!, lastUserText, responseText);
+          await persist(supabase, uid, lastUserText, responseText);
           return streamCached(responseText, uiMessages);
         }
 
@@ -310,7 +310,7 @@ export const Route = createFileRoute("/api/chat")({
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           onFinish: async ({ text, usage }) => {
             await finalize("success", usage?.inputTokens, usage?.outputTokens);
-            await persist(supabase, userId!, lastUserText, text);
+            await persist(supabase, uid, lastUserText, text);
             // Store only complete, non-empty answers, and only if we own the lock.
             if (holdsLock && cacheKey && text && text.trim().length > 0) {
               try {

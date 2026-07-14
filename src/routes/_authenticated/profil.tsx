@@ -17,6 +17,7 @@ import { RecommendationAssistant } from "@/components/media/RecommendationAssist
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { ChatPreference } from "@/components/settings/ChatPreference";
+import { ProfilePrivacy } from "@/components/settings/ProfilePrivacy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

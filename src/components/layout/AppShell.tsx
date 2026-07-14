@@ -40,6 +40,7 @@ import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ChatBell } from "@/components/chat/ChatBell";
 import { BackToTop } from "./BackToTop";
+import { BetaFeedbackDialog } from "@/components/beta/BetaFeedbackDialog";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";
@@ -303,6 +304,15 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
             </p>
             <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 px-2.5 py-1 text-[0.7rem] font-semibold text-primary">
+                Bêta
+              </span>
+              <span className="text-xs">
+                KAZEN est actuellement en bêta. Certaines fonctionnalités peuvent évoluer.
+              </span>
+              <BetaFeedbackDialog />
+            </div>
           </footer>
         </div>
         <AssistantChat />

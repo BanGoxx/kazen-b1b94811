@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -10,7 +10,15 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType, WatchStatus } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO, onAirSeriesQO, trendingAnimeQO, popularAnimeQO } from "@/lib/queries";
+import {
+  upcomingAllQO,
+  onAirSeriesQO,
+  trendingAnimeQO,
+  popularAnimeQO,
+  seasonalAnimeQO,
+  refreshAnimeRails,
+  upgradeCatalogOnce,
+} from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
 import { useAuth } from "@/lib/auth";
 import {

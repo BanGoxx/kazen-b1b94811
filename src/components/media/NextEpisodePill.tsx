@@ -17,9 +17,13 @@ export function NextEpisodePill({
   nextEpisode: MediaItem["nextEpisode"];
   className?: string;
 }) {
-  const [now, setNow] = useState(() => Date.now());
+  // Start at `null` so SSR and the first client render produce the SAME
+  // deterministic (absolute-date) label — no hydration mismatch. After mount we
+  // switch to the accurate relative wording and refresh on a slow tick.
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     if (!nextEpisode?.airDate) return;
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(id);
   }, [nextEpisode?.airDate]);

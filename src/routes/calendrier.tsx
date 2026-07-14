@@ -122,11 +122,26 @@ function isoDay(d: Date): string {
  * so weekly episodes actually surface — relying on `releaseDate` alone only
  * ever showed the series premiere, hiding shows that are mid-run. Everything
  * else (unreleased anime, films, séries) falls back to `releaseDate`.
+ *
+ * Episode air dates come back as full UTC ISO timestamps; naive `.slice(0,10)`
+ * would drop a late-evening episode onto the previous UTC day. We normalize to
+ * the Europe/Paris civil day (the timezone KAZEN uses everywhere for airing
+ * info) so episodes land on the day members actually expect. Film/série
+ * `releaseDate` values are date-only (no time), so they stay timezone-neutral.
  */
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const PARIS_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Europe/Paris",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 function calendarDate(it: MediaItem): string | null {
-  const ep = it.nextEpisode?.airDate?.slice(0, 10);
-  if (ep && ISO_DATE.test(ep)) return ep;
+  const ep = it.nextEpisode?.airDate;
+  if (ep) {
+    const d = new Date(ep);
+    if (!Number.isNaN(d.getTime())) return PARIS_DAY.format(d);
+  }
   const rel = it.releaseDate?.slice(0, 10);
   return rel && ISO_DATE.test(rel) ? rel : null;
 }

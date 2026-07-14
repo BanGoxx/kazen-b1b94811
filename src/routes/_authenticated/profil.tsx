@@ -60,6 +60,8 @@ export const Route = createFileRoute("/_authenticated/profil")({
 
 
 function ProfilePage() {
+  const { t } = useI18n();
+  const typeLabels = useMediaTypeLabels();
   const { user } = useAuth();
   const { isSupporter } = usePremium();
   const { isBetaPremium } = useBetaPremium();

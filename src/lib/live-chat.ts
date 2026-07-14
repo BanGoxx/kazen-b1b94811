@@ -223,15 +223,20 @@ export function useLiveChatMessages(roomId: string | undefined) {
  *  Safe no-op if the publication does not include the table yet. */
 export function useLiveChatRealtime(roomId: string | undefined) {
   const qc = useQueryClient();
-  const [status, setStatus] = useState<
-    "idle" | "connecting" | "connected" | "reconnecting" | "disconnected"
-  >("idle");
+  const [status, setStatus] = useState<RtStatus>("idle");
   const attemptRef = useRef(0);
+
+  // Mirror local status into the module registry so useLiveChatMessages can
+  // gate its polling fallback on live connection health.
+  const applyStatus = (next: RtStatus) => {
+    setStatus(next);
+    if (roomId) setRtStatus(roomId, next);
+  };
 
   useEffect(() => {
     if (!roomId) return;
     let cancelled = false;
-    setStatus("connecting");
+    applyStatus("connecting");
     const channel = supabase
       .channel(`live-chat:${roomId}`)
       .on(
@@ -252,18 +257,22 @@ export function useLiveChatRealtime(roomId: string | undefined) {
         if (cancelled) return;
         if (s === "SUBSCRIBED") {
           attemptRef.current = 0;
-          setStatus("connected");
+          applyStatus("connected");
         } else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT") {
           attemptRef.current += 1;
-          setStatus(attemptRef.current > 2 ? "disconnected" : "reconnecting");
+          applyStatus(
+            attemptRef.current > 2 ? "disconnected" : "reconnecting",
+          );
         } else if (s === "CLOSED") {
-          setStatus("disconnected");
+          applyStatus("disconnected");
         }
       });
     return () => {
       cancelled = true;
       supabase.removeChannel(channel);
+      if (roomId) setRtStatus(roomId, "disconnected");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, qc]);
 
   return status;

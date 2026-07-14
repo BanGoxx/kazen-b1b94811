@@ -45,7 +45,8 @@ export function effectiveMax(
   mediaType: MediaType,
   episodesCount: number | null | undefined,
 ): number | null {
-  if (mediaType === "movie") return null;
+  // Movies use a binary watched counter (0 = non vu, 1 = vu/terminé).
+  if (mediaType === "movie") return 1;
   if (episodesCount != null && episodesCount > 0) return Math.floor(episodesCount);
   return null;
 }

@@ -165,6 +165,26 @@ function ProfilePage() {
           </Button>
         </header>
 
+        {/* KAZEN Premium — accès offert pendant la bêta (présentation, aucun paiement) */}
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/25 bg-primary/5 p-5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl aurora-bg text-white shadow-glow">
+              <Crown className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="font-display text-base font-bold">KAZEN Premium</p>
+                <PremiumBetaBadge size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">{BETA_PREMIUM_COPY.primary}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{BETA_PREMIUM_COPY.secondary}</p>
+            </div>
+          </div>
+          <Button asChild variant="premium" size="sm">
+            <Link to="/soutien">En savoir plus</Link>
+          </Button>
+        </section>
+
         {/* Couche Soutien / Premium */}
         {isSupporter ? (
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-5 backdrop-blur">

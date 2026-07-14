@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -10,7 +10,15 @@ import { SafeImage } from "@/components/media/SafeImage";
 import type { MediaItem, MediaType, WatchStatus } from "@/lib/media-types";
 import { MEDIA_TYPE_LABELS, WATCH_STATUS_LABELS } from "@/lib/media-types";
 import { PLATFORMS } from "@/lib/platforms";
-import { upcomingAllQO, onAirSeriesQO, trendingAnimeQO, popularAnimeQO } from "@/lib/queries";
+import {
+  upcomingAllQO,
+  onAirSeriesQO,
+  trendingAnimeQO,
+  popularAnimeQO,
+  seasonalAnimeQO,
+  refreshAnimeRails,
+  upgradeCatalogOnce,
+} from "@/lib/queries";
 import { useUserList } from "@/lib/user-list";
 import { useAuth } from "@/lib/auth";
 import {
@@ -45,15 +53,19 @@ export const Route = createFileRoute("/calendrier")({
     void context.queryClient.ensureQueryData(upcomingAllQO);
     void context.queryClient.prefetchQuery(onAirSeriesQO);
     // Currently-airing anime carry `nextEpisode`; prefetch so weekly episodes
-    // (not just premieres) can populate the grid.
+    // (not just premieres) can populate the grid. Seasonal covers the full
+    // airing season (far beyond the ~60 trending/popular titles), which is the
+    // main lever for anime completeness in the calendar.
     void context.queryClient.prefetchQuery(trendingAnimeQO);
     void context.queryClient.prefetchQuery(popularAnimeQO);
+    void context.queryClient.prefetchQuery(seasonalAnimeQO());
   },
   component: CalendarPage,
   pendingComponent: () => (
     <AppShell>
       <PageHeader title="Calendrier" description="Les sorties de la semaine, jour par jour." />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="min-h-40 rounded-2xl border border-border bg-card/40 p-2">
             <Skeleton className="mb-3 h-4 w-10" />
@@ -110,11 +122,26 @@ function isoDay(d: Date): string {
  * so weekly episodes actually surface — relying on `releaseDate` alone only
  * ever showed the series premiere, hiding shows that are mid-run. Everything
  * else (unreleased anime, films, séries) falls back to `releaseDate`.
+ *
+ * Episode air dates come back as full UTC ISO timestamps; naive `.slice(0,10)`
+ * would drop a late-evening episode onto the previous UTC day. We normalize to
+ * the Europe/Paris civil day (the timezone KAZEN uses everywhere for airing
+ * info) so episodes land on the day members actually expect. Film/série
+ * `releaseDate` values are date-only (no time), so they stay timezone-neutral.
  */
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const PARIS_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Europe/Paris",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 function calendarDate(it: MediaItem): string | null {
-  const ep = it.nextEpisode?.airDate?.slice(0, 10);
-  if (ep && ISO_DATE.test(ep)) return ep;
+  const ep = it.nextEpisode?.airDate;
+  if (ep) {
+    const d = new Date(ep);
+    if (!Number.isNaN(d.getTime())) return PARIS_DAY.format(d);
+  }
   const rel = it.releaseDate?.slice(0, 10);
   return rel && ISO_DATE.test(rel) ? rel : null;
 }
@@ -127,9 +154,19 @@ function CalendarPage() {
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
   const { data: trending } = useSuspenseQuery(trendingAnimeQO);
   const { data: popular } = useSuspenseQuery(popularAnimeQO);
+  const { data: seasonal } = useSuspenseQuery(seasonalAnimeQO());
   const userList = useUserList();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
+  // Post-hydration browser-direct upgrade. On the server the Worker is often
+  // AniList-blocked, so the dehydrated anime data can be a curated fallback.
+  // Upgrade each anime source to the real browser-direct list exactly ONCE per
+  // session (bounded, rate-limit friendly) so the calendar isn't thin.
+  useEffect(() => {
+    refreshAnimeRails(queryClient);
+    upgradeCatalogOnce(queryClient, ["upcoming", "all"]);
+  }, [queryClient]);
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [weeks, setWeeks] = useState<1 | 2 | 4>(2);
@@ -137,12 +174,15 @@ function CalendarPage() {
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
 
-  // Merge sources and de-dupe by key. Trending/popular anime carry the airing
-  // `nextEpisode`, so when the same title also appears in another source we keep
-  // the variant that has an episode air date (the calendar-relevant one).
+  // Merge sources and de-dupe by canonical key. Trending/popular/seasonal anime
+  // carry the airing `nextEpisode`; seasonal is the widest airing set, so it
+  // fills the many days the ~60 trending/popular titles leave empty. When the
+  // same title appears in several sources we keep the variant that has an
+  // episode air date (the calendar-relevant one). Dedup is key-exact, so
+  // unrelated titles are never merged.
   const all = useMemo<MediaItem[]>(() => {
     const map = new Map<string, MediaItem>();
-    for (const it of [...trending, ...popular, ...upcoming, ...series]) {
+    for (const it of [...trending, ...popular, ...seasonal.items, ...upcoming, ...series]) {
       const existing = map.get(it.key);
       if (!existing) {
         map.set(it.key, it);
@@ -151,7 +191,14 @@ function CalendarPage() {
       }
     }
     return [...map.values()];
-  }, [trending, popular, upcoming, series]);
+  }, [trending, popular, seasonal, upcoming, series]);
+
+  // Honest degradation signal: if every anime source came back empty, the
+  // provider is temporarily unreachable — surface a subtle, non-alarmist hint
+  // rather than implying "no anime releases exist".
+  const animeDegraded =
+    trending.length === 0 && popular.length === 0 && seasonal.items.length === 0;
+
 
   const availablePlatforms = useMemo(() => {
     const ids = new Set<string>();
@@ -320,6 +367,15 @@ function CalendarPage() {
         </span>
       </div>
 
+      {animeDegraded ? (
+        <div
+          role="status"
+          className="mb-4 rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-[0.72rem] text-muted-foreground"
+        >
+          Certaines données anime peuvent être limitées temporairement.
+        </div>
+      ) : null}
+
       {/* Weekly grid — one labelled block per week for clear separation */}
       {filtered.length ? (
         <div className="space-y-6">
@@ -341,37 +397,18 @@ function CalendarPage() {
                     </span>
                   </div>
                 ) : null}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
                   {weekDays.map((d, i) => {
                     const key = isoDay(d);
-                    const items = byDay.get(key) ?? [];
-                    const isToday = key === todayIso;
-                    const isPast = key < todayIso;
                     return (
-                      <div
+                      <DayCell
                         key={key}
-                        className={cn(
-                          "flex min-h-40 flex-col rounded-2xl border p-2 transition-opacity",
-                          isToday
-                            ? "border-primary/50 bg-primary/5"
-                            : "border-border bg-card/40",
-                          isPast && !isToday && "opacity-55",
-                        )}
-                      >
-                        <div className="mb-2 flex items-baseline justify-between px-1">
-                          <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
-                            {DAY_LABELS[i % 7]}
-                          </span>
-                          <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
-                        </div>
-                        <div className="flex flex-1 flex-col gap-1.5">
-                          {items.length ? (
-                            items.map((it) => <CalendarEntry key={it.key} item={it} />)
-                          ) : (
-                            <span className="px-1 text-[0.7rem] text-muted-foreground/60">—</span>
-                          )}
-                        </div>
-                      </div>
+                        dayLabel={DAY_LABELS[i % 7]}
+                        date={d}
+                        items={byDay.get(key) ?? []}
+                        isToday={key === todayIso}
+                        isPast={key < todayIso}
+                      />
                     );
                   })}
                 </div>
@@ -421,6 +458,67 @@ function SignInFilterPrompt() {
         </Button>
       </PopoverContent>
     </Popover>
+  );
+}
+
+// Show a bounded number of entries per day; busy days expand inline via a
+// "voir plus" toggle so columns stay scannable and never overlap.
+const DAY_VISIBLE = 4;
+
+function DayCell({
+  dayLabel,
+  date,
+  items,
+  isToday,
+  isPast,
+}: {
+  dayLabel: string;
+  date: Date;
+  items: MediaItem[];
+  isToday: boolean;
+  isPast: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const overflow = items.length - DAY_VISIBLE;
+  const shown = expanded ? items : items.slice(0, DAY_VISIBLE);
+  return (
+    <div
+      className={cn(
+        "flex min-h-40 flex-col rounded-2xl border p-2 transition-opacity",
+        isToday ? "border-primary/50 bg-primary/5" : "border-border bg-card/40",
+        isPast && !isToday && "opacity-55",
+      )}
+    >
+      <div className="mb-2 flex items-baseline justify-between px-1">
+        <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
+          {dayLabel}
+        </span>
+        <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{date.getDate()}</span>
+      </div>
+      <div className="flex flex-1 flex-col gap-1.5">
+        {items.length ? (
+          <>
+            {shown.map((it) => (
+              <CalendarEntry key={it.key} item={it} />
+            ))}
+            {overflow > 0 ? (
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+                className="focus-ring mt-0.5 rounded-lg border border-border/60 bg-background/40 px-2 py-1 text-[0.7rem] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {expanded ? "Voir moins" : `+${overflow} de plus`}
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <span className="flex flex-1 items-center justify-center px-1 py-6 text-center text-[0.7rem] text-muted-foreground/60">
+            Aucune sortie
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
 

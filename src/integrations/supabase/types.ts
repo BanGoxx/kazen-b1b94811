@@ -991,6 +991,7 @@ export type Database = {
         Row: {
           backdrop_url: string | null
           created_at: string
+          episodes_count: number | null
           external_id: string
           genres: string[]
           media_key: string
@@ -1007,6 +1008,7 @@ export type Database = {
         Insert: {
           backdrop_url?: string | null
           created_at?: string
+          episodes_count?: number | null
           external_id: string
           genres?: string[]
           media_key: string
@@ -1023,6 +1025,7 @@ export type Database = {
         Update: {
           backdrop_url?: string | null
           created_at?: string
+          episodes_count?: number | null
           external_id?: string
           genres?: string[]
           media_key?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.media_records ADD COLUMN IF NOT EXISTS episodes_count integer;

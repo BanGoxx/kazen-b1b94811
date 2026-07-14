@@ -1,7 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  type UIMessage,
+} from "ai";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import {
+  ASSISTANT_MODEL_ID,
+  ASSISTANT_PROMPT_VERSION,
+  cacheKeyMaterial,
+  evaluateEligibility,
+  sha256Hex,
+} from "@/lib/assistant-cache";
 
 type ChatRequestBody = { messages?: unknown };
 
@@ -10,6 +23,11 @@ const MAX_MESSAGES = 40; // reject obviously oversized histories
 const MODEL_HISTORY_TURNS = 12; // only the most recent turns are sent to the model
 const MAX_USER_CHARS = 2000; // per-message input cap
 const MAX_OUTPUT_TOKENS = 800; // bound provider output cost
+
+// --- Cache / dedup tuning ---------------------------------------------------
+const CACHE_LOCK_SECONDS = 30; // max lifetime of a pending generation lock
+const INFLIGHT_POLL_TRIES = 16; // ~8s bounded wait for an in-flight generation
+const INFLIGHT_POLL_MS = 500;
 
 const SYSTEM_PROMPT = `Tu es l'assistant de KAZEN, une application française premium de découverte et de suivi d'anime, séries et films.
 Ton rôle : aider l'utilisateur à trouver quoi regarder, comparer des titres, expliquer un univers, organiser ses envies.
@@ -33,12 +51,8 @@ function textOf(m: UIMessage): string {
 
 async function requestKey(text: string): Promise<string> {
   try {
-    const bytes = new TextEncoder().encode(text);
-    const digest = await crypto.subtle.digest("SHA-256", bytes);
-    return Array.from(new Uint8Array(digest))
-      .slice(0, 16)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const hex = await sha256Hex(text);
+    return hex.slice(0, 32);
   } catch {
     return String(text.length);
   }
@@ -57,6 +71,7 @@ const DENY_MESSAGES: Record<string, string> = {
   daily: "Tu as atteint ta limite de questions pour aujourd'hui. Reviens demain !",
   monthly: "Tu as atteint ta limite de questions pour ce mois-ci.",
   new_account: "Ton compte est récent : la limite de questions est temporairement réduite. Réessaie plus tard.",
+  cache_rate: "Trop de requêtes en peu de temps. Réessaie dans un instant.",
   auth: "Connecte-toi pour utiliser l'assistant KAZEN.",
 };
 
@@ -75,6 +90,22 @@ async function persist(
     console.error("assistant persist failed", err);
   }
 }
+
+/** Stream a stored cached answer through the normal UI message stream. */
+function streamCached(text: string, originalMessages: UIMessage[]): Response {
+  const stream = createUIMessageStream({
+    originalMessages,
+    execute: ({ writer }) => {
+      const id = crypto.randomUUID();
+      writer.write({ type: "text-start", id });
+      writer.write({ type: "text-delta", id, delta: text });
+      writer.write({ type: "text-end", id });
+    },
+  });
+  return createUIMessageStreamResponse({ stream });
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -122,14 +153,109 @@ export const Route = createFileRoute("/api/chat")({
           return json({ error: "Ton message est trop long." }, 400);
         }
 
-        // --- Quota reservation (server-enforced) --------------------------
-        const rk = await requestKey(lastUserText);
+        // --- Trusted server-only client for cache operations --------------
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        // Cache settings (server-read; never trust the client for these).
+        let cacheEnabled = false;
+        let cacheTtl = 180;
+        let catalogueVersion = 1;
+        try {
+          const { data: settings } = await supabaseAdmin
+            .from("ai_assistant_settings")
+            .select("cache_enabled, cache_ttl_minutes, catalogue_version")
+            .eq("id", 1)
+            .maybeSingle();
+          if (settings) {
+            cacheEnabled = !!settings.cache_enabled;
+            cacheTtl = settings.cache_ttl_minutes ?? 180;
+            catalogueVersion = settings.catalogue_version ?? 1;
+          }
+        } catch (err) {
+          console.error("assistant cache settings read failed", err);
+        }
+
+        const eligibility = evaluateEligibility(uiMessages);
+        const rk = await requestKey(eligibility.normalized || lastUserText);
+
+        // ---- Helper: serve a cache hit (rate-limited, no paid call) ------
+        async function serveCacheHit(responseText: string): Promise<Response> {
+          const { data: res, error } = await supabaseAdmin.rpc("ai_assistant_cache_reserve", {
+            _user_id: userId,
+            _request_key: rk,
+          });
+          const decision = (res ?? {}) as { allowed?: boolean; reason?: string };
+          if (error || !decision.allowed) {
+            const reason = decision.reason ?? "cache_rate";
+            const status = reason === "disabled" ? 403 : 429;
+            return json({ error: DENY_MESSAGES[reason] ?? DENY_MESSAGES.cache_rate, reason }, status);
+          }
+          // Keep the persisted conversation consistent with the paid path.
+          await persist(supabase, userId!, lastUserText, responseText);
+          return streamCached(responseText, uiMessages);
+        }
+
+        // ---- Cache lookup + in-flight dedup (eligible requests only) -----
+        let holdsLock = false;
+        let cacheKey: string | null = null;
+
+        if (cacheEnabled && eligibility.eligible) {
+          try {
+            cacheKey = await sha256Hex(
+              cacheKeyMaterial({ normalized: eligibility.normalized, catalogueVersion }),
+            );
+            const { data: tryRes, error: tryErr } = await supabaseAdmin.rpc("ai_assistant_cache_try", {
+              _cache_key: cacheKey,
+              _model_id: ASSISTANT_MODEL_ID,
+              _prompt_version: ASSISTANT_PROMPT_VERSION,
+              _catalogue_version: catalogueVersion,
+              _ttl_minutes: cacheTtl,
+              _lock_seconds: CACHE_LOCK_SECONDS,
+            });
+            if (tryErr) throw tryErr;
+            const state = (tryRes ?? {}) as { state?: string; response_text?: string };
+
+            if (state.state === "hit" && state.response_text) {
+              return await serveCacheHit(state.response_text);
+            }
+            if (state.state === "acquired") {
+              holdsLock = true;
+            } else if (state.state === "inflight") {
+              // Bounded wait for the concurrent generation to complete.
+              for (let i = 0; i < INFLIGHT_POLL_TRIES; i++) {
+                await sleep(INFLIGHT_POLL_MS);
+                const { data: pollRes } = await supabaseAdmin.rpc("ai_assistant_cache_poll", {
+                  _cache_key: cacheKey,
+                  _model_id: ASSISTANT_MODEL_ID,
+                  _prompt_version: ASSISTANT_PROMPT_VERSION,
+                  _catalogue_version: catalogueVersion,
+                });
+                const pState = (pollRes ?? {}) as { state?: string; response_text?: string };
+                if (pState.state === "hit" && pState.response_text) {
+                  return await serveCacheHit(pState.response_text);
+                }
+              }
+              // Timed out: fall through to a normal paid call without a lock
+              // (do not clobber the other generation's entry).
+              cacheKey = null;
+            }
+          } catch (err) {
+            console.error("assistant cache lookup failed", err);
+            cacheKey = null;
+            holdsLock = false;
+          }
+        }
+
+        // ---- Paid model path (quota-reserved) ----------------------------
         const { data: reserve, error: reserveError } = await supabase.rpc(
           "ai_assistant_reserve",
           { _request_key: rk },
         );
         if (reserveError) {
           console.error("ai_assistant_reserve failed", reserveError);
+          if (holdsLock && cacheKey) {
+            await supabaseAdmin.rpc("ai_assistant_cache_release", { _cache_key: cacheKey });
+          }
           return json({ error: "Assistant indisponible." }, 500);
         }
         const decision = (reserve ?? {}) as {
@@ -138,6 +264,11 @@ export const Route = createFileRoute("/api/chat")({
           usage_id?: string;
         };
         if (!decision.allowed) {
+          // Release our lock so the next eligible request can generate.
+          if (holdsLock && cacheKey) {
+            await supabaseAdmin.rpc("ai_assistant_cache_release", { _cache_key: cacheKey });
+            holdsLock = false;
+          }
           const reason = decision.reason ?? "daily";
           const status = reason === "disabled" || reason === "auth" ? 403 : 429;
           return json(
@@ -172,21 +303,34 @@ export const Route = createFileRoute("/api/chat")({
 
         const gateway = createLovableAiGatewayProvider(key);
         const result = streamText({
-          model: gateway("google/gemini-3-flash-preview"),
+          model: gateway(ASSISTANT_MODEL_ID),
           system: SYSTEM_PROMPT,
           messages: await convertToModelMessages(trimmed),
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           onFinish: async ({ text, usage }) => {
-            await finalize(
-              "success",
-              usage?.inputTokens,
-              usage?.outputTokens,
-            );
-            await persist(supabase, userId, lastUserText, text);
+            await finalize("success", usage?.inputTokens, usage?.outputTokens);
+            await persist(supabase, userId!, lastUserText, text);
+            // Store only complete, non-empty answers, and only if we own the lock.
+            if (holdsLock && cacheKey && text && text.trim().length > 0) {
+              try {
+                await supabaseAdmin.rpc("ai_assistant_cache_store", {
+                  _cache_key: cacheKey,
+                  _response_text: text,
+                  _ttl_minutes: cacheTtl,
+                });
+              } catch (err) {
+                console.error("assistant cache store failed", err);
+                await supabaseAdmin.rpc("ai_assistant_cache_release", { _cache_key: cacheKey });
+              }
+            }
           },
           onError: async (event) => {
             console.error("assistant stream error", event);
             await finalize("failed", undefined, undefined, "stream_error");
+            // Release the lock so a partial/aborted generation is not cached.
+            if (holdsLock && cacheKey) {
+              await supabaseAdmin.rpc("ai_assistant_cache_release", { _cache_key: cacheKey });
+            }
           },
         });
 

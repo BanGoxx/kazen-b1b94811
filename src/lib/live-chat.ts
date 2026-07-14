@@ -28,6 +28,40 @@ export const LIVE_CHAT_ROOM_SLUG = "general";
 export const LIVE_CHAT_PAGE_SIZE = 40;
 const POLL_INTERVAL_MS = 20_000;
 
+// Module-level Realtime connection status per room. Lets the messages query
+// gate its polling fallback so it only runs while Realtime is NOT connected.
+type RtStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected";
+const rtStatusByRoom = new Map<string, RtStatus>();
+const rtStatusListeners = new Set<() => void>();
+function setRtStatus(roomId: string, s: RtStatus) {
+  rtStatusByRoom.set(roomId, s);
+  rtStatusListeners.forEach((fn) => fn());
+}
+function useRealtimeConnected(roomId: string | undefined): boolean {
+  const [connected, setConnected] = useState(
+    !!roomId && rtStatusByRoom.get(roomId) === "connected",
+  );
+  useEffect(() => {
+    if (!roomId) {
+      setConnected(false);
+      return;
+    }
+    const update = () =>
+      setConnected(rtStatusByRoom.get(roomId) === "connected");
+    update();
+    rtStatusListeners.add(update);
+    return () => {
+      rtStatusListeners.delete(update);
+    };
+  }, [roomId]);
+  return connected;
+}
+
 export interface LiveChatAuthor {
   id: string;
   display_name: string | null;
@@ -131,6 +165,7 @@ export interface LiveChatCursor {
 
 export function useLiveChatMessages(roomId: string | undefined) {
   const { user } = useAuth();
+  const rtConnected = useRealtimeConnected(roomId);
   type Page = { items: LiveChatMessage[]; nextCursor: LiveChatCursor | null };
   return useInfiniteQuery<
     Page,
@@ -141,7 +176,10 @@ export function useLiveChatMessages(roomId: string | undefined) {
   >({
     queryKey: ["live-chat", "messages", roomId],
     enabled: !!user && !!roomId,
-    refetchInterval: POLL_INTERVAL_MS,
+    // Polling is a fallback only: pause it while Realtime is connected so
+    // healthy sockets are the single source of freshness. When Realtime is
+    // idle/connecting/reconnecting/disconnected we resume the 20s poll.
+    refetchInterval: rtConnected ? false : POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,
     staleTime: 5_000,
     initialPageParam: null,
@@ -185,15 +223,20 @@ export function useLiveChatMessages(roomId: string | undefined) {
  *  Safe no-op if the publication does not include the table yet. */
 export function useLiveChatRealtime(roomId: string | undefined) {
   const qc = useQueryClient();
-  const [status, setStatus] = useState<
-    "idle" | "connecting" | "connected" | "reconnecting" | "disconnected"
-  >("idle");
+  const [status, setStatus] = useState<RtStatus>("idle");
   const attemptRef = useRef(0);
+
+  // Mirror local status into the module registry so useLiveChatMessages can
+  // gate its polling fallback on live connection health.
+  const applyStatus = (next: RtStatus) => {
+    setStatus(next);
+    if (roomId) setRtStatus(roomId, next);
+  };
 
   useEffect(() => {
     if (!roomId) return;
     let cancelled = false;
-    setStatus("connecting");
+    applyStatus("connecting");
     const channel = supabase
       .channel(`live-chat:${roomId}`)
       .on(
@@ -214,18 +257,22 @@ export function useLiveChatRealtime(roomId: string | undefined) {
         if (cancelled) return;
         if (s === "SUBSCRIBED") {
           attemptRef.current = 0;
-          setStatus("connected");
+          applyStatus("connected");
         } else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT") {
           attemptRef.current += 1;
-          setStatus(attemptRef.current > 2 ? "disconnected" : "reconnecting");
+          applyStatus(
+            attemptRef.current > 2 ? "disconnected" : "reconnecting",
+          );
         } else if (s === "CLOSED") {
-          setStatus("disconnected");
+          applyStatus("disconnected");
         }
       });
     return () => {
       cancelled = true;
       supabase.removeChannel(channel);
+      if (roomId) setRtStatus(roomId, "disconnected");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, qc]);
 
   return status;

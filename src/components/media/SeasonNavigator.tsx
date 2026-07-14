@@ -37,7 +37,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
         {prev ? (
           <Link
             to="/media/$source/$id"
-            params={{ source: prev.source, externalId: prev.externalId } as never}
+            params={{ source: prev.source, id: prev.externalId }}
             className="focus-ring rounded-full px-3 py-1 font-medium text-foreground transition-colors hover:text-primary"
           >
             ← Saison précédente
@@ -46,7 +46,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
         {next ? (
           <Link
             to="/media/$source/$id"
-            params={{ source: next.source, externalId: next.externalId } as never}
+            params={{ source: next.source, id: next.externalId }}
             className="focus-ring rounded-full px-3 py-1 font-medium text-foreground transition-colors hover:text-primary"
           >
             Saison suivante →
@@ -109,7 +109,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
             <Link
               key={e.key}
               to="/media/$source/$id"
-              params={{ source: e.source, externalId: e.externalId } as never}
+              params={{ source: e.source, id: e.externalId }}
               className={cn(base, "focus-ring rounded-lg transition-transform hover:scale-[1.03]")}
             >
               {inner}

@@ -80,10 +80,23 @@ export function AssistantChat() {
     [],
   );
 
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
+
   const { messages, sendMessage, status, setMessages } = useChat({
     id: "kazen-assistant",
     messages: initialMessages,
     transport,
+    onError: (err) => {
+      // The transport throws with the server response body on non-200s.
+      let msg = "Une erreur est survenue. Réessaie dans un instant.";
+      try {
+        const parsed = JSON.parse(err.message) as { error?: string };
+        if (parsed?.error) msg = parsed.error;
+      } catch {
+        if (err.message && err.message.length < 200) msg = err.message;
+      }
+      setErrorNotice(msg);
+    },
   });
 
   // Prime the chat with loaded history once available.

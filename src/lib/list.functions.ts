@@ -114,14 +114,14 @@ export const removeListItem = createServerFn({ method: "POST" })
 export const getMyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", context.userId)
-      .maybeSingle();
+    // Reads the owner's own full profile (incl. private preference fields).
+    // Direct SELECT on those columns is revoked at the DB level; the
+    // get_my_profile() SECURITY DEFINER RPC returns the owner's own row only.
+    const { data, error } = await context.supabase.rpc("get_my_profile");
     if (error) throw new Error(error.message);
-    return data;
+    return data ?? null;
   });
+
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -144,7 +144,7 @@ export function KazenAssistantMascot() {
           width={130}
           height={130}
           draggable={false}
-          className="h-[75px] w-auto select-none drop-shadow-[0_6px_16px_rgba(0,0,0,0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_6px_20px_hsl(var(--primary)/0.55)] md:h-[112px] lg:h-[132px]"
+          className="mascot-glow h-[75px] w-auto select-none md:h-[112px] lg:h-[132px]"
           style={
             !reduced && pose === "idle"
               ? { animation: "kazenMascotIdle 3s ease-in-out infinite alternate" }

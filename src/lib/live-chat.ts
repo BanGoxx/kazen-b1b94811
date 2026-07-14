@@ -165,6 +165,7 @@ export interface LiveChatCursor {
 
 export function useLiveChatMessages(roomId: string | undefined) {
   const { user } = useAuth();
+  const rtConnected = useRealtimeConnected(roomId);
   type Page = { items: LiveChatMessage[]; nextCursor: LiveChatCursor | null };
   return useInfiniteQuery<
     Page,
@@ -175,7 +176,10 @@ export function useLiveChatMessages(roomId: string | undefined) {
   >({
     queryKey: ["live-chat", "messages", roomId],
     enabled: !!user && !!roomId,
-    refetchInterval: POLL_INTERVAL_MS,
+    // Polling is a fallback only: pause it while Realtime is connected so
+    // healthy sockets are the single source of freshness. When Realtime is
+    // idle/connecting/reconnecting/disconnected we resume the 20s poll.
+    refetchInterval: rtConnected ? false : POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,
     staleTime: 5_000,
     initialPageParam: null,

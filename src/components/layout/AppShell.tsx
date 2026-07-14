@@ -40,6 +40,7 @@ import { AssistantChat } from "@/components/assistant/AssistantChat";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ChatBell } from "@/components/chat/ChatBell";
 import { BackToTop } from "./BackToTop";
+import { BetaFeedbackDialog } from "@/components/beta/BetaFeedbackDialog";
 import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";

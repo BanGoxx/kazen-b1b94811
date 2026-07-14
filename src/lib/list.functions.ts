@@ -90,6 +90,11 @@ export const upsertListItem = createServerFn({ method: "POST" })
   .inputValidator((data: { media: MediaSnapshot; patch: ListPatch }) => data)
   .handler(async ({ data, context }) => {
     const m = data.media;
+    // The client may only seed/refresh presentation fields of the catalogue
+    // snapshot. It has NO authority over `episodes_count` (the trusted progress
+    // cap): that column is column-privilege-revoked for the `authenticated`
+    // role and is written only by trusted server catalogue paths
+    // (see syncCatalogueEpisodes in discover.functions.ts). Never list it here.
     const { error: mediaError } = await context.supabase.from("media_records").upsert(
       {
         media_key: m.key,
@@ -104,18 +109,15 @@ export const upsertListItem = createServerFn({ method: "POST" })
         genres: m.genres,
         platforms: m.platforms as never,
         score: m.score,
-        episodes_count:
-          m.episodesCount != null && m.episodesCount > 0
-            ? Math.floor(m.episodesCount)
-            : null,
       },
       { onConflict: "media_key" },
     );
     if (mediaError) throw new Error(mediaError.message);
 
     // Server-side reliable maximum: movies are binary (0/1); episodic titles use
-    // the stored provider total. The client-sent max is never trusted — we read
-    // the total we just persisted from a provider snapshot.
+    // the TRUSTED stored provider total only. The client-sent count/max is never
+    // trusted — we read exclusively the value already persisted by a trusted
+    // catalogue path. If it is null, we keep the safe "unknown total" behavior.
     const { data: rec } = await context.supabase
       .from("media_records")
       .select("media_type,episodes_count")
@@ -127,6 +129,7 @@ export const upsertListItem = createServerFn({ method: "POST" })
         : rec?.episodes_count != null && rec.episodes_count > 0
           ? rec.episodes_count
           : null;
+
 
     // Sanitize the patch server-side: integer non-negative progress capped to
     // the reliable maximum, valid enums, and valid dates. Guarantees hold even

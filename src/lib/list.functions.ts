@@ -213,6 +213,12 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       preferred_genres?: string[];
       preferred_types?: string[];
       favorite_styles?: string[];
+      profile_public?: boolean;
+      show_bio?: boolean;
+      show_playlists?: boolean;
+      show_reviews?: boolean;
+      show_favorites?: boolean;
+      show_stats?: boolean;
     }) => data,
   )
   .handler(async ({ data, context }) => {

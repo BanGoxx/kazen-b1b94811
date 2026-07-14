@@ -17,6 +17,7 @@ import { RecommendationAssistant } from "@/components/media/RecommendationAssist
 import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { ChatPreference } from "@/components/settings/ChatPreference";
+import { ProfilePrivacy } from "@/components/settings/ProfilePrivacy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -363,6 +364,19 @@ function ProfilePage() {
 
         {/* Préférence messages privés (Phase 13) */}
         <ChatPreference />
+
+        {/* Confidentialité du profil public (Phase 18) */}
+        <ProfilePrivacy />
+
+        {user?.id ? (
+          <div className="flex justify-start">
+            <Button asChild variant="outline" size="sm" className="gap-2">
+              <Link to="/membre/$id" params={{ id: user.id }}>
+                <UserRound className="h-4 w-4" /> Voir mon profil public
+              </Link>
+            </Button>
+          </div>
+        ) : null}
 
         {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
         <EmailPreferences />

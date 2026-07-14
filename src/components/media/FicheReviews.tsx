@@ -333,7 +333,13 @@ function ReviewItem({
           </Avatar>
           <div>
             <p className="text-sm font-semibold text-foreground">
-              {review.authorName}
+              <Link
+                to="/membre/$id"
+                params={{ id: review.userId }}
+                className="hover:text-primary hover:underline"
+              >
+                {review.authorName}
+              </Link>
               {isOwn && <span className="ml-2 text-xs font-medium text-primary">Vous</span>}
             </p>
             <p className="text-xs text-muted-foreground">{formatDate(review.createdAt)}</p>

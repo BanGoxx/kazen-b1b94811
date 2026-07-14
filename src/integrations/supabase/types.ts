@@ -1086,6 +1086,27 @@ export type Database = {
         }
         Relationships: []
       }
+      member_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       member_email_preferences: {
         Row: {
           consent_updated_at: string
@@ -1507,6 +1528,12 @@ export type Database = {
           id: string
           preferred_genres: string[]
           preferred_types: string[]
+          profile_public: boolean
+          show_bio: boolean
+          show_favorites: boolean
+          show_playlists: boolean
+          show_reviews: boolean
+          show_stats: boolean
           updated_at: string
         }
         Insert: {
@@ -1519,6 +1546,12 @@ export type Database = {
           id: string
           preferred_genres?: string[]
           preferred_types?: string[]
+          profile_public?: boolean
+          show_bio?: boolean
+          show_favorites?: boolean
+          show_playlists?: boolean
+          show_reviews?: boolean
+          show_stats?: boolean
           updated_at?: string
         }
         Update: {
@@ -1531,6 +1564,12 @@ export type Database = {
           id?: string
           preferred_genres?: string[]
           preferred_types?: string[]
+          profile_public?: boolean
+          show_bio?: boolean
+          show_favorites?: boolean
+          show_playlists?: boolean
+          show_reviews?: boolean
+          show_stats?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -1980,6 +2019,12 @@ export type Database = {
           id: string
           preferred_genres: string[]
           preferred_types: string[]
+          profile_public: boolean
+          show_bio: boolean
+          show_favorites: boolean
+          show_playlists: boolean
+          show_reviews: boolean
+          show_stats: boolean
           updated_at: string
         }
         SetofOptions: {
@@ -2010,6 +2055,18 @@ export type Database = {
           title_override: string
         }[]
       }
+      get_public_favorites: {
+        Args: { _id: string }
+        Returns: {
+          external_id: string
+          media_key: string
+          media_type: string
+          poster_url: string
+          source: string
+          title: string
+        }[]
+      }
+      get_public_profile: { Args: { _id: string }; Returns: Json }
       grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2169,6 +2226,10 @@ export type Database = {
       }
       set_forum_topic_cover: {
         Args: { _alt?: string; _path: string; _source?: string; _topic: string }
+        Returns: undefined
+      }
+      set_member_block: {
+        Args: { _blocked: boolean; _target: string }
         Returns: undefined
       }
       submit_content_report: {

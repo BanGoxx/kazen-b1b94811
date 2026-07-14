@@ -21,6 +21,8 @@ import { SafeImage } from "@/components/media/SafeImage";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
+import { SeasonNavigator } from "@/components/media/SeasonNavigator";
+import { FicheCorrectionRequest } from "@/components/media/FicheCorrectionRequest";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { AddToPlaylist } from "@/components/media/AddToPlaylist";
 import { FicheSection } from "@/components/media/FicheSection";
@@ -486,10 +488,19 @@ function MediaDetailPage() {
           <CreditScroller title={item.castLabel} people={item.cast} kind="character" />
           <CreditScroller title={item.crewLabel} people={item.crew} kind="staff" />
 
+          <SeasonNavigator detail={item} />
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
           {/* Editorial context — renders only when a title-linked article exists. */}
           <FicheArticles articles={titleArticles} titleLabel={item.title} />
+
+          <div className="flex justify-end border-t border-border/60 pt-4">
+            <FicheCorrectionRequest
+              source={source}
+              externalId={id}
+              mediaTitle={item.title}
+            />
+          </div>
         </div>
       </div>
     </AppShell>

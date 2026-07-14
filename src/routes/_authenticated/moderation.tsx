@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { MediaRequestsPanel } from "@/components/moderation/MediaRequestsPanel";
+import { CorrectionRequestsPanel } from "@/components/moderation/CorrectionRequestsPanel";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -369,6 +370,7 @@ function ModerationPage() {
         )}
 
         <MediaRequestsPanel />
+        <CorrectionRequestsPanel />
       </div>
 
       <AlertDialog

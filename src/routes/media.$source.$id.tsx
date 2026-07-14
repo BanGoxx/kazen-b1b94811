@@ -21,6 +21,8 @@ import { SafeImage } from "@/components/media/SafeImage";
 import { TrailerDialog } from "@/components/media/TrailerDialog";
 import { CreditScroller } from "@/components/media/CreditScroller";
 import { RelatedContent } from "@/components/media/RelatedContent";
+import { SeasonNavigator } from "@/components/media/SeasonNavigator";
+import { FicheCorrectionRequest } from "@/components/media/FicheCorrectionRequest";
 import { UserListPanel } from "@/components/media/UserListPanel";
 import { AddToPlaylist } from "@/components/media/AddToPlaylist";
 import { FicheSection } from "@/components/media/FicheSection";

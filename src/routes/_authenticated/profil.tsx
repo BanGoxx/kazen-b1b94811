@@ -19,6 +19,8 @@ import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { ChatPreference } from "@/components/settings/ChatPreference";
 import { ProfilePrivacy } from "@/components/settings/ProfilePrivacy";
+import { AccountDeletion } from "@/components/settings/AccountDeletion";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -403,6 +405,11 @@ function ProfilePage() {
 
         {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
         <EmailPreferences />
+
+        {/* Demande de suppression de compte (Phase 26.1R) */}
+        <AccountDeletion />
+
+
 
 
         <div className="flex justify-end">

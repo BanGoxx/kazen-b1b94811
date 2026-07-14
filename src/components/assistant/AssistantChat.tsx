@@ -167,8 +167,11 @@ export function AssistantChat() {
               </span>
               <div>
                 <p className="text-sm font-semibold leading-none text-foreground">Assistant KAZEN</p>
-                <p className="mt-0.5 text-[0.7rem] text-muted-foreground">Ton copilote anime, séries & films</p>
+                <p className="mt-0.5 text-[0.7rem] text-muted-foreground">
+                  Réponses générées automatiquement — à vérifier pour toute décision.
+                </p>
               </div>
+
             </div>
             <div className="flex items-center gap-1">
               {messages.length > 0 && (

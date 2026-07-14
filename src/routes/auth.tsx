@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -39,7 +41,9 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+
 
   const target = redirect && redirect.startsWith("/") ? redirect : "/mes-listes";
 
@@ -51,6 +55,10 @@ function AuthPage() {
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup" && !ageConfirmed) {
+      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -64,6 +72,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Compte créé ! Vérifiez votre e-mail si une confirmation est demandée.");
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -78,6 +87,10 @@ function AuthPage() {
   };
 
   const handleGoogle = async () => {
+    if (mode === "signup" && !ageConfirmed) {
+      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      return;
+    }
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -95,6 +108,7 @@ function AuthPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-4 py-12">
@@ -121,10 +135,11 @@ function AuthPage() {
           variant="premium"
           className="w-full gap-2"
           onClick={handleGoogle}
-          disabled={loading}
+          disabled={loading || (mode === "signup" && !ageConfirmed)}
         >
           <GoogleIcon /> Continuer avec Google
         </Button>
+
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
@@ -168,7 +183,49 @@ function AuthPage() {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
             />
           </div>
-          <Button type="submit" variant="aurora" className="w-full gap-2" disabled={loading}>
+          {mode === "signup" ? (
+            <div className="flex items-start gap-2.5 rounded-lg border border-border bg-background/60 p-3">
+              <Checkbox
+                id="age-confirm"
+                checked={ageConfirmed}
+                onCheckedChange={(v) => setAgeConfirmed(v === true)}
+                className="mt-0.5"
+                aria-describedby="age-confirm-desc"
+              />
+              <Label
+                htmlFor="age-confirm"
+                id="age-confirm-desc"
+                className="text-xs font-normal leading-relaxed text-muted-foreground"
+              >
+                Je confirme avoir l'âge requis pour utiliser KAZEN et accepter ses{" "}
+                <a
+                  href="/cgu"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  conditions d'utilisation
+                </a>{" "}
+                et sa{" "}
+                <a
+                  href="/confidentialite"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  politique de confidentialité
+                </a>
+                .
+              </Label>
+            </div>
+          ) : null}
+          <Button
+            type="submit"
+            variant="aurora"
+            className="w-full gap-2"
+            disabled={loading || (mode === "signup" && !ageConfirmed)}
+          >
+
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {mode === "login" ? "Se connecter" : "Créer mon compte"}
           </Button>

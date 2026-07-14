@@ -397,37 +397,18 @@ function CalendarPage() {
                     </span>
                   </div>
                 ) : null}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
                   {weekDays.map((d, i) => {
                     const key = isoDay(d);
-                    const items = byDay.get(key) ?? [];
-                    const isToday = key === todayIso;
-                    const isPast = key < todayIso;
                     return (
-                      <div
+                      <DayCell
                         key={key}
-                        className={cn(
-                          "flex min-h-40 flex-col rounded-2xl border p-2 transition-opacity",
-                          isToday
-                            ? "border-primary/50 bg-primary/5"
-                            : "border-border bg-card/40",
-                          isPast && !isToday && "opacity-55",
-                        )}
-                      >
-                        <div className="mb-2 flex items-baseline justify-between px-1">
-                          <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
-                            {DAY_LABELS[i % 7]}
-                          </span>
-                          <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{d.getDate()}</span>
-                        </div>
-                        <div className="flex flex-1 flex-col gap-1.5">
-                          {items.length ? (
-                            items.map((it) => <CalendarEntry key={it.key} item={it} />)
-                          ) : (
-                            <span className="px-1 text-[0.7rem] text-muted-foreground/60">—</span>
-                          )}
-                        </div>
-                      </div>
+                        dayLabel={DAY_LABELS[i % 7]}
+                        date={d}
+                        items={byDay.get(key) ?? []}
+                        isToday={key === todayIso}
+                        isPast={key < todayIso}
+                      />
                     );
                   })}
                 </div>

@@ -21,6 +21,9 @@ import {
   Crown,
   DownloadCloud,
   MessagesSquare,
+  BarChart3,
+
+
 
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -66,6 +69,7 @@ const NAV: NavItem[] = [
   { to: "/a-venir", label: "À venir", icon: CalendarClock },
   { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { to: "/mes-listes", label: "Ma liste", icon: ListChecks },
+  { to: "/statistiques", label: "Statistiques", icon: BarChart3, memberOnly: true },
   { to: "/listes", label: "Playlists partagées", icon: ListMusic },
   { to: "/communaute", label: "Communauté", icon: MessagesSquare },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
@@ -109,6 +113,11 @@ function AuthMenu() {
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
             <ListChecks className="h-4 w-4" /> Ma liste
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/statistiques" className="gap-2">
+            <BarChart3 className="h-4 w-4" /> Statistiques
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

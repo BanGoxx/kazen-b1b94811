@@ -27,6 +27,7 @@ import { Route as CommunauteIndexRouteImport } from './routes/communaute.index'
 import { Route as AnimeIndexRouteImport } from './routes/anime.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
+import { Route as MembreIdRouteImport } from './routes/membre.$id'
 import { Route as CommunauteNouveauRouteImport } from './routes/communaute.nouveau'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
@@ -134,6 +135,11 @@ const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
 const PlaylistIdRoute = PlaylistIdRouteImport.update({
   id: '/playlist/$id',
   path: '/playlist/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembreIdRoute = MembreIdRouteImport.update({
+  id: '/membre/$id',
+  path: '/membre/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunauteNouveauRoute = CommunauteNouveauRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/communaute/nouveau': typeof CommunauteNouveauRoute
+  '/membre/$id': typeof MembreIdRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/communaute/nouveau': typeof CommunauteNouveauRoute
+  '/membre/$id': typeof MembreIdRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
   '/communaute/nouveau': typeof CommunauteNouveauRoute
+  '/membre/$id': typeof MembreIdRoute
   '/playlist/$id': typeof PlaylistIdRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/anime/saison'
     | '/api/chat'
     | '/communaute/nouveau'
+    | '/membre/$id'
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/anime/saison'
     | '/api/chat'
     | '/communaute/nouveau'
+    | '/membre/$id'
     | '/playlist/$id'
     | '/actualites'
     | '/anime'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/anime/saison'
     | '/api/chat'
     | '/communaute/nouveau'
+    | '/membre/$id'
     | '/playlist/$id'
     | '/actualites/'
     | '/anime/'
@@ -484,6 +496,7 @@ export interface RootRouteChildren {
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   ApiChatRoute: typeof ApiChatRoute
   CommunauteNouveauRoute: typeof CommunauteNouveauRoute
+  MembreIdRoute: typeof MembreIdRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   CommunauteIndexRoute: typeof CommunauteIndexRoute
@@ -621,6 +634,13 @@ declare module '@tanstack/react-router' {
       path: '/playlist/$id'
       fullPath: '/playlist/$id'
       preLoaderRoute: typeof PlaylistIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membre/$id': {
+      id: '/membre/$id'
+      path: '/membre/$id'
+      fullPath: '/membre/$id'
+      preLoaderRoute: typeof MembreIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communaute/nouveau': {
@@ -816,6 +836,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActualitesSlugRoute: ActualitesSlugRoute,
   ApiChatRoute: ApiChatRoute,
   CommunauteNouveauRoute: CommunauteNouveauRoute,
+  MembreIdRoute: MembreIdRoute,
   PlaylistIdRoute: PlaylistIdRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
   CommunauteIndexRoute: CommunauteIndexRoute,

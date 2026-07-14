@@ -32,6 +32,7 @@ import { Route as CommunauteNouveauRouteImport } from './routes/communaute.nouve
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AnimeSaisonRouteImport } from './routes/anime.saison'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
+import { Route as AuthenticatedStatistiquesRouteImport } from './routes/_authenticated/statistiques'
 import { Route as AuthenticatedRecapRouteImport } from './routes/_authenticated/recap'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
@@ -162,6 +163,12 @@ const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
   path: '/actualites/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedStatistiquesRoute =
+  AuthenticatedStatistiquesRouteImport.update({
+    id: '/statistiques',
+    path: '/statistiques',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRecapRoute = AuthenticatedRecapRouteImport.update({
   id: '/recap',
   path: '/recap',
@@ -263,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/recap': typeof AuthenticatedRecapRoute
+  '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/recap': typeof AuthenticatedRecapRoute
+  '/statistiques': typeof AuthenticatedStatistiquesRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -342,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/recap': typeof AuthenticatedRecapRoute
+  '/_authenticated/statistiques': typeof AuthenticatedStatistiquesRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/anime/saison': typeof AnimeSaisonRoute
   '/api/chat': typeof ApiChatRoute
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profil'
     | '/recap'
+    | '/statistiques'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profil'
     | '/recap'
+    | '/statistiques'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/profil'
     | '/_authenticated/recap'
+    | '/_authenticated/statistiques'
     | '/actualites/$slug'
     | '/anime/saison'
     | '/api/chat'
@@ -671,6 +684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ActualitesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/statistiques': {
+      id: '/_authenticated/statistiques'
+      path: '/statistiques'
+      fullPath: '/statistiques'
+      preLoaderRoute: typeof AuthenticatedStatistiquesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/recap': {
       id: '/_authenticated/recap'
       path: '/recap'
@@ -789,6 +809,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedRecapRoute: typeof AuthenticatedRecapRoute
+  AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -801,6 +822,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedRecapRoute: AuthenticatedRecapRoute,
+  AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

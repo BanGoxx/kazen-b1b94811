@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { useAuth } from "@/lib/auth";
 import {
   SlidersHorizontal,
   BellRing,

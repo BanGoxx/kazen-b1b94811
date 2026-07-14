@@ -52,34 +52,39 @@ import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";
 import { cn } from "@/lib/utils";
 import { useConsent } from "@/lib/consent";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
+import type { Dict } from "@/lib/i18n/locales";
+
+type NavKey = keyof Dict["nav"];
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: NavKey;
   icon: typeof Compass;
   /** Only shown to authenticated members (also enforced server-side + RLS). */
   memberOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { to: "/", label: "Découverte", icon: Compass },
-  { to: "/recherche", label: "Recherche", icon: Search },
-  { to: "/pour-vous", label: "Pour vous", icon: Wand2 },
-  { to: "/anime", label: "Anime", icon: Sparkles },
-  { to: "/series", label: "Séries", icon: Tv },
-  { to: "/films", label: "Films", icon: Film },
-  { to: "/anime/saison", label: "Saison anime", icon: Leaf },
-  { to: "/a-venir", label: "À venir", icon: CalendarClock },
-  { to: "/calendrier", label: "Calendrier", icon: CalendarDays },
-  { to: "/mes-listes", label: "Ma liste", icon: ListChecks },
-  { to: "/statistiques", label: "Statistiques", icon: BarChart3, memberOnly: true },
-  { to: "/listes", label: "Playlists partagées", icon: ListMusic },
-  { to: "/communaute", label: "Communauté", icon: MessagesSquare },
-  { to: "/communaute/direct", label: "Chat en direct", icon: Radio, memberOnly: true },
-  { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
-  { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
+  { to: "/", labelKey: "discover", icon: Compass },
+  { to: "/recherche", labelKey: "search", icon: Search },
+  { to: "/pour-vous", labelKey: "forYou", icon: Wand2 },
+  { to: "/anime", labelKey: "anime", icon: Sparkles },
+  { to: "/series", labelKey: "series", icon: Tv },
+  { to: "/films", labelKey: "movies", icon: Film },
+  { to: "/anime/saison", labelKey: "animeSeason", icon: Leaf },
+  { to: "/a-venir", labelKey: "upcoming", icon: CalendarClock },
+  { to: "/calendrier", labelKey: "calendar", icon: CalendarDays },
+  { to: "/mes-listes", labelKey: "myList", icon: ListChecks },
+  { to: "/statistiques", labelKey: "stats", icon: BarChart3, memberOnly: true },
+  { to: "/listes", labelKey: "sharedPlaylists", icon: ListMusic },
+  { to: "/communaute", labelKey: "community", icon: MessagesSquare },
+  { to: "/communaute/direct", labelKey: "liveChat", icon: Radio, memberOnly: true },
+  { to: "/mes-playlists", labelKey: "myPlaylists", icon: ListMusic },
+  { to: "/import", labelKey: "import", icon: DownloadCloud, memberOnly: true },
 
-  { to: "/soutien", label: "Soutien", icon: Heart },
+  { to: "/soutien", labelKey: "support", icon: Heart },
 ];
 
 function AuthMenu() {
@@ -175,16 +180,17 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const isModerator = useIsModerator();
   const isOwner = useIsOwner();
   const { user } = useAuth();
+  const { t } = useI18n();
   const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
   // Owner gets the unified "Espace fondateur" (which embeds Modération).
   // Non-owner moderators (future, post-beta) keep the direct Modération link.
-  const items = isOwner
-    ? [...base, { to: "/fondateur", label: "Espace fondateur", icon: Crown }]
+  const items: NavItem[] = isOwner
+    ? [...base, { to: "/fondateur", labelKey: "founder", icon: Crown }]
     : isModerator
-      ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+      ? [...base, { to: "/moderation", labelKey: "moderation", icon: ShieldCheck }]
       : base;
   return (
-    <nav aria-label="Navigation principale">
+    <nav aria-label={t.nav.section}>
       <ul className="space-y-1">
         {items.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
@@ -210,7 +216,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 >
                   <Icon className="h-4 w-4" />
                 </span>
-                {item.label}
+                {t.nav[item.labelKey]}
               </Link>
             </li>
           );
@@ -223,6 +229,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { openPreferences } = useConsent();
+  const { t } = useI18n();
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-background">
@@ -253,14 +260,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         {open ? (
           <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
             <button
-              aria-label="Fermer le menu"
+              aria-label={t.common.closeMenu}
               onClick={() => setOpen(false)}
               className="absolute inset-0 bg-background/70 backdrop-blur-sm"
             />
             <div className="glass absolute left-0 top-0 h-full w-72 border-r border-sidebar-border px-4 py-6 animate-fade-in">
               <div className="flex items-center justify-between px-2">
                 <Brand />
-                <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Fermer">
+                <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label={t.common.close}>
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -280,7 +287,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 size="icon"
                 className="lg:hidden"
                 onClick={() => setOpen(true)}
-                aria-label="Ouvrir le menu"
+                aria-label={t.common.openMenu}
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -292,25 +299,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mx-2 hidden max-w-md flex-1 md:block lg:mr-4">
               <SearchAutocomplete
                 showExploreButton={false}
-                placeholder="Rechercher un anime, une série, un film…"
+                placeholder={t.common.searchPlaceholder}
                 inputClassName="h-10"
               />
             </div>
             <div className="flex items-center gap-1">
-              <Button asChild variant="ghost" size="icon" className="md:hidden" aria-label="Recherche">
+              <Button asChild variant="ghost" size="icon" className="md:hidden" aria-label={t.common.search}>
                 <Link to="/recherche">
                   <Search className="h-5 w-5" />
                 </Link>
               </Button>
               <RecommendationAssistant
                 trigger={
-                  <Button variant="ghost" size="icon" aria-label="Ouvrir l'assistant KAZEN" title="Assistant">
+                  <Button variant="ghost" size="icon" aria-label={t.assistant.openLabel} title={t.assistant.title}>
                     <Wand2 className="h-5 w-5 text-primary" />
                   </Button>
                 }
               />
               <ChatBell />
               <NotificationBell />
+              <LanguageSelector />
               <ThemeToggle />
               <AuthMenu />
             </div>
@@ -321,42 +329,40 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
             <p>
-              <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
+              <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — {t.common.appTagline}
             </p>
-            <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
+            <p className="mt-1 text-xs">{t.common.dataSource}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 px-2.5 py-1 text-[0.7rem] font-semibold text-primary">
-                Bêta
+                {t.common.beta}
               </span>
-              <span className="text-xs">
-                KAZEN est actuellement en bêta. Certaines fonctionnalités peuvent évoluer.
-              </span>
+              <span className="text-xs">{t.common.betaNotice}</span>
               <BetaFeedbackDialog />
             </div>
             <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground">
-              Pendant la bêta, l'accès KAZEN Premium est offert à tous les membres.{" "}
+              {t.common.premiumBetaNotice}{" "}
               <Link to="/soutien" className="text-primary underline-offset-2 hover:underline">
-                En savoir plus
+                {t.common.learnMore}
               </Link>
             </p>
             <nav
-              aria-label="Documents juridiques"
+              aria-label={t.legal.legalNotice}
               className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
             >
               <Link to="/mentions-legales" className="hover:text-foreground">
-                Mentions légales
+                {t.legal.legalNotice}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/cgu" className="hover:text-foreground">
-                CGU
+                {t.legal.tos}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/confidentialite" className="hover:text-foreground">
-                Confidentialité
+                {t.legal.privacy}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/regles-communautaires" className="hover:text-foreground">
-                Règles communautaires
+                {t.legal.communityRules}
               </Link>
               <span aria-hidden="true">·</span>
               <button
@@ -364,10 +370,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={openPreferences}
                 className="hover:text-foreground focus-ring rounded"
               >
-                Gérer mes cookies
+                {t.common.manageCookies}
               </button>
               <span className="ml-1 rounded-full border border-primary/25 bg-primary/5 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
-                Brouillons
+                {t.common.drafts}
               </span>
             </nav>
           </footer>

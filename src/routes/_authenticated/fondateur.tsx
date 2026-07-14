@@ -84,6 +84,7 @@ import { useGeneralDigest, usePersonalizedDigest } from "@/lib/use-digest";
 import { DigestPreview } from "@/components/digest/DigestPreview";
 import { FounderTestSender } from "@/components/founder/FounderTestSender";
 import { FounderSystemNotice } from "@/components/founder/FounderSystemNotice";
+import { FounderBetaSection } from "@/components/founder/FounderBetaSection";
 
 export const Route = createFileRoute("/_authenticated/fondateur")({
   ssr: false,

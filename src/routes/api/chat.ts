@@ -140,6 +140,7 @@ export const Route = createFileRoute("/api/chat")({
         if (!userId) {
           return json({ error: DENY_MESSAGES.auth, reason: "auth" }, 401);
         }
+        const uid: string = userId; // stable non-nullable for use inside closures
 
         const uiMessages = messages as UIMessage[];
 

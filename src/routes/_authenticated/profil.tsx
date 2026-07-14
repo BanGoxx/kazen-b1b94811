@@ -365,6 +365,19 @@ function ProfilePage() {
         {/* Préférence messages privés (Phase 13) */}
         <ChatPreference />
 
+        {/* Confidentialité du profil public (Phase 18) */}
+        <ProfilePrivacy />
+
+        {user?.id ? (
+          <div className="flex justify-start">
+            <Button asChild variant="outline" size="sm" className="gap-2">
+              <Link to="/membre/$id" params={{ id: user.id }}>
+                <UserRound className="h-4 w-4" /> Voir mon profil public
+              </Link>
+            </Button>
+          </div>
+        ) : null}
+
         {/* Préférences email + aperçu digest (Phase 1 — aucun envoi) */}
         <EmailPreferences />
 

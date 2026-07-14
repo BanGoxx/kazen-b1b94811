@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as PourVousRouteImport } from './routes/pour-vous'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as ListesRouteImport } from './routes/listes'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as DesabonnementRouteImport } from './routes/desabonnement'
@@ -73,6 +74,11 @@ const RechercheRoute = RechercheRouteImport.update({
 const PourVousRoute = PourVousRouteImport.update({
   id: '/pour-vous',
   path: '/pour-vous',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListesRoute = ListesRouteImport.update({
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
   '/series': typeof SeriesRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -471,6 +482,7 @@ export interface FileRouteTypes {
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
     | '/series'
@@ -514,6 +526,7 @@ export interface RootRouteChildren {
   DesabonnementRoute: typeof DesabonnementRoute
   FilmsRoute: typeof FilmsRoute
   ListesRoute: typeof ListesRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
   PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
   SeriesRoute: typeof SeriesRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/pour-vous'
       fullPath: '/pour-vous'
       preLoaderRoute: typeof PourVousRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listes': {
@@ -872,6 +892,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesabonnementRoute: DesabonnementRoute,
   FilmsRoute: FilmsRoute,
   ListesRoute: ListesRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
   PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
   SeriesRoute: SeriesRoute,

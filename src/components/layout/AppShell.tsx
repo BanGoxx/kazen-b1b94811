@@ -316,6 +316,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </footer>
         </div>
         <AssistantChat />
+        <KazenAssistantMascot />
       </div>
       <BackToTop />
     </div>

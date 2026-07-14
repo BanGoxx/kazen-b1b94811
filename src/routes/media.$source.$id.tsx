@@ -488,10 +488,19 @@ function MediaDetailPage() {
           <CreditScroller title={item.castLabel} people={item.cast} kind="character" />
           <CreditScroller title={item.crewLabel} people={item.crew} kind="staff" />
 
+          <SeasonNavigator detail={item} />
           <RelatedContent related={item.related} collectionName={item.collectionName} />
           <FicheReviews source={source} externalId={id} />
           {/* Editorial context — renders only when a title-linked article exists. */}
           <FicheArticles articles={titleArticles} titleLabel={item.title} />
+
+          <div className="flex justify-end border-t border-border/60 pt-4">
+            <FicheCorrectionRequest
+              source={source}
+              externalId={id}
+              mediaTitle={item.title}
+            />
+          </div>
         </div>
       </div>
     </AppShell>

@@ -229,6 +229,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { openPreferences } = useConsent();
+  const { t } = useI18n();
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-background">
@@ -259,14 +260,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         {open ? (
           <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
             <button
-              aria-label="Fermer le menu"
+              aria-label={t.common.closeMenu}
               onClick={() => setOpen(false)}
               className="absolute inset-0 bg-background/70 backdrop-blur-sm"
             />
             <div className="glass absolute left-0 top-0 h-full w-72 border-r border-sidebar-border px-4 py-6 animate-fade-in">
               <div className="flex items-center justify-between px-2">
                 <Brand />
-                <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Fermer">
+                <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label={t.common.close}>
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -286,7 +287,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 size="icon"
                 className="lg:hidden"
                 onClick={() => setOpen(true)}
-                aria-label="Ouvrir le menu"
+                aria-label={t.common.openMenu}
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -298,25 +299,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mx-2 hidden max-w-md flex-1 md:block lg:mr-4">
               <SearchAutocomplete
                 showExploreButton={false}
-                placeholder="Rechercher un anime, une série, un film…"
+                placeholder={t.common.searchPlaceholder}
                 inputClassName="h-10"
               />
             </div>
             <div className="flex items-center gap-1">
-              <Button asChild variant="ghost" size="icon" className="md:hidden" aria-label="Recherche">
+              <Button asChild variant="ghost" size="icon" className="md:hidden" aria-label={t.common.search}>
                 <Link to="/recherche">
                   <Search className="h-5 w-5" />
                 </Link>
               </Button>
               <RecommendationAssistant
                 trigger={
-                  <Button variant="ghost" size="icon" aria-label="Ouvrir l'assistant KAZEN" title="Assistant">
+                  <Button variant="ghost" size="icon" aria-label={t.assistant.openLabel} title={t.assistant.title}>
                     <Wand2 className="h-5 w-5 text-primary" />
                   </Button>
                 }
               />
               <ChatBell />
               <NotificationBell />
+              <LanguageSelector />
               <ThemeToggle />
               <AuthMenu />
             </div>
@@ -327,42 +329,40 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-border px-4 py-8 text-center text-sm text-muted-foreground sm:px-6">
             <p>
-              <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — Tes anime, séries et films. Enfin au même endroit.
+              <span className="brand-wordmark font-display text-sm font-bold">KAZEN</span> — {t.common.appTagline}
             </p>
-            <p className="mt-1 text-xs">Données : AniList &amp; TMDB.</p>
+            <p className="mt-1 text-xs">{t.common.dataSource}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 px-2.5 py-1 text-[0.7rem] font-semibold text-primary">
-                Bêta
+                {t.common.beta}
               </span>
-              <span className="text-xs">
-                KAZEN est actuellement en bêta. Certaines fonctionnalités peuvent évoluer.
-              </span>
+              <span className="text-xs">{t.common.betaNotice}</span>
               <BetaFeedbackDialog />
             </div>
             <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground">
-              Pendant la bêta, l'accès KAZEN Premium est offert à tous les membres.{" "}
+              {t.common.premiumBetaNotice}{" "}
               <Link to="/soutien" className="text-primary underline-offset-2 hover:underline">
-                En savoir plus
+                {t.common.learnMore}
               </Link>
             </p>
             <nav
-              aria-label="Documents juridiques"
+              aria-label={t.legal.legalNotice}
               className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
             >
               <Link to="/mentions-legales" className="hover:text-foreground">
-                Mentions légales
+                {t.legal.legalNotice}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/cgu" className="hover:text-foreground">
-                CGU
+                {t.legal.tos}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/confidentialite" className="hover:text-foreground">
-                Confidentialité
+                {t.legal.privacy}
               </Link>
               <span aria-hidden="true">·</span>
               <Link to="/regles-communautaires" className="hover:text-foreground">
-                Règles communautaires
+                {t.legal.communityRules}
               </Link>
               <span aria-hidden="true">·</span>
               <button
@@ -370,10 +370,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={openPreferences}
                 className="hover:text-foreground focus-ring rounded"
               >
-                Gérer mes cookies
+                {t.common.manageCookies}
               </button>
               <span className="ml-1 rounded-full border border-primary/25 bg-primary/5 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
-                Brouillons
+                {t.common.drafts}
               </span>
             </nav>
           </footer>

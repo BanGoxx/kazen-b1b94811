@@ -369,12 +369,12 @@ function ProfilePage() {
             <RecommendationAssistant
               trigger={
                 <Button variant="outline" size="sm" className="gap-2">
-                  <Wand2 className="h-4 w-4" /> {t.profile.assistant}
+                  <Wand2 className="h-4 w-4" /> {t.profile.forYouAssistant}
                 </Button>
               }
             />
             <Button asChild variant="aurora" size="sm">
-              <Link to="/pour-vous">{t.profile.forYouView}</Link>
+              <Link to="/pour-vous">{t.profile.forYouSee}</Link>
             </Button>
           </div>
         </section>
@@ -397,7 +397,7 @@ function ProfilePage() {
           <div className="flex justify-start">
             <Button asChild variant="outline" size="sm" className="gap-2">
               <Link to="/membre/$id" params={{ id: user.id }}>
-                <UserRound className="h-4 w-4" /> {t.profile.viewPublic}
+                <UserRound className="h-4 w-4" /> {t.profile.seeMyPublicProfile}
               </Link>
             </Button>
           </div>

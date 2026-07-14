@@ -145,3 +145,62 @@ export const setBetaFeedbackStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export interface BetaOverview {
+  members: number | null;
+  newMembers7d: number | null;
+  activeMembers7d: number | null;
+  feedbackTotal: number | null;
+  feedbackUnresolved: number | null;
+}
+
+/** Owner-only: aggregate beta launch overview (no PII, counts only). */
+export const founderBetaOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<BetaOverview> => {
+    const { supabase, userId } = context;
+    const { data: allowed, error: roleErr } = await supabase.rpc(
+      "can_moderate_now",
+      { _user_id: userId },
+    );
+    if (roleErr) throw new Error(roleErr.message);
+    if (!allowed) throw new Error("Forbidden");
+
+    const weekAgoIso = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const count = async (
+      table: string,
+      apply?: (q: any) => any,
+    ): Promise<number | null> => {
+      try {
+        let q = (supabase as any)
+          .from(table)
+          .select("*", { count: "exact", head: true });
+        if (apply) q = apply(q);
+        const { count: c, error } = await q;
+        if (error) return null;
+        return c ?? 0;
+      } catch {
+        return null;
+      }
+    };
+
+    const [members, newMembers7d, activeMembers7d, feedbackTotal, feedbackUnresolved] =
+      await Promise.all([
+        count("profiles"),
+        count("profiles", (q) => q.gte("created_at", weekAgoIso)),
+        count("profiles", (q) => q.gte("updated_at", weekAgoIso)),
+        count("beta_feedback"),
+        count("beta_feedback", (q) => q.in("status", ["received", "reviewing"])),
+      ]);
+
+    return {
+      members,
+      newMembers7d,
+      activeMembers7d,
+      feedbackTotal,
+      feedbackUnresolved,
+    };
+  });

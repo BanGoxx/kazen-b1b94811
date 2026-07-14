@@ -447,24 +447,22 @@ function ListEntryCard({ entry }: { entry: ListEntry }) {
     <div className="space-y-2">
       <div className="relative">
         <MediaCard item={entry.item} />
-        <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-          {entry.favorite ? (
-            <span
-              className="rounded-full bg-primary/90 p-1.5 text-primary-foreground shadow"
-              aria-label="Favori"
-            >
-              <Heart className="h-3.5 w-3.5 fill-current" />
-            </span>
-          ) : null}
-          {entry.priority === "haute" ? (
-            <span
-              className="inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-primary-foreground shadow"
-              title={`Priorité ${PRIORITY_LABELS.haute}`}
-            >
-              <Flame className="h-3 w-3" /> Haute
-            </span>
-          ) : null}
-        </div>
+        {entry.favorite ? (
+          <span
+            className="absolute left-2.5 top-10 z-10 rounded-full bg-primary/90 p-1.5 text-primary-foreground shadow"
+            aria-label="Favori"
+          >
+            <Heart className="h-3.5 w-3.5 fill-current" />
+          </span>
+        ) : null}
+        {entry.priority === "haute" ? (
+          <span
+            className="absolute right-2 top-11 z-10 inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-primary-foreground shadow"
+            title={`Priorité ${PRIORITY_LABELS.haute}`}
+          >
+            <Flame className="h-3 w-3" /> Haute
+          </span>
+        ) : null}
       </div>
       {entry.tags.length > 0 ? (
         <div className="flex flex-wrap items-center gap-1">

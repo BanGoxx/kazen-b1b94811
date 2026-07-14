@@ -154,9 +154,19 @@ function CalendarPage() {
   const { data: series } = useSuspenseQuery(onAirSeriesQO);
   const { data: trending } = useSuspenseQuery(trendingAnimeQO);
   const { data: popular } = useSuspenseQuery(popularAnimeQO);
+  const { data: seasonal } = useSuspenseQuery(seasonalAnimeQO());
   const userList = useUserList();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
+  // Post-hydration browser-direct upgrade. On the server the Worker is often
+  // AniList-blocked, so the dehydrated anime data can be a curated fallback.
+  // Upgrade each anime source to the real browser-direct list exactly ONCE per
+  // session (bounded, rate-limit friendly) so the calendar isn't thin.
+  useEffect(() => {
+    refreshAnimeRails(queryClient);
+    upgradeCatalogOnce(queryClient, ["upcoming", "all"]);
+  }, [queryClient]);
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [weeks, setWeeks] = useState<1 | 2 | 4>(2);
@@ -164,12 +174,15 @@ function CalendarPage() {
   const [platform, setPlatform] = useState<string>("all");
   const [watch, setWatch] = useState<WatchFilter>("all");
 
-  // Merge sources and de-dupe by key. Trending/popular anime carry the airing
-  // `nextEpisode`, so when the same title also appears in another source we keep
-  // the variant that has an episode air date (the calendar-relevant one).
+  // Merge sources and de-dupe by canonical key. Trending/popular/seasonal anime
+  // carry the airing `nextEpisode`; seasonal is the widest airing set, so it
+  // fills the many days the ~60 trending/popular titles leave empty. When the
+  // same title appears in several sources we keep the variant that has an
+  // episode air date (the calendar-relevant one). Dedup is key-exact, so
+  // unrelated titles are never merged.
   const all = useMemo<MediaItem[]>(() => {
     const map = new Map<string, MediaItem>();
-    for (const it of [...trending, ...popular, ...upcoming, ...series]) {
+    for (const it of [...trending, ...popular, ...seasonal.items, ...upcoming, ...series]) {
       const existing = map.get(it.key);
       if (!existing) {
         map.set(it.key, it);
@@ -178,7 +191,14 @@ function CalendarPage() {
       }
     }
     return [...map.values()];
-  }, [trending, popular, upcoming, series]);
+  }, [trending, popular, seasonal, upcoming, series]);
+
+  // Honest degradation signal: if every anime source came back empty, the
+  // provider is temporarily unreachable — surface a subtle, non-alarmist hint
+  // rather than implying "no anime releases exist".
+  const animeDegraded =
+    trending.length === 0 && popular.length === 0 && seasonal.items.length === 0;
+
 
   const availablePlatforms = useMemo(() => {
     const ids = new Set<string>();

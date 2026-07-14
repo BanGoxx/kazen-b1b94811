@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { getMyProfile, updateMyProfile } from "@/lib/list.functions";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useI18n } from "@/lib/i18n";
 
 type PrivacyKey =
   | "profile_public"
@@ -14,39 +15,6 @@ type PrivacyKey =
   | "show_reviews"
   | "show_favorites"
   | "show_stats";
-
-const ROWS: { key: PrivacyKey; title: string; desc: string }[] = [
-  {
-    key: "profile_public",
-    title: "Profil public",
-    desc: "Rendre ta page profil visible par les autres membres et visiteurs.",
-  },
-  {
-    key: "show_bio",
-    title: "Afficher ta bio",
-    desc: "Montrer ta présentation sur ta page publique.",
-  },
-  {
-    key: "show_stats",
-    title: "Afficher tes statistiques",
-    desc: "Montrer le nombre de listes, avis et favoris.",
-  },
-  {
-    key: "show_playlists",
-    title: "Afficher tes listes partagées",
-    desc: "Montrer tes listes publiques sur ton profil.",
-  },
-  {
-    key: "show_reviews",
-    title: "Afficher tes avis",
-    desc: "Montrer tes avis publics sur ton profil.",
-  },
-  {
-    key: "show_favorites",
-    title: "Afficher tes favoris",
-    desc: "Partager une sélection de tes titres favoris (masqué par défaut).",
-  },
-];
 
 const DEFAULTS: Record<PrivacyKey, boolean> = {
   profile_public: true,
@@ -60,11 +28,24 @@ const DEFAULTS: Record<PrivacyKey, boolean> = {
 /** Member privacy controls for the public profile page. */
 export function ProfilePrivacy() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const load = useServerFn(getMyProfile);
   const save = useServerFn(updateMyProfile);
   const [values, setValues] = useState<Record<PrivacyKey, boolean>>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<PrivacyKey | null>(null);
+
+  const rows = useMemo<{ key: PrivacyKey; title: string; desc: string }[]>(
+    () => [
+      { key: "profile_public", title: t.profile.privacyProfilePublic, desc: t.profile.privacyProfilePublicDesc },
+      { key: "show_bio", title: t.profile.privacyShowBio, desc: t.profile.privacyShowBioDesc },
+      { key: "show_stats", title: t.profile.privacyShowStats, desc: t.profile.privacyShowStatsDesc },
+      { key: "show_playlists", title: t.profile.privacyShowPlaylists, desc: t.profile.privacyShowPlaylistsDesc },
+      { key: "show_reviews", title: t.profile.privacyShowReviews, desc: t.profile.privacyShowReviewsDesc },
+      { key: "show_favorites", title: t.profile.privacyShowFavorites, desc: t.profile.privacyShowFavoritesDesc },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     let active = true;
@@ -98,7 +79,7 @@ export function ProfilePrivacy() {
       await save({ data: { [key]: next } });
     } catch {
       setValues((v) => ({ ...v, [key]: !next }));
-      toast.error("La préférence n'a pas pu être enregistrée.");
+      toast.error(t.profile.privacySaveError);
     } finally {
       setSavingKey(null);
     }
@@ -111,14 +92,11 @@ export function ProfilePrivacy() {
     >
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg font-semibold">Confidentialité du profil</h2>
+        <h2 className="font-display text-lg font-semibold">{t.profile.privacyTitle}</h2>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Ton nom et ton avatar restent visibles là où tu publies (avis, listes,
-        communauté). Ces réglages contrôlent ta page profil publique.
-      </p>
+      <p className="text-xs text-muted-foreground">{t.profile.privacyIntro}</p>
       <div className="divide-y divide-border/60">
-        {ROWS.map((row) => {
+        {rows.map((row) => {
           const disabledByParent = row.key !== "profile_public" && !values.profile_public;
           return (
             <div key={row.key} className="flex items-center justify-between gap-4 py-3">
@@ -146,3 +124,4 @@ export function ProfilePrivacy() {
     </section>
   );
 }
+

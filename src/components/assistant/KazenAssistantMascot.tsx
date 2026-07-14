@@ -202,9 +202,12 @@ export function KazenAssistantMascot() {
   // Discreet mode sits directly above the assistant launcher (button top is
   // ~76px: bottom-5 20px + h-14 56px), leaving only a ~4-8px gap; intro mode
   // hugs the launcher so its arrow points at it.
+  // Horizontally centered on the launcher button axis:
+  // button center sits at 48px (mobile) / 52px (sm+) from the right edge.
+  // right offset = buttonCenter - mascotWidth/2 so items-center aligns both axes.
   const wrapperPos = discreet
-    ? "bottom-[5.25rem] right-5 sm:bottom-[5.5rem] sm:right-6"
-    : "bottom-[5.5rem] right-3 sm:bottom-[6.25rem] sm:right-5";
+    ? "bottom-[5.25rem] right-[17px] sm:bottom-[5.5rem] sm:right-[12px] lg:right-[2px]"
+    : "bottom-[5.5rem] right-[11px] sm:bottom-[6.25rem] md:right-[-4px] lg:right-[-14px]";
 
   const boxSize = discreet
     ? "h-[62px] w-[62px] sm:h-[80px] sm:w-[80px] lg:h-[100px] lg:w-[100px]"

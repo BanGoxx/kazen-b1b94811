@@ -28,7 +28,8 @@ function textOf(m: UIMessage): string {
 }
 
 export function AssistantChat() {
-  const [open, setOpen] = useState(false);
+  const open = useAssistantOpen();
+  const setOpen = setAssistantOpen;
   const [signedIn, setSignedIn] = useState(false);
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);

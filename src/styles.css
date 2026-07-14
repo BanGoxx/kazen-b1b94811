@@ -290,6 +290,21 @@ p {
   60%, 100% { transform: translateX(260%); }
 }
 
+/* KAZEN assistant mascot idle float — light translate + scale, alternating. */
+@keyframes kazenMascotIdle {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-3px) scale(1.01); }
+}
+
+/* Discreet metallic-red glow on mascot hover. */
+.mascot-glow {
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+  transition: filter 0.3s ease;
+}
+.group:hover .mascot-glow {
+  filter: drop-shadow(0 6px 20px color-mix(in oklab, var(--color-primary) 55%, transparent));
+}
+
 /* Refined skeleton: base tone + animated diagonal sheen. Respects reduced
    motion (global rule disables the animation). */
 @utility shimmer {

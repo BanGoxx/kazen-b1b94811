@@ -37,6 +37,7 @@ import { KazenLogo } from "@/components/brand/KazenLogo";
 import { SearchAutocomplete } from "@/components/media/SearchAutocomplete";
 import { RecommendationAssistant } from "@/components/media/RecommendationAssistant";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
+import { KazenAssistantMascot } from "@/components/assistant/KazenAssistantMascot";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ChatBell } from "@/components/chat/ChatBell";
 import { BackToTop } from "./BackToTop";
@@ -316,6 +317,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </footer>
         </div>
         <AssistantChat />
+        <KazenAssistantMascot />
       </div>
       <BackToTop />
     </div>

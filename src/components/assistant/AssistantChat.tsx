@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { MessageCircle, X, Send, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAssistantHistory, clearAssistantHistory } from "@/lib/assistant-chat.functions";
+import { useAssistantOpen, setAssistantOpen } from "@/lib/assistant-open";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
@@ -27,7 +28,8 @@ function textOf(m: UIMessage): string {
 }
 
 export function AssistantChat() {
-  const [open, setOpen] = useState(false);
+  const open = useAssistantOpen();
+  const setOpen = setAssistantOpen;
   const [signedIn, setSignedIn] = useState(false);
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);

@@ -124,10 +124,21 @@ async function hydrateAuthors(
   return rows.map((r) => ({ ...r, author: map.get(r.author_id) ?? null }));
 }
 
+export interface LiveChatCursor {
+  created_at: string;
+  id: string;
+}
+
 export function useLiveChatMessages(roomId: string | undefined) {
   const { user } = useAuth();
-  type Page = { items: LiveChatMessage[]; nextCursor: string | null };
-  return useInfiniteQuery<Page, Error, { pages: Page[]; pageParams: unknown[] }, readonly unknown[], string | null>({
+  type Page = { items: LiveChatMessage[]; nextCursor: LiveChatCursor | null };
+  return useInfiniteQuery<
+    Page,
+    Error,
+    { pages: Page[]; pageParams: unknown[] },
+    readonly unknown[],
+    LiveChatCursor | null
+  >({
     queryKey: ["live-chat", "messages", roomId],
     enabled: !!user && !!roomId,
     refetchInterval: POLL_INTERVAL_MS,
@@ -136,7 +147,8 @@ export function useLiveChatMessages(roomId: string | undefined) {
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     queryFn: async ({ pageParam }) => {
-      if (!roomId) return { items: [], nextCursor: null as string | null };
+      if (!roomId)
+        return { items: [], nextCursor: null as LiveChatCursor | null };
       let query = supabase
         .from("live_chat_messages")
         .select(
@@ -146,14 +158,23 @@ export function useLiveChatMessages(roomId: string | undefined) {
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
         .limit(LIVE_CHAT_PAGE_SIZE);
-      if (pageParam) query = query.lt("created_at", pageParam);
+      if (pageParam) {
+        // Deterministic composite cursor:
+        //   created_at < c.created_at
+        //   OR (created_at = c.created_at AND id < c.id)
+        // Prevents duplicates/gaps when multiple messages share created_at.
+        query = query.or(
+          `created_at.lt.${pageParam.created_at},and(created_at.eq.${pageParam.created_at},id.lt.${pageParam.id})`,
+        );
+      }
       const { data, error } = await query;
       if (error) throw new Error(error.message);
       const rows = (data ?? []) as Array<Omit<LiveChatMessage, "author">>;
       const items = await hydrateAuthors(rows);
-      const nextCursor =
-        rows.length === LIVE_CHAT_PAGE_SIZE
-          ? rows[rows.length - 1].created_at
+      const last = rows[rows.length - 1];
+      const nextCursor: LiveChatCursor | null =
+        rows.length === LIVE_CHAT_PAGE_SIZE && last
+          ? { created_at: last.created_at, id: last.id }
           : null;
       return { items, nextCursor };
     },

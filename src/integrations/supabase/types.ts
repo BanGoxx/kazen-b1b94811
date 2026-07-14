@@ -2146,6 +2146,23 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: number
       }
+      seed_media_snapshot: {
+        Args: {
+          _backdrop_url?: string
+          _external_id: string
+          _genres?: string[]
+          _media_key: string
+          _media_type: string
+          _platforms?: Json
+          _poster_url?: string
+          _release_date?: string
+          _score?: number
+          _source: string
+          _title: string
+          _title_original?: string
+        }
+        Returns: undefined
+      }
       send_chat_message: {
         Args: { _body: string; _conv: string }
         Returns: string

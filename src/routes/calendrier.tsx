@@ -461,6 +461,67 @@ function SignInFilterPrompt() {
   );
 }
 
+// Show a bounded number of entries per day; busy days expand inline via a
+// "voir plus" toggle so columns stay scannable and never overlap.
+const DAY_VISIBLE = 4;
+
+function DayCell({
+  dayLabel,
+  date,
+  items,
+  isToday,
+  isPast,
+}: {
+  dayLabel: string;
+  date: Date;
+  items: MediaItem[];
+  isToday: boolean;
+  isPast: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const overflow = items.length - DAY_VISIBLE;
+  const shown = expanded ? items : items.slice(0, DAY_VISIBLE);
+  return (
+    <div
+      className={cn(
+        "flex min-h-40 flex-col rounded-2xl border p-2 transition-opacity",
+        isToday ? "border-primary/50 bg-primary/5" : "border-border bg-card/40",
+        isPast && !isToday && "opacity-55",
+      )}
+    >
+      <div className="mb-2 flex items-baseline justify-between px-1">
+        <span className={cn("text-xs font-bold uppercase", isToday ? "text-primary" : "text-muted-foreground")}>
+          {dayLabel}
+        </span>
+        <span className={cn("text-lg font-extrabold", isToday && "text-primary")}>{date.getDate()}</span>
+      </div>
+      <div className="flex flex-1 flex-col gap-1.5">
+        {items.length ? (
+          <>
+            {shown.map((it) => (
+              <CalendarEntry key={it.key} item={it} />
+            ))}
+            {overflow > 0 ? (
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+                className="focus-ring mt-0.5 rounded-lg border border-border/60 bg-background/40 px-2 py-1 text-[0.7rem] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {expanded ? "Voir moins" : `+${overflow} de plus`}
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <span className="flex flex-1 items-center justify-center px-1 py-6 text-center text-[0.7rem] text-muted-foreground/60">
+            Aucune sortie
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function CalendarEntry({ item }: { item: MediaItem }) {
   // When the item is placed on its next-episode date, surface the episode

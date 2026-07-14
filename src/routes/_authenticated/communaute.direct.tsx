@@ -401,12 +401,12 @@ function LiveChatPage() {
                     onDelete={() => del.mutate(m.id)}
                     onReport={() => setReportTarget(m)}
                     onBlock={async () => {
-                      try {
-                        await setMemberBlock(m.author_id, true);
-                        toast.success("Membre bloqué.");
-                      } catch (e) {
-                        toast.error((e as Error).message);
-                      }
+                      const { error } = await supabase.rpc("set_member_block", {
+                        _target: m.author_id,
+                        _blocked: true,
+                      });
+                      if (error) toast.error(error.message);
+                      else toast.success("Membre bloqué.");
                     }}
                     onHide={() => hide.mutate({ id: m.id })}
                     onRestore={() => restore.mutate(m.id)}

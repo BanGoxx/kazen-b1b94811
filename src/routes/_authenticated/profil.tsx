@@ -122,9 +122,9 @@ function ProfilePage() {
         },
       });
       await refetch();
-      toast.success("Profil mis à jour.");
+      toast.success(t.profile.updated);
     } catch {
-      toast.error("Impossible d'enregistrer le profil.");
+      toast.error(t.profile.updateError);
     } finally {
       setSaving(false);
     }

@@ -13,6 +13,30 @@ const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
   other: Layers,
 };
 
+type WorkType = "anime" | "serie" | "film" | "autre";
+
+const TYPE_LABELS: Record<Exclude<WorkType, "autre">, string> = {
+  anime: "Anime",
+  serie: "Série",
+  film: "Film",
+};
+
+const FILM_RE = /film|movie/i;
+
+/**
+ * Reliable media-type classification derived from provider format signals —
+ * never from the title text. Manga/novel/music/other formats are grouped as
+ * "autre" and remain visible only under the "Tout" filter.
+ */
+function workType(it: RelatedMedia): WorkType {
+  const fg = it.formatGroup ?? "anime";
+  if (fg !== "anime") return "autre";
+  if (FILM_RE.test(it.format ?? "") || it.mediaType === "movie") return "film";
+  if (it.mediaType === "series") return "serie";
+  return "anime";
+}
+
+
 /**
  * Renders linked content as clean, ordered franchise/adaptation/reco groups.
  * When several groups exist, a lightweight filter lets the reader focus one

@@ -329,6 +329,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <BetaFeedbackDialog />
             </div>
+            <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground">
+              Pendant la bêta, l'accès KAZEN Premium est offert à tous les membres.{" "}
+              <Link to="/soutien" className="text-primary underline-offset-2 hover:underline">
+                En savoir plus
+              </Link>
+            </p>
           </footer>
         </div>
         <AssistantChat />

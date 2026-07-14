@@ -1667,30 +1667,7 @@ export type Database = {
       }
     }
     Views: {
-      profiles_public: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       accept_conversation: { Args: { _id: string }; Returns: undefined }
@@ -1770,6 +1747,27 @@ export type Database = {
         Returns: undefined
       }
       founder_user_ids: { Args: never; Returns: string[] }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          accepts_chat: boolean
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          favorite_styles: string[]
+          id: string
+          preferred_genres: string[]
+          preferred_types: string[]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_public_enrichment: {
         Args: { _external_id: string; _source: string }
         Returns: {

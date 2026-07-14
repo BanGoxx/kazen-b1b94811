@@ -199,10 +199,11 @@ export function KazenAssistantMascot() {
   const restOpacity = discreet ? (scrolling ? 0.5 : 0.65) : 1;
   const targetOpacity = !visible ? 0 : hovered ? 0.98 : restOpacity;
 
-  // Discreet mode sits higher (clear of the BackToTop control at ~140px) and
-  // is smaller; intro mode hugs the launcher so its arrow points at it.
+  // Discreet mode sits directly above the assistant launcher (button top is
+  // ~76px: bottom-5 20px + h-14 56px), leaving only a ~4-8px gap; intro mode
+  // hugs the launcher so its arrow points at it.
   const wrapperPos = discreet
-    ? "bottom-[9.75rem] right-5 sm:right-6"
+    ? "bottom-[5.25rem] right-5 sm:bottom-[5.5rem] sm:right-6"
     : "bottom-[5.5rem] right-3 sm:bottom-[6.25rem] sm:right-5";
 
   const boxSize = discreet

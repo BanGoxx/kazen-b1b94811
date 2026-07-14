@@ -405,7 +405,7 @@ const fr = {
       description: "Cette page n'existe pas.",
     },
   },
-} as const;
+};
 
 export type Dict = typeof fr;
 

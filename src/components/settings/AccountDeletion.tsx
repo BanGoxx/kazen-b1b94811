@@ -105,11 +105,11 @@ export function AccountDeletion() {
       .eq("status", "pending");
     setCancelling(false);
     if (error) {
-      toast.error("Impossible d'annuler la demande.");
+      toast.error(t.profile.deletionCancelError);
       return;
     }
     setCurrent(null);
-    toast.success("Demande annulée.");
+    toast.success(t.profile.deletionCancelSuccess);
   }
 
   if (!user?.id) return null;

@@ -26,7 +26,7 @@ export const getAiAssistantStats = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<AiAssistantStats> => {
     const { data, error } = await context.supabase.rpc("ai_assistant_admin_stats");
     if (error) throw new Error(error.message);
-    return data as AiAssistantStats;
+    return data as unknown as AiAssistantStats;
   });
 
 export const setAiAssistantEnabled = createServerFn({ method: "POST" })
@@ -38,5 +38,5 @@ export const setAiAssistantEnabled = createServerFn({ method: "POST" })
       { _patch: { enabled: data.enabled } },
     );
     if (error) throw new Error(error.message);
-    return result as AiAssistantStats;
+    return result as unknown as AiAssistantStats;
   });

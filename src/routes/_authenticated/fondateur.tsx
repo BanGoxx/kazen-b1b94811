@@ -1495,6 +1495,39 @@ function AiAssistantSection() {
 
       <Separator />
 
+      <div>
+        <p className="mb-2 text-sm font-semibold">
+          Cache des réponses{" "}
+          <span className="text-muted-foreground">
+            ({stats?.cache_enabled ? "actif" : "inactif"} · TTL{" "}
+            {stats?.cache_ttl_minutes ?? "—"} min · v.catalogue {stats?.catalogue_version ?? "—"})
+          </span>
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <AiStat label="Hits cache (jour)" value={stats?.cached_today ?? null} />
+          <AiStat label="Hits cache (mois)" value={stats?.cached_month ?? null} />
+          <AiStat label="Appels modèle évités (mois)" value={stats?.cached_month ?? null} />
+          <AiStat label="Appels modèle payants (mois)" value={stats?.model_calls_month ?? null} />
+          <AiStat label="Entrées actives" value={stats?.active_cache_entries ?? null} />
+          <AiStat label="Entrées expirées" value={stats?.expired_cache_entries ?? null} />
+          <AiStat
+            label="Taux de hit"
+            value={
+              stats
+                ? Math.round(
+                    (stats.cached_month /
+                      Math.max(stats.cached_month + stats.model_calls_month, 1)) *
+                      100,
+                  )
+                : null
+            }
+            suffix="%"
+          />
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
         <div>
           <p className="text-muted-foreground">Limite / membre / jour</p>

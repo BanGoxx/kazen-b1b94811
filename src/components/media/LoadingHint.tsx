@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { MediaGridSkeleton } from "./MediaGrid";
+import { useI18n } from "@/lib/i18n";
 
 // Progressive loading messaging: AniList hydration uses a browser-direct
 // fallback with retries, so a plain skeleton can feel stuck. After a short
@@ -25,16 +26,13 @@ export function useLoadPhase(active = true): LoadPhase {
   return phase;
 }
 
-// Default neutral copy; callers pass a media-type-specific label so a Films or
-// Séries page never says "anime". The retry phase stays source-agnostic.
-const DEFAULT_LOADING_LABEL = "Chargement du contenu…";
-
-export function loadPhaseLabel(
+export function useLoadPhaseLabel(
   phase: LoadPhase,
-  label: string = DEFAULT_LOADING_LABEL,
+  label?: string,
 ): string | null {
-  if (phase === "loading") return label;
-  if (phase === "retrying") return "Connexion à la source de données…";
+  const { t } = useI18n();
+  if (phase === "loading") return label ?? t.common.loadingContent;
+  if (phase === "retrying") return t.common.loadingSource;
   return null;
 }
 
@@ -47,7 +45,7 @@ export function SlowLoadHint({
   label?: string;
 }) {
   const phase = useLoadPhase(active);
-  const text = loadPhaseLabel(phase, label);
+  const text = useLoadPhaseLabel(phase, label);
   if (!text) return null;
   return (
     <p

@@ -1,9 +1,6 @@
 import { Pill, type PillProps } from "@/components/ui/pill";
-import {
-  WATCH_STATUS_LABELS,
-  type WatchStatus,
-  type PriorityLevel,
-} from "@/lib/media-types";
+import type { WatchStatus, PriorityLevel } from "@/lib/media-types";
+import { useWatchStatusLabels, usePriorityLabels } from "@/lib/i18n/tracking";
 
 const STATUS_TONE: Record<WatchStatus, PillProps["tone"]> = {
   a_voir: "neutral",
@@ -13,12 +10,6 @@ const STATUS_TONE: Record<WatchStatus, PillProps["tone"]> = {
   abandonne: "danger",
 };
 
-const PRIORITY_LABELS: Record<PriorityLevel, string> = {
-  basse: "Priorité basse",
-  normale: "Priorité normale",
-  haute: "Priorité haute",
-};
-
 const PRIORITY_TONE: Record<PriorityLevel, PillProps["tone"]> = {
   basse: "neutral",
   normale: "accent",
@@ -26,9 +17,11 @@ const PRIORITY_TONE: Record<PriorityLevel, PillProps["tone"]> = {
 };
 
 export function StatusPill({ status }: { status: WatchStatus }) {
-  return <Pill tone={STATUS_TONE[status]}>{WATCH_STATUS_LABELS[status]}</Pill>;
+  const labels = useWatchStatusLabels();
+  return <Pill tone={STATUS_TONE[status]}>{labels[status]}</Pill>;
 }
 
 export function PriorityPill({ level }: { level: PriorityLevel }) {
-  return <Pill tone={PRIORITY_TONE[level]}>{PRIORITY_LABELS[level]}</Pill>;
+  const labels = usePriorityLabels();
+  return <Pill tone={PRIORITY_TONE[level]}>{labels[level]}</Pill>;
 }

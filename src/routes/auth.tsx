@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
+import { mapErrorToMessage } from "@/lib/i18n/errors";
+import { DICTIONARIES, DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,16 +22,18 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
-  head: () => ({
-    meta: [
-      { title: "Connexion — KAZEN" },
-      {
-        name: "description",
-        content:
-          "Connectez-vous à KAZEN pour suivre vos anime, séries et films et gérer vos listes personnelles.",
-      },
-    ],
-  }),
+  head: () => {
+    // Head is computed at SSR / initial render — always use the default locale
+    // for deterministic hydration. Runtime clients can still switch language,
+    // but page metadata stays consistent with server output.
+    const t = DICTIONARIES[DEFAULT_LOCALE];
+    return {
+      meta: [
+        { title: t.auth.metaLoginTitle },
+        { name: "description", content: t.auth.metaLoginDescription },
+      ],
+    };
+  },
   component: AuthPage,
 });
 
@@ -37,6 +42,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const { user, ready } = useAuth();
+  const { t } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +62,7 @@ function AuthPage() {
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "signup" && !ageConfirmed) {
-      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      toast.error(t.auth.ageConfirmRequired);
       return;
     }
     setLoading(true);
@@ -71,16 +77,16 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Compte créé ! Vérifiez votre e-mail si une confirmation est demandée.");
+        toast.success(t.auth.signupSuccess);
 
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Bienvenue !");
+        toast.success(t.auth.loginSuccess);
       }
       router.invalidate();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Une erreur est survenue.");
+      toast.error(mapErrorToMessage(err, t));
     } finally {
       setLoading(false);
     }
@@ -88,7 +94,7 @@ function AuthPage() {
 
   const handleGoogle = async () => {
     if (mode === "signup" && !ageConfirmed) {
-      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      toast.error(t.auth.ageConfirmRequired);
       return;
     }
     setLoading(true);
@@ -97,14 +103,14 @@ function AuthPage() {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error("Connexion Google impossible.");
+        toast.error(t.errors.authGoogleUnavailable);
         setLoading(false);
         return;
       }
       if (result.redirected) return;
       router.invalidate();
     } catch {
-      toast.error("Connexion Google impossible.");
+      toast.error(t.errors.authGoogleUnavailable);
       setLoading(false);
     }
   };
@@ -124,9 +130,7 @@ function AuthPage() {
           </span>
           <h1 className="brand-wordmark font-display text-2xl font-extrabold">KAZEN</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "login"
-              ? "Tes anime, séries et films. Enfin au même endroit."
-              : "Créez votre compte et suivez tout au même endroit."}
+            {mode === "login" ? t.auth.loginTagline : t.auth.signupTagline}
           </p>
         </div>
 
@@ -137,41 +141,41 @@ function AuthPage() {
           onClick={handleGoogle}
           disabled={loading || (mode === "signup" && !ageConfirmed)}
         >
-          <GoogleIcon /> Continuer avec Google
+          <GoogleIcon /> {t.auth.continueGoogle}
         </Button>
 
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+          <span className="h-px flex-1 bg-border" /> {t.auth.orSeparator} <span className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleEmail} className="space-y-4">
           {mode === "signup" ? (
             <div className="space-y-1.5">
-              <Label htmlFor="name">Nom d'affichage</Label>
+              <Label htmlFor="name">{t.auth.displayName}</Label>
               <Input
                 id="name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Votre pseudo"
+                placeholder={t.auth.displayNamePlaceholder}
                 autoComplete="nickname"
               />
             </div>
           ) : null}
           <div className="space-y-1.5">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email">{t.auth.email}</Label>
             <Input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="vous@exemple.com"
+              placeholder={t.auth.emailPlaceholder}
               autoComplete="email"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Mot de passe</Label>
+            <Label htmlFor="password">{t.auth.password}</Label>
             <Input
               id="password"
               type="password"
@@ -179,7 +183,7 @@ function AuthPage() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t.auth.passwordPlaceholder}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
             />
           </div>
@@ -197,25 +201,25 @@ function AuthPage() {
                 id="age-confirm-desc"
                 className="text-xs font-normal leading-relaxed text-muted-foreground"
               >
-                Je confirme avoir l'âge requis pour utiliser KAZEN et accepter ses{" "}
+                {t.auth.ageConfirmPrefix}
                 <a
                   href="/cgu"
                   target="_blank"
                   rel="noreferrer"
                   className="font-medium text-primary hover:underline"
                 >
-                  conditions d'utilisation
-                </a>{" "}
-                et sa{" "}
+                  {t.auth.ageConfirmTos}
+                </a>
+                {t.auth.ageConfirmAnd}
                 <a
                   href="/confidentialite"
                   target="_blank"
                   rel="noreferrer"
                   className="font-medium text-primary hover:underline"
                 >
-                  politique de confidentialité
+                  {t.auth.ageConfirmPrivacy}
                 </a>
-                .
+                {t.auth.ageConfirmSuffix}
               </Label>
             </div>
           ) : null}
@@ -227,18 +231,18 @@ function AuthPage() {
           >
 
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {mode === "login" ? "Se connecter" : "Créer mon compte"}
+            {mode === "login" ? t.auth.submitLogin : t.auth.submitSignup}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "login" ? "Pas encore de compte ?" : "Déjà un compte ?"}{" "}
+          {mode === "login" ? t.auth.noAccount : t.auth.hasAccount}{" "}
           <button
             type="button"
             onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="focus-ring font-semibold text-primary hover:underline"
           >
-            {mode === "login" ? "Créer un compte" : "Se connecter"}
+            {mode === "login" ? t.auth.switchToSignup : t.auth.switchToLogin}
           </button>
         </p>
       </div>

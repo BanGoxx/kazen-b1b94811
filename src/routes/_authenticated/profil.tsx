@@ -226,10 +226,10 @@ function ProfilePage() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Suivis", value: stats.total },
-            { label: "En cours", value: stats.en_cours },
-            { label: "Terminés", value: stats.termine },
-            { label: "Favoris", value: stats.favoris },
+            { label: t.profile.statFollowed, value: stats.total },
+            { label: t.profile.statInProgress, value: stats.en_cours },
+            { label: t.profile.statCompleted, value: stats.termine },
+            { label: t.profile.statFavorites, value: stats.favoris },
           ].map((s) => (
             <div
               key={s.label}
@@ -244,10 +244,10 @@ function ProfilePage() {
         {entries.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "À voir", value: insights.aVoir },
-              { label: "Épisodes suivis", value: insights.episodes },
-              { label: "Revisionnages", value: insights.rewatches },
-              { label: "Note moyenne", value: insights.avgRating ?? "—" },
+              { label: t.profile.statToWatch, value: insights.aVoir },
+              { label: t.profile.statEpisodes, value: insights.episodes },
+              { label: t.profile.statRewatches, value: insights.rewatches },
+              { label: t.profile.statAvgRating, value: insights.avgRating ?? "—" },
             ].map((s) => (
               <div
                 key={s.label}
@@ -263,7 +263,7 @@ function ProfilePage() {
 
         <section className="space-y-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-            <UserRound className="h-5 w-5" /> Informations
+            <UserRound className="h-5 w-5" /> {t.profile.information}
           </h2>
           {isLoading ? (
             <div className="flex justify-center py-8 text-muted-foreground">
@@ -272,23 +272,23 @@ function ProfilePage() {
           ) : (
             <>
               <div className="space-y-1.5">
-                <Label htmlFor="displayName">Nom d'affichage</Label>
+                <Label htmlFor="displayName">{t.profile.displayName}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Votre pseudo"
+                  placeholder={t.profile.displayNamePlaceholder}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bio">Bio</Label>
+                <Label htmlFor="bio">{t.profile.bio}</Label>
                 <Textarea
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={4}
                   className="resize-none"
-                  placeholder="Parlez de vos goûts…"
+                  placeholder={t.profile.bioPlaceholder}
                 />
               </div>
             </>
@@ -299,30 +299,30 @@ function ProfilePage() {
         <section className="space-y-6 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur">
           <div>
             <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-              <Heart className="h-5 w-5 text-primary" /> Mes préférences
+              <Heart className="h-5 w-5 text-primary" /> {t.profile.myPreferences}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sélectionne tes goûts pour affiner tes recommandations personnalisées.
+              {t.profile.tastesHelp}
             </p>
           </div>
 
           <div className="space-y-3">
-            <Label>Types préférés</Label>
+            <Label>{t.profile.preferredTypes}</Label>
             <div className="flex flex-wrap gap-2">
-              {TYPE_OPTIONS.map((t) => (
+              {TYPE_VALUES.map((v) => (
                 <Chip
-                  key={t.value}
-                  active={types.includes(t.value)}
-                  onClick={() => setTypes((prev) => toggle(prev, t.value))}
+                  key={v}
+                  active={types.includes(v)}
+                  onClick={() => setTypes((prev) => toggle(prev, v))}
                 >
-                  {t.label}
+                  {typeLabels[v as keyof typeof typeLabels] ?? v}
                 </Chip>
               ))}
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label>Genres préférés</Label>
+            <Label>{t.profile.preferredGenres}</Label>
             <div className="flex flex-wrap gap-2">
               {GENRE_OPTIONS.map((g) => (
                 <Chip

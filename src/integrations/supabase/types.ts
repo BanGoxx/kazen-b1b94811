@@ -14,42 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      account_deletion_requests: {
-        Row: {
-          created_at: string
-          id: string
-          notes: string | null
-          processed_at: string | null
-          processed_by: string | null
-          reason: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          reason?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          reason?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       ai_assistant_cache: {
         Row: {
           cache_key: string

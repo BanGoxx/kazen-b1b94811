@@ -19,7 +19,6 @@ import { EmailPreferences } from "@/components/settings/EmailPreferences";
 import { NotificationPreferences } from "@/components/settings/NotificationPreferences";
 import { ChatPreference } from "@/components/settings/ChatPreference";
 import { ProfilePrivacy } from "@/components/settings/ProfilePrivacy";
-import { AccountDeletion } from "@/components/settings/AccountDeletion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -412,9 +411,6 @@ function ProfilePage() {
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
           </Button>
         </div>
-
-        {/* Suppression de compte (Phase 26.1 — C5, RGPD art. 17) */}
-        <AccountDeletion />
       </div>
     </AppShell>
   );

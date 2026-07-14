@@ -39,7 +39,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const target = redirect && redirect.startsWith("/") ? redirect : "/mes-listes";
@@ -52,10 +51,6 @@ function AuthPage() {
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === "signup" && !ageConfirmed) {
-      toast.error("Vous devez avoir au moins 15 ans pour créer un compte KAZEN.");
-      return;
-    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -83,10 +78,6 @@ function AuthPage() {
   };
 
   const handleGoogle = async () => {
-    if (mode === "signup" && !ageConfirmed) {
-      toast.error("Vous devez avoir au moins 15 ans pour créer un compte KAZEN.");
-      return;
-    }
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -177,22 +168,6 @@ function AuthPage() {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
             />
           </div>
-          {mode === "signup" ? (
-            <label className="flex items-start gap-2 rounded-xl border border-border bg-background/40 p-3 text-xs leading-snug text-muted-foreground">
-              <input
-                type="checkbox"
-                required
-                checked={ageConfirmed}
-                onChange={(e) => setAgeConfirmed(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                aria-describedby="age-help"
-              />
-              <span id="age-help">
-                Je déclare avoir <strong>au moins 15 ans</strong>. KAZEN est un espace communautaire
-                (chat, forum, messages privés) et n'est pas destiné aux enfants (RGPD art. 8).
-              </span>
-            </label>
-          ) : null}
           <Button type="submit" variant="aurora" className="w-full gap-2" disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {mode === "login" ? "Se connecter" : "Créer mon compte"}

@@ -133,7 +133,7 @@ export function useLiveChatMessages(roomId: string | undefined) {
     refetchInterval: POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,
     staleTime: 5_000,
-    initialPageParam: null as string | null,
+    initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     queryFn: async ({ pageParam }) => {
       if (!roomId) return { items: [], nextCursor: null as string | null };

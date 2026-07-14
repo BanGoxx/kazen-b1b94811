@@ -181,13 +181,29 @@ export const getMediaDetail = createServerFn({ method: "GET" })
     const id = Number(data.id);
     if (!Number.isFinite(id)) return null;
     try {
+      let detail: MediaDetail | null = null;
       if (data.source === "anilist") {
-        const detail = await anilistDetail(id);
-        return detail ?? fallbackAnimeDetail(data.id);
+        detail = (await anilistDetail(id)) ?? fallbackAnimeDetail(data.id);
+      } else if (data.source === "tmdb_movie") {
+        detail = await tmdbMovieDetail(id);
+      } else if (data.source === "tmdb_tv") {
+        detail = await tmdbTvDetail(id);
       }
-      if (data.source === "tmdb_movie") return await tmdbMovieDetail(id);
-      if (data.source === "tmdb_tv") return await tmdbTvDetail(id);
-      return null;
+      // Trusted catalogue sync: persist the authoritative episode total using
+      // the provider data we JUST fetched (no extra provider call). This is the
+      // only sanctioned writer of media_records.episodes_count; the client can
+      // never set it. Best-effort and bounded — awaited so it settles, but its
+      // failures are swallowed inside the helper.
+      if (detail) {
+        const { syncCatalogueEpisodes } = await import("./catalogue-sync.server");
+        await syncCatalogueEpisodes({
+          mediaKey: detail.key,
+          source: detail.source,
+          mediaType: detail.mediaType,
+          episodesCount: detail.episodesCount,
+        });
+      }
+      return detail;
     } catch (e) {
       console.error("getMediaDetail", e);
       // Serve a curated fallback for known anime so a transient upstream
@@ -196,6 +212,7 @@ export const getMediaDetail = createServerFn({ method: "GET" })
       return null;
     }
   });
+
 
 // ---------- Search ----------
 

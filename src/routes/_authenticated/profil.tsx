@@ -40,11 +40,7 @@ const GENRE_OPTIONS = [
   "Sport", "Mecha", "Tranche de vie", "Musique",
 ];
 
-const TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: "anime", label: "Anime" },
-  { value: "series", label: "Séries" },
-  { value: "movie", label: "Films" },
-];
+const TYPE_VALUES: readonly string[] = ["anime", "series", "movie"] as const;
 
 const STYLE_OPTIONS = [
   "Shonen", "Seinen", "Shojo", "Isekai", "Slice of life", "Dark",

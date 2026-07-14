@@ -185,13 +185,13 @@ export function AccountDeletion() {
               htmlFor="deletion-reason"
               className="text-sm font-medium text-foreground"
             >
-              Motif (facultatif)
+              {t.profile.deletionReasonInputLabel}
             </label>
             <Textarea
               id="deletion-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value.slice(0, 1000))}
-              placeholder="Aide-nous à comprendre — ce champ est optionnel."
+              placeholder={t.profile.deletionReasonPlaceholder}
               rows={3}
               className="bg-card/60"
             />
@@ -203,28 +203,25 @@ export function AccountDeletion() {
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : null}
-                Demander la suppression de mon compte
+                {t.profile.deletionRequestBtn}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Confirmer la demande ?</AlertDialogTitle>
+                <AlertDialogTitle>{t.profile.deletionDialogTitle}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Nous allons enregistrer une demande de suppression pour ton
-                  compte. Aucun compte n'est supprimé immédiatement : nous te
-                  recontacterons pour traiter ta demande manuellement. Tu
-                  pourras l'annuler tant qu'elle est en cours.
+                  {t.profile.deletionDialogBody}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Retour</AlertDialogCancel>
+                <AlertDialogCancel>{t.profile.deletionDialogBack}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={(e) => {
                     e.preventDefault();
                     void submit();
                   }}
                 >
-                  Enregistrer ma demande
+                  {t.profile.deletionDialogConfirm}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

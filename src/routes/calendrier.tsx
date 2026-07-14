@@ -19,12 +19,15 @@ import {
   refreshAnimeRails,
   upgradeCatalogOnce,
 } from "@/lib/queries";
-import { useUserList } from "@/lib/user-list";
+import { useMyList } from "@/lib/use-list";
+import { useEmailPreferences } from "@/lib/use-digest";
 import { useAuth } from "@/lib/auth";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -93,11 +96,19 @@ const weekLabelFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "
 const TYPE_ORDER: Record<MediaType, number> = { anime: 0, series: 1, movie: 2 };
 const TYPE_LEGEND: MediaType[] = ["anime", "series", "movie"];
 
-function sortEntries(items: MediaItem[]): MediaItem[] {
+/** A catalog item placed on a concrete calendar day, with optional episode info. */
+interface PlacedItem {
+  item: MediaItem;
+  date: string;
+  epNumber: number | null;
+  missed: boolean;
+}
+
+function sortEntries(items: PlacedItem[]): PlacedItem[] {
   return [...items].sort(
     (a, b) =>
-      TYPE_ORDER[a.mediaType] - TYPE_ORDER[b.mediaType] ||
-      a.title.localeCompare(b.title, "fr"),
+      TYPE_ORDER[a.item.mediaType] - TYPE_ORDER[b.item.mediaType] ||
+      a.item.title.localeCompare(b.item.title, "fr"),
   );
 }
 
@@ -146,8 +157,67 @@ function calendarDate(it: MediaItem): string | null {
   return rel && ISO_DATE.test(rel) ? rel : null;
 }
 
+/**
+ * Missed-episode reasoning for a tracked, currently-watching title.
+ *
+ * We only know the NEXT episode (number + air date) from the provider — not
+ * the full per-episode schedule. From that we derive the latest episode that
+ * has ALREADY aired: if the "next" episode's air date is in the past it is
+ * itself the latest aired one, otherwise the latest aired is the previous
+ * number. A title counts as "missed" only when ALL of these hold — otherwise
+ * we stay silent rather than guess:
+ *  - reliable progress exists (not null);
+ *  - the next-episode number is a real positive integer;
+ *  - member progress is strictly behind the latest aired episode.
+ */
+function missedInfo(
+  it: MediaItem,
+  progress: number | null,
+): { missed: boolean; latestAired: number | null } {
+  const n = it.nextEpisode?.number;
+  const airRaw = it.nextEpisode?.airDate;
+  if (progress == null || !airRaw || !n || !(n > 0)) {
+    return { missed: false, latestAired: null };
+  }
+  const airMs = new Date(airRaw).getTime();
+  if (Number.isNaN(airMs)) return { missed: false, latestAired: null };
+  const latestAired = airMs <= Date.now() ? n : n - 1;
+  if (latestAired < 1) return { missed: false, latestAired: null };
+  return { missed: progress < latestAired, latestAired };
+}
+
+/**
+ * Best-effort placement day for a MISSED episode. Providers only expose the
+ * NEXT episode date, so:
+ *  - if that next episode already aired, that is the missed episode's day;
+ *  - otherwise we estimate the previous weekly slot (next − 7 days), the
+ *    dominant cadence for airing anime. This is explicitly an estimate and is
+ *    only ever used in the "Épisodes manqués" mode.
+ */
+function missedPlacementDate(it: MediaItem): string | null {
+  const airRaw = it.nextEpisode?.airDate;
+  if (!airRaw) return null;
+  const d = new Date(airRaw);
+  if (Number.isNaN(d.getTime())) return null;
+  if (d.getTime() > Date.now()) d.setDate(d.getDate() - 7);
+  return PARIS_DAY.format(d);
+}
+
 type StatusFilter = MediaType | "all";
-type WatchFilter = WatchStatus | "all" | "tracked" | "untracked";
+type WatchFilter =
+  | "all"
+  | "tracked"
+  | "untracked"
+  | "favoris"
+  | "upcoming_ep"
+  | "missed_ep"
+  | "my_platforms"
+  | "preferred_genres"
+  | WatchStatus;
+
+function normGenre(g: string): string {
+  return g.trim().toLowerCase();
+}
 
 function CalendarPage() {
   const { data: upcoming } = useSuspenseQuery(upcomingAllQO);
@@ -155,9 +225,36 @@ function CalendarPage() {
   const { data: trending } = useSuspenseQuery(trendingAnimeQO);
   const { data: popular } = useSuspenseQuery(popularAnimeQO);
   const { data: seasonal } = useSuspenseQuery(seasonalAnimeQO());
-  const userList = useUserList();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Authenticated, RLS-scoped personal tracking. `useMyList` reads ONLY the
+  // signed-in member's own `list_items` server-side (server identity, no
+  // client-supplied user id) and is empty for anonymous visitors, so the
+  // public calendar is unchanged for them. It shares the ["my-list"] query key
+  // that list mutations invalidate, so personal modes refresh immediately
+  // after any tracking change.
+  const { entries } = useMyList();
+  const personal = useMemo(() => {
+    const m = new Map<string, { status: WatchStatus | null; favorite: boolean; progress: number | null }>();
+    for (const e of entries) {
+      m.set(e.mediaKey, { status: e.status, favorite: e.favorite, progress: e.progress });
+    }
+    return m;
+  }, [entries]);
+
+  // Private, server-side platform/genre preferences (member_email_preferences,
+  // RLS-scoped, never exposed on public profiles). Reused here so a member can
+  // filter the calendar by the platforms/genres they already declared.
+  const { data: emailPrefs } = useEmailPreferences();
+  const preferredPlatforms = useMemo(
+    () => new Set(emailPrefs?.preferred_platforms ?? []),
+    [emailPrefs],
+  );
+  const preferredGenres = useMemo(
+    () => new Set((emailPrefs?.preferred_genres ?? []).map(normGenre)),
+    [emailPrefs],
+  );
 
   // Post-hydration browser-direct upgrade. On the server the Worker is often
   // AniList-blocked, so the dehydrated anime data can be a curated fallback.
@@ -216,37 +313,83 @@ function CalendarPage() {
     [weekStart, weeks],
   );
 
-  const filtered = useMemo(() => {
+  const todayIso = isoDay(new Date());
+
+  // Personal-mode set that requires the member to be tracking the title.
+  const trackedModes: WatchFilter[] = ["tracked", "upcoming_ep", "missed_ep"];
+  const statusModes: WatchStatus[] = Object.keys(WATCH_STATUS_LABELS) as WatchStatus[];
+
+  // Single pass: apply base (type/platform) + personal filters and resolve the
+  // day each item is placed on. Missed mode overrides the placement date with
+  // the missed episode's (estimated) day.
+  const placed = useMemo<PlacedItem[]>(() => {
     const weekKeys = new Set(days.map(isoDay));
-    return all.filter((it) => {
-      const date = calendarDate(it);
-      if (!date || !weekKeys.has(date)) return false;
-      if (type !== "all" && it.mediaType !== type) return false;
-      if (platform !== "all" && !it.platforms.some((p) => p.id === platform)) return false;
-      if (watch !== "all") {
-        const entry = userList[it.key];
-        if (watch === "tracked" && !entry) return false;
-        if (watch === "untracked" && entry) return false;
-        if (watch !== "tracked" && watch !== "untracked" && entry?.status !== watch) return false;
+    const out: PlacedItem[] = [];
+    for (const it of all) {
+      if (type !== "all" && it.mediaType !== type) continue;
+      if (platform !== "all" && !it.platforms.some((p) => p.id === platform)) continue;
+
+      const entry = personal.get(it.key);
+      let date = calendarDate(it);
+      let epNumber: number | null = null;
+      let missed = false;
+
+      // Episode number surfaced only when the item sits on its next-episode day.
+      const epDay = it.nextEpisode?.airDate ? PARIS_DAY.format(new Date(it.nextEpisode.airDate)) : null;
+      if (epDay && epDay === date && Number.isFinite(it.nextEpisode!.number) && it.nextEpisode!.number > 0) {
+        epNumber = it.nextEpisode!.number;
       }
-      return true;
-    });
-  }, [all, days, type, platform, watch, userList]);
+
+      if (user && watch !== "all") {
+        if (watch === "untracked") {
+          if (entry) continue;
+        } else if (watch === "tracked") {
+          if (!entry) continue;
+        } else if (watch === "favoris") {
+          if (!entry?.favorite) continue;
+        } else if (watch === "my_platforms") {
+          if (preferredPlatforms.size === 0) continue;
+          if (!it.platforms.some((p) => preferredPlatforms.has(p.id))) continue;
+        } else if (watch === "preferred_genres") {
+          if (preferredGenres.size === 0) continue;
+          if (!(it.genres ?? []).some((g) => preferredGenres.has(normGenre(g)))) continue;
+        } else if (watch === "upcoming_ep") {
+          if (!entry) continue;
+          const ep = it.nextEpisode?.airDate;
+          if (!ep) continue;
+          const epKey = PARIS_DAY.format(new Date(ep));
+          if (epKey < todayIso) continue; // only genuinely upcoming episodes
+        } else if (watch === "missed_ep") {
+          if (entry?.status !== "en_cours") continue;
+          const mi = missedInfo(it, entry.progress);
+          if (!mi.missed) continue;
+          date = missedPlacementDate(it);
+          epNumber = mi.latestAired;
+          missed = true;
+        } else if (statusModes.includes(watch as WatchStatus)) {
+          if (entry?.status !== watch) continue;
+        }
+      }
+
+      if (!date || !weekKeys.has(date)) continue;
+      out.push({ item: it, date, epNumber, missed });
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all, days, type, platform, watch, personal, user, preferredPlatforms, preferredGenres, todayIso]);
 
   const byDay = useMemo(() => {
-    const map = new Map<string, MediaItem[]>();
-    for (const it of filtered) {
-      const key = calendarDate(it)!;
-      const arr = map.get(key) ?? [];
-      arr.push(it);
-      map.set(key, arr);
+    const map = new Map<string, PlacedItem[]>();
+    for (const p of placed) {
+      const arr = map.get(p.date) ?? [];
+      arr.push(p);
+      map.set(p.date, arr);
     }
     for (const [k, arr] of map) map.set(k, sortEntries(arr));
     return map;
-  }, [filtered]);
+  }, [placed]);
 
 
-  const todayIso = isoDay(new Date());
   const weekEnd = days[days.length - 1];
   const rangeLabel = `${rangeFmt.format(weekStart)} – ${rangeFmt.format(weekEnd)} ${weekEnd.getFullYear()}`;
 
@@ -255,6 +398,11 @@ function CalendarPage() {
     d.setDate(weekStart.getDate() + delta * 7);
     setWeekStart(d);
   };
+
+  // Empty-state hint tailored to a personal mode that relies on preferences.
+  const personalPrefsMissing =
+    (watch === "my_platforms" && preferredPlatforms.size === 0) ||
+    (watch === "preferred_genres" && preferredGenres.size === 0);
 
   return (
     <AppShell>
@@ -334,16 +482,30 @@ function CalendarPage() {
           </Select>
           {user ? (
             <Select value={watch} onValueChange={(v) => setWatch(v as WatchFilter)}>
-              <SelectTrigger className="h-9 w-40" aria-label="Filtrer par statut">
+              <SelectTrigger className="h-9 w-44" aria-label="Mode calendrier personnel">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous statuts</SelectItem>
-                <SelectItem value="tracked">Dans ma liste</SelectItem>
-                <SelectItem value="untracked">Hors liste</SelectItem>
-                {(Object.keys(WATCH_STATUS_LABELS) as WatchStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
-                ))}
+                <SelectItem value="all">Tout</SelectItem>
+                <SelectGroup>
+                  <SelectLabel>Ma liste</SelectLabel>
+                  <SelectItem value="tracked">Dans ma liste</SelectItem>
+                  <SelectItem value="untracked">Hors liste</SelectItem>
+                  <SelectItem value="favoris">Favoris</SelectItem>
+                  <SelectItem value="upcoming_ep">Épisodes à venir</SelectItem>
+                  <SelectItem value="missed_ep">Épisodes manqués</SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Préférences</SelectLabel>
+                  <SelectItem value="my_platforms">Mes plateformes</SelectItem>
+                  <SelectItem value="preferred_genres">Genres préférés</SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Statut</SelectLabel>
+                  {statusModes.map((s) => (
+                    <SelectItem key={s} value={s}>{WATCH_STATUS_LABELS[s]}</SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           ) : (
@@ -363,7 +525,7 @@ function CalendarPage() {
           ))}
         </div>
         <span className="text-xs font-medium text-muted-foreground">
-          {filtered.length} sortie{filtered.length > 1 ? "s" : ""} sur {weeks} semaine{weeks > 1 ? "s" : ""}
+          {placed.length} sortie{placed.length > 1 ? "s" : ""} sur {weeks} semaine{weeks > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -376,8 +538,19 @@ function CalendarPage() {
         </div>
       ) : null}
 
+      {watch === "missed_ep" && user ? (
+        <div
+          role="note"
+          className="mb-4 rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-[0.72rem] text-muted-foreground"
+        >
+          Rattrapage : titres « en cours » dont votre progression est en retard sur
+          le dernier épisode diffusé. Le jour affiché est estimé (cadence
+          hebdomadaire) faute de planning épisode par épisode.
+        </div>
+      ) : null}
+
       {/* Weekly grid — one labelled block per week for clear separation */}
-      {filtered.length ? (
+      {placed.length ? (
         <div className="space-y-6">
           {Array.from({ length: weeks }).map((_, wi) => {
             const weekDays = days.slice(wi * 7, wi * 7 + 7);
@@ -418,7 +591,18 @@ function CalendarPage() {
         </div>
       ) : (
 
-        <EmptyState message="Aucune sortie sur cette période avec ces filtres." hint="Changez de période ou réinitialisez les filtres." />
+        <EmptyState
+          message={
+            personalPrefsMissing
+              ? "Aucune préférence enregistrée pour ce filtre."
+              : "Aucune sortie sur cette période avec ces filtres."
+          }
+          hint={
+            personalPrefsMissing
+              ? "Renseignez vos plateformes ou genres dans vos préférences pour utiliser ce mode."
+              : "Changez de période ou réinitialisez les filtres."
+          }
+        />
       )}
     </AppShell>
   );
@@ -448,8 +632,9 @@ function SignInFilterPrompt() {
           <div className="min-w-0">
             <p className="font-display text-sm font-bold">Filtre par tes suivis</p>
             <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-              Connecte-toi pour filtrer le calendrier selon tes listes : à voir,
-              en cours, terminé et plus encore.
+              Connecte-toi pour personnaliser le calendrier selon tes listes :
+              ma liste, en cours, favoris, plateformes, épisodes à venir ou
+              manqués.
             </p>
           </div>
         </div>
@@ -474,7 +659,7 @@ function DayCell({
 }: {
   dayLabel: string;
   date: Date;
-  items: MediaItem[];
+  items: PlacedItem[];
   isToday: boolean;
   isPast: boolean;
 }) {
@@ -498,8 +683,8 @@ function DayCell({
       <div className="flex flex-1 flex-col gap-1.5">
         {items.length ? (
           <>
-            {shown.map((it) => (
-              <CalendarEntry key={it.key} item={it} />
+            {shown.map((p) => (
+              <CalendarEntry key={p.item.key} placed={p} />
             ))}
             {overflow > 0 ? (
               <button
@@ -523,15 +708,9 @@ function DayCell({
 }
 
 
-function CalendarEntry({ item }: { item: MediaItem }) {
-  // When the item is placed on its next-episode date, surface the episode
-  // number — the clearest signal that this is an airing anime, not a premiere.
-  const epDate = item.nextEpisode?.airDate?.slice(0, 10);
-  const onEpisode = !!epDate && epDate === calendarDate(item);
-  const epLabel =
-    onEpisode && Number.isFinite(item.nextEpisode!.number) && item.nextEpisode!.number > 0
-      ? `Ép. ${item.nextEpisode!.number}`
-      : null;
+function CalendarEntry({ placed }: { placed: PlacedItem }) {
+  const { item, epNumber, missed } = placed;
+  const epLabel = epNumber && epNumber > 0 ? `Ép. ${epNumber}${missed ? " manqué" : ""}` : null;
   return (
     <Link
       to="/media/$source/$id"
@@ -547,7 +726,7 @@ function CalendarEntry({ item }: { item: MediaItem }) {
           <span className="truncate text-[0.7rem] font-semibold group-hover:text-primary">{item.title}</span>
         </div>
         {epLabel ? (
-          <span className="truncate text-[0.65rem] font-semibold text-primary">
+          <span className={cn("truncate text-[0.65rem] font-semibold", missed ? "text-destructive" : "text-primary")}>
             {epLabel}
             {item.platforms[0] ? <span className="font-normal text-muted-foreground"> · {item.platforms[0].name}</span> : null}
           </span>

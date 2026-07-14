@@ -48,6 +48,7 @@ export function snapshotFromItem(item: MediaItem): MediaSnapshot {
     genres: item.genres,
     platforms: item.platforms,
     score: item.score,
+    episodesCount: item.episodesCount,
   };
 }
 

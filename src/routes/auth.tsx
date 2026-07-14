@@ -41,7 +41,9 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+
 
   const target = redirect && redirect.startsWith("/") ? redirect : "/mes-listes";
 
@@ -53,6 +55,10 @@ function AuthPage() {
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup" && !ageConfirmed) {
+      toast.error("Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -66,6 +72,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Compte créé ! Vérifiez votre e-mail si une confirmation est demandée.");
+
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;

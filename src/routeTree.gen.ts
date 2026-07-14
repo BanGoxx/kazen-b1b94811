@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoutienRouteImport } from './routes/soutien'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
+import { Route as ReglesCommunautairesRouteImport } from './routes/regles-communautaires'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as PourVousRouteImport } from './routes/pour-vous'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
@@ -66,6 +67,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
   path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglesCommunautairesRoute = ReglesCommunautairesRouteImport.update({
+  id: '/regles-communautaires',
+  path: '/regles-communautaires',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RechercheRoute = RechercheRouteImport.update({
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
+  ReglesCommunautairesRoute: typeof ReglesCommunautairesRoute
   SeriesRoute: typeof SeriesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoutienRoute: typeof SoutienRoute
@@ -594,6 +607,13 @@ declare module '@tanstack/react-router' {
       path: '/series'
       fullPath: '/series'
       preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regles-communautaires': {
+      id: '/regles-communautaires'
+      path: '/regles-communautaires'
+      fullPath: '/regles-communautaires'
+      preLoaderRoute: typeof ReglesCommunautairesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recherche': {
@@ -937,6 +957,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
+  ReglesCommunautairesRoute: ReglesCommunautairesRoute,
   SeriesRoute: SeriesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoutienRoute: SoutienRoute,

@@ -337,6 +337,29 @@ export function AppShell({ children }: { children: ReactNode }) {
                 En savoir plus
               </Link>
             </p>
+            <nav
+              aria-label="Documents juridiques"
+              className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+            >
+              <Link to="/mentions-legales" className="hover:text-foreground">
+                Mentions légales
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/cgu" className="hover:text-foreground">
+                CGU
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/confidentialite" className="hover:text-foreground">
+                Confidentialité
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/regles-communautaires" className="hover:text-foreground">
+                Règles communautaires
+              </Link>
+              <span className="ml-1 rounded-full border border-primary/25 bg-primary/5 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
+                Brouillons
+              </span>
+            </nav>
           </footer>
         </div>
         <AssistantChat />

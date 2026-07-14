@@ -325,7 +325,7 @@ function PublicProfilePage() {
 
         {showPlaylists && playlists && playlists.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Listes partagées</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicListsTitle}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {playlists.map((pl) => (
                 <Link
@@ -348,7 +348,7 @@ function PublicProfilePage() {
 
         {showReviews && reviews && reviews.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Avis récents</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicReviewsTitle}</h2>
             <div className="space-y-3">
               {reviews.map((r) => (
                 <Link

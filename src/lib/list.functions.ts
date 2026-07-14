@@ -65,6 +65,26 @@ export const getMyList = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+// Server-authoritative allow-list of watch statuses. Anything else is dropped.
+const ALLOWED_STATUSES = new Set([
+  "a_voir",
+  "en_cours",
+  "termine",
+  "en_pause",
+  "abandonne",
+]);
+const ALLOWED_PRIORITIES = new Set(["basse", "normale", "haute"]);
+
+// A yyyy-mm-dd or ISO date string, else null. Rejects malformed input so a
+// direct API call can't write garbage into the date columns.
+function safeDate(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value !== "string") return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : value;
+}
+
 export const upsertListItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { media: MediaSnapshot; patch: ListPatch }) => data)
@@ -84,16 +104,71 @@ export const upsertListItem = createServerFn({ method: "POST" })
         genres: m.genres,
         platforms: m.platforms as never,
         score: m.score,
+        episodes_count:
+          m.episodesCount != null && m.episodesCount > 0
+            ? Math.floor(m.episodesCount)
+            : null,
       },
       { onConflict: "media_key" },
     );
     if (mediaError) throw new Error(mediaError.message);
 
+    // Server-side reliable maximum: movies are binary (0/1); episodic titles use
+    // the stored provider total. The client-sent max is never trusted — we read
+    // the total we just persisted from a provider snapshot.
+    const { data: rec } = await context.supabase
+      .from("media_records")
+      .select("media_type,episodes_count")
+      .eq("media_key", m.key)
+      .maybeSingle();
+    const serverMax =
+      rec?.media_type === "movie"
+        ? 1
+        : rec?.episodes_count != null && rec.episodes_count > 0
+          ? rec.episodes_count
+          : null;
+
+    // Sanitize the patch server-side: integer non-negative progress capped to
+    // the reliable maximum, valid enums, and valid dates. Guarantees hold even
+    // for a direct API call that bypasses the UI.
+    const raw = data.patch;
+    const clean: ListPatch = { ...raw };
+
+    if ("progress" in raw) {
+      if (raw.progress == null) {
+        clean.progress = null;
+      } else {
+        let p = Math.max(0, Math.floor(Number(raw.progress) || 0));
+        if (serverMax != null) p = Math.min(p, serverMax);
+        clean.progress = p;
+      }
+    }
+    if ("status" in raw) {
+      clean.status =
+        raw.status && ALLOWED_STATUSES.has(raw.status) ? raw.status : null;
+    }
+    if ("priority" in raw && raw.priority && !ALLOWED_PRIORITIES.has(raw.priority)) {
+      delete clean.priority;
+    }
+    if ("rating" in raw) {
+      clean.rating =
+        raw.rating == null
+          ? null
+          : Math.min(10, Math.max(1, Math.floor(Number(raw.rating) || 0)));
+    }
+    if ("rewatch_count" in raw) {
+      clean.rewatch_count = Math.max(0, Math.floor(Number(raw.rewatch_count) || 0));
+    }
+    const sd = safeDate(raw.started_at);
+    if (sd !== undefined) clean.started_at = sd;
+    const cd = safeDate(raw.completed_at);
+    if (cd !== undefined) clean.completed_at = cd;
+
     const { error } = await context.supabase.from("list_items").upsert(
       {
         user_id: context.userId,
         media_key: m.key,
-        ...data.patch,
+        ...clean,
       },
       { onConflict: "user_id,media_key" },
     );

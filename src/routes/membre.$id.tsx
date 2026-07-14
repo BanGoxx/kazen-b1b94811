@@ -23,6 +23,8 @@ import {
   useMemberBlock,
 } from "@/lib/public-profile";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
+import { formatDateLocalized } from "@/lib/i18n/date";
 import {
   Avatar,
   AvatarFallback,
@@ -114,6 +116,7 @@ function usePublicReviews(id: string, enabled: boolean) {
 function PublicProfilePage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const { data: profile, isLoading } = usePublicProfile(id);
   const { data: badges } = useUserBadges(id);
   const blockMut = useMemberBlock(id);
@@ -150,12 +153,12 @@ function PublicProfilePage() {
       <AppShell>
         <div className="section-container max-w-lg space-y-4 py-16 text-center">
           <UserRound className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="font-display text-2xl font-bold">Membre introuvable</h1>
+          <h1 className="font-display text-2xl font-bold">{t.profile.publicNotFoundTitle}</h1>
           <p className="text-sm text-muted-foreground">
-            Ce profil n'existe pas ou n'est plus disponible.
+            {t.profile.publicNotFoundBody}
           </p>
           <Button asChild variant="outline">
-            <Link to="/">Retour à l'accueil</Link>
+            <Link to="/">{t.common.backHome}</Link>
           </Button>
         </div>
       </AppShell>
@@ -167,12 +170,12 @@ function PublicProfilePage() {
       <AppShell>
         <div className="section-container max-w-lg space-y-4 py-16 text-center">
           <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="font-display text-2xl font-bold">Profil privé</h1>
+          <h1 className="font-display text-2xl font-bold">{t.profile.publicPrivateTitle}</h1>
           <p className="text-sm text-muted-foreground">
-            Ce membre a choisi de garder son profil privé.
+            {t.profile.publicPrivateBody}
           </p>
           <Button asChild variant="outline">
-            <Link to="/">Retour à l'accueil</Link>
+            <Link to="/">{t.common.backHome}</Link>
           </Button>
         </div>
       </AppShell>
@@ -180,7 +183,7 @@ function PublicProfilePage() {
   }
 
   const memberSince = profile.member_since
-    ? new Date(profile.member_since).toLocaleDateString("fr-FR", {
+    ? formatDateLocalized(profile.member_since, locale, {
         month: "long",
         year: "numeric",
       })
@@ -190,11 +193,12 @@ function PublicProfilePage() {
     const next = !profile.is_blocked_by_me;
     try {
       await blockMut.mutateAsync(next);
-      toast.success(next ? "Membre bloqué." : "Membre débloqué.");
+      toast.success(next ? t.profile.publicBlocked : t.profile.publicUnblocked);
     } catch {
-      toast.error("Action impossible pour le moment.");
+      toast.error(t.profile.publicBlockError);
     }
   };
+
 
   return (
     <AppShell>
@@ -218,7 +222,7 @@ function PublicProfilePage() {
               </div>
               {memberSince ? (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Membre depuis {memberSince}
+                  {t.profile.publicMemberSince} {memberSince}
                 </p>
               ) : null}
               {profile.show_bio && profile.bio ? (
@@ -245,39 +249,40 @@ function PublicProfilePage() {
               >
                 {profile.is_blocked_by_me ? (
                   <>
-                    <ShieldOff className="h-4 w-4" /> Débloquer
+                    <ShieldOff className="h-4 w-4" /> {t.profile.publicUnblock}
                   </>
                 ) : (
                   <>
-                    <Ban className="h-4 w-4" /> Bloquer
+                    <Ban className="h-4 w-4" /> {t.profile.publicBlock}
                   </>
                 )}
               </Button>
             </div>
           ) : null}
+
         </header>
 
         {profile.is_blocked_by_me ? (
           <p className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Tu as bloqué ce membre. Son contenu et la messagerie sont masqués.
+            {t.profile.publicBlockedNotice}
           </p>
         ) : null}
 
         {profile.show_stats && !profile.is_blocked_by_me ? (
           <section className="grid grid-cols-3 gap-3">
             <StatCard
-              label="Listes"
+              label={t.profile.publicStatLists}
               value={profile.playlists_count ?? 0}
               icon={<ListMusic className="h-4 w-4" />}
             />
             <StatCard
-              label="Avis"
+              label={t.profile.publicStatReviews}
               value={profile.reviews_count ?? 0}
               icon={<Star className="h-4 w-4" />}
             />
             {profile.show_favorites ? (
               <StatCard
-                label="Favoris"
+                label={t.profile.publicStatFavorites}
                 value={profile.favorites_count ?? 0}
                 icon={<Heart className="h-4 w-4" />}
               />
@@ -287,7 +292,8 @@ function PublicProfilePage() {
 
         {showFavorites && favorites && favorites.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Favoris</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicFavoritesTitle}</h2>
+
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
               {favorites.map((f) =>
                 f.source && f.external_id ? (
@@ -308,7 +314,7 @@ function PublicProfilePage() {
                       ) : null}
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground group-hover:text-foreground">
-                      {f.title ?? "Titre"}
+                      {f.title ?? t.common.notAvailable}
                     </p>
                   </Link>
                 ) : null,
@@ -319,7 +325,7 @@ function PublicProfilePage() {
 
         {showPlaylists && playlists && playlists.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Listes partagées</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicListsTitle}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {playlists.map((pl) => (
                 <Link
@@ -342,7 +348,7 @@ function PublicProfilePage() {
 
         {showReviews && reviews && reviews.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Avis récents</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicReviewsTitle}</h2>
             <div className="space-y-3">
               {reviews.map((r) => (
                 <Link
@@ -352,7 +358,7 @@ function PublicProfilePage() {
                   className="block rounded-xl border border-border bg-card/60 p-4 transition-colors hover:border-primary/40"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium">{r.title ?? "Fiche"}</p>
+                    <p className="font-medium">{r.title ?? t.common.notAvailable}</p>
                     {typeof r.rating === "number" ? (
                       <span className="flex items-center gap-1 text-sm text-primary">
                         <Star className="h-3.5 w-3.5 fill-current" />

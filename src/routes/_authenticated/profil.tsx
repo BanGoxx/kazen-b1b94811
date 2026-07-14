@@ -151,6 +151,7 @@ function ProfilePage() {
                   {displayName || "Mon profil"}
                 </h1>
                 {isOwner ? <FounderBadge size="sm" /> : null}
+                {isBetaPremium ? <PremiumBetaBadge size="sm" /> : null}
                 {isSupporter ? <SupporterBadge size="sm" /> : null}
                 {myBadges && myBadges.length > 0 ? (
                   <PublicBadgeList badges={myBadges} max={3} />

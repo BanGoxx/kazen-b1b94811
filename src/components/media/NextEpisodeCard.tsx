@@ -78,7 +78,8 @@ export function NextEpisodeCard({
           Prochain épisode
         </p>
         <p className="truncate text-sm font-semibold">
-          Épisode {nextEpisode.number} · {countdown}
+          Épisode {nextEpisode.number}
+          {countdown ? ` · ${countdown}` : ""}
         </p>
         <p className="truncate text-xs capitalize text-muted-foreground">{dateLabel}</p>
       </div>

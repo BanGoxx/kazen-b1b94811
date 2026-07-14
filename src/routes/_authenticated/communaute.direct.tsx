@@ -42,9 +42,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { cn } from "@/lib/utils";
 import {

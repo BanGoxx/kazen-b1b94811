@@ -110,7 +110,12 @@ function AuthMenu() {
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+          <PremiumBetaBadge size="sm" />
+        </div>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/mes-listes" className="gap-2">
             <ListChecks className="h-4 w-4" /> Ma liste

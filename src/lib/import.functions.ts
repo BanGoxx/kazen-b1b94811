@@ -279,23 +279,20 @@ export const confirmImport = createServerFn({ method: "POST" })
         score?: number | null;
       } | null;
       if (snapshot?.key && snapshot.key === it.matched_media_key) {
-        const { error: mErr } = await context.supabase.from("media_records").upsert(
-          {
-            media_key: snapshot.key,
-            source: snapshot.source ?? "anilist",
-            external_id: snapshot.externalId ?? snapshot.key.split(":")[1] ?? "",
-            media_type: snapshot.mediaType ?? "anime",
-            title: snapshot.title ?? it.raw_title,
-            title_original: snapshot.titleOriginal ?? null,
-            poster_url: snapshot.posterUrl ?? null,
-            backdrop_url: snapshot.backdropUrl ?? null,
-            release_date: snapshot.releaseDate ?? null,
-            genres: snapshot.genres ?? [],
-            platforms: (snapshot.platforms ?? []) as never,
-            score: snapshot.score ?? null,
-          },
-          { onConflict: "media_key" },
-        );
+        const { error: mErr } = await context.supabase.rpc("seed_media_snapshot", {
+          _media_key: snapshot.key,
+          _source: snapshot.source ?? "anilist",
+          _external_id: snapshot.externalId ?? snapshot.key.split(":")[1] ?? "",
+          _media_type: snapshot.mediaType ?? "anime",
+          _title: snapshot.title ?? it.raw_title,
+          _title_original: snapshot.titleOriginal ?? undefined,
+          _poster_url: snapshot.posterUrl ?? undefined,
+          _backdrop_url: snapshot.backdropUrl ?? undefined,
+          _release_date: snapshot.releaseDate ?? undefined,
+          _genres: snapshot.genres ?? [],
+          _platforms: (snapshot.platforms ?? []) as never,
+          _score: snapshot.score ?? undefined,
+        });
         if (mErr) {
           await context.supabase
             .from("import_items")

@@ -222,7 +222,7 @@ function PublicProfilePage() {
               </div>
               {memberSince ? (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Membre depuis {memberSince}
+                  {t.profile.publicMemberSince} {memberSince}
                 </p>
               ) : null}
               {profile.show_bio && profile.bio ? (
@@ -249,16 +249,17 @@ function PublicProfilePage() {
               >
                 {profile.is_blocked_by_me ? (
                   <>
-                    <ShieldOff className="h-4 w-4" /> Débloquer
+                    <ShieldOff className="h-4 w-4" /> {t.profile.publicUnblock}
                   </>
                 ) : (
                   <>
-                    <Ban className="h-4 w-4" /> Bloquer
+                    <Ban className="h-4 w-4" /> {t.profile.publicBlock}
                   </>
                 )}
               </Button>
             </div>
           ) : null}
+
         </header>
 
         {profile.is_blocked_by_me ? (

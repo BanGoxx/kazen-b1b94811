@@ -264,25 +264,25 @@ function PublicProfilePage() {
 
         {profile.is_blocked_by_me ? (
           <p className="rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Tu as bloqué ce membre. Son contenu et la messagerie sont masqués.
+            {t.profile.publicBlockedNotice}
           </p>
         ) : null}
 
         {profile.show_stats && !profile.is_blocked_by_me ? (
           <section className="grid grid-cols-3 gap-3">
             <StatCard
-              label="Listes"
+              label={t.profile.publicStatLists}
               value={profile.playlists_count ?? 0}
               icon={<ListMusic className="h-4 w-4" />}
             />
             <StatCard
-              label="Avis"
+              label={t.profile.publicStatReviews}
               value={profile.reviews_count ?? 0}
               icon={<Star className="h-4 w-4" />}
             />
             {profile.show_favorites ? (
               <StatCard
-                label="Favoris"
+                label={t.profile.publicStatFavorites}
                 value={profile.favorites_count ?? 0}
                 icon={<Heart className="h-4 w-4" />}
               />
@@ -292,7 +292,8 @@ function PublicProfilePage() {
 
         {showFavorites && favorites && favorites.length > 0 ? (
           <section className="space-y-3">
-            <h2 className="font-display text-lg font-semibold">Favoris</h2>
+            <h2 className="font-display text-lg font-semibold">{t.profile.publicFavoritesTitle}</h2>
+
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
               {favorites.map((f) =>
                 f.source && f.external_id ? (

@@ -180,16 +180,17 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const isModerator = useIsModerator();
   const isOwner = useIsOwner();
   const { user } = useAuth();
+  const { t } = useI18n();
   const base = NAV.filter((item) => !item.memberOnly || Boolean(user));
   // Owner gets the unified "Espace fondateur" (which embeds Modération).
   // Non-owner moderators (future, post-beta) keep the direct Modération link.
-  const items = isOwner
-    ? [...base, { to: "/fondateur", label: "Espace fondateur", icon: Crown }]
+  const items: NavItem[] = isOwner
+    ? [...base, { to: "/fondateur", labelKey: "founder", icon: Crown }]
     : isModerator
-      ? [...base, { to: "/moderation", label: "Modération", icon: ShieldCheck }]
+      ? [...base, { to: "/moderation", labelKey: "moderation", icon: ShieldCheck }]
       : base;
   return (
-    <nav aria-label="Navigation principale">
+    <nav aria-label={t.nav.section}>
       <ul className="space-y-1">
         {items.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
@@ -215,7 +216,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 >
                   <Icon className="h-4 w-4" />
                 </span>
-                {item.label}
+                {t.nav[item.labelKey]}
               </Link>
             </li>
           );

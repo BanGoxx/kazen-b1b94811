@@ -65,7 +65,7 @@ function rowToMediaItem(rec: NonNullable<ListRow["media_records"]>): MediaItem {
     status: null,
     releaseDate: rec.release_date,
     nextEpisode: null,
-    episodesCount: null,
+    episodesCount: rec.episodes_count ?? null,
     seasonsCount: null,
     runtime: null,
     platforms: (rec.platforms as Platform[] | null) ?? [],
@@ -120,6 +120,7 @@ function optimisticMediaRecord(item: MediaItem): NonNullable<ListRow["media_reco
     genres: item.genres ?? [],
     platforms: item.platforms as never,
     score: item.score,
+    episodes_count: item.episodesCount ?? null,
     created_at: now,
     updated_at: now,
   } as NonNullable<ListRow["media_records"]>;

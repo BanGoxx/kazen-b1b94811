@@ -119,6 +119,7 @@ export function AssistantChat() {
   function send(text: string) {
     const t = text.trim();
     if (!t || isLoading) return;
+    setErrorNotice(null);
     sendMessage({ text: t });
     setInput("");
     setTimeout(() => inputRef.current?.focus(), 30);

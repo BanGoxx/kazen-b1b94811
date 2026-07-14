@@ -438,6 +438,54 @@ export type Database = {
         }
         Relationships: []
       }
+      fiche_correction_requests: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          external_id: string
+          id: string
+          media_title: string
+          requester_id: string
+          review_note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          category: string
+          created_at?: string
+          external_id: string
+          id?: string
+          media_title?: string
+          requester_id: string
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          external_id?: string
+          id?: string
+          media_title?: string
+          requester_id?: string
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fiche_reviews: {
         Row: {
           body: string

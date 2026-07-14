@@ -143,5 +143,12 @@ export const getLiveChatAdminStats = createServerFn({ method: "GET" })
       "live_chat_admin_stats",
     );
     if (error) throw new Error(error.message);
-    return data as Record<string, unknown>;
+    return (data ?? {}) as {
+      rooms?: Array<{ id: string; slug: string; name: string; is_active: boolean }>;
+      messages_today?: number;
+      unique_authors_today?: number;
+      hidden_today?: number;
+      restricted_members?: number;
+      open_reports?: number;
+    };
   });

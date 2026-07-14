@@ -1,85 +1,26 @@
 /**
- * KAZEN — Phase 27 i18n dictionaries.
+ * KAZEN — Phase 27.1 i18n dictionaries.
  *
- * Bilingual FR/EN foundation. French remains the source of truth (product
- * language). English is a *working translation* — legal documents in
- * particular stay tied to the French MODE B drafts and must not be
- * presented as validated versions.
+ * Bilingual FR/EN. French remains the source of truth (product language).
+ * English is a *working translation*. Legal documents stay bound to the
+ * MODE B French drafts and MUST NOT be presented as validated versions.
  *
- * Adding a namespace? Keep parity between `fr` and `en`, and prefer stable
- * semantic keys over full sentences as identifiers.
+ * Parity rule: every namespace and every key present in `fr` MUST exist in
+ * `en` with the same shape. The exported `Dict` type is derived from `fr`
+ * so TypeScript enforces this at build time.
+ *
+ * Content policy — never translate:
+ *   - user-generated content (titles, descriptions, posts, messages, bios);
+ *   - official work titles from providers (AniList, TMDB);
+ *   - proper nouns (studios, people, characters);
+ *   - values stored in the database (enums are technical identifiers).
  */
 
 export type Locale = "fr" | "en";
 export const LOCALES: readonly Locale[] = ["fr", "en"] as const;
 export const DEFAULT_LOCALE: Locale = "fr";
 
-export type Dict = {
-  common: {
-    appTagline: string;
-    dataSource: string;
-    beta: string;
-    betaNotice: string;
-    premiumBetaNotice: string;
-    learnMore: string;
-    retry: string;
-    backHome: string;
-    loading: string;
-    close: string;
-    signIn: string;
-    signOut: string;
-    accountMenu: string;
-    openMenu: string;
-    closeMenu: string;
-    search: string;
-    searchPlaceholder: string;
-    languageLabel: string;
-    languageFrench: string;
-    languageEnglish: string;
-    drafts: string;
-    manageCookies: string;
-  };
-  nav: {
-    section: string;
-    discover: string;
-    search: string;
-    forYou: string;
-    anime: string;
-    series: string;
-    movies: string;
-    animeSeason: string;
-    upcoming: string;
-    calendar: string;
-    myList: string;
-    stats: string;
-    sharedPlaylists: string;
-    community: string;
-    liveChat: string;
-    myPlaylists: string;
-    import: string;
-    support: string;
-    founder: string;
-    moderation: string;
-  };
-  legal: {
-    legalNotice: string;
-    tos: string;
-    privacy: string;
-    communityRules: string;
-  };
-  errors: {
-    pageNotFoundTitle: string;
-    pageNotFoundBody: string;
-    genericTitle: string;
-    genericBody: string;
-  };
-  assistant: {
-    openLabel: string;
-    title: string;
-  };
-};
-
-const fr: Dict = {
+const fr = {
   common: {
     appTagline: "Tes anime, séries et films. Enfin au même endroit.",
     dataSource: "Données : AniList & TMDB.",
@@ -92,7 +33,27 @@ const fr: Dict = {
     retry: "Réessayer",
     backHome: "Retour à l'accueil",
     loading: "Chargement…",
+    loadingContent: "Chargement du contenu…",
+    loadingSource: "Connexion à la source de données…",
     close: "Fermer",
+    cancel: "Annuler",
+    confirm: "Confirmer",
+    save: "Enregistrer",
+    edit: "Modifier",
+    delete: "Supprimer",
+    remove: "Retirer",
+    add: "Ajouter",
+    create: "Créer",
+    update: "Mettre à jour",
+    next: "Suivant",
+    previous: "Précédent",
+    seeMore: "Voir plus",
+    seeAll: "Tout voir",
+    showMore: "Afficher plus",
+    showLess: "Afficher moins",
+    copy: "Copier",
+    copied: "Copié",
+    share: "Partager",
     signIn: "Se connecter",
     signOut: "Se déconnecter",
     accountMenu: "Menu du compte",
@@ -105,6 +66,12 @@ const fr: Dict = {
     languageEnglish: "English",
     drafts: "Brouillons",
     manageCookies: "Gérer mes cookies",
+    yes: "Oui",
+    no: "Non",
+    optional: "optionnel",
+    required: "requis",
+    unknown: "Inconnu",
+    notAvailable: "Non disponible",
   },
   nav: {
     section: "Navigation principale",
@@ -133,6 +100,9 @@ const fr: Dict = {
     tos: "CGU",
     privacy: "Confidentialité",
     communityRules: "Règles communautaires",
+    draftBadge: "Brouillon interne",
+    draftWarning:
+      "Ce document est un brouillon de travail interne. Il n'a pas de valeur contractuelle tant qu'il n'a pas été validé.",
   },
   errors: {
     pageNotFoundTitle: "Page introuvable",
@@ -141,27 +111,337 @@ const fr: Dict = {
     genericTitle: "Cette page n'a pas pu se charger",
     genericBody:
       "Une erreur est survenue de notre côté. Réessayez ou revenez à l'accueil.",
+    network: "Problème réseau. Vérifiez votre connexion et réessayez.",
+    permission: "Vous n'avez pas les permissions nécessaires.",
+    notFound: "Contenu introuvable.",
+    server: "Erreur serveur. Réessayez dans quelques instants.",
+    validation: "Certaines informations sont invalides.",
+    unknown: "Une erreur inattendue est survenue.",
+    authInvalidCredentials: "E-mail ou mot de passe incorrect.",
+    authEmailNotConfirmed: "Merci de confirmer votre e-mail avant de vous connecter.",
+    authUserExists: "Un compte existe déjà avec cet e-mail.",
+    authWeakPassword: "Mot de passe trop court (6 caractères minimum).",
+    authRateLimit: "Trop de tentatives. Réessayez dans quelques minutes.",
+    authGoogleUnavailable: "Connexion Google impossible.",
+    aiUnavailable: "L'assistant est momentanément indisponible.",
+    aiQuotaExceeded: "Quota atteint. Réessayez plus tard.",
+    realtimeReconnecting: "Reconnexion en cours…",
   },
   assistant: {
     openLabel: "Ouvrir l'assistant KAZEN",
     title: "Assistant",
+    placeholder: "Posez votre question…",
+    intro: "Je peux vous aider à découvrir des titres et à naviguer sur KAZEN.",
+    disclaimer: "Réponses générées automatiquement. Vérifiez les informations importantes.",
+    quotaHint: "Quota quotidien limité pendant la bêta.",
+    send: "Envoyer",
+    thinking: "Réflexion…",
+    empty: "Aucune conversation pour le moment.",
   },
-};
+  auth: {
+    loginTitle: "Connexion",
+    signupTitle: "Créer un compte",
+    loginTagline: "Tes anime, séries et films. Enfin au même endroit.",
+    signupTagline: "Créez votre compte et suivez tout au même endroit.",
+    continueGoogle: "Continuer avec Google",
+    orSeparator: "ou",
+    email: "E-mail",
+    emailPlaceholder: "vous@exemple.com",
+    password: "Mot de passe",
+    passwordPlaceholder: "••••••••",
+    displayName: "Nom d'affichage",
+    displayNamePlaceholder: "Votre pseudo",
+    submitLogin: "Se connecter",
+    submitSignup: "Créer mon compte",
+    switchToSignup: "Créer un compte",
+    switchToLogin: "Se connecter",
+    hasAccount: "Déjà un compte ?",
+    noAccount: "Pas encore de compte ?",
+    ageConfirmPrefix: "Je confirme avoir l'âge requis pour utiliser KAZEN et accepter ses ",
+    ageConfirmTos: "conditions d'utilisation",
+    ageConfirmAnd: " et sa ",
+    ageConfirmPrivacy: "politique de confidentialité",
+    ageConfirmSuffix: ".",
+    ageConfirmRequired: "Merci de confirmer que tu as l'âge requis pour utiliser KAZEN.",
+    signupSuccess: "Compte créé ! Vérifiez votre e-mail si une confirmation est demandée.",
+    loginSuccess: "Bienvenue !",
+    genericError: "Une erreur est survenue.",
+    metaLoginTitle: "Connexion — KAZEN",
+    metaLoginDescription:
+      "Connectez-vous à KAZEN pour suivre vos anime, séries et films et gérer vos listes personnelles.",
+  },
+  tracking: {
+    a_voir: "À voir",
+    en_cours: "En cours",
+    termine: "Terminé",
+    en_pause: "En pause",
+    abandonne: "Abandonné",
+    priorityLow: "Priorité basse",
+    priorityNormal: "Priorité normale",
+    priorityHigh: "Priorité haute",
+    progress: "Progression",
+    episode: "Épisode",
+    season: "Saison",
+    rating: "Note",
+    startedAt: "Date de début",
+    finishedAt: "Date de fin",
+    updatedAt: "Mise à jour",
+    rewatchCount: "Revisionnages",
+    addedToList: "Ajouté à votre liste.",
+    removedFromList: "Retiré de votre liste.",
+    updated: "Suivi mis à jour.",
+  },
+  status: {
+    a_venir: "À venir",
+    en_cours: "En cours",
+    termine: "Terminé",
+  },
+  mediaTypes: {
+    anime: "Anime",
+    series: "Série",
+    movie: "Film",
+  },
+  catalog: {
+    filters: "Filtres",
+    sort: "Trier",
+    genre: "Genre",
+    year: "Année",
+    format: "Format",
+    reset: "Réinitialiser",
+    apply: "Appliquer",
+    loadMore: "Charger plus",
+    empty: "Aucun contenu disponible.",
+    emptyHint: "Essayez d'ajuster vos filtres ou revenez plus tard.",
+    resultsCount: "{count} résultat(s)",
+    pageOf: "Page {current} sur {total}",
+  },
+  fiche: {
+    overview: "Aperçu",
+    episodes: "Épisodes",
+    seasons: "Saisons",
+    cast: "Casting",
+    crew: "Équipe",
+    related: "Titres liés",
+    recommendations: "Recommandations",
+    trailer: "Bande-annonce",
+    whereToWatch: "Où regarder",
+    reviews: "Avis",
+    articles: "Articles",
+    requestCorrection: "Signaler une correction",
+    addToList: "Ajouter à ma liste",
+    inMyList: "Dans ma liste",
+    addToPlaylist: "Ajouter à une playlist",
+    synopsisEmpty: "Aucun synopsis disponible.",
+  },
+  playlist: {
+    myPlaylists: "Mes playlists",
+    createTitle: "Créer une playlist",
+    editTitle: "Modifier la playlist",
+    name: "Nom",
+    description: "Description",
+    visibility: "Visibilité",
+    visibilityPublic: "Publique",
+    visibilityPrivate: "Privée",
+    visibilityUnlisted: "Non répertoriée",
+    addItem: "Ajouter",
+    removeItem: "Retirer",
+    invite: "Inviter",
+    leave: "Quitter",
+    duplicate: "Dupliquer",
+    empty: "Aucune playlist pour le moment.",
+    created: "Playlist créée.",
+    updated: "Playlist mise à jour.",
+    deleted: "Playlist supprimée.",
+  },
+  search: {
+    placeholder: "Rechercher un anime, une série, un film…",
+    recent: "Recherches récentes",
+    noResults: "Aucun résultat.",
+    noResultsHint: "Essayez d'autres mots-clés.",
+    loading: "Recherche en cours…",
+    suggestions: "Suggestions",
+    all: "Tout",
+  },
+  notifications: {
+    title: "Notifications",
+    empty: "Aucune notification.",
+    markAllRead: "Tout marquer comme lu",
+    settings: "Préférences",
+    unreadCount: "{count} non lue(s)",
+    categories: {
+      social: "Communauté",
+      tracking: "Suivi",
+      system: "Système",
+      moderation: "Modération",
+    },
+  },
+  forum: {
+    newTopic: "Nouveau sujet",
+    reply: "Répondre",
+    edit: "Modifier",
+    delete: "Supprimer",
+    report: "Signaler",
+    lock: "Verrouiller",
+    unlock: "Déverrouiller",
+    pin: "Épingler",
+    unpin: "Désépingler",
+    sortRecent: "Récents",
+    sortPopular: "Populaires",
+    empty: "Aucun sujet pour le moment.",
+    posted: "Publié",
+    edited: "Modifié",
+  },
+  chatPrivate: {
+    title: "Messages",
+    newConversation: "Nouvelle conversation",
+    send: "Envoyer",
+    placeholder: "Écrire un message…",
+    block: "Bloquer",
+    unblock: "Débloquer",
+    report: "Signaler",
+    read: "Lu",
+    unread: "Non lu",
+    empty: "Aucune conversation.",
+    offline: "Hors ligne",
+    loading: "Chargement des messages…",
+  },
+  chatLive: {
+    title: "Chat en direct",
+    send: "Envoyer",
+    placeholder: "Écrire un message…",
+    edit: "Modifier",
+    delete: "Supprimer",
+    report: "Signaler",
+    reconnect: "Reconnecter",
+    connected: "Connecté",
+    disconnected: "Déconnecté",
+    newMessages: "Nouveaux messages",
+    empty: "Aucun message pour le moment.",
+  },
+  imports: {
+    title: "Importer",
+    chooseProvider: "Choisir un format",
+    uploadFile: "Téléverser un fichier",
+    preview: "Aperçu",
+    confirm: "Confirmer l'import",
+    rollback: "Annuler l'import",
+    history: "Historique",
+    duplicates: "Doublons",
+    rejected: "Rejetés",
+    imported: "Importés",
+    limitReached: "Limite atteinte.",
+    inProgress: "Import en cours…",
+    success: "Import terminé.",
+    error: "Import échoué.",
+  },
+  calendar: {
+    today: "Aujourd'hui",
+    tomorrow: "Demain",
+    thisWeek: "Cette semaine",
+    inMyList: "Dans ma liste",
+    releases: "Sorties",
+    empty: "Aucune sortie prévue.",
+  },
+  founder: {
+    title: "Espace fondateur",
+    diagnostics: "Diagnostics",
+    audit: "Audit",
+    roles: "Rôles",
+    reports: "Signalements",
+    settings: "Réglages",
+    tests: "Tests",
+  },
+  consent: {
+    bannerTitle: "Vos préférences",
+    bannerBody:
+      "Nous utilisons des cookies techniques pour faire fonctionner KAZEN, et des services tiers (YouTube) que vous pouvez activer.",
+    acceptAll: "Tout accepter",
+    rejectAll: "Tout refuser",
+    customize: "Personnaliser",
+    save: "Enregistrer mes choix",
+    categoryEssential: "Essentiels",
+    categoryFunctional: "Fonctionnels",
+    categoryYouTube: "YouTube (contenus intégrés)",
+    withdraw: "Retirer mon consentement",
+  },
+  profile: {
+    title: "Profil",
+    privacy: "Confidentialité",
+    preferences: "Préférences",
+    emailPrefs: "E-mails",
+    notificationsPrefs: "Notifications",
+    chatPrefs: "Messagerie",
+    deleteAccount: "Supprimer mon compte",
+    deleteConfirm: "Cette action est irréversible.",
+    deleteRequested: "Demande de suppression enregistrée.",
+    saved: "Préférences enregistrées.",
+  },
+  toasts: {
+    genericSuccess: "Opération réussie.",
+    genericError: "Une erreur est survenue.",
+    savedShort: "Enregistré.",
+    copiedShort: "Copié.",
+  },
+  empty: {
+    generic: "Rien à afficher pour le moment.",
+    tryAgain: "Essayez de rafraîchir la page.",
+  },
+  meta: {
+    home: {
+      title: "KAZEN — Anime, séries et films",
+      description:
+        "Découvrez, suivez et organisez vos anime, séries et films préférés dans une expérience premium en français.",
+    },
+    discover: {
+      title: "Découverte — KAZEN",
+      description: "Explorez les nouveautés et les tendances anime, séries et films.",
+    },
+    search: {
+      title: "Recherche — KAZEN",
+      description: "Trouvez un anime, une série ou un film dans le catalogue KAZEN.",
+    },
+    notFound: {
+      title: "Page introuvable — KAZEN",
+      description: "Cette page n'existe pas.",
+    },
+  },
+} as const;
+
+export type Dict = typeof fr;
 
 const en: Dict = {
   common: {
     appTagline: "Your anime, TV shows and movies. Finally in one place.",
     dataSource: "Data: AniList & TMDB.",
     beta: "Beta",
-    betaNotice:
-      "KAZEN is currently in beta. Some features may still evolve.",
+    betaNotice: "KAZEN is currently in beta. Some features may still evolve.",
     premiumBetaNotice:
       "During the beta, KAZEN Premium is free for every member.",
     learnMore: "Learn more",
     retry: "Try again",
     backHome: "Back to home",
     loading: "Loading…",
+    loadingContent: "Loading content…",
+    loadingSource: "Connecting to the data source…",
     close: "Close",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    save: "Save",
+    edit: "Edit",
+    delete: "Delete",
+    remove: "Remove",
+    add: "Add",
+    create: "Create",
+    update: "Update",
+    next: "Next",
+    previous: "Previous",
+    seeMore: "See more",
+    seeAll: "See all",
+    showMore: "Show more",
+    showLess: "Show less",
+    copy: "Copy",
+    copied: "Copied",
+    share: "Share",
     signIn: "Sign in",
     signOut: "Sign out",
     accountMenu: "Account menu",
@@ -174,6 +454,12 @@ const en: Dict = {
     languageEnglish: "English",
     drafts: "Drafts",
     manageCookies: "Manage cookies",
+    yes: "Yes",
+    no: "No",
+    optional: "optional",
+    required: "required",
+    unknown: "Unknown",
+    notAvailable: "Not available",
   },
   nav: {
     section: "Main navigation",
@@ -202,6 +488,9 @@ const en: Dict = {
     tos: "Terms",
     privacy: "Privacy",
     communityRules: "Community rules",
+    draftBadge: "Internal draft",
+    draftWarning:
+      "This document is an internal working draft. It has no contractual value until it has been validated.",
   },
   errors: {
     pageNotFoundTitle: "Page not found",
@@ -210,10 +499,299 @@ const en: Dict = {
     genericTitle: "This page couldn't load",
     genericBody:
       "Something went wrong on our side. Try again or go back home.",
+    network: "Network issue. Check your connection and try again.",
+    permission: "You don't have the required permissions.",
+    notFound: "Content not found.",
+    server: "Server error. Try again in a moment.",
+    validation: "Some information is invalid.",
+    unknown: "An unexpected error occurred.",
+    authInvalidCredentials: "Incorrect email or password.",
+    authEmailNotConfirmed: "Please confirm your email before signing in.",
+    authUserExists: "An account already exists with this email.",
+    authWeakPassword: "Password too short (6 characters minimum).",
+    authRateLimit: "Too many attempts. Try again in a few minutes.",
+    authGoogleUnavailable: "Google sign-in is unavailable.",
+    aiUnavailable: "The assistant is temporarily unavailable.",
+    aiQuotaExceeded: "Quota reached. Try again later.",
+    realtimeReconnecting: "Reconnecting…",
   },
   assistant: {
     openLabel: "Open the KAZEN assistant",
     title: "Assistant",
+    placeholder: "Ask your question…",
+    intro: "I can help you discover titles and navigate KAZEN.",
+    disclaimer: "Responses are generated automatically. Double-check important information.",
+    quotaHint: "Daily quota is limited during the beta.",
+    send: "Send",
+    thinking: "Thinking…",
+    empty: "No conversation yet.",
+  },
+  auth: {
+    loginTitle: "Sign in",
+    signupTitle: "Create an account",
+    loginTagline: "Your anime, TV shows and movies. Finally in one place.",
+    signupTagline: "Create your account and track everything in one place.",
+    continueGoogle: "Continue with Google",
+    orSeparator: "or",
+    email: "Email",
+    emailPlaceholder: "you@example.com",
+    password: "Password",
+    passwordPlaceholder: "••••••••",
+    displayName: "Display name",
+    displayNamePlaceholder: "Your handle",
+    submitLogin: "Sign in",
+    submitSignup: "Create my account",
+    switchToSignup: "Create an account",
+    switchToLogin: "Sign in",
+    hasAccount: "Already have an account?",
+    noAccount: "Don't have an account yet?",
+    ageConfirmPrefix: "I confirm I meet the age requirement to use KAZEN and accept its ",
+    ageConfirmTos: "terms of use",
+    ageConfirmAnd: " and its ",
+    ageConfirmPrivacy: "privacy policy",
+    ageConfirmSuffix: ".",
+    ageConfirmRequired: "Please confirm you meet the age requirement to use KAZEN.",
+    signupSuccess: "Account created! Check your email if confirmation is requested.",
+    loginSuccess: "Welcome!",
+    genericError: "Something went wrong.",
+    metaLoginTitle: "Sign in — KAZEN",
+    metaLoginDescription:
+      "Sign in to KAZEN to track your anime, TV shows and movies and manage your personal lists.",
+  },
+  tracking: {
+    a_voir: "To watch",
+    en_cours: "Watching",
+    termine: "Completed",
+    en_pause: "On hold",
+    abandonne: "Dropped",
+    priorityLow: "Low priority",
+    priorityNormal: "Normal priority",
+    priorityHigh: "High priority",
+    progress: "Progress",
+    episode: "Episode",
+    season: "Season",
+    rating: "Rating",
+    startedAt: "Started",
+    finishedAt: "Finished",
+    updatedAt: "Updated",
+    rewatchCount: "Rewatches",
+    addedToList: "Added to your list.",
+    removedFromList: "Removed from your list.",
+    updated: "Tracking updated.",
+  },
+  status: {
+    a_venir: "Upcoming",
+    en_cours: "Ongoing",
+    termine: "Finished",
+  },
+  mediaTypes: {
+    anime: "Anime",
+    series: "TV show",
+    movie: "Movie",
+  },
+  catalog: {
+    filters: "Filters",
+    sort: "Sort",
+    genre: "Genre",
+    year: "Year",
+    format: "Format",
+    reset: "Reset",
+    apply: "Apply",
+    loadMore: "Load more",
+    empty: "No content available.",
+    emptyHint: "Try adjusting your filters or come back later.",
+    resultsCount: "{count} result(s)",
+    pageOf: "Page {current} of {total}",
+  },
+  fiche: {
+    overview: "Overview",
+    episodes: "Episodes",
+    seasons: "Seasons",
+    cast: "Cast",
+    crew: "Crew",
+    related: "Related titles",
+    recommendations: "Recommendations",
+    trailer: "Trailer",
+    whereToWatch: "Where to watch",
+    reviews: "Reviews",
+    articles: "Articles",
+    requestCorrection: "Report a correction",
+    addToList: "Add to my list",
+    inMyList: "In my list",
+    addToPlaylist: "Add to a playlist",
+    synopsisEmpty: "No synopsis available.",
+  },
+  playlist: {
+    myPlaylists: "My playlists",
+    createTitle: "Create a playlist",
+    editTitle: "Edit playlist",
+    name: "Name",
+    description: "Description",
+    visibility: "Visibility",
+    visibilityPublic: "Public",
+    visibilityPrivate: "Private",
+    visibilityUnlisted: "Unlisted",
+    addItem: "Add",
+    removeItem: "Remove",
+    invite: "Invite",
+    leave: "Leave",
+    duplicate: "Duplicate",
+    empty: "No playlists yet.",
+    created: "Playlist created.",
+    updated: "Playlist updated.",
+    deleted: "Playlist deleted.",
+  },
+  search: {
+    placeholder: "Search for anime, TV shows or movies…",
+    recent: "Recent searches",
+    noResults: "No results.",
+    noResultsHint: "Try different keywords.",
+    loading: "Searching…",
+    suggestions: "Suggestions",
+    all: "All",
+  },
+  notifications: {
+    title: "Notifications",
+    empty: "No notifications.",
+    markAllRead: "Mark all as read",
+    settings: "Preferences",
+    unreadCount: "{count} unread",
+    categories: {
+      social: "Community",
+      tracking: "Tracking",
+      system: "System",
+      moderation: "Moderation",
+    },
+  },
+  forum: {
+    newTopic: "New topic",
+    reply: "Reply",
+    edit: "Edit",
+    delete: "Delete",
+    report: "Report",
+    lock: "Lock",
+    unlock: "Unlock",
+    pin: "Pin",
+    unpin: "Unpin",
+    sortRecent: "Recent",
+    sortPopular: "Popular",
+    empty: "No topics yet.",
+    posted: "Posted",
+    edited: "Edited",
+  },
+  chatPrivate: {
+    title: "Messages",
+    newConversation: "New conversation",
+    send: "Send",
+    placeholder: "Write a message…",
+    block: "Block",
+    unblock: "Unblock",
+    report: "Report",
+    read: "Read",
+    unread: "Unread",
+    empty: "No conversations.",
+    offline: "Offline",
+    loading: "Loading messages…",
+  },
+  chatLive: {
+    title: "Live chat",
+    send: "Send",
+    placeholder: "Write a message…",
+    edit: "Edit",
+    delete: "Delete",
+    report: "Report",
+    reconnect: "Reconnect",
+    connected: "Connected",
+    disconnected: "Disconnected",
+    newMessages: "New messages",
+    empty: "No messages yet.",
+  },
+  imports: {
+    title: "Import",
+    chooseProvider: "Choose a format",
+    uploadFile: "Upload a file",
+    preview: "Preview",
+    confirm: "Confirm import",
+    rollback: "Undo import",
+    history: "History",
+    duplicates: "Duplicates",
+    rejected: "Rejected",
+    imported: "Imported",
+    limitReached: "Limit reached.",
+    inProgress: "Import in progress…",
+    success: "Import complete.",
+    error: "Import failed.",
+  },
+  calendar: {
+    today: "Today",
+    tomorrow: "Tomorrow",
+    thisWeek: "This week",
+    inMyList: "In my list",
+    releases: "Releases",
+    empty: "No upcoming releases.",
+  },
+  founder: {
+    title: "Founder console",
+    diagnostics: "Diagnostics",
+    audit: "Audit",
+    roles: "Roles",
+    reports: "Reports",
+    settings: "Settings",
+    tests: "Tests",
+  },
+  consent: {
+    bannerTitle: "Your preferences",
+    bannerBody:
+      "We use technical cookies to run KAZEN, plus third-party services (YouTube) that you can enable.",
+    acceptAll: "Accept all",
+    rejectAll: "Reject all",
+    customize: "Customize",
+    save: "Save my choices",
+    categoryEssential: "Essential",
+    categoryFunctional: "Functional",
+    categoryYouTube: "YouTube (embedded content)",
+    withdraw: "Withdraw my consent",
+  },
+  profile: {
+    title: "Profile",
+    privacy: "Privacy",
+    preferences: "Preferences",
+    emailPrefs: "Email",
+    notificationsPrefs: "Notifications",
+    chatPrefs: "Messaging",
+    deleteAccount: "Delete my account",
+    deleteConfirm: "This action is irreversible.",
+    deleteRequested: "Deletion request recorded.",
+    saved: "Preferences saved.",
+  },
+  toasts: {
+    genericSuccess: "Done.",
+    genericError: "Something went wrong.",
+    savedShort: "Saved.",
+    copiedShort: "Copied.",
+  },
+  empty: {
+    generic: "Nothing to display for now.",
+    tryAgain: "Try refreshing the page.",
+  },
+  meta: {
+    home: {
+      title: "KAZEN — Anime, TV shows and movies",
+      description:
+        "Discover, track and organize your favorite anime, TV shows and movies in a premium experience.",
+    },
+    discover: {
+      title: "Discover — KAZEN",
+      description: "Explore trending anime, TV shows and movies.",
+    },
+    search: {
+      title: "Search — KAZEN",
+      description: "Find an anime, TV show or movie in the KAZEN catalog.",
+    },
+    notFound: {
+      title: "Page not found — KAZEN",
+      description: "This page does not exist.",
+    },
   },
 };
 

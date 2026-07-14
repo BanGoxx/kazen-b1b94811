@@ -48,6 +48,7 @@ import { Route as FranchiseSourceIdRouteImport } from './routes/franchise.$sourc
 import { Route as EntiteKindIdRouteImport } from './routes/entite.$kind.$id'
 import { Route as CommunauteTIdRouteImport } from './routes/communaute.t.$id'
 import { Route as CommunauteCSlugRouteImport } from './routes/communaute.c.$slug'
+import { Route as AuthenticatedCommunauteDirectRouteImport } from './routes/_authenticated/communaute.direct'
 
 const SoutienRoute = SoutienRouteImport.update({
   id: '/soutien',
@@ -246,6 +247,12 @@ const CommunauteCSlugRoute = CommunauteCSlugRouteImport.update({
   path: '/communaute/c/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCommunauteDirectRoute =
+  AuthenticatedCommunauteDirectRouteImport.update({
+    id: '/communaute/direct',
+    path: '/communaute/direct',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
+  '/communaute/direct': typeof AuthenticatedCommunauteDirectRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
@@ -319,6 +327,7 @@ export interface FileRoutesByTo {
   '/actualites': typeof ActualitesIndexRoute
   '/anime': typeof AnimeIndexRoute
   '/communaute': typeof CommunauteIndexRoute
+  '/communaute/direct': typeof AuthenticatedCommunauteDirectRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
@@ -361,6 +370,7 @@ export interface FileRoutesById {
   '/actualites/': typeof ActualitesIndexRoute
   '/anime/': typeof AnimeIndexRoute
   '/communaute/': typeof CommunauteIndexRoute
+  '/_authenticated/communaute/direct': typeof AuthenticatedCommunauteDirectRoute
   '/communaute/c/$slug': typeof CommunauteCSlugRoute
   '/communaute/t/$id': typeof CommunauteTIdRoute
   '/entite/$kind/$id': typeof EntiteKindIdRoute
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/actualites/'
     | '/anime/'
     | '/communaute/'
+    | '/communaute/direct'
     | '/communaute/c/$slug'
     | '/communaute/t/$id'
     | '/entite/$kind/$id'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/anime'
     | '/communaute'
+    | '/communaute/direct'
     | '/communaute/c/$slug'
     | '/communaute/t/$id'
     | '/entite/$kind/$id'
@@ -483,6 +495,7 @@ export interface FileRouteTypes {
     | '/actualites/'
     | '/anime/'
     | '/communaute/'
+    | '/_authenticated/communaute/direct'
     | '/communaute/c/$slug'
     | '/communaute/t/$id'
     | '/entite/$kind/$id'
@@ -796,6 +809,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunauteCSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/communaute/direct': {
+      id: '/_authenticated/communaute/direct'
+      path: '/communaute/direct'
+      fullPath: '/communaute/direct'
+      preLoaderRoute: typeof AuthenticatedCommunauteDirectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -810,6 +830,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedRecapRoute: typeof AuthenticatedRecapRoute
   AuthenticatedStatistiquesRoute: typeof AuthenticatedStatistiquesRoute
+  AuthenticatedCommunauteDirectRoute: typeof AuthenticatedCommunauteDirectRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -823,6 +844,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedRecapRoute: AuthenticatedRecapRoute,
   AuthenticatedStatistiquesRoute: AuthenticatedStatistiquesRoute,
+  AuthenticatedCommunauteDirectRoute: AuthenticatedCommunauteDirectRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

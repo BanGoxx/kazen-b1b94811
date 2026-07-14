@@ -1,0 +1,2 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.live_chat_messages;
+ALTER TABLE public.live_chat_messages REPLICA IDENTITY FULL;

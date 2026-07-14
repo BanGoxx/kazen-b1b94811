@@ -22,6 +22,7 @@ import {
   DownloadCloud,
   MessagesSquare,
   BarChart3,
+  Radio,
 
 
 
@@ -73,6 +74,7 @@ const NAV: NavItem[] = [
   { to: "/statistiques", label: "Statistiques", icon: BarChart3, memberOnly: true },
   { to: "/listes", label: "Playlists partagées", icon: ListMusic },
   { to: "/communaute", label: "Communauté", icon: MessagesSquare },
+  { to: "/communaute/direct", label: "Chat en direct", icon: Radio, memberOnly: true },
   { to: "/mes-playlists", label: "Mes playlists", icon: ListMusic },
   { to: "/import", label: "Importer", icon: DownloadCloud, memberOnly: true },
 

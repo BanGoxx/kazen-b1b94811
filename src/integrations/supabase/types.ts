@@ -954,6 +954,134 @@ export type Database = {
           },
         ]
       }
+      live_chat_member_state: {
+        Row: {
+          last_read_at: string | null
+          muted_at: string | null
+          restricted_by: string | null
+          restricted_reason: string | null
+          restricted_until: string | null
+          room_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string | null
+          muted_at?: string | null
+          restricted_by?: string | null
+          restricted_reason?: string | null
+          restricted_until?: string | null
+          room_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string | null
+          muted_at?: string | null
+          restricted_by?: string | null
+          restricted_reason?: string | null
+          restricted_until?: string | null
+          room_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_member_state_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_messages: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          edited_at: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          reply_to_id: string | null
+          room_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          reply_to_id?: string | null
+          room_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          edited_at?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          reply_to_id?: string | null
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_chat_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_rooms: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_enrichments: {
         Row: {
           backdrop_url_override: string | null
@@ -2030,6 +2158,7 @@ export type Database = {
       delete_chat_message: { Args: { _id: string }; Returns: undefined }
       delete_forum_post: { Args: { _id: string }; Returns: undefined }
       delete_forum_topic: { Args: { _id: string }; Returns: undefined }
+      delete_live_chat_message: { Args: { _id: string }; Returns: undefined }
       delete_playlist_review: { Args: { _id: string }; Returns: undefined }
       edit_chat_message: {
         Args: { _body: string; _id: string }
@@ -2041,6 +2170,10 @@ export type Database = {
       }
       edit_forum_topic: {
         Args: { _body: string; _id: string; _title: string }
+        Returns: undefined
+      }
+      edit_live_chat_message: {
+        Args: { _body: string; _id: string }
         Returns: undefined
       }
       forum_notify: {
@@ -2189,6 +2322,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      hide_live_chat_message: {
+        Args: { _id: string; _reason?: string }
+        Returns: undefined
+      }
       is_chat_participant: {
         Args: { _conv: string; _user: string }
         Returns: boolean
@@ -2202,6 +2339,7 @@ export type Database = {
         Args: { _playlist: string; _user: string }
         Returns: boolean
       }
+      live_chat_admin_stats: { Args: never; Returns: Json }
       manage_forum_category: {
         Args: {
           _description: string
@@ -2215,6 +2353,7 @@ export type Database = {
         Returns: string
       }
       mark_conversation_read: { Args: { _id: string }; Returns: undefined }
+      mark_live_chat_read: { Args: { _room: string }; Returns: undefined }
       moderate_clear_forum_cover: {
         Args: { _note?: string; _topic: string }
         Returns: string
@@ -2283,6 +2422,10 @@ export type Database = {
         Args: { _details?: string; _id: string; _reason: string }
         Returns: string
       }
+      report_live_chat_message: {
+        Args: { _details?: string; _id: string; _reason: string }
+        Returns: string
+      }
       request_conversation: { Args: { _target: string }; Returns: string }
       request_playlist_join: {
         Args: { _message?: string; _playlist: string }
@@ -2297,6 +2440,16 @@ export type Database = {
           _note?: string
           _report_id: string
           _status: Database["public"]["Enums"]["report_status"]
+        }
+        Returns: undefined
+      }
+      restore_live_chat_message: { Args: { _id: string }; Returns: undefined }
+      restrict_live_chat_member: {
+        Args: {
+          _minutes: number
+          _reason?: string
+          _room: string
+          _user: string
         }
         Returns: undefined
       }
@@ -2332,8 +2485,16 @@ export type Database = {
         Args: { _body: string; _conv: string }
         Returns: string
       }
+      send_live_chat_message: {
+        Args: { _body: string; _reply_to?: string; _room: string }
+        Returns: string
+      }
       set_forum_topic_cover: {
         Args: { _alt?: string; _path: string; _source?: string; _topic: string }
+        Returns: undefined
+      }
+      set_live_chat_room_active: {
+        Args: { _active: boolean; _room: string }
         Returns: undefined
       }
       set_member_block: {
@@ -2357,6 +2518,10 @@ export type Database = {
           _target_type: string
         }
         Returns: string
+      }
+      unrestrict_live_chat_member: {
+        Args: { _room: string; _user: string }
+        Returns: undefined
       }
       upsert_playlist_review: {
         Args: { _body: string; _playlist: string; _rating?: number }
@@ -2388,6 +2553,7 @@ export type Database = {
         | "playlist_item"
         | "playlist_review"
         | "chat_message"
+        | "live_chat_message"
       playlist_collab_role: "viewer" | "editor"
       playlist_request_status: "pending" | "accepted" | "declined" | "cancelled"
       priority_level: "basse" | "normale" | "haute"
@@ -2546,6 +2712,7 @@ export const Constants = {
         "playlist_item",
         "playlist_review",
         "chat_message",
+        "live_chat_message",
       ],
       playlist_collab_role: ["viewer", "editor"],
       playlist_request_status: ["pending", "accepted", "declined", "cancelled"],

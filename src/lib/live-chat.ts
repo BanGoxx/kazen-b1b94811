@@ -28,6 +28,40 @@ export const LIVE_CHAT_ROOM_SLUG = "general";
 export const LIVE_CHAT_PAGE_SIZE = 40;
 const POLL_INTERVAL_MS = 20_000;
 
+// Module-level Realtime connection status per room. Lets the messages query
+// gate its polling fallback so it only runs while Realtime is NOT connected.
+type RtStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected";
+const rtStatusByRoom = new Map<string, RtStatus>();
+const rtStatusListeners = new Set<() => void>();
+function setRtStatus(roomId: string, s: RtStatus) {
+  rtStatusByRoom.set(roomId, s);
+  rtStatusListeners.forEach((fn) => fn());
+}
+function useRealtimeConnected(roomId: string | undefined): boolean {
+  const [connected, setConnected] = useState(
+    !!roomId && rtStatusByRoom.get(roomId) === "connected",
+  );
+  useEffect(() => {
+    if (!roomId) {
+      setConnected(false);
+      return;
+    }
+    const update = () =>
+      setConnected(rtStatusByRoom.get(roomId) === "connected");
+    update();
+    rtStatusListeners.add(update);
+    return () => {
+      rtStatusListeners.delete(update);
+    };
+  }, [roomId]);
+  return connected;
+}
+
 export interface LiveChatAuthor {
   id: string;
   display_name: string | null;

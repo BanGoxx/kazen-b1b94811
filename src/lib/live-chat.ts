@@ -126,7 +126,8 @@ async function hydrateAuthors(
 
 export function useLiveChatMessages(roomId: string | undefined) {
   const { user } = useAuth();
-  return useInfiniteQuery({
+  type Page = { items: LiveChatMessage[]; nextCursor: string | null };
+  return useInfiniteQuery<Page, Error, { pages: Page[]; pageParams: unknown[] }, readonly unknown[], string | null>({
     queryKey: ["live-chat", "messages", roomId],
     enabled: !!user && !!roomId,
     refetchInterval: POLL_INTERVAL_MS,

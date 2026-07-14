@@ -17,6 +17,7 @@ export interface MediaSnapshot {
   genres: string[];
   platforms: unknown;
   score: number | null;
+  episodesCount: number | null;
 }
 
 export interface ListPatch {

@@ -171,7 +171,11 @@ export function useListMutations() {
   const upsertFn = useServerFn(upsertListItem);
   const removeFn = useServerFn(removeListItem);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["my-list"] });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["my-list"] });
+    // Personal statistics derive from the same tracking data.
+    qc.invalidateQueries({ queryKey: ["my-stats"] });
+  };
 
   const upsert = useMutation({
     mutationFn: (vars: UpsertVars) =>

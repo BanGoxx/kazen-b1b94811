@@ -337,7 +337,7 @@ function ProfilePage() {
           </div>
 
           <div className="space-y-3">
-            <Label>Styles favoris</Label>
+            <Label>{t.profile.favoriteStyles}</Label>
             <div className="flex flex-wrap gap-2">
               {STYLE_OPTIONS.map((s) => (
                 <Chip
@@ -359,9 +359,9 @@ function ProfilePage() {
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
-              <p className="font-display text-base font-bold">Pour vous</p>
+              <p className="font-display text-base font-bold">{t.profile.forYouTitle}</p>
               <p className="text-sm text-muted-foreground">
-                Des suggestions adaptées à tes goûts et à ton historique.
+                {t.profile.forYouSubtitle}
               </p>
             </div>
           </div>
@@ -369,12 +369,12 @@ function ProfilePage() {
             <RecommendationAssistant
               trigger={
                 <Button variant="outline" size="sm" className="gap-2">
-                  <Wand2 className="h-4 w-4" /> Assistant
+                  <Wand2 className="h-4 w-4" /> {t.profile.assistant}
                 </Button>
               }
             />
             <Button asChild variant="aurora" size="sm">
-              <Link to="/pour-vous">Voir</Link>
+              <Link to="/pour-vous">{t.profile.forYouView}</Link>
             </Button>
           </div>
         </section>
@@ -397,7 +397,7 @@ function ProfilePage() {
           <div className="flex justify-start">
             <Button asChild variant="outline" size="sm" className="gap-2">
               <Link to="/membre/$id" params={{ id: user.id }}>
-                <UserRound className="h-4 w-4" /> Voir mon profil public
+                <UserRound className="h-4 w-4" /> {t.profile.viewPublic}
               </Link>
             </Button>
           </div>
@@ -415,7 +415,7 @@ function ProfilePage() {
         <div className="flex justify-end">
 
           <Button variant="aurora" onClick={save} disabled={saving} className="gap-2">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} {t.common.save}
           </Button>
         </div>
       </div>

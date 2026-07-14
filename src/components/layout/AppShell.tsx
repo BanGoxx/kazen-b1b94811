@@ -51,6 +51,7 @@ import { signOut, useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/use-moderator";
 import { useIsOwner } from "@/lib/founder";
 import { cn } from "@/lib/utils";
+import { useConsent } from "@/lib/consent";
 
 interface NavItem {
   to: string;
@@ -221,6 +222,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { openPreferences } = useConsent();
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-background">
@@ -356,6 +358,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link to="/regles-communautaires" className="hover:text-foreground">
                 Règles communautaires
               </Link>
+              <span aria-hidden="true">·</span>
+              <button
+                type="button"
+                onClick={openPreferences}
+                className="hover:text-foreground focus-ring rounded"
+              >
+                Gérer mes cookies
+              </button>
               <span className="ml-1 rounded-full border border-primary/25 bg-primary/5 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
                 Brouillons
               </span>

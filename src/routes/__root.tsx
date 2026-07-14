@@ -12,6 +12,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
 import { setIdentityCallback } from "../lib/auth";
 import { RootShell } from "../components/RootShell";
+import { ConsentProvider } from "../lib/consent";
+import { CookieBanner } from "../components/consent/CookieBanner";
 
 
 function NotFoundComponent() {
@@ -135,9 +137,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <Toaster />
+      <ConsentProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <CookieBanner />
+        <Toaster />
+      </ConsentProvider>
     </QueryClientProvider>
   );
 }

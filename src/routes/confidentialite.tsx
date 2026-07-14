@@ -173,11 +173,21 @@ function ConfidentialitePage() {
       </section>
 
       <section>
-        <h2>12. Cookies et stockages</h2>
+        <h2>12. Cookies, stockages et contenus externes</h2>
         <p>
-          Une interface dédiée de gestion des cookies et traceurs sera introduite lors de la phase 26.3.
-          Les stockages actuellement utilisés se limitent à ce qui est strictement nécessaire au
-          fonctionnement du service (session d'authentification, préférences locales indispensables).
+          KAZEN limite volontairement l'usage des stockages navigateur et n'intègre
+          actuellement aucun outil de mesure d'audience, aucun traceur publicitaire
+          et aucun widget social embarqué.
+        </p>
+        <ul>
+          <li><strong>Strictement nécessaires (toujours actifs) :</strong> jeton d'authentification Supabase (localStorage), préférence de thème, préférence de consentement, état de session du catalogue (sessionStorage).</li>
+          <li><strong>Contenus externes (optionnels, désactivés par défaut) :</strong> lecteurs et miniatures YouTube pour les bandes-annonces. Aucune requête n'est envoyée à YouTube tant que vous ne l'avez pas autorisé, soit globalement depuis vos préférences, soit ponctuellement en cliquant sur une vidéo précise.</li>
+        </ul>
+        <p>
+          Vous pouvez consulter et modifier vos choix à tout moment via le
+          lien « Gérer mes cookies » dans le pied de page. Le refus est aussi
+          simple que l'acceptation et n'affecte pas les fonctions essentielles
+          (compte, tracking, navigation, communauté).
         </p>
       </section>
 

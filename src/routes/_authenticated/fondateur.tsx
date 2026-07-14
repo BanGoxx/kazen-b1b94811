@@ -210,10 +210,18 @@ function FounderConsole() {
             <TabsTrigger value="assistant" className="gap-1.5">
               <Sparkles className="h-4 w-4" /> Assistant IA
             </TabsTrigger>
+            <TabsTrigger value="beta" className="gap-1.5">
+              <Rocket className="h-4 w-4" /> Bêta
+            </TabsTrigger>
             <TabsTrigger value="reglages" className="gap-1.5">
               <Settings2 className="h-4 w-4" /> Réglages
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="beta" className="pt-6">
+            <FounderBetaSection />
+          </TabsContent>
+
 
           <TabsContent value="assistant" className="pt-6">
             <AiAssistantSection />

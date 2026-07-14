@@ -27,7 +27,9 @@ import {
   Activity,
   Stethoscope,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
+import { getAiAssistantStats, setAiAssistantEnabled } from "@/lib/ai-usage.functions";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";

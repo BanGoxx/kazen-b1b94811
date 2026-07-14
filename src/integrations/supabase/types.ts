@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_assistant_settings: {
+        Row: {
+          daily_user_limit: number
+          enabled: boolean
+          global_daily_limit: number
+          global_monthly_limit: number
+          id: number
+          monthly_user_limit: number
+          new_account_daily_limit: number
+          new_account_window_days: number
+          new_account_window_limit: number
+          owner_daily_limit: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          daily_user_limit?: number
+          enabled?: boolean
+          global_daily_limit?: number
+          global_monthly_limit?: number
+          id?: number
+          monthly_user_limit?: number
+          new_account_daily_limit?: number
+          new_account_window_days?: number
+          new_account_window_limit?: number
+          owner_daily_limit?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          daily_user_limit?: number
+          enabled?: boolean
+          global_daily_limit?: number
+          global_monthly_limit?: number
+          id?: number
+          monthly_user_limit?: number
+          new_account_daily_limit?: number
+          new_account_window_days?: number
+          new_account_window_limit?: number
+          owner_daily_limit?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_assistant_usage: {
+        Row: {
+          cached: boolean
+          id: string
+          input_tokens: number | null
+          output_tokens: number | null
+          provider_error_code: string | null
+          request_key: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cached?: boolean
+          id?: string
+          input_tokens?: number | null
+          output_tokens?: number | null
+          provider_error_code?: string | null
+          request_key?: string | null
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          cached?: boolean
+          id?: string
+          input_tokens?: number | null
+          output_tokens?: number | null
+          provider_error_code?: string | null
+          request_key?: string | null
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       anilist_cache: {
         Row: {
           cache_key: string
@@ -1671,6 +1752,20 @@ export type Database = {
     }
     Functions: {
       accept_conversation: { Args: { _id: string }; Returns: undefined }
+      ai_assistant_admin_stats: { Args: never; Returns: Json }
+      ai_assistant_finalize: {
+        Args: {
+          _error_code?: string
+          _input_tokens?: number
+          _output_tokens?: number
+          _status: string
+          _usage_id: string
+        }
+        Returns: undefined
+      }
+      ai_assistant_my_quota: { Args: never; Returns: Json }
+      ai_assistant_reserve: { Args: { _request_key: string }; Returns: Json }
+      ai_assistant_update_settings: { Args: { _patch: Json }; Returns: Json }
       anilist_cache_get: {
         Args: { p_key: string }
         Returns: {

@@ -80,10 +80,23 @@ export function AssistantChat() {
     [],
   );
 
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
+
   const { messages, sendMessage, status, setMessages } = useChat({
     id: "kazen-assistant",
     messages: initialMessages,
     transport,
+    onError: (err) => {
+      // The transport throws with the server response body on non-200s.
+      let msg = "Une erreur est survenue. Réessaie dans un instant.";
+      try {
+        const parsed = JSON.parse(err.message) as { error?: string };
+        if (parsed?.error) msg = parsed.error;
+      } catch {
+        if (err.message && err.message.length < 200) msg = err.message;
+      }
+      setErrorNotice(msg);
+    },
   });
 
   // Prime the chat with loaded history once available.
@@ -106,6 +119,7 @@ export function AssistantChat() {
   function send(text: string) {
     const t = text.trim();
     if (!t || isLoading) return;
+    setErrorNotice(null);
     sendMessage({ text: t });
     setInput("");
     setTimeout(() => inputRef.current?.focus(), 30);
@@ -225,6 +239,14 @@ export function AssistantChat() {
             {status === "submitted" && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Réflexion…
+              </div>
+            )}
+            {errorNotice && (
+              <div
+                role="status"
+                className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground"
+              >
+                {errorNotice}
               </div>
             )}
           </div>

@@ -22,15 +22,38 @@ export interface NextEpisodeSignal {
   episodeNumber: number;
 }
 
-const dayFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
+// Fixed timezone so the absolute-date label is byte-identical on the server
+// (UTC) and every client, regardless of the runtime's local timezone. This is
+// what makes the pre-hydration deterministic render reproducible.
+const dayFmt = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  timeZone: "Europe/Paris",
+});
 
 export function getNextEpisodeSignal(
   nextEpisode: MediaItem["nextEpisode"],
-  now: number = Date.now(),
+  // `null` = pre-hydration / not-yet-mounted: emit a deterministic label that
+  // depends only on the (serialized) air date, never on the current time, so
+  // the server render and the first client render are identical. Pass a real
+  // timestamp after mount to get the accurate relative wording.
+  now: number | null = Date.now(),
 ): NextEpisodeSignal | null {
   if (!nextEpisode || !nextEpisode.airDate) return null;
   const air = new Date(nextEpisode.airDate);
   if (Number.isNaN(air.getTime())) return null;
+
+  const ep = nextEpisode.number;
+
+  // Deterministic pre-hydration render: absolute date only (time-independent).
+  if (now === null) {
+    return {
+      short: `Prochain ép. : ${dayFmt.format(air)}`,
+      imminent: false,
+      today: false,
+      episodeNumber: ep,
+    };
+  }
 
   const diffMs = air.getTime() - now;
   const ep = nextEpisode.number;

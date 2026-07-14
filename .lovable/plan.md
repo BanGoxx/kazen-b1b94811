@@ -1,108 +1,266 @@
-# Phase 13 — Private Member Chat: Feasibility & Security Plan
+# KAZEN Phase 25 — Authenticated Community Live Chat: Feasibility & Security Audit
 
-**Verdict: READY FOR APPROVAL.** A secure, RLS-provable, report-scoped 1:1 chat is achievable with the existing spine (SECURITY DEFINER RPCs + `requireSupabaseAuth` + `notify_member` + moderation enum). Nothing was implemented. No table, migration, Realtime change, route or UI was created. Explicit approval **is required** before any migration or code runs.
+**VERDICT: READY FOR APPROVAL** (implementation-ready; nothing built yet).
 
-## 1. Architecture audit
+Realtime event isolation *can* be proven (per-table publication + RLS-gated broadcast), rate limits and moderation are server-enforceable with the existing `SECURITY DEFINER` pattern, and no destructive migration is required. This is an approval-ready blueprint only — no code, migration, Realtime, or publish action was performed.
 
-- **Auth/session**: browser client (`supabase`) with RLS; `_authenticated/route.tsx` gate redirects unauthenticated users; server writes go through `requireSupabaseAuth` middleware (bearer attached via `attachSupabaseAuth` in `src/start.ts`). Reusable as-is.
-- **Profiles**: `profiles` is `SELECT`-viewable-by-everyone; columns are display-only (`display_name, avatar_url, bio, preferred_*`). **Gap**: no `accepts_chat` preference and no member-block table exist.
-- **Write pattern (reusable, proven)**: every mutation is a `SECURITY DEFINER` RPC with `SET search_path=public`, author derived from `auth.uid()`, length + rate-limit checks internal, exposed via thin `createServerFn` wrappers (see `playlist-reviews.functions.ts`). Chat will mirror this exactly. **No user INSERT/UPDATE grants** — reads via RLS, writes via RPC only.
-- **Notifications**: `notify_member(_user,_type,_event_key,...)` respects `member_notification_preferences` (enabled/quiet/snooze) and dedupes on `event_key`. Reusable for chat events.
-- **Moderation/report spine**: `moderation_target_type` enum (`review,reply,playlist,playlist_item,playlist_review`), `submit_content_report` + `moderate_content` (hide/unhide/soft_delete/restore into `moderation_actions`), owner-gated `can_moderate_now`, `/moderation` console with `TARGET_LABELS`. Reusable by adding `chat_message` (report-scoped only).
-- **Realtime**: `supabase_realtime` publication currently has **zero tables** — Realtime is unused today. Enabling it is additive but deferred (see §8).
-- **Rate limits**: forum RPCs already use `count(*) ... where created_at > now() - interval` pattern — reuse verbatim.
-- **Unread/pagination/cache**: notification feed uses infinite scroll + `last_read_at`-style deltas; playlist reviews use page-size + load-more + batched `.in('id', ids)` profile joins (no N+1). Reuse both patterns.
-- **Account deletion**: FKs to `auth.users` use `ON DELETE CASCADE` throughout — chat tables must do the same.
+---
 
-**Conclusion**: no destructive change needed; every requirement maps onto an existing, audited pattern. No moderator surveillance is required for a working product.
+## 1. Architecture audit (what exists, what to reuse)
 
-## 2. Recommended product rules (safest low-complexity)
+| System | State today | Reuse for live chat? |
+|---|---|---|
+| Auth | Supabase, `_authenticated/route.tsx` gate (`ssr:false`, redirect `/auth`) | **Reuse** — chat route lives under `_authenticated/` |
+| Profiles | Public columns locked; `get_public_profile` RPC exposes only `display_name`, `avatar_url`, `bio` | **Reuse** — join safe columns only |
+| Public badges | `public_badges` / `user_public_badges` | **Reuse** for author badge chips |
+| Forum | `forum_*` tables, own moderation | Separate; not merged |
+| Private 1:1 chat | `chat_conversations/participants/messages`, RPC-only writes, 10s/25s polling, **Realtime OFF** | **Do NOT touch** — fully separate tables/RPCs |
+| Block system | `member_blocks` + `set_member_block(_target,_blocked)` | **Reuse** for local hide + send-guard |
+| Moderation spine | `content_reports`, `moderation_actions`, `moderate_content`, `resolve_report`, `can_moderate_now(uid)` (currently owner-only), enum `moderation_target_type` = review/reply/playlist/playlist_item/playlist_review/**chat_message**; `moderation_action_type` = hide/unhide/soft_delete/restore/lock/unlock/warn/timeout/dismiss_report | **Reuse** — add `live_chat_message` enum value + a `restrict`/`unrestrict` handling |
+| Rate limits | Convention: recent-count guard inside `SECURITY DEFINER` RPC (`send_chat_message`: 30/10min, dup within 2min) | **Reuse pattern**, tighter values |
+| Notification center | `notify_member(...)` dedup by `event_key`; server-only inserts | Reuse **sparingly** (replies/moderation only) |
+| Realtime | `supabase_realtime` publication has **zero tables** — nothing streams today | Enable **only** `live_chat_messages` later |
+| Founder Console | `/fondateur` + `can_moderate_now` gating | **Reuse** — add compact live-chat panel |
+| Profile privacy | Private fields already restricted | Chat exposes only safe columns |
 
-- Start a conversation only from another member's **public profile**; recipient can **accept or ignore** a first-contact request.
-- Per-member `accepts_chat` toggle (default on); when off, no new requests can be created against them.
-- One conversation per unordered member pair — reopen the existing one instead of creating duplicates.
-- Accepted → `active`; blocking → immediate hard stop, both directions.
-- **Phase 1 excludes**: read receipts, typing indicators, attachments, embeds, voice/video, email, browser push.
-- Message edit: author-only, within a window; delete: author-only soft delete. Conversation: archive (per-participant) + close.
-- Retention: soft delete retained for moderation/audit; hard purge on account deletion via cascade.
+**Conclusion:** ~80% reuse. New: 3 tables, one enum value, RPC set, one route, one Founder panel, one nav entry.
 
-## 3. Data model (additive — NOT applied)
+---
+
+## 2. Access rules (all server-enforced)
+
+- **Anonymous:** cannot read/enumerate/send. Public route shows a sign-in invitation only.
+- **Member:** read active room, send, edit/delete own only, block, report. No moderation.
+- **Moderator** (`can_moderate_now`): hide/restore messages, restrict/unrestrict posting, resolve reports, bounded context only. No access to private 1:1 tables, no private profile fields.
+- **Owner:** ultimate authority + kill switch; nothing above.
+
+---
+
+## 3. Route & navigation
+
+- **Route:** `src/routes/_authenticated/chat.tsx` → `/chat` (auth-gated by existing layout; keeps it cleanly separate from `/messages` and `/communaute`).
+- **Nav:** single entry **"Chat en direct"** with a small **Bêta** badge, placed inside the Communauté area of `AppShell` (desktop + mobile menu). No main-nav overload, no floating overlay.
+
+---
+
+## 4. Data model (proposal — DO NOT APPLY)
 
 ```text
-chat_conversations(id, status[pending|active|blocked|closed],
-                   created_at, updated_at, last_message_at,
-                   pair_key text UNIQUE)   -- sorted "uidA:uidB" enforces one-per-pair
-chat_participants(conversation_id, user_id, joined_at,
-                  last_read_at, muted_at, archived_at, blocked_at,
-                  PRIMARY KEY(conversation_id, user_id))
-chat_messages(id, conversation_id, sender_id, body,
-              created_at, edited_at, deleted_at, moderation_state)
-profiles.accepts_chat boolean NOT NULL DEFAULT true   -- single additive column
+live_chat_rooms
+  id uuid pk default gen_random_uuid()
+  slug text unique          -- 'general'
+  name text                 -- 'Général KAZEN'
+  description text null
+  is_active boolean default true   -- read-only kill switch when false
+  created_at timestamptz default now()
+
+live_chat_messages
+  id uuid pk default gen_random_uuid()
+  room_id uuid -> live_chat_rooms(id)
+  author_id uuid -> auth.users(id)   -- set by RPC = auth.uid()
+  body text                          -- <=500 chars, plain text
+  reply_to_id uuid null -> live_chat_messages(id)
+  created_at timestamptz default now()
+  edited_at timestamptz null
+  deleted_at timestamptz null
+  hidden_at timestamptz null
+  hidden_by uuid null
+  index (room_id, created_at desc)
+
+live_chat_member_state
+  room_id uuid, user_id uuid  (pk composite)
+  last_read_at timestamptz null
+  muted_at timestamptz null          -- local per-user notification mute
+  restricted_until timestamptz null  -- moderator-set posting restriction
 ```
-Reporting **reuses** `content_reports` + `moderation_target_type += 'chat_message'`; no `chat_reports` table. Blocking is chat-scoped via `chat_participants.blocked_at` (no global block table introduced in Phase 1).
 
-**Constraints**: exactly two participants (enforced by RPC + `pair_key` uniqueness); `char_length(body) BETWEEN 1 AND 4000`; no raw HTML (rendered as text); no arbitrary sender; blocked participant cannot send.
+Reports reuse `content_reports` via **new enum value `live_chat_message`** on `moderation_target_type` (`ALTER TYPE ... ADD VALUE` — additive, non-destructive). Constraints (author from `auth.uid()`, non-empty bounded body, plain text, valid+active room, reply target same room, soft delete/hide) enforced in RPCs + triggers, not client.
 
-## 4. RLS design
+---
 
-- `chat_participants` / `chat_conversations` SELECT: `EXISTS (participant row where user_id = auth.uid())` via a `SECURITY DEFINER` helper `is_chat_participant(conv, uid)` to avoid recursive cross-table cost.
-- `chat_messages` SELECT: `is_chat_participant(conversation_id, auth.uid())` AND `deleted_at IS NULL OR sender_id = auth.uid()`.
-- **No INSERT/UPDATE/DELETE policies for `authenticated`** — all writes via SECURITY DEFINER RPCs, so arbitrary sender_id, cross-user edits, and conversation enumeration are structurally impossible.
-- Owner/moderator get **no** blanket read of private messages. Moderation reads are report-scoped only (a SECURITY DEFINER function returns just the reported message + bounded context when an open `content_report` references it).
-- No ID guessing: unrelated user C reading a conversation returns empty under RLS.
+## 5. RLS design
 
-## 5. RPC design (all `SECURITY DEFINER`, `SET search_path=public`, author from `auth.uid()`)
+Every new public table gets GRANTs + RLS in the same migration (no anon grant).
 
-`request_conversation(_target)` · `accept_conversation(_id)` · `decline_conversation(_id)` · `send_chat_message(_conv,_body)` · `edit_chat_message(_id,_body)` · `delete_chat_message(_id)` · `mark_conversation_read(_id)` · `block_chat_member(_conv)` · `report_chat_message(_id,_reason,_details)` (wraps `submit_content_report`) · `archive_conversation(_id)`.
+```
+live_chat_rooms
+  SELECT to authenticated: is_active = true (read-only listing)
+live_chat_messages
+  SELECT to authenticated:
+    exists(room active) AND deleted_at IS NULL
+    AND (hidden_at IS NULL OR author_id = auth.uid() OR can_moderate_now(auth.uid()))
+  INSERT/UPDATE/DELETE: NONE for authenticated  -> RPC-only writes
+live_chat_member_state
+  SELECT/UPSERT to authenticated: user_id = auth.uid() only
+```
 
-Each: validates participation, `accepts_chat`, not-blocked, length bounds, duplicate-send (`same body <2min`) and rate limits (`send ≤ 30/10min`, `request ≤ 10/15min`); idempotent request/accept; safe generic errors. Thin `createServerFn` wrappers in `src/lib/chat.functions.ts`.
+- No broad `TO anon` policy anywhere.
+- Moderator visibility of hidden rows via `can_moderate_now`, not a wildcard.
+- Writes exclusively through `SECURITY DEFINER` RPCs → no client-forged author, no client moderator privilege.
 
-## 6. Blocking
+---
 
-Chat-scoped, immediate, symmetric: sets `chat_participants.blocked_at` and conversation `status='blocked'`; sends fail server-side instantly; prior history stays readable to both; pending chat notifications for that pair suppressed; block state not leaked to the blocked member beyond a generic "conversation unavailable".
+## 6. RPC / server functions
 
-## 7. Reporting & moderation
+All `SECURITY DEFINER SET search_path=public`, identity from `auth.uid()`, French errors, bounded inputs (mirrors `send_chat_message`).
 
-Member reports a specific message → `content_reports(target_type='chat_message', target_id=message_id)`. Moderator queue shows only the reported message + a small bounded window fetched by a report-gated SECURITY DEFINER reader — no inbox browsing. Actions reuse `moderate_content`: warn, hide reported message, restrict sender, close conversation; all audited in `moderation_actions`. No silent global surveillance.
+| RPC | Guards |
+|---|---|
+| `send_live_chat_message(_room,_body,_reply_to)` | auth; room active; not `restricted_until>now()`; body 1–500 after control-char strip; reply target in same room; cooldown + burst + duplicate checks |
+| `edit_live_chat_message(_id,_body)` | author only; not deleted/hidden; length; sets `edited_at` |
+| `delete_live_chat_message(_id)` | author only; sets `deleted_at` (soft) |
+| `mark_live_chat_read(_room)` | upsert own `member_state.last_read_at` |
+| `report_live_chat_message(_id,_reason,_details)` | routes to `submit_content_report('live_chat_message',...)`; idempotent per (reporter,message) |
+| `hide_live_chat_message(_id,_reason)` | `can_moderate_now`; sets hidden_at/hidden_by; logs `moderate_content` |
+| `restore_live_chat_message(_id)` | `can_moderate_now`; clears hidden; audited |
+| `restrict_live_chat_member(_user,_until,_reason)` | `can_moderate_now`; sets `restricted_until`; audited |
+| `unrestrict_live_chat_member(_user)` | `can_moderate_now`; audited |
 
-## 8. Realtime recommendation
+Server functions wrap each in `src/lib/live-chat.functions.ts` with `requireSupabaseAuth` (bearer already registered in `src/start.ts`).
 
-Realtime is currently disabled (empty publication). **Preferred**: enable Supabase Realtime for `chat_messages`/`chat_participants` **only after approval**, gated by the same RLS (subscribers receive only rows they may read), with bounded reconnect and dedupe by message id. **Fallback**: bounded polling of `last_message_at` on the open conversation (e.g. 5s while focused, paused when hidden) — no hidden high-frequency polling, no external WebSocket provider. **Not enabled in this phase.**
+Server-fn wrappers expose: `sendLiveChatMessage`, `editLiveChatMessage`, `deleteLiveChatMessage`, `markLiveChatRead`, `reportLiveChatMessage`, `hideLiveChatMessage`, `restoreLiveChatMessage`, `restrictLiveChatMember`, `unrestrictLiveChatMember`.
 
-## 9. Notification integration
+---
 
-Internal-only via `notify_member`, deduped by `event_key`, preference-gated: `chat_request`, `chat_request_accepted`, `chat_message` (coalesced per conversation, not per message; no edit/delete notifications). No email, no push. Unread count derived from `last_read_at` vs `last_message_at`.
+## 7. Realtime architecture
 
-## 10. UI plan
+**Provable isolation → not BLOCKED.** Approach:
+- Enable Realtime for **only** `public.live_chat_messages` (`ALTER PUBLICATION supabase_realtime ADD TABLE`). Private-chat tables stay out of the publication, so no private events can leak.
+- Client subscribes to **one** channel filtered `room_id=eq.<general>`, inside `useEffect`, torn down on unmount (per project realtime rule); no global/table-wide subscriptions.
+- RLS on the table gates row delivery to authenticated subscribers.
+- Initial history via paginated query; Realtime only appends new rows; dedupe by message `id`; targeted `queryClient` cache merge.
+- Fallback: on disconnect, bounded exponential reconnect (cap ~30s, max attempts) + a manual "Rafraîchir" button + one low-frequency (~30s) refetch while disconnected. No infinite loop, no hidden high-frequency polling.
 
-New `/messages` inbox (route `src/routes/_authenticated/messages.tsx` + `messages.$id.tsx`): conversation list, pending-requests section, active thread, unread badges, empty/loading/error/blocked states, responsive (list→thread on mobile). Entry point: a "Message" action on public profiles. Preserves black + metallic-crimson DA, existing tokens only; no floating overlay, no Discord clone, no forum/notification impact.
+**Realtime is NOT enabled in this audit.**
 
-## 11. Performance
+---
 
-Paginated conversations (order by `last_message_at DESC`, indexed); message page size 30 + load-older; batched profile join; optimistic send with rollback and id-dedupe; per-conversation subscription only (no global subscription); no full-history fetch.
+## 8. Message + anti-spam rules (recommended, justified)
 
-## 12. Retention & deletion
+- Body ≤ **500** chars, plain text; control chars stripped (same regex as `send_chat_message`); URLs shown as plain text, **no** auto rich previews; no HTML/Markdown execution; no attachments.
+- Edited indicator; deleted → "Message supprimé" placeholder; hidden → "Message masqué par la modération".
+- Normal accounts: **1 msg / 3s**, ≤ 20/min, ≤ 150/hour, duplicate blocked if identical within 2 min.
+- New accounts (<7 days, from `auth.users.created_at`): **1 msg / 8s**, ≤ 8/min, ≤ 50/hour. Stricter tier deters throwaway-account flooding during open beta; values tunable via constants.
+- Never silently censor normal words — limits are rate/format only.
 
-Soft delete for messages/conversations (moderation audit); user-deleted message shows "message supprimé" placeholder to both; archive is per-participant. Account deletion → cascade purge of participant rows and authored messages. No false privacy promises (backups outside app control are disclosed).
+History: initial page 30–50, cursor pagination on `(room_id, created_at)`, max retained in client memory (e.g. 200) to bound memory.
 
-## 13. Abuse prevention
+---
 
-Send + request rate limits, duplicate-message detection, plain-text only, max length 4000, link sanitization (no auto-embed), block/report, spam cooldown, no attachments in Phase 1.
+## 9. Blocking behavior
 
-## 14. Migration plan (approval-ready, additive, NOT applied)
+- Reuse `member_blocks`. Blocked authors' messages are **hidden locally for the blocker only** (client filter using the blocker's own block list) — never removed globally.
+- Blocked member cannot mention or open private 1:1 with the blocker (existing 1:1 RPC already honors blocks).
+- Block metadata never exposed to others. One member cannot silence another for everyone.
 
-Single migration, in order: (1) `ALTER TYPE moderation_target_type ADD VALUE 'chat_message'` — committed before use (split so enum precedes RPC patch); (2) `ADD COLUMN profiles.accepts_chat`; (3) `CREATE TABLE` chat_conversations/participants/messages with checks (`body` length, `pair_key` unique) and cascade FKs; (4) `GRANT SELECT` to `authenticated`, `GRANT ALL` to `service_role` (no anon, no write grants); (5) indexes (`chat_messages(conversation_id, created_at DESC)`, `chat_conversations(last_message_at DESC)`, participant `(user_id)`); (6) `ENABLE ROW LEVEL SECURITY` + SELECT-only policies per §4; (7) SECURITY DEFINER helpers + RPCs per §5 with `GRANT EXECUTE ... TO authenticated`; (8) `updated_at` trigger; (9) patch `moderate_content`/`submit_content_report` with a `chat_message` branch. **Realtime publication change deferred** to a follow-up flagged step. **Rollback**: `DROP TABLE ... CASCADE` + `DROP FUNCTION` + revert moderation branch + drop `accepts_chat`; the enum label is inert once unreferenced (Postgres cannot drop enum values cleanly — documented, harmless).
+---
 
-## 15. QA matrix
+## 10. Reporting & moderation
 
-A requests B · B accepts · B declines · duplicate request (idempotent) · A sends / B replies · A edits own · B cannot edit A's · A soft-deletes own · unrelated C reads nothing · blocked cannot send · direct RPC spoof (arbitrary sender/participant) rejected · duplicate send blocked · 100+ messages pagination · reconnect/realtime failure fallback · report → report-scoped moderation only · account deletion cascade · mobile · dark/light · no DA regression · `tsgo` typecheck.
+- Reuse `content_reports` + `moderation_actions` with new `live_chat_message` target type. Moderator queue (extend `moderationQueue`/`loadTargetSnapshot`) shows reported message, author, room, **bounded surrounding context** (report-scoped, like existing `moderation_chat_context`), reason, prior live-chat actions.
+- Moderators never receive private 1:1 messages, full private profiles, or unrelated activity.
+- Actions: hide / restore / warn / restrict-temporarily / close report — **every action audited** in `moderation_actions`. No automatic account deletion, no auto provider moderation.
 
-## 16. Stop-condition review
+---
 
-None triggered: RLS is provable (SELECT gated by participation, writes RPC-only), block/report enforced server-side, message access limited to participants, no default moderator surveillance, Realtime deferred and RLS-scoped, rate limiting reuses proven pattern, deletion semantics defined, migration is fully additive.
+## 11. Retention
 
-## 17. Files expected to change (after approval)
-New: one migration; `src/lib/chat.ts` (hooks); `src/lib/chat.functions.ts`; `src/routes/_authenticated/messages.tsx`; `src/routes/_authenticated/messages.$id.tsx`; a profile "Message" entry component.
-Edited (minimal): `src/lib/moderation.functions.ts` (union + snapshot branch); `src/routes/_authenticated/moderation.tsx` (`TARGET_LABELS`); navigation to add a Messages link.
+- Recent history stays visible (paginated); no full-history fetch.
+- Delete = soft (`deleted_at`); hidden rows retained for evidence with `hidden_by`.
+- On account deletion: cascade or anonymize `author_id`; moderation records retained.
+- No false promise of immediate backup deletion.
 
-**Confirmation**: no code, schema, migration, Realtime, or publish action was performed in this phase. Explicit approval is required before any implementation.
+---
+
+## 12. UI plan (`/chat`)
+
+Reuse KAZEN black + metallic-crimson DA and existing primitives (`Avatar`, `ScrollArea`, `Textarea`, `Button`, `ReportDialog`). DA unchanged.
+
+- Header: room name "Général KAZEN" + member-only + Bêta badge + connection status (Connecté / Reconnexion… / Lecture seule).
+- Message list: author avatar + display name + public badges + timestamp; reply preview; edited/deleted/hidden states; unread divider from `last_read_at`.
+- Composer: bounded textarea (500 counter), reply-to chip, disabled with clear French message when restricted or room read-only.
+- Per-message menu: reply / edit-own / delete-own / report / block; moderator actions (hide/restore/restrict) for authorized roles.
+- States: empty, loading, error, Realtime-disconnected + manual refresh.
+- **Desktop:** centered readable column, optional compact context sidebar. **Mobile:** full-width, fixed keyboard-safe composer, no overlap with mascot / BackToTop / bottom nav (respect existing safe-area offsets). Not a Discord clone, no floating overlay, not mixed with `/messages`.
+
+---
+
+## 13. Notifications
+
+First version: **no** per-message notification, no email, no push. Only reply-to-your-message and moderation outcome via existing `notify_member` (dedup key). Unread state kept per-room via `live_chat_member_state.last_read_at`.
+
+---
+
+## 14. Founder Console panel (Owner-only)
+
+Compact section in `/fondateur`: room active/inactive toggle (kill switch), messages today, unique participants, rate-limit rejection events, unresolved reports, currently restricted members, Realtime health, emergency disable. **No** aggregate full transcript exposure — message content only via moderation-relevant views.
+
+---
+
+## 15. Kill switch
+
+Server-enforced via `live_chat_rooms.is_active`. When false: `send_*` RPC raises; reads may remain (read-only). Owner-only update RPC. Member-facing French: **"Le chat en direct est temporairement en lecture seule."** No client-only flag.
+
+---
+
+## 16. Performance estimates
+
+- 10 users: trivial. 100 users: one shared channel, ~indexed inserts, fine. 1,000 users: single-room fan-out is the main cost — mitigate with client dedupe, capped retained messages, cursor pagination, and rate limits capping insert throughput. Burst: rate limits + duplicate detection blunt floods; list virtualized only if measured need.
+- Indexed `(room_id, created_at desc)`; bounded profile/badge lookup (batch, no N+1); optimistic send with rollback; stable ordering by `(created_at, id)`.
+
+---
+
+## 17. Migration plan (when approved)
+
+1. `ALTER TYPE moderation_target_type ADD VALUE 'live_chat_message'` (additive).
+2. Create 3 tables + GRANTs + RLS + policies (RPC-only writes).
+3. Create `SECURITY DEFINER` RPCs (section 6).
+4. Seed one room `general` / "Général KAZEN".
+5. **Separately, after review:** add `live_chat_messages` to `supabase_realtime`.
+
+## 18. Rollback plan
+
+- Set room `is_active=false` (instant kill, no deploy).
+- Remove table from publication to stop Realtime.
+- Drop RPCs, then tables (all additive; nothing else depends on them). Enum value is harmless if left. No existing system touched → clean rollback.
+
+---
+
+## 19. QA matrix (to execute at implementation)
+
+- **Auth:** anon read/send blocked; authed read/send OK; expired session redirect.
+- **Messages:** send/edit-own/delete-own/reply; oversized & empty rejected; HTML/script neutralized; duplicate & rate-limit rejected.
+- **Isolation:** no access to `chat_messages`/`chat_conversations`; no private profile fields; moderator spoof denied.
+- **Realtime:** two users receive new msg; reconnect; duplicate event deduped; offline fallback; no infinite reconnect.
+- **Blocking:** blocker-local hide; blocked can't bypass 1:1 restriction; not globally silenced.
+- **Moderation:** report → bounded context → hide/restore/restrict → audited; ordinary member denied.
+- **Responsive:** desktop/tablet/mobile, virtual keyboard, long messages & names, dark/light, reduced motion, no mascot/BackToTop overlap.
+- **Performance:** 100+ msgs, 100-user sim, burst, pagination, no memory leak.
+
+---
+
+## 20. Expected files to change (implementation)
+
+- New migration (tables, enum value, RPCs, room seed) — separate Realtime migration.
+- `src/lib/live-chat.functions.ts` (server fns) + `src/lib/live-chat.ts` (client hooks, Realtime subscribe, pagination).
+- `src/routes/_authenticated/chat.tsx` (UI).
+- `src/components/layout/AppShell.tsx` (nav entry + Bêta badge).
+- `src/lib/moderation.functions.ts` (`live_chat_message` snapshot + context).
+- `src/routes/_authenticated/moderation.tsx` (queue support).
+- `src/routes/_authenticated/fondateur.tsx` (diagnostics panel + kill switch).
+- Optional: `src/components/chat/LiveChat*` presentational components.
+
+---
+
+## 21. Risks
+
+- **Realtime fan-out at scale** — mitigated by single room, rate limits, client caps; revisit sharding/rooms only past beta.
+- **Enum `ADD VALUE`** cannot run inside some transaction contexts — run in its own migration step.
+- **Moderator visibility scope creep** — keep context strictly report-scoped like `moderation_chat_context`.
+- **Mobile keyboard/safe-area overlap** — verified against existing mascot/BackToTop offsets during QA.
+
+---
+
+## Confirmation
+
+No code was written, no table created, no migration applied, no enum altered, **Supabase Realtime was not enabled**, and nothing was published. This document is planning/audit output only, awaiting your approval.

@@ -61,7 +61,7 @@ import {
   useBlockedMemberIds,
   type LiveChatMessage,
 } from "@/lib/live-chat";
-import { setMemberBlock } from "@/lib/public-profile";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/communaute/direct")({
   head: () => ({

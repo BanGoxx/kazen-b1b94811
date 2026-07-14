@@ -367,6 +367,15 @@ function CalendarPage() {
         </span>
       </div>
 
+      {animeDegraded ? (
+        <div
+          role="status"
+          className="mb-4 rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-[0.72rem] text-muted-foreground"
+        >
+          Certaines données anime peuvent être limitées temporairement.
+        </div>
+      ) : null}
+
       {/* Weekly grid — one labelled block per week for clear separation */}
       {filtered.length ? (
         <div className="space-y-6">

@@ -12,11 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SoutienRouteImport } from './routes/soutien'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
+import { Route as ReglesCommunautairesRouteImport } from './routes/regles-communautaires'
 import { Route as RechercheRouteImport } from './routes/recherche'
 import { Route as PourVousRouteImport } from './routes/pour-vous'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as ListesRouteImport } from './routes/listes'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as DesabonnementRouteImport } from './routes/desabonnement'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as CguRouteImport } from './routes/cgu'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
@@ -65,6 +69,11 @@ const SeriesRoute = SeriesRouteImport.update({
   path: '/series',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReglesCommunautairesRoute = ReglesCommunautairesRouteImport.update({
+  id: '/regles-communautaires',
+  path: '/regles-communautaires',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RechercheRoute = RechercheRouteImport.update({
   id: '/recherche',
   path: '/recherche',
@@ -73,6 +82,11 @@ const RechercheRoute = RechercheRouteImport.update({
 const PourVousRoute = PourVousRouteImport.update({
   id: '/pour-vous',
   path: '/pour-vous',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListesRoute = ListesRouteImport.update({
@@ -88,6 +102,16 @@ const FilmsRoute = FilmsRouteImport.update({
 const DesabonnementRoute = DesabonnementRouteImport.update({
   id: '/desabonnement',
   path: '/desabonnement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CguRoute = CguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendrierRoute = CalendrierRouteImport.update({
@@ -260,11 +284,15 @@ export interface FileRoutesByFullPath {
   '/anime': typeof AnimeRouteWithChildren
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -300,11 +328,15 @@ export interface FileRoutesByTo {
   '/a-venir': typeof AVenirRoute
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -343,11 +375,15 @@ export interface FileRoutesById {
   '/anime': typeof AnimeRouteWithChildren
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/pour-vous': typeof PourVousRoute
   '/recherche': typeof RechercheRoute
+  '/regles-communautaires': typeof ReglesCommunautairesRoute
   '/series': typeof SeriesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soutien': typeof SoutienRoute
@@ -386,11 +422,15 @@ export interface FileRouteTypes {
     | '/anime'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
+    | '/confidentialite'
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -426,11 +466,15 @@ export interface FileRouteTypes {
     | '/a-venir'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
+    | '/confidentialite'
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -468,11 +512,15 @@ export interface FileRouteTypes {
     | '/anime'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
+    | '/confidentialite'
     | '/desabonnement'
     | '/films'
     | '/listes'
+    | '/mentions-legales'
     | '/pour-vous'
     | '/recherche'
+    | '/regles-communautaires'
     | '/series'
     | '/sitemap.xml'
     | '/soutien'
@@ -511,11 +559,15 @@ export interface RootRouteChildren {
   AnimeRoute: typeof AnimeRouteWithChildren
   AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
+  CguRoute: typeof CguRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   DesabonnementRoute: typeof DesabonnementRoute
   FilmsRoute: typeof FilmsRoute
   ListesRoute: typeof ListesRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
   PourVousRoute: typeof PourVousRoute
   RechercheRoute: typeof RechercheRoute
+  ReglesCommunautairesRoute: typeof ReglesCommunautairesRoute
   SeriesRoute: typeof SeriesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SoutienRoute: typeof SoutienRoute
@@ -557,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/regles-communautaires': {
+      id: '/regles-communautaires'
+      path: '/regles-communautaires'
+      fullPath: '/regles-communautaires'
+      preLoaderRoute: typeof ReglesCommunautairesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recherche': {
       id: '/recherche'
       path: '/recherche'
@@ -569,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/pour-vous'
       fullPath: '/pour-vous'
       preLoaderRoute: typeof PourVousRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listes': {
@@ -590,6 +656,20 @@ declare module '@tanstack/react-router' {
       path: '/desabonnement'
       fullPath: '/desabonnement'
       preLoaderRoute: typeof DesabonnementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cgu': {
+      id: '/cgu'
+      path: '/cgu'
+      fullPath: '/cgu'
+      preLoaderRoute: typeof CguRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendrier': {
@@ -869,11 +949,15 @@ const rootRouteChildren: RootRouteChildren = {
   AnimeRoute: AnimeRouteWithChildren,
   AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
+  CguRoute: CguRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   DesabonnementRoute: DesabonnementRoute,
   FilmsRoute: FilmsRoute,
   ListesRoute: ListesRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
   PourVousRoute: PourVousRoute,
   RechercheRoute: RechercheRoute,
+  ReglesCommunautairesRoute: ReglesCommunautairesRoute,
   SeriesRoute: SeriesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SoutienRoute: SoutienRoute,

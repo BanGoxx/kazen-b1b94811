@@ -18,6 +18,7 @@ import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as ListesRouteImport } from './routes/listes'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as DesabonnementRouteImport } from './routes/desabonnement'
+import { Route as CguRouteImport } from './routes/cgu'
 import { Route as CalendrierRouteImport } from './routes/calendrier'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnimeRouteImport } from './routes/anime'
@@ -94,6 +95,11 @@ const FilmsRoute = FilmsRouteImport.update({
 const DesabonnementRoute = DesabonnementRouteImport.update({
   id: '/desabonnement',
   path: '/desabonnement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CguRoute = CguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendrierRoute = CalendrierRouteImport.update({
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/anime': typeof AnimeRouteWithChildren
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/a-venir': typeof AVenirRoute
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
@@ -351,6 +359,7 @@ export interface FileRoutesById {
   '/anime': typeof AnimeRouteWithChildren
   '/auth': typeof AuthRoute
   '/calendrier': typeof CalendrierRoute
+  '/cgu': typeof CguRoute
   '/desabonnement': typeof DesabonnementRoute
   '/films': typeof FilmsRoute
   '/listes': typeof ListesRoute
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/anime'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
     | '/desabonnement'
     | '/films'
     | '/listes'
@@ -436,6 +446,7 @@ export interface FileRouteTypes {
     | '/a-venir'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
     | '/desabonnement'
     | '/films'
     | '/listes'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/anime'
     | '/auth'
     | '/calendrier'
+    | '/cgu'
     | '/desabonnement'
     | '/films'
     | '/listes'
@@ -523,6 +535,7 @@ export interface RootRouteChildren {
   AnimeRoute: typeof AnimeRouteWithChildren
   AuthRoute: typeof AuthRoute
   CalendrierRoute: typeof CalendrierRoute
+  CguRoute: typeof CguRoute
   DesabonnementRoute: typeof DesabonnementRoute
   FilmsRoute: typeof FilmsRoute
   ListesRoute: typeof ListesRoute
@@ -610,6 +623,13 @@ declare module '@tanstack/react-router' {
       path: '/desabonnement'
       fullPath: '/desabonnement'
       preLoaderRoute: typeof DesabonnementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cgu': {
+      id: '/cgu'
+      path: '/cgu'
+      fullPath: '/cgu'
+      preLoaderRoute: typeof CguRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendrier': {
@@ -889,6 +909,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnimeRoute: AnimeRouteWithChildren,
   AuthRoute: AuthRoute,
   CalendrierRoute: CalendrierRoute,
+  CguRoute: CguRoute,
   DesabonnementRoute: DesabonnementRoute,
   FilmsRoute: FilmsRoute,
   ListesRoute: ListesRoute,

@@ -115,21 +115,21 @@ export function RelatedContent({
           >
             {t.catalog.all}
           </button>
-          {availableTypes.map((t) => (
+          {availableTypes.map((wt) => (
             <button
-              key={t}
+              key={wt}
               type="button"
               role="tab"
-              aria-selected={typeFilter === t}
-              onClick={() => setTypeFilter(t)}
+              aria-selected={typeFilter === wt}
+              onClick={() => setTypeFilter(wt)}
               className={cn(
                 "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors",
-                typeFilter === t
+                typeFilter === wt
                   ? "aurora-bg text-white"
                   : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
               )}
             >
-              {TYPE_LABELS[t]}
+              {TYPE_LABELS[wt]}
             </button>
           ))}
         </div>
@@ -138,7 +138,7 @@ export function RelatedContent({
       {showFilter ? (
         <div
           role="tablist"
-          aria-label="Filtrer les contenus liés"
+          aria-label={t.fiche.filterRelated}
           className="flex flex-wrap gap-2"
         >
           <button
@@ -153,7 +153,7 @@ export function RelatedContent({
                 : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
             )}
           >
-            Tout
+            {t.catalog.all}
           </button>
           {groups.map((group) => {
             const Icon = CATEGORY_ICON[group.category];
@@ -182,7 +182,7 @@ export function RelatedContent({
 
       {visible.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Aucun contenu lié ne correspond à ce filtre.
+          {t.fiche.noRelatedForFilter}
         </p>
       ) : (
         visible.map((group) => {

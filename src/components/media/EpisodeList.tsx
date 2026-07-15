@@ -2,6 +2,8 @@ import { useState } from "react";
 import { CalendarDays, Play } from "lucide-react";
 import type { MediaEpisode } from "@/lib/media-types";
 import { SafeImage } from "@/components/media/SafeImage";
+import { useI18n } from "@/lib/i18n";
+import { formatDateLocalized } from "@/lib/i18n/date";
 
 interface EpisodeListProps {
   episodes: MediaEpisode[];
@@ -9,35 +11,38 @@ interface EpisodeListProps {
 
 const INITIAL_VISIBLE = 12;
 
-function formatDate(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-}
-
 /**
  * Ordered episode list for anime/series fiches (Step D).
- * Aired episodes are highlighted; upcoming ones show a "À venir" badge.
+ * Aired episodes are highlighted; upcoming ones show an upcoming badge.
  * Renders nothing when there is no episode data (graceful fallback).
  */
 export function EpisodeList({ episodes }: EpisodeListProps) {
+  const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
   if (!episodes.length) return null;
 
   const visible = expanded ? episodes : episodes.slice(0, INITIAL_VISIBLE);
   const airedCount = episodes.filter((e) => e.isAired).length;
+  const upcoming = episodes.length - airedCount;
+  const airedLabel = airedCount > 1 ? t.fiche.episodeAiredOther : t.fiche.episodeAiredOne;
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        {airedCount} épisode{airedCount > 1 ? "s" : ""} diffusé{airedCount > 1 ? "s" : ""}
-        {episodes.length > airedCount ? ` · ${episodes.length - airedCount} à venir` : ""}
+        {airedCount} {airedLabel}
+        {upcoming > 0 ? ` · ${upcoming} ${t.fiche.episodesUpcoming}` : ""}
       </p>
 
       <ul className="grid gap-2 sm:grid-cols-2">
         {visible.map((ep) => {
-          const date = formatDate(ep.airDate);
+          const date = ep.airDate
+            ? formatDateLocalized(ep.airDate, locale, {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            : null;
+          const fallbackTitle = `${t.fiche.episodeFull} ${ep.number}`;
           return (
             <li
               key={`${ep.number}-${ep.title ?? ""}`}
@@ -48,7 +53,7 @@ export function EpisodeList({ episodes }: EpisodeListProps) {
               <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg">
                 <SafeImage
                   src={ep.thumbnailUrl ?? undefined}
-                  alt={ep.title ?? `Épisode ${ep.number}`}
+                  alt={ep.title ?? fallbackTitle}
                   variant="backdrop"
                   className="h-full w-full object-cover"
                 />
@@ -60,15 +65,17 @@ export function EpisodeList({ episodes }: EpisodeListProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-primary">Ép. {ep.number}</span>
+                  <span className="text-xs font-semibold text-primary">
+                    {t.fiche.episodeShort} {ep.number}
+                  </span>
                   {!ep.isAired ? (
                     <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
-                      À venir
+                      {t.catalog.badgeUpcoming}
                     </span>
                   ) : null}
                 </div>
                 <p className="truncate text-sm font-medium text-foreground">
-                  {ep.title ?? `Épisode ${ep.number}`}
+                  {ep.title ?? fallbackTitle}
                 </p>
                 {date ? (
                   <p className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -87,7 +94,9 @@ export function EpisodeList({ episodes }: EpisodeListProps) {
           onClick={() => setExpanded((v) => !v)}
           className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
         >
-          {expanded ? "Réduire" : `Voir les ${episodes.length} épisodes`}
+          {expanded
+            ? t.fiche.reduce
+            : t.fiche.showAllEpisodes.replace("{count}", String(episodes.length))}
         </button>
       ) : null}
     </div>

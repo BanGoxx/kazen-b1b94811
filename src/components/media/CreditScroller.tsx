@@ -2,6 +2,8 @@ import { useState } from "react";
 import { User } from "lucide-react";
 import type { CreditPerson } from "@/lib/media-types";
 import { EntityProfileDialog, type EntityKind } from "./EntityProfileDialog";
+import { useI18n } from "@/lib/i18n";
+
 
 /**
  * Cast/crew avatar with graceful fallback: if there is no photo, or the remote
@@ -41,6 +43,7 @@ export function CreditScroller({
 }) {
   const [selected, setSelected] = useState<CreditPerson | null>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   if (!people.length) return null;
 
@@ -62,7 +65,7 @@ export function CreditScroller({
               type="button"
               onClick={() => handleOpen(p)}
               className="focus-ring group block w-full rounded-xl border border-border bg-card/60 p-2 text-center transition-colors hover:border-primary/40"
-              aria-label={`Voir le profil de ${p.name}`}
+              aria-label={t.fiche.viewPersonProfile.replace("{name}", p.name)}
             >
               <CreditAvatar person={p} />
               <p className="line-clamp-2 text-xs font-semibold leading-tight group-hover:text-primary">

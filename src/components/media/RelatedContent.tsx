@@ -5,6 +5,8 @@ import { groupRelated } from "@/lib/franchise";
 import { cn } from "@/lib/utils";
 import { FicheSection } from "./FicheSection";
 import { RelatedScroller } from "./RelatedScroller";
+import { useI18n } from "@/lib/i18n";
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 
 const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
   franchise: GitBranch,
@@ -15,13 +17,8 @@ const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
 
 type WorkType = "anime" | "serie" | "film" | "autre";
 
-const TYPE_LABELS: Record<Exclude<WorkType, "autre">, string> = {
-  anime: "Anime",
-  serie: "Série",
-  film: "Film",
-};
-
 const FILM_RE = /film|movie/i;
+
 
 /**
  * Reliable media-type classification derived from provider format signals —

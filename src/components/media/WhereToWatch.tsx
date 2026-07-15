@@ -1,12 +1,7 @@
 import { Clapperboard } from "lucide-react";
 import type { Platform } from "@/lib/media-types";
 import { PlatformBadge } from "./PlatformBadge";
-
-const OFFER_GROUPS: { type: Platform["type"]; label: string }[] = [
-  { type: "stream", label: "En streaming" },
-  { type: "rent", label: "En location" },
-  { type: "buy", label: "À l'achat" },
-];
+import { useI18n } from "@/lib/i18n";
 
 /**
  * "Où regarder" — groups providers by offer type (streaming / location /
@@ -14,7 +9,14 @@ const OFFER_GROUPS: { type: Platform["type"]; label: string }[] = [
  * to a single flat list when every provider shares the same offer type.
  */
 export function WhereToWatch({ platforms }: { platforms: Platform[] }) {
+  const { t } = useI18n();
   if (!platforms.length) return null;
+
+  const OFFER_GROUPS: { type: Platform["type"]; label: string }[] = [
+    { type: "stream", label: t.catalog.offerStream },
+    { type: "rent", label: t.catalog.offerRent },
+    { type: "buy", label: t.catalog.offerBuy },
+  ];
 
   const distinctTypes = new Set(platforms.map((p) => p.type));
   const grouped = distinctTypes.size > 1;
@@ -22,7 +24,7 @@ export function WhereToWatch({ platforms }: { platforms: Platform[] }) {
   return (
     <div className="rounded-2xl border border-border bg-card/60 p-4 backdrop-blur">
       <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <Clapperboard className="h-3.5 w-3.5 text-primary" /> Où regarder
+        <Clapperboard className="h-3.5 w-3.5 text-primary" /> {t.fiche.whereToWatch}
       </h2>
       {grouped ? (
         <div className="space-y-3">

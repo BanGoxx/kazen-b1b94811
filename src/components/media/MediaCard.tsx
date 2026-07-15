@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
-import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
 import { NextEpisodePill } from "./NextEpisodePill";
 import { cn } from "@/lib/utils";
+
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {
   anime: "bg-primary/85 text-primary-foreground ring-primary/30",
@@ -27,6 +28,7 @@ export function MediaCard({
   /** When provided, shows a "pas intéressé" control that dismisses the card. */
   onHide?: () => void;
 }) {
+  const typeLabels = useMediaTypeLabels();
   return (
     <Link
       to="/media/$source/$id"
@@ -67,7 +69,7 @@ export function MediaCard({
         />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
           <span className={cn("rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.08em] shadow-sm ring-1 ring-inset backdrop-blur-md", TYPE_COLORS[item.mediaType])}>
-            {MEDIA_TYPE_LABELS[item.mediaType]}
+            {typeLabels[item.mediaType]}
           </span>
           <RatingBadge score={item.score} />
         </div>

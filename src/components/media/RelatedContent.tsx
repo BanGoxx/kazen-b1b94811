@@ -47,6 +47,13 @@ export function RelatedContent({
   related: RelatedMedia[];
   collectionName?: string | null;
 }) {
+  const { t } = useI18n();
+  const mediaTypeLabels = useMediaTypeLabels();
+  const TYPE_LABELS: Record<Exclude<WorkType, "autre">, string> = {
+    anime: mediaTypeLabels.anime,
+    serie: mediaTypeLabels.series,
+    film: mediaTypeLabels.movie,
+  };
   const groups = groupRelated(related);
   const [active, setActive] = useState<RelationCategory | "all">("all");
   const [typeFilter, setTypeFilter] = useState<WorkType | "all">("all");
@@ -82,7 +89,7 @@ export function RelatedContent({
         <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
           <Layers className="h-5 w-5 shrink-0 text-primary" />
           <span className="text-sm">
-            Fait partie de la saga{" "}
+            {t.fiche.partOfSagaPrefix}{" "}
             <strong className="font-semibold">{collectionName}</strong>
           </span>
         </div>
@@ -91,7 +98,7 @@ export function RelatedContent({
       {showTypeFilter ? (
         <div
           role="tablist"
-          aria-label="Filtrer par type"
+          aria-label={t.fiche.filterByType}
           className="flex flex-wrap gap-2"
         >
           <button
@@ -106,7 +113,7 @@ export function RelatedContent({
                 : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
             )}
           >
-            Tout
+            {t.catalog.all}
           </button>
           {availableTypes.map((t) => (
             <button

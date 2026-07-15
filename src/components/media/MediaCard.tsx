@@ -29,7 +29,6 @@ export function MediaCard({
   onHide?: () => void;
 }) {
   const typeLabels = useMediaTypeLabels();
-  const hideLabel = "Pas intéressé";
   return (
     <Link
       to="/media/$source/$id"

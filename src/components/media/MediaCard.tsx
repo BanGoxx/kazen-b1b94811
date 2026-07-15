@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import type { MediaItem } from "@/lib/media-types";
-import { MEDIA_TYPE_LABELS } from "@/lib/media-types";
 import { SafeImage } from "./SafeImage";
 import { RatingBadge } from "./RatingBadge";
 import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
 import { NextEpisodePill } from "./NextEpisodePill";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {
   anime: "bg-primary/85 text-primary-foreground ring-primary/30",

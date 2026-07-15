@@ -14,6 +14,7 @@ import { MediaCard } from "./MediaCard";
 import { EmptyState } from "./EmptyState";
 import { useCandidatePool, useTasteProfile } from "@/lib/use-recommendations";
 import { runAssistant, describeIntent, type AssistantResult } from "@/lib/assistant";
+import { useI18n } from "@/lib/i18n";
 
 const SUGGESTIONS = [
   "un anime horreur",
@@ -29,6 +30,7 @@ export function RecommendationAssistant({
 }: {
   trigger?: React.ReactNode;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [result, setResult] = useState<AssistantResult | null>(null);
@@ -55,7 +57,7 @@ export function RecommendationAssistant({
         {trigger ?? (
           <Button variant="secondary" className="gap-2">
             <Wand2 className="h-4 w-4 text-primary" />
-            Assistant
+            {t.reco.triggerLabel}
           </Button>
         )}
       </DialogTrigger>
@@ -63,11 +65,9 @@ export function RecommendationAssistant({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Que veux-tu regarder&nbsp;?
+            {t.reco.title}
           </DialogTitle>
-          <DialogDescription>
-            Décris une envie — genre, type, ambiance — et je te propose les titres les plus pertinents.
-          </DialogDescription>
+          <DialogDescription>{t.reco.description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="flex gap-2">
@@ -75,12 +75,12 @@ export function RecommendationAssistant({
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="ex. un anime horreur récent"
-            aria-label="Décris ce que tu veux regarder"
+            placeholder={t.reco.inputPlaceholder}
+            aria-label={t.reco.inputAria}
           />
           <Button type="submit" disabled={!ready || !input.trim()} className="gap-2 shrink-0">
             <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">Trouver</span>
+            <span className="hidden sm:inline">{t.reco.find}</span>
           </Button>
         </form>
 
@@ -99,12 +99,13 @@ export function RecommendationAssistant({
 
         <div className="max-h-[52vh] overflow-y-auto">
           {isLoading && !ready ? (
-            <EmptyState message="Préparation des recommandations…" />
+            <EmptyState message={t.reco.preparing} />
           ) : result ? (
             result.items.length ? (
               <div>
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Sélection pour&nbsp;: <span className="text-foreground">{describeIntent(result.intent)}</span>
+                  {t.reco.selectionFor}{" "}
+                  <span className="text-foreground">{describeIntent(result.intent)}</span>
                 </p>
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
                   {result.items.map((item) => (
@@ -113,16 +114,10 @@ export function RecommendationAssistant({
                 </div>
               </div>
             ) : (
-              <EmptyState
-                message="Aucun titre ne correspond exactement."
-                hint="Essaie une autre formulation, un autre genre ou un autre type."
-              />
+              <EmptyState message={t.reco.noMatch} hint={t.reco.noMatchHint} />
             )
           ) : (
-            <EmptyState
-              message="Pose ta question pour commencer."
-              hint="Astuce : combine type + genre + ambiance, ex. « série thriller récente »."
-            />
+            <EmptyState message={t.reco.promptEmpty} hint={t.reco.promptEmptyHint} />
           )}
         </div>
       </DialogContent>

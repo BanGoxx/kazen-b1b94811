@@ -28,6 +28,9 @@ export function MediaCard({
   /** When provided, shows a "pas intéressé" control that dismisses the card. */
   onHide?: () => void;
 }) {
+  const { t } = useI18n();
+  const typeLabels = useMediaTypeLabels();
+  const hideLabel = t.common.dismiss ?? "Pas intéressé";
   return (
     <Link
       to="/media/$source/$id"

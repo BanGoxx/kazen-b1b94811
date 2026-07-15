@@ -19,11 +19,12 @@ import {
   type MediaRequestType,
 } from "@/lib/media-requests";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 const TYPES: MediaRequestType[] = ["anime", "series", "film"];
 
 /**
- * Restrained "Proposer ce titre" flow. Members can request a missing title;
+ * Restrained "suggest this title" flow. Members can request a missing title;
  * during beta only the Owner reviews these (see /moderation). It never creates
  * an official media fiche directly.
  */
@@ -34,6 +35,7 @@ export function MissingTitleRequest({
   defaultTitle?: string;
   trigger?: React.ReactNode;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(defaultTitle);
   const [mediaType, setMediaType] = useState<MediaRequestType>("anime");
@@ -43,18 +45,18 @@ export function MissingTitleRequest({
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error("Indiquez le titre à proposer.");
+      toast.error(t.mediaRequest.emptyTitle);
       return;
     }
     try {
       await submit.mutateAsync({ title, mediaType, externalUrl, note });
-      toast.success("Proposition envoyée. Merci ! L'équipe KAZEN l'examinera.");
+      toast.success(t.mediaRequest.sent);
       setOpen(false);
       setTitle("");
       setExternalUrl("");
       setNote("");
     } catch {
-      toast.error("Impossible d'envoyer la proposition pour le moment.");
+      toast.error(t.mediaRequest.sendFailed);
     }
   };
 
@@ -69,52 +71,49 @@ export function MissingTitleRequest({
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="outline" size="sm" className="gap-1.5">
-            <Sparkles className="h-4 w-4" /> Proposer ce titre
+            <Sparkles className="h-4 w-4" /> {t.mediaRequest.cta}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Proposer un titre manquant</DialogTitle>
-          <DialogDescription>
-            Ce titre n'est pas encore dans KAZEN ? Proposez-le. L'équipe KAZEN l'examinera — cela ne
-            crée pas de fiche automatiquement.
-          </DialogDescription>
+          <DialogTitle>{t.mediaRequest.dialogTitle}</DialogTitle>
+          <DialogDescription>{t.mediaRequest.dialogDesc}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titre du média"
+            placeholder={t.mediaRequest.titlePlaceholder}
             maxLength={200}
           />
           <div className="flex flex-wrap gap-2">
-            {TYPES.map((t) => (
+            {TYPES.map((ty) => (
               <button
-                key={t}
+                key={ty}
                 type="button"
-                onClick={() => setMediaType(t)}
+                onClick={() => setMediaType(ty)}
                 className={cn(
                   "focus-ring rounded-full border px-3 py-1 text-sm transition-colors",
-                  mediaType === t
+                  mediaType === ty
                     ? "border-primary bg-primary/15 text-primary"
                     : "border-border text-muted-foreground hover:text-foreground",
                 )}
               >
-                {MEDIA_REQUEST_TYPE_LABELS[t]}
+                {MEDIA_REQUEST_TYPE_LABELS[ty]}
               </button>
             ))}
           </div>
           <Input
             value={externalUrl}
             onChange={(e) => setExternalUrl(e.target.value)}
-            placeholder="Lien externe (optionnel) — ex. AniList, TMDB…"
+            placeholder={t.mediaRequest.urlPlaceholder}
             maxLength={500}
           />
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Pourquoi ce titre ? (optionnel)"
+            placeholder={t.mediaRequest.notePlaceholder}
             rows={2}
             maxLength={1000}
             className="resize-y"
@@ -127,7 +126,7 @@ export function MissingTitleRequest({
             ) : (
               <Send className="h-4 w-4" />
             )}
-            Envoyer la proposition
+            {t.mediaRequest.submit}
           </Button>
         </DialogFooter>
       </DialogContent>

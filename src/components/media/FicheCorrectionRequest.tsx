@@ -31,9 +31,10 @@ import {
   type CorrectionCategory,
 } from "@/lib/fiche-corrections";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 /**
- * Member-facing "Signaler une erreur" flow for a fiche. Authenticated only,
+ * Member-facing "report correction" flow for a fiche. Authenticated only,
  * bounded text, rate-limited server-side, and never edits catalogue data.
  * Shows the member their own past reports for this fiche with live status.
  */
@@ -49,6 +50,7 @@ export function FicheCorrectionRequest({
   defaultCategory?: CorrectionCategory;
 }) {
   const { user, ready } = useAuth();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<CorrectionCategory>(
     defaultCategory ?? "incorrect_metadata",
@@ -63,22 +65,22 @@ export function FicheCorrectionRequest({
 
   const handleSubmit = async () => {
     if (!body.trim()) {
-      toast.error("Décrivez brièvement l'erreur constatée.");
+      toast.error(t.correction.emptyBody);
       return;
     }
     try {
       await submit.mutateAsync({ source, externalId, mediaTitle, category, body });
-      toast.success("Signalement envoyé. Merci ! L'équipe KAZEN l'examinera.");
+      toast.success(t.correction.sent);
       setBody("");
       setOpen(false);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       if (msg === "rate-limit") {
-        toast.error("Trop de signalements récents. Réessayez dans un moment.");
+        toast.error(t.correction.rateLimit);
       } else if (msg === "duplicate") {
-        toast.error("Vous avez déjà un signalement ouvert de ce type sur cette fiche.");
+        toast.error(t.correction.duplicate);
       } else {
-        toast.error("Impossible d'envoyer le signalement pour le moment.");
+        toast.error(t.correction.sendFailed);
       }
     }
   };
@@ -92,7 +94,7 @@ export function FicheCorrectionRequest({
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
           <Flag className="h-4 w-4" />
-          Signaler une erreur
+          {t.correction.cta}
           {openReports.length > 0 && (
             <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[11px]">
               {openReports.length}
@@ -102,16 +104,13 @@ export function FicheCorrectionRequest({
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Signaler une erreur</DialogTitle>
-          <DialogDescription>
-            Aidez-nous à améliorer cette fiche. Votre signalement est examiné manuellement
-            et ne modifie jamais la fiche automatiquement.
-          </DialogDescription>
+          <DialogTitle>{t.correction.dialogTitle}</DialogTitle>
+          <DialogDescription>{t.correction.dialogDesc}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Type d'erreur</label>
+            <label className="text-sm font-medium">{t.correction.typeLabel}</label>
             <Select value={category} onValueChange={(v) => setCategory(v as CorrectionCategory)}>
               <SelectTrigger>
                 <SelectValue />
@@ -127,21 +126,21 @@ export function FicheCorrectionRequest({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Détails</label>
+            <label className="text-sm font-medium">{t.correction.detailsLabel}</label>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value.slice(0, MAX_CORRECTION_BODY))}
               rows={4}
-              placeholder="Décrivez l'erreur (ex. l'affiche ne correspond pas, la plateforme X manque…)."
+              placeholder={t.correction.detailsPlaceholder}
             />
             <p className={cn("text-right text-xs", remaining < 80 ? "text-destructive" : "text-muted-foreground")}>
-              {remaining} caractères restants
+              {t.correction.charsRemaining.replace("{count}", String(remaining))}
             </p>
           </div>
 
           {(mine.data?.length ?? 0) > 0 && (
             <div className="space-y-1.5 rounded-lg border border-border/60 bg-muted/30 p-3">
-              <p className="text-xs font-medium text-muted-foreground">Vos signalements sur cette fiche</p>
+              <p className="text-xs font-medium text-muted-foreground">{t.correction.yourReports}</p>
               <ul className="space-y-1">
                 {mine.data!.slice(0, 4).map((r) => {
                   const closed = r.status === "accepted" || r.status === "rejected";
@@ -168,11 +167,11 @@ export function FicheCorrectionRequest({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>
-            Annuler
+            {t.common.cancel}
           </Button>
           <Button onClick={handleSubmit} disabled={submit.isPending} className="gap-2">
             {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            Envoyer
+            {t.assistant.send}
           </Button>
         </DialogFooter>
       </DialogContent>

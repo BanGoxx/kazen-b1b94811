@@ -5,6 +5,7 @@ import { buildSeasonChain } from "@/lib/seasons";
 import { SafeImage } from "./SafeImage";
 import { FicheSection } from "./FicheSection";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * Confident season navigation for a fiche. Renders only when reliable
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
  * seasons). Each season links to its own fiche; the current one is marked.
  */
 export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
+  const { t } = useI18n();
   const chain = buildSeasonChain(detail);
   if (!chain || chain.entries.length < 2) return null;
 
@@ -21,17 +23,17 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
 
   return (
     <FicheSection
-      title="Saisons"
+      title={t.fiche.seasons}
       icon={<Layers className="h-5 w-5" />}
     >
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         {total ? (
           <span className="rounded-full border border-border bg-card/60 px-3 py-1 font-medium">
-            {total} saison{total > 1 ? "s" : ""}
+            {total} {total > 1 ? t.fiche.seasonsCountOther : t.fiche.seasonsCountOne}
           </span>
         ) : (
           <span className="rounded-full border border-border bg-card/60 px-3 py-1 font-medium">
-            Chaîne de saisons
+            {t.fiche.seasonChain}
           </span>
         )}
         {prev ? (
@@ -40,7 +42,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
             params={{ source: prev.source, id: prev.externalId }}
             className="focus-ring rounded-full px-3 py-1 font-medium text-foreground transition-colors hover:text-primary"
           >
-            ← Saison précédente
+            {t.fiche.prevSeason}
           </Link>
         ) : null}
         {next ? (
@@ -49,7 +51,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
             params={{ source: next.source, id: next.externalId }}
             className="focus-ring rounded-full px-3 py-1 font-medium text-foreground transition-colors hover:text-primary"
           >
-            Saison suivante →
+            {t.fiche.nextSeasonLink}
           </Link>
         ) : null}
       </div>
@@ -71,7 +73,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
                 ) : null}
                 {e.isCurrent ? (
                   <span className="absolute right-1.5 top-1.5 rounded-md bg-primary px-1.5 py-0.5 text-[11px] font-bold text-primary-foreground">
-                    Actuelle
+                    {t.fiche.seasonCurrent}
                   </span>
                 ) : null}
               </div>
@@ -86,7 +88,7 @@ export function SeasonNavigator({ detail }: { detail: MediaDetail }) {
                 {e.episodesCount ? (
                   <span className="inline-flex items-center gap-0.5">
                     <Tv className="h-3 w-3" />
-                    {e.episodesCount} ép.
+                    {e.episodesCount} {t.fiche.seasonEpisodesShort}
                   </span>
                 ) : null}
               </div>

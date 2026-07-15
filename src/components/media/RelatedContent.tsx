@@ -5,6 +5,8 @@ import { groupRelated } from "@/lib/franchise";
 import { cn } from "@/lib/utils";
 import { FicheSection } from "./FicheSection";
 import { RelatedScroller } from "./RelatedScroller";
+import { useI18n } from "@/lib/i18n";
+import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 
 const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
   franchise: GitBranch,
@@ -15,13 +17,8 @@ const CATEGORY_ICON: Record<RelationCategory, typeof GitBranch> = {
 
 type WorkType = "anime" | "serie" | "film" | "autre";
 
-const TYPE_LABELS: Record<Exclude<WorkType, "autre">, string> = {
-  anime: "Anime",
-  serie: "Série",
-  film: "Film",
-};
-
 const FILM_RE = /film|movie/i;
+
 
 /**
  * Reliable media-type classification derived from provider format signals —
@@ -50,6 +47,13 @@ export function RelatedContent({
   related: RelatedMedia[];
   collectionName?: string | null;
 }) {
+  const { t } = useI18n();
+  const mediaTypeLabels = useMediaTypeLabels();
+  const TYPE_LABELS: Record<Exclude<WorkType, "autre">, string> = {
+    anime: mediaTypeLabels.anime,
+    serie: mediaTypeLabels.series,
+    film: mediaTypeLabels.movie,
+  };
   const groups = groupRelated(related);
   const [active, setActive] = useState<RelationCategory | "all">("all");
   const [typeFilter, setTypeFilter] = useState<WorkType | "all">("all");
@@ -85,7 +89,7 @@ export function RelatedContent({
         <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
           <Layers className="h-5 w-5 shrink-0 text-primary" />
           <span className="text-sm">
-            Fait partie de la saga{" "}
+            {t.fiche.partOfSagaPrefix}{" "}
             <strong className="font-semibold">{collectionName}</strong>
           </span>
         </div>
@@ -94,7 +98,7 @@ export function RelatedContent({
       {showTypeFilter ? (
         <div
           role="tablist"
-          aria-label="Filtrer par type"
+          aria-label={t.fiche.filterByType}
           className="flex flex-wrap gap-2"
         >
           <button
@@ -109,23 +113,23 @@ export function RelatedContent({
                 : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
             )}
           >
-            Tout
+            {t.catalog.all}
           </button>
-          {availableTypes.map((t) => (
+          {availableTypes.map((wt) => (
             <button
-              key={t}
+              key={wt}
               type="button"
               role="tab"
-              aria-selected={typeFilter === t}
-              onClick={() => setTypeFilter(t)}
+              aria-selected={typeFilter === wt}
+              onClick={() => setTypeFilter(wt)}
               className={cn(
                 "focus-ring rounded-full px-3 py-1 text-xs font-semibold transition-colors",
-                typeFilter === t
+                typeFilter === wt
                   ? "aurora-bg text-white"
                   : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
               )}
             >
-              {TYPE_LABELS[t]}
+              {TYPE_LABELS[wt]}
             </button>
           ))}
         </div>
@@ -134,7 +138,7 @@ export function RelatedContent({
       {showFilter ? (
         <div
           role="tablist"
-          aria-label="Filtrer les contenus liés"
+          aria-label={t.fiche.filterRelated}
           className="flex flex-wrap gap-2"
         >
           <button
@@ -149,7 +153,7 @@ export function RelatedContent({
                 : "border border-border bg-card/60 text-muted-foreground hover:text-foreground",
             )}
           >
-            Tout
+            {t.catalog.all}
           </button>
           {groups.map((group) => {
             const Icon = CATEGORY_ICON[group.category];
@@ -178,7 +182,7 @@ export function RelatedContent({
 
       {visible.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Aucun contenu lié ne correspond à ce filtre.
+          {t.fiche.noRelatedForFilter}
         </p>
       ) : (
         visible.map((group) => {

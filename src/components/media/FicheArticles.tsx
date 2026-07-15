@@ -2,15 +2,11 @@ import { useState } from "react";
 import { Newspaper, ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { FicheSection } from "./FicheSection";
+import { useI18n } from "@/lib/i18n";
+import { formatDateLocalized } from "@/lib/i18n/date";
 
 /** Relevance tier of an article relative to the current fiche. */
 export type FicheArticleRelevance = "exact" | "franchise" | "related";
-
-const RELEVANCE_TAG: Record<FicheArticleRelevance, string | null> = {
-  exact: null,
-  franchise: "Même univers",
-  related: "Œuvre liée",
-};
 
 export interface FicheArticle {
   id: string;
@@ -33,14 +29,11 @@ export interface FicheArticle {
 const VISIBLE_LIMIT = 4;
 
 /**
- * Editorial "actualités liées" block (Article-to-Fiche Relevance, Phase 1).
+ * Editorial "related news" block (Article-to-Fiche Relevance, Phase 1).
  *
- * Renders only articles that are truly relevant to this title (the caller
- * already filters + orders them by relevance tier then recency). It shows
- * nothing when the list is empty, so the fiche never displays an empty or
- * broken-looking section. Visible entries are capped; a discreet in-place
- * "Voir toutes les actualités liées" reveals the rest only when more exist.
- * Internal articles route to /actualites/$slug; external ones open cleanly.
+ * Renders only articles that are truly relevant to this title. Shows nothing
+ * when the list is empty. Internal articles route to /actualites/$slug;
+ * external ones open cleanly.
  */
 export function FicheArticles({
   articles,
@@ -49,20 +42,21 @@ export function FicheArticles({
   articles: FicheArticle[];
   titleLabel?: string;
 }) {
+  const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
   if (!articles.length) return null;
 
-  const dateFmt = new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const RELEVANCE_TAG: Record<FicheArticleRelevance, string | null> = {
+    exact: null,
+    franchise: t.fiche.articleSameUniverse,
+    related: t.fiche.articleRelatedWork,
+  };
 
   const hasMore = articles.length > VISIBLE_LIMIT;
   const shown = expanded ? articles : articles.slice(0, VISIBLE_LIMIT);
   const heading = titleLabel
-    ? `Actualités liées à ${titleLabel}`
-    : "Actualités liées";
+    ? t.fiche.articlesRelatedTo.replace("{title}", titleLabel)
+    : t.fiche.articlesRelated;
 
   return (
     <FicheSection title={heading} icon={<Newspaper className="h-5 w-5" />}>
@@ -72,7 +66,11 @@ export function FicheArticles({
             !a.evergreen &&
             a.publishedAt &&
             !Number.isNaN(new Date(a.publishedAt).getTime())
-              ? dateFmt.format(new Date(a.publishedAt))
+              ? formatDateLocalized(a.publishedAt, locale, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
               : null;
           const tag =
             a.relevance && a.relevance !== "exact"
@@ -145,8 +143,8 @@ export function FicheArticles({
           className="focus-ring mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
         >
           {expanded
-            ? "Réduire"
-            : `Voir toutes les actualités liées (${articles.length})`}
+            ? t.fiche.reduce
+            : t.fiche.articlesViewAll.replace("{count}", String(articles.length))}
         </button>
       ) : null}
     </FicheSection>

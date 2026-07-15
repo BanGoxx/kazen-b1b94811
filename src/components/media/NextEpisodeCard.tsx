@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { CalendarClock } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+
+const LOCALE_MAP = { fr: "fr-FR", en: "en-US" } as const;
 
 /**
  * Compact "next episode" card for ongoing series/anime. Shows the upcoming
- * episode number, its air date, and a live countdown (days / hours / minutes)
- * so a returning user instantly knows what's next and exactly when. Renders
- * nothing without a valid next episode, so the fiche never shows empty UI.
+ * episode number, its air date, and a live countdown so a returning user
+ * instantly knows what's next and exactly when.
  */
 export function NextEpisodeCard({
   nextEpisode,
 }: {
   nextEpisode: { number: number; airDate: string } | null;
 }) {
+  const { t, locale } = useI18n();
   const air = nextEpisode?.airDate ? new Date(nextEpisode.airDate) : null;
   const valid = air && !Number.isNaN(air.getTime());
 
-  // Start at `null` so SSR and the first client render are identical (no
-  // countdown, which depends on the current time). After mount we compute the
-  // live countdown and tick every 30s without heavy re-renders.
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     if (!valid) return;
@@ -33,27 +33,29 @@ export function NextEpisodeCard({
   if (now !== null) {
     const diffMs = air.getTime() - now;
     if (diffMs <= 0) {
-      countdown = "Diffusé récemment";
+      countdown = t.fiche.airedRecently;
     } else {
       const totalMin = Math.floor(diffMs / 60_000);
       const days = Math.floor(totalMin / 1440);
       const hours = Math.floor((totalMin % 1440) / 60);
       const mins = totalMin % 60;
       if (days >= 1) {
-        countdown = `Dans ${days} j ${hours} h`;
+        countdown = t.fiche.inDaysHours
+          .replace("{days}", String(days))
+          .replace("{hours}", String(hours));
       } else if (hours >= 1) {
-        countdown = `Dans ${hours} h ${mins} min`;
+        countdown = t.fiche.inHoursMin
+          .replace("{hours}", String(hours))
+          .replace("{mins}", String(mins));
         imminent = true;
       } else {
-        countdown = `Dans ${mins} min`;
+        countdown = t.fiche.inMinutes.replace("{mins}", String(mins));
         imminent = true;
       }
     }
   }
 
-  // Fixed timezone keeps this label byte-identical on the server (UTC) and the
-  // client, so hydration never mismatches on the date/hour.
-  const dateLabel = new Intl.DateTimeFormat("fr-FR", {
+  const dateLabel = new Intl.DateTimeFormat(LOCALE_MAP[locale], {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -75,10 +77,10 @@ export function NextEpisodeCard({
       </div>
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          Prochain épisode
+          {t.fiche.nextEpisode}
         </p>
         <p className="truncate text-sm font-semibold">
-          Épisode {nextEpisode.number}
+          {t.fiche.episodeFull} {nextEpisode.number}
           {countdown ? ` · ${countdown}` : ""}
         </p>
         <p className="truncate text-xs capitalize text-muted-foreground">{dateLabel}</p>

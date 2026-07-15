@@ -284,6 +284,52 @@ const fr = {
     articlesRelated: "Actualités liées",
     articlesViewAll: "Voir toutes les actualités liées ({count})",
   },
+  correction: {
+    cta: "Signaler une erreur",
+    dialogTitle: "Signaler une erreur",
+    dialogDesc:
+      "Aidez-nous à améliorer cette fiche. Votre signalement est examiné manuellement et ne modifie jamais la fiche automatiquement.",
+    typeLabel: "Type d'erreur",
+    detailsLabel: "Détails",
+    detailsPlaceholder:
+      "Décrivez l'erreur (ex. l'affiche ne correspond pas, la plateforme X manque…).",
+    charsRemaining: "{count} caractères restants",
+    yourReports: "Vos signalements sur cette fiche",
+    emptyBody: "Décrivez brièvement l'erreur constatée.",
+    sent: "Signalement envoyé. Merci ! L'équipe KAZEN l'examinera.",
+    rateLimit: "Trop de signalements récents. Réessayez dans un moment.",
+    duplicate: "Vous avez déjà un signalement ouvert de ce type sur cette fiche.",
+    sendFailed: "Impossible d'envoyer le signalement pour le moment.",
+  },
+  mediaRequest: {
+    cta: "Proposer ce titre",
+    dialogTitle: "Proposer un titre manquant",
+    dialogDesc:
+      "Ce titre n'est pas encore dans KAZEN ? Proposez-le. L'équipe KAZEN l'examinera — cela ne crée pas de fiche automatiquement.",
+    titlePlaceholder: "Titre du média",
+    urlPlaceholder: "Lien externe (optionnel) — ex. AniList, TMDB…",
+    notePlaceholder: "Pourquoi ce titre ? (optionnel)",
+    submit: "Envoyer la proposition",
+    emptyTitle: "Indiquez le titre à proposer.",
+    sent: "Proposition envoyée. Merci ! L'équipe KAZEN l'examinera.",
+    sendFailed: "Impossible d'envoyer la proposition pour le moment.",
+  },
+  reco: {
+    triggerLabel: "Assistant",
+    title: "Que veux-tu regarder ?",
+    description:
+      "Décris une envie — genre, type, ambiance — et je te propose les titres les plus pertinents.",
+    inputPlaceholder: "ex. un anime horreur récent",
+    inputAria: "Décris ce que tu veux regarder",
+    find: "Trouver",
+    preparing: "Préparation des recommandations…",
+    selectionFor: "Sélection pour :",
+    noMatch: "Aucun titre ne correspond exactement.",
+    noMatchHint: "Essaie une autre formulation, un autre genre ou un autre type.",
+    promptEmpty: "Pose ta question pour commencer.",
+    promptEmptyHint:
+      "Astuce : combine type + genre + ambiance, ex. « série thriller récente ».",
+  },
   playlist: {
     myPlaylists: "Mes playlists",
     createTitle: "Créer une playlist",

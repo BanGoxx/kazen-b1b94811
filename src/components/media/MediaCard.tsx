@@ -7,7 +7,7 @@ import { PlatformRow } from "./PlatformBadge";
 import { MediaBadges } from "./MediaBadges";
 import { NextEpisodePill } from "./NextEpisodePill";
 import { cn } from "@/lib/utils";
-import { useI18n } from "@/lib/i18n";
+
 import { useMediaTypeLabels } from "@/lib/i18n/tracking";
 
 const TYPE_COLORS: Record<MediaItem["mediaType"], string> = {

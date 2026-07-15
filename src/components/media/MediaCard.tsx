@@ -70,7 +70,7 @@ export function MediaCard({
         />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
           <span className={cn("rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.08em] shadow-sm ring-1 ring-inset backdrop-blur-md", TYPE_COLORS[item.mediaType])}>
-            {MEDIA_TYPE_LABELS[item.mediaType]}
+            {typeLabels[item.mediaType]}
           </span>
           <RatingBadge score={item.score} />
         </div>

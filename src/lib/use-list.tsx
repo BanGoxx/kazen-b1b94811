@@ -123,6 +123,7 @@ function optimisticMediaRecord(item: MediaItem): NonNullable<ListRow["media_reco
     episodes_count: item.episodesCount ?? null,
     created_at: now,
     updated_at: now,
+    created_by: null,
   } as NonNullable<ListRow["media_records"]>;
 }
 

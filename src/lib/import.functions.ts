@@ -279,7 +279,12 @@ export const confirmImport = createServerFn({ method: "POST" })
         score?: number | null;
       } | null;
       if (snapshot?.key && snapshot.key === it.matched_media_key) {
-        const { error: mErr } = await context.supabase.rpc("seed_media_snapshot", {
+        // Confirmed-import path: reuses every validation of seed_media_snapshot
+        // but replaces the interactive 60/10-min quota with strict batch
+        // ownership + product ceiling, so a legitimate multi-hundred-title
+        // import is never truncated silently at the 61st fresh media.
+        const { error: mErr } = await context.supabase.rpc("seed_media_snapshot_for_batch", {
+          _batch_id: data.batchId,
           _media_key: snapshot.key,
           _source: snapshot.source ?? "anilist",
           _external_id: snapshot.externalId ?? snapshot.key.split(":")[1] ?? "",

@@ -1203,6 +1203,7 @@ export type Database = {
         Row: {
           backdrop_url: string | null
           created_at: string
+          created_by: string | null
           episodes_count: number | null
           external_id: string
           genres: string[]
@@ -1220,6 +1221,7 @@ export type Database = {
         Insert: {
           backdrop_url?: string | null
           created_at?: string
+          created_by?: string | null
           episodes_count?: number | null
           external_id: string
           genres?: string[]
@@ -1237,6 +1239,7 @@ export type Database = {
         Update: {
           backdrop_url?: string | null
           created_at?: string
+          created_by?: string | null
           episodes_count?: number | null
           external_id?: string
           genres?: string[]

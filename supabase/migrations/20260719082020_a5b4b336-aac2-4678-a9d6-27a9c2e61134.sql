@@ -1,0 +1,139 @@
+-- Hardening de public.seed_media_snapshot :
+--  - dérive canonique media_key = source:external_id (rejet des mismatch)
+--  - external_id restreint aux entiers positifs (formats AniList/TMDB réels)
+--  - URLs poster/backdrop : ne conserve que https://…, sinon NULL (résilient)
+--  - release_date : ne conserve que si parseable en date, sinon NULL
+--  - titre : retire balises HTML et caractères de contrôle
+--  - rate limit : 60 nouveaux media_records par membre / 10 min
+--  - REVOKE inutile pour anon (défense en profondeur ; auth.uid() bloquait déjà)
+-- Ajout additif d'une colonne created_by (nullable, sans FK vers auth.users) pour le rate limit.
+
+ALTER TABLE public.media_records
+  ADD COLUMN IF NOT EXISTS created_by uuid;
+
+CREATE INDEX IF NOT EXISTS media_records_created_by_created_at_idx
+  ON public.media_records (created_by, created_at DESC)
+  WHERE created_by IS NOT NULL;
+
+CREATE OR REPLACE FUNCTION public.seed_media_snapshot(
+  _media_key text,
+  _source text,
+  _external_id text,
+  _media_type text,
+  _title text,
+  _title_original text DEFAULT NULL::text,
+  _poster_url text DEFAULT NULL::text,
+  _backdrop_url text DEFAULT NULL::text,
+  _release_date text DEFAULT NULL::text,
+  _genres text[] DEFAULT '{}'::text[],
+  _platforms jsonb DEFAULT '[]'::jsonb,
+  _score numeric DEFAULT NULL::numeric
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  caller uuid := auth.uid();
+  canonical_key text;
+  clean_title text;
+  clean_title_original text;
+  clean_poster text;
+  clean_backdrop text;
+  clean_release text;
+  parsed_date date;
+  recent integer;
+BEGIN
+  IF caller IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
+
+  -- Whitelist stricte
+  IF _source NOT IN ('anilist','tmdb_movie','tmdb_tv') THEN
+    RAISE EXCEPTION 'Invalid source.';
+  END IF;
+  IF _media_type NOT IN ('anime','movie','series') THEN
+    RAISE EXCEPTION 'Invalid media_type.';
+  END IF;
+
+  -- external_id : entier positif (formats AniList/TMDB réels)
+  IF _external_id IS NULL OR _external_id !~ '^[1-9][0-9]{0,9}$' THEN
+    RAISE EXCEPTION 'Invalid external_id.';
+  END IF;
+
+  -- media_key dérivée serveur ; rejette tout mismatch avec source/external_id
+  canonical_key := _source || ':' || _external_id;
+  IF _media_key IS DISTINCT FROM canonical_key THEN
+    RAISE EXCEPTION 'media_key must match source:external_id.';
+  END IF;
+
+  -- Titre : retire balises HTML et caractères de contrôle
+  clean_title := regexp_replace(coalesce(_title, ''), '<[^>]*>', '', 'g');
+  clean_title := regexp_replace(clean_title, '[\u0000-\u0008\u000B\u000C\u000E-\u001F]', '', 'g');
+  clean_title := trim(clean_title);
+  IF char_length(clean_title) = 0 OR char_length(clean_title) > 300 THEN
+    RAISE EXCEPTION 'Invalid title.';
+  END IF;
+
+  IF _title_original IS NOT NULL THEN
+    clean_title_original := regexp_replace(_title_original, '<[^>]*>', '', 'g');
+    clean_title_original := regexp_replace(clean_title_original, '[\u0000-\u0008\u000B\u000C\u000E-\u001F]', '', 'g');
+    clean_title_original := trim(clean_title_original);
+    IF char_length(clean_title_original) = 0 THEN
+      clean_title_original := NULL;
+    ELSIF char_length(clean_title_original) > 300 THEN
+      clean_title_original := left(clean_title_original, 300);
+    END IF;
+  END IF;
+
+  -- URLs : conserver uniquement https:// (résilient : mauvaise URL → NULL)
+  IF _poster_url IS NOT NULL AND _poster_url ~* '^https://[^\s<>"]{5,}$' THEN
+    clean_poster := left(_poster_url, 1024);
+  END IF;
+  IF _backdrop_url IS NOT NULL AND _backdrop_url ~* '^https://[^\s<>"]{5,}$' THEN
+    clean_backdrop := left(_backdrop_url, 1024);
+  END IF;
+
+  -- release_date : conserver la valeur d'origine (text) seulement si parseable
+  IF _release_date IS NOT NULL AND _release_date <> '' THEN
+    BEGIN
+      parsed_date := _release_date::date;
+      clean_release := _release_date;
+    EXCEPTION WHEN OTHERS THEN
+      clean_release := NULL;
+    END;
+  END IF;
+
+  IF _score IS NOT NULL AND (_score < 0 OR _score > 100) THEN
+    RAISE EXCEPTION 'Invalid score.';
+  END IF;
+
+  -- Rate limit anti-pollution volumétrique : 60 nouveaux médias / 10 min / membre
+  SELECT count(*) INTO recent
+  FROM public.media_records
+  WHERE created_by = caller
+    AND created_at > now() - interval '10 minutes';
+  IF recent >= 60 THEN
+    RAISE EXCEPTION 'Trop de nouveaux médias soumis récemment. Réessaie plus tard.';
+  END IF;
+
+  INSERT INTO public.media_records (
+    media_key, source, external_id, media_type, title, title_original,
+    poster_url, backdrop_url, release_date, genres, platforms, score, created_by
+  ) VALUES (
+    canonical_key, _source, _external_id, _media_type, clean_title, clean_title_original,
+    clean_poster, clean_backdrop, clean_release,
+    coalesce(_genres, '{}'::text[]), coalesce(_platforms, '[]'::jsonb), _score, caller
+  )
+  ON CONFLICT (media_key) DO NOTHING;
+END;
+$function$;
+
+-- Défense en profondeur : anon ne doit pas atteindre la RPC.
+-- (auth.uid() bloquait déjà, mais on retire la surface inutile.)
+REVOKE EXECUTE ON FUNCTION public.seed_media_snapshot(
+  text, text, text, text, text, text, text, text, text, text[], jsonb, numeric
+) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.seed_media_snapshot(
+  text, text, text, text, text, text, text, text, text, text[], jsonb, numeric
+) TO authenticated, service_role;

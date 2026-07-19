@@ -27,26 +27,19 @@ import {
 const HOUR = 1000 * 60 * 60;
 const IS_BROWSER = typeof window !== "undefined";
 
-// Homepage anime rails: on the server, use the cached server handlers (which
-// fall back to a curated list when the Worker is 403-blocked by AniList). On
-// the client, prefer the browser-direct AniList CORS path so production shows
-// the real, complete lists even when the Worker stays blocked — then fall back
-// to the SSR value on any client error. staleTime 0 on the client lets the
-// browser immediately replace any curated SSR fallback with real data.
+// Homepage anime rails: use the server handler on BOTH the server and the
+// client's initial render so the dehydrated SSR cache and the first client
+// render agree byte-for-byte (no hydration mismatch). The browser-direct
+// AniList upgrade — needed when the Worker is 403-blocked in production — is
+// applied post-hydration by refreshAnimeRails() via setQueryData, never inside
+// the queryFn of the initial render.
 async function isoAnimeList(
-  kind: "trending" | "popular" | "upcoming",
+  _kind: "trending" | "popular" | "upcoming",
   serverFn: () => Promise<import("./media-types").MediaItem[]>,
 ) {
-  if (IS_BROWSER) {
-    try {
-      const items = await anilistPublicList(kind);
-      if (items.length) return items;
-    } catch (error) {
-      console.error("anilistPublicList", kind, error);
-    }
-  }
   return serverFn();
 }
+
 
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],
@@ -74,17 +67,7 @@ export const upcomingAnimeQO = queryOptions({
 export const seasonalAnimeQO = (season?: string, year?: number) =>
   queryOptions({
     queryKey: ["anime", "seasonal", season ?? "current", year ?? "current"],
-    queryFn: async () => {
-      if (IS_BROWSER) {
-        try {
-          const result = await anilistPublicSeasonal(season, year);
-          if (result.items.length) return result;
-        } catch (error) {
-          console.error("anilistPublicSeasonal", error);
-        }
-      }
-      return getSeasonalAnime({ data: { season, year } });
-    },
+    queryFn: async () => getSeasonalAnime({ data: { season, year } }),
     staleTime: HOUR,
     retry: 3,
   });
@@ -96,12 +79,28 @@ export const seasonalAnimeQO = (season?: string, year?: number) =>
  * (so SSR and hydration match and React does not crash). Once the app has
  * hydrated, call this to pull the complete browser-direct AniList lists — this
  * matters in production, where the Worker is often AniList-blocked and the SSR
- * data is a curated fallback. Runs only in the browser and only when needed.
+ * data is a curated fallback. Runs only in the browser and swaps data via
+ * setQueryData so it never triggers a mid-hydration refetch.
  */
 export function refreshAnimeRails(queryClient: import("@tanstack/react-query").QueryClient) {
   if (typeof window === "undefined") return;
-  void queryClient.refetchQueries({ queryKey: ["anime"], type: "active" });
+  const kinds: Array<"trending" | "popular" | "upcoming"> = ["trending", "popular", "upcoming"];
+  for (const kind of kinds) {
+    void anilistPublicList(kind)
+      .then((items) => {
+        if (items.length) queryClient.setQueryData(["anime", kind], items);
+      })
+      .catch((error) => console.error("anilistPublicList", kind, error));
+  }
+  void anilistPublicSeasonal()
+    .then((result) => {
+      if (result.items.length) {
+        queryClient.setQueryData(["anime", "seasonal", "current", "current"], result);
+      }
+    })
+    .catch((error) => console.error("anilistPublicSeasonal", error));
 }
+
 
 // One-time, post-hydration browser-direct upgrade for a catalog query.
 //

@@ -84,22 +84,39 @@ export const seasonalAnimeQO = (season?: string, year?: number) =>
  */
 export function refreshAnimeRails(queryClient: import("@tanstack/react-query").QueryClient) {
   if (typeof window === "undefined") return;
-  const kinds: Array<"trending" | "popular" | "upcoming"> = ["trending", "popular", "upcoming"];
-  for (const kind of kinds) {
-    void anilistPublicList(kind)
-      .then((items) => {
-        if (items.length) queryClient.setQueryData(["anime", kind], items);
+  const run = () => {
+    const kinds: Array<"trending" | "popular" | "upcoming"> = ["trending", "popular", "upcoming"];
+    for (const kind of kinds) {
+      void anilistPublicList(kind)
+        .then((items) => {
+          if (items.length) queryClient.setQueryData(["anime", kind], items);
+        })
+        .catch((error) => console.error("anilistPublicList", kind, error));
+    }
+    void anilistPublicSeasonal()
+      .then((result) => {
+        if (result.items.length) {
+          queryClient.setQueryData(["anime", "seasonal", "current", "current"], result);
+        }
       })
-      .catch((error) => console.error("anilistPublicList", kind, error));
-  }
-  void anilistPublicSeasonal()
-    .then((result) => {
-      if (result.items.length) {
-        queryClient.setQueryData(["anime", "seasonal", "current", "current"], result);
-      }
-    })
-    .catch((error) => console.error("anilistPublicSeasonal", error));
+      .catch((error) => console.error("anilistPublicSeasonal", error));
+  };
+  // Defer until well after React has finished hydrating every streamed Suspense
+  // boundary. setQueryData during hydration re-renders subscribers with a
+  // larger (30-item) browser-direct payload while React still expects the
+  // 24-item SSR HTML — that's the hydration mismatch we saw on the homepage.
+  // `window.load` + a small idle tail guarantees hydration has committed.
+  const schedule = () => {
+    const ric =
+      (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback;
+    if (typeof ric === "function") ric(run, { timeout: 1500 });
+    else window.setTimeout(run, 300);
+  };
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
 }
+
 
 
 // One-time, post-hydration browser-direct upgrade for a catalog query.

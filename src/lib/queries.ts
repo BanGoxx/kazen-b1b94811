@@ -27,26 +27,19 @@ import {
 const HOUR = 1000 * 60 * 60;
 const IS_BROWSER = typeof window !== "undefined";
 
-// Homepage anime rails: on the server, use the cached server handlers (which
-// fall back to a curated list when the Worker is 403-blocked by AniList). On
-// the client, prefer the browser-direct AniList CORS path so production shows
-// the real, complete lists even when the Worker stays blocked — then fall back
-// to the SSR value on any client error. staleTime 0 on the client lets the
-// browser immediately replace any curated SSR fallback with real data.
+// Homepage anime rails: use the server handler on BOTH the server and the
+// client's initial render so the dehydrated SSR cache and the first client
+// render agree byte-for-byte (no hydration mismatch). The browser-direct
+// AniList upgrade — needed when the Worker is 403-blocked in production — is
+// applied post-hydration by refreshAnimeRails() via setQueryData, never inside
+// the queryFn of the initial render.
 async function isoAnimeList(
-  kind: "trending" | "popular" | "upcoming",
+  _kind: "trending" | "popular" | "upcoming",
   serverFn: () => Promise<import("./media-types").MediaItem[]>,
 ) {
-  if (IS_BROWSER) {
-    try {
-      const items = await anilistPublicList(kind);
-      if (items.length) return items;
-    } catch (error) {
-      console.error("anilistPublicList", kind, error);
-    }
-  }
   return serverFn();
 }
+
 
 export const trendingAnimeQO = queryOptions({
   queryKey: ["anime", "trending"],

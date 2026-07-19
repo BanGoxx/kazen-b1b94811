@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.notify_member(uuid, text, text, text, text, text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.forum_notify(uuid, text, text, text, text, text) FROM PUBLIC, anon, authenticated;

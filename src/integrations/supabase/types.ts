@@ -2520,6 +2520,24 @@ export type Database = {
         }
         Returns: undefined
       }
+      seed_media_snapshot_for_batch: {
+        Args: {
+          _backdrop_url?: string
+          _batch_id: string
+          _external_id: string
+          _genres?: string[]
+          _media_key: string
+          _media_type: string
+          _platforms?: Json
+          _poster_url?: string
+          _release_date?: string
+          _score?: number
+          _source: string
+          _title: string
+          _title_original?: string
+        }
+        Returns: undefined
+      }
       send_chat_message: {
         Args: { _body: string; _conv: string }
         Returns: string

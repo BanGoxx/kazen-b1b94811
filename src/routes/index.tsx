@@ -205,7 +205,9 @@ function DiscoverPage() {
   // in production where the Worker is AniList-blocked and SSR data is curated).
   // Running this post-mount avoids swapping data mid-hydration.
   useEffect(() => {
-    refreshAnimeRails(queryClient);
+    // TEMP: disabled for hydration test
+    void queryClient;
+    void refreshAnimeRails;
   }, [queryClient]);
   return (
     <AppShell>

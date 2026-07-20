@@ -27,10 +27,12 @@
 //     a wait. Backoff is bounded by `MAX_ATTEMPTS`.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import { withAniListSlot } from "./anilist-shared-queue.server";
 
-type UserClient = SupabaseClient<Database>;
+// V2 tables/RPCs are not yet in the generated Database types on this branch
+// (DB migration is deferred to H.2-C). Use an untyped SupabaseClient here so
+// typecheck stays green; runtime validation is enforced by the DB RPCs.
+type UserClient = SupabaseClient;
 
 // ---------------------------------------------------------------------------
 // Auth context — opaque brand. `buildAuthContext` is the only constructor;

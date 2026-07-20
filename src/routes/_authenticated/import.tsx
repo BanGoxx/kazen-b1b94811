@@ -363,15 +363,22 @@ function ImportPage() {
           </div>
         </section>
 
-        {/* Upload */}
-        {selected && (
-          <UploadSection
-            provider={PROVIDERS.find((p) => p.id === selected)!}
-            busy={busy}
-            onFile={handleFile}
-            onUsername={handleUsername}
-          />
-
+        {/* Upload — V2 canonical path (server-gated) for AniList; V1 otherwise. */}
+        {selected && v2Enabled && selected === "anilist" ? (
+          <div data-testid="canonical-v2-panel">
+            <CanonicalV2Import />
+          </div>
+        ) : (
+          selected && (
+            <div data-testid="legacy-v1-upload">
+              <UploadSection
+                provider={PROVIDERS.find((p) => p.id === selected)!}
+                busy={busy}
+                onFile={handleFile}
+                onUsername={handleUsername}
+              />
+            </div>
+          )
         )}
 
         {/* Preview */}

@@ -1,0 +1,2 @@
+ALTER TABLE public.import_canonical_v2_batches DROP CONSTRAINT import_canonical_v2_batches_total_count_check;
+ALTER TABLE public.import_canonical_v2_batches ADD CONSTRAINT import_canonical_v2_batches_total_count_check CHECK (total_count >= 1 AND total_count <= 5000);

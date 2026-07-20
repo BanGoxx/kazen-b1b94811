@@ -1,0 +1,407 @@
+{
+  "version": "phase-h.2-export",
+  "environment": "KAZEN STAGING",
+  "staging_project_ref": "yuazpxegdqdeflbdyobd",
+  "production_project_ref_target": "yzmkeceduhzqqqpyfmdd",
+  "production_contacted": false,
+  "git_head_staging": "0ba068f1b81b7936071e3e389e8e57b940fe773a",
+  "branch": "edit/edt-304e2cb1-ca7c-432e-9370-0faacb419125",
+  "counts": {
+    "total": 31
+  },
+  "files": [
+    {
+      "package_path": "DEPENDENCIES.json",
+      "target_path": "DEPENDENCIES.json",
+      "category": "meta",
+      "sha256": "72112333607a43bfedd9c25743291e0e0252f3a7f2df039e3715cafc590e17dc",
+      "size": 1342,
+      "transfer_mode": "DOC_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "EXCLUSIONS.md",
+      "target_path": "EXCLUSIONS.md",
+      "category": "meta",
+      "sha256": "4ba90766789d1a0eca5d474e881327405029bfc8574aa0efa0b4ea17f54f634a",
+      "size": 1515,
+      "transfer_mode": "DOC_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "README-IMPORT.md",
+      "target_path": "README-IMPORT.md",
+      "category": "meta",
+      "sha256": "15dbd5d8b2dca94cc0441fcf36910fcfa90b9d0e7afad05ccc52966fda4db91d",
+      "size": 2828,
+      "transfer_mode": "DOC_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "docs/phase-import-canonicalization-v2-parallel.md",
+      "target_path": "docs/phase-import-canonicalization-v2-parallel.md",
+      "category": "doc",
+      "sha256": "105bfe4551ebe2b081e5cc63e0c56015a880956cbd85094697af2158514af6d3",
+      "size": 26476,
+      "transfer_mode": "DOC_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "docs/phase-import-canonicalization-v2-staging-isolation.md",
+      "target_path": "docs/phase-import-canonicalization-v2-staging-isolation.md",
+      "category": "doc",
+      "sha256": "38f1a7b291cdc91b1c701fc27b0b3c24348f22225c776819b59ed63dade27143",
+      "size": 12683,
+      "transfer_mode": "DOC_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "migrations/apply-candidates/01_v2_foundation.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_01_v2_foundation.sql",
+      "category": "migration-apply",
+      "sha256": "a502cf4108296d7e20705c5248f1f893fce3d059b31f6e272bc11fd6a2b96f68",
+      "size": 49232,
+      "transfer_mode": "COPY_NEW",
+      "order": 1,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/apply-candidates/02_fix_total_count_check.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_02_fix_total_count_check.sql",
+      "category": "migration-apply",
+      "sha256": "52ef65eaa70d9f824b9ead4c41ea2753c7bd2da7570a70248a429c61ce77695d",
+      "size": 267,
+      "transfer_mode": "COPY_NEW",
+      "order": 2,
+      "dependencies": [
+        "01_v2_foundation.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/apply-candidates/03_allowlist.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_03_allowlist.sql",
+      "category": "migration-apply",
+      "sha256": "4080b8f8a530302fee2a6475dda267e274418ca9afea5d7845c00bbb47a74111",
+      "size": 1354,
+      "transfer_mode": "COPY_NEW",
+      "order": 3,
+      "dependencies": [
+        "01_v2_foundation.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/apply-candidates/04_worker_intermediate.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_04_worker_intermediate.sql",
+      "category": "migration-apply",
+      "sha256": "d9245d59c8669cca4fcf73d800baba5abeb441b201efb947020b70d3034f2442",
+      "size": 11123,
+      "transfer_mode": "COPY_NEW",
+      "order": 4,
+      "dependencies": [
+        "01_v2_foundation.sql",
+        "03_allowlist.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/apply-candidates/05_rollback_intermediate.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_05_rollback_intermediate.sql",
+      "category": "migration-apply",
+      "sha256": "fcf50a38f8d82a340d82cb467272621a1f46e2e00cd63db371f6614f53929b6f",
+      "size": 7415,
+      "transfer_mode": "COPY_NEW",
+      "order": 5,
+      "dependencies": [
+        "04_worker_intermediate.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/apply-candidates/06_worker_final_qualified.sql",
+      "target_path": "supabase/migrations/<new-timestamp>_06_worker_final_qualified.sql",
+      "category": "migration-apply",
+      "sha256": "9793f61539f032639c5260ef8963d69619537bffe65f984c1a3e53a33dcb9820",
+      "size": 11313,
+      "transfer_mode": "COPY_NEW",
+      "order": 6,
+      "dependencies": [
+        "05_rollback_intermediate.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/compare-only/N1_notify_forum_revoke.sql",
+      "target_path": "(compare against production, do not apply if already present)",
+      "category": "migration-compare",
+      "sha256": "e794557b1e41132298b0d57d40452e809f8ae319c2af568fb404ffffa5d1ea6c",
+      "size": 616,
+      "transfer_mode": "COMPARE_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/compare-only/PROFILE_trigger_handle_new_user.sql",
+      "target_path": "(compare against production, do not apply if already present)",
+      "category": "migration-compare",
+      "sha256": "7630c732fecfa5b981892c9cf00b535fb6b8127b8ec5fbc0c66a5c99e012111c",
+      "size": 655,
+      "transfer_mode": "COMPARE_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/01_v2_foundation.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "6c02d17ffc8c14916ade3c1d06daf5f496c486ad8ea64ce1c02cd71d1176bc0b",
+      "size": 2913,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/03_allowlist.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "3267919f26e1702972fb440dfbb08003acbee3122d804413fa396d189efa59a6",
+      "size": 837,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/04_worker_intermediate.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "a24d5faf144cb18542bf207ca7a4a729dce48ac0d6cf72e5ed3576b7d8ac9492",
+      "size": 7551,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/06_worker_final.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "a24d5faf144cb18542bf207ca7a4a729dce48ac0d6cf72e5ed3576b7d8ac9492",
+      "size": 7551,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/N1.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "881072588962c65e4bc9251acbeffb57b9bb275b190078da2f14aa95b29584c1",
+      "size": 520,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "migrations/rollbacks/PROFILE.rollback.sql",
+      "target_path": "(kept out of migrations dir; run only if reverting)",
+      "category": "rollback",
+      "sha256": "d82475eb90c163ba2b5770015093f496059cd733b0951c514bbe9cb3feb7c4a9",
+      "size": 504,
+      "transfer_mode": "ROLLBACK_ONLY",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0 preflight + G validation"
+    },
+    {
+      "package_path": "patches/import-route-v2-integration-notes.md",
+      "target_path": "patches/import-route-v2-integration-notes.md",
+      "category": "patch",
+      "sha256": "ab63e453ca95af1e5293b90923d538a7291c09c27d966a19ce44d965306cc5d6",
+      "size": 3258,
+      "transfer_mode": "MANUAL_MERGE",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G branching"
+    },
+    {
+      "package_path": "patches/import-route-v2.patch",
+      "target_path": "patches/import-route-v2.patch",
+      "category": "patch",
+      "sha256": "4873fe585d31eac00ae595836617b5e88579899155977b818b30698c49e030ed",
+      "size": 3199,
+      "transfer_mode": "MANUAL_MERGE",
+      "order": null,
+      "dependencies": [
+        "runtime/src/components/import/CanonicalV2Import.tsx",
+        "runtime/src/lib/import-canonical-v2.functions.ts"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G branching"
+    },
+    {
+      "package_path": "reference/src/routes/_authenticated/import.tsx",
+      "target_path": "src/routes/_authenticated/import.tsx",
+      "category": "reference",
+      "sha256": "3ead50bfb0a8a88e6f5f7f502e3b44d03244dd950e592cae7005c02dd2c0cbf2",
+      "size": 25492,
+      "transfer_mode": "MANUAL_MERGE",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "H.0"
+    },
+    {
+      "package_path": "runtime/src/components/import/CanonicalV2Import.tsx",
+      "target_path": "src/components/import/CanonicalV2Import.tsx",
+      "category": "runtime",
+      "sha256": "0b6fd292b4a7eb02a4f17375e32a7b3e7b435ceb3c4ec6ba861ad43123529197",
+      "size": 17158,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [
+        "runtime/src/lib/import-canonical-v2.functions.ts"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G / G.6*"
+    },
+    {
+      "package_path": "runtime/src/lib/anilist-shared-queue.server.ts",
+      "target_path": "src/lib/anilist-shared-queue.server.ts",
+      "category": "runtime",
+      "sha256": "701cbf7052cbd413dad0b20408692dc2ae429cb2090984e7ef4a1a8d833986e9",
+      "size": 1969,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G / G.6*"
+    },
+    {
+      "package_path": "runtime/src/lib/import-canonical-v2.functions.ts",
+      "target_path": "src/lib/import-canonical-v2.functions.ts",
+      "category": "runtime",
+      "sha256": "aee35a853ea7e180eb8d656be94b7b957708e3fef7704493d5168cadc3f6ebaa",
+      "size": 10192,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [
+        "runtime/src/lib/import-canonical-v2.server.ts"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G / G.6*"
+    },
+    {
+      "package_path": "runtime/src/lib/import-canonical-v2.server.ts",
+      "target_path": "src/lib/import-canonical-v2.server.ts",
+      "category": "runtime",
+      "sha256": "faa5ce9e573bf710c30f81d92c882c1ddaa51da5ced570ca1c4f25cb90e157a1",
+      "size": 26692,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [
+        "runtime/src/lib/anilist-shared-queue.server.ts",
+        "migrations/apply-candidates/06_worker_final_qualified.sql"
+      ],
+      "tested_on_staging": true,
+      "proof_phase": "Phase G / G.6*"
+    },
+    {
+      "package_path": "tests/src/components/import/CanonicalV2Import.retry-ux.test.ts",
+      "target_path": "src/components/import/CanonicalV2Import.retry-ux.test.ts",
+      "category": "test",
+      "sha256": "0ccd3e6b0e9331b090d7529de636ad98bce07f25036a8c7275743981efc661df",
+      "size": 2295,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Vitest 70/70 PASS"
+    },
+    {
+      "package_path": "tests/src/lib/import-canonical-v2-metrics.test.ts",
+      "target_path": "src/lib/import-canonical-v2-metrics.test.ts",
+      "category": "test",
+      "sha256": "b3730c53034463731c4ea47a5b1f3ad64df3d1594f1f857414d5b47149cbf2f5",
+      "size": 1670,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Vitest 70/70 PASS"
+    },
+    {
+      "package_path": "tests/src/lib/import-canonical-v2.gate.test.ts",
+      "target_path": "src/lib/import-canonical-v2.gate.test.ts",
+      "category": "test",
+      "sha256": "f93a9f6070ffef707686f1fd9d1cdb6ff747686c936bd33c5108e5f25c8b43b9",
+      "size": 3818,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Vitest 70/70 PASS"
+    },
+    {
+      "package_path": "tests/src/lib/import-canonical-v2.orchestrator.test.ts",
+      "target_path": "src/lib/import-canonical-v2.orchestrator.test.ts",
+      "category": "test",
+      "sha256": "e5b96f9419b3c3e45b966a39f07d5d10961765fa8d0dc649bced1d44a31b444c",
+      "size": 11970,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Vitest 70/70 PASS"
+    },
+    {
+      "package_path": "tests/src/lib/import-canonical-v2.test.ts",
+      "target_path": "src/lib/import-canonical-v2.test.ts",
+      "category": "test",
+      "sha256": "b8fe06a044845a3dadc9e56046b542ab70af78f317e7c6372d896be2247fd8fa",
+      "size": 12479,
+      "transfer_mode": "COPY_NEW",
+      "order": null,
+      "dependencies": [],
+      "tested_on_staging": true,
+      "proof_phase": "Vitest 70/70 PASS"
+    }
+  ]
+}

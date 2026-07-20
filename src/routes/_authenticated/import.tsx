@@ -31,6 +31,8 @@ import {
   rollbackImport,
   deleteImportBatch,
 } from "@/lib/import.functions";
+import { isCanonicalImportV2Enabled } from "@/lib/import-canonical-v2.functions";
+import { CanonicalV2Import } from "@/components/import/CanonicalV2Import";
 import { exportMyData } from "@/lib/export.functions";
 import { toCsv, downloadFile, exportFileName } from "@/lib/export";
 

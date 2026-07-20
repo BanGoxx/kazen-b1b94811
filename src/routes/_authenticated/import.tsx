@@ -99,7 +99,9 @@ function ImportPage() {
   const listBatches = useServerFn(getImportBatches);
 
   const runExport = useServerFn(exportMyData);
+  const checkV2 = useServerFn(isCanonicalImportV2Enabled);
 
+  const [v2Enabled, setV2Enabled] = useState(false);
   const [selected, setSelected] = useState<ProviderId | null>(null);
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
@@ -119,6 +121,10 @@ function ImportPage() {
 
   useEffect(() => {
     void refreshBatches();
+    // Server-side V1/V2 gate. Client MUST NOT decide via query/localStorage/cookie.
+    void checkV2()
+      .then((r) => setV2Enabled(Boolean(r?.enabled)))
+      .catch(() => setV2Enabled(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

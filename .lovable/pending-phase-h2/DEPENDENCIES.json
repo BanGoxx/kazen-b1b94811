@@ -1,0 +1,32 @@
+{
+  "do_not_replace_package_json": true,
+  "runtime_new_dependencies": [],
+  "test_new_dependencies": [],
+  "dev_dependencies": [
+    {
+      "name": "wrangler",
+      "version_staging": "4.112.0",
+      "scope": "devDependencies",
+      "purpose": "Local Cloudflare Workers preview of dist/server/index.mjs. Never bundled to client. Optional in production; keep only if the team wants local worker preview.",
+      "compatibility": "Node 18+; installs its own workerd runtime; no impact on production runtime.",
+      "recommendation": "Add manually as devDependency if desired. Not required to deploy."
+    }
+  ],
+  "runtime_notes": [
+    "Canonicalization V2 runtime code uses ONLY packages already present in a standard TanStack Start + Supabase project (no new runtime import).",
+    "@tanstack/react-start (createServerFn) — already present",
+    "@tanstack/react-router (createFileRoute, useServerFn) — already present",
+    "@supabase/supabase-js — already present",
+    "react / react-dom — already present"
+  ],
+  "verification": {
+    "typecheck": "bunx tsgo --noEmit",
+    "tests": "bunx vitest run",
+    "build": "bun run build"
+  },
+  "forbidden": [
+    "Do not copy staging package.json into production",
+    "Do not copy staging bun.lockb into production",
+    "Do not add any private npm registry or npm token"
+  ]
+}

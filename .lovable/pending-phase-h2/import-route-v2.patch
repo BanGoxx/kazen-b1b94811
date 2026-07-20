@@ -1,0 +1,83 @@
+diff --git a/src/routes/_authenticated/import.tsx b/src/routes/_authenticated/import.tsx
+index c48e82d..428beb3 100644
+--- a/src/routes/_authenticated/import.tsx
++++ b/src/routes/_authenticated/import.tsx
+@@ -31,6 +31,8 @@ import {
+   rollbackImport,
+   deleteImportBatch,
+ } from "@/lib/import.functions";
++import { isCanonicalImportV2Enabled } from "@/lib/import-canonical-v2.functions";
++import { CanonicalV2Import } from "@/components/import/CanonicalV2Import";
+ import { exportMyData } from "@/lib/export.functions";
+ import { toCsv, downloadFile, exportFileName } from "@/lib/export";
+ 
+@@ -97,7 +99,9 @@ function ImportPage() {
+   const listBatches = useServerFn(getImportBatches);
+ 
+   const runExport = useServerFn(exportMyData);
++  const checkV2 = useServerFn(isCanonicalImportV2Enabled);
+ 
++  const [v2Enabled, setV2Enabled] = useState(false);
+   const [selected, setSelected] = useState<ProviderId | null>(null);
+   const [busy, setBusy] = useState(false);
+   const [exporting, setExporting] = useState<"json" | "csv" | null>(null);
+@@ -117,6 +121,8 @@ function ImportPage() {
+ 
+   useEffect(() => {
+     void refreshBatches();
++    // Server-side V1/V2 gate. Client MUST NOT decide via query/localStorage/cookie.
++    void checkV2().then((r) => setV2Enabled(Boolean(r?.enabled))).catch(() => setV2Enabled(false));
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, []);
+ 
+@@ -321,6 +327,7 @@ function ImportPage() {
+                 <button
+                   key={p.id}
+                   type="button"
++                  data-testid={`provider-${p.id}`}
+                   disabled={!p.available}
+                   onClick={() => {
+                     setSelected(p.id);
+@@ -330,6 +337,7 @@ function ImportPage() {
+                     isSel ? "border-primary bg-primary/5" : "border-border bg-card/50"
+                   } ${p.available ? "hover:border-primary/60" : "cursor-not-allowed opacity-55"}`}
+                 >
++
+                   <div className="flex items-center justify-between gap-2">
+                     <span className="font-semibold">{p.label}</span>
+                     {p.available ? (
+@@ -355,17 +363,25 @@ function ImportPage() {
+           </div>
+         </section>
+ 
+-        {/* Upload */}
+-        {selected && (
+-          <UploadSection
+-            provider={PROVIDERS.find((p) => p.id === selected)!}
+-            busy={busy}
+-            onFile={handleFile}
+-            onUsername={handleUsername}
+-          />
+-
++        {/* Upload — V2 canonical path (server-gated) for AniList; V1 otherwise. */}
++        {selected && v2Enabled && selected === "anilist" ? (
++          <div data-testid="canonical-v2-panel">
++            <CanonicalV2Import />
++          </div>
++        ) : (
++          selected && (
++            <div data-testid="legacy-v1-upload">
++              <UploadSection
++                provider={PROVIDERS.find((p) => p.id === selected)!}
++                busy={busy}
++                onFile={handleFile}
++                onUsername={handleUsername}
++              />
++            </div>
++          )
+         )}
+ 
++
+         {/* Preview */}
+         {previewData && (
+           <section className="space-y-4">
